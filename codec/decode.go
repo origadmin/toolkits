@@ -24,7 +24,7 @@ func DecodeJSONFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 
 	return json.NewDecoder(f).Decode(obj)
 }
@@ -35,7 +35,7 @@ func DecodeTOMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 	_, err = toml.NewDecoder(f).Decode(obj)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func DecodeYAMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 
 	return yaml.NewDecoder(f).Decode(obj)
 }

@@ -24,7 +24,7 @@ func EncodeJSONFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 	err = json.NewEncoder(f).Encode(obj)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func EncodeYAMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 	err = yaml.NewEncoder(f).Encode(obj)
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func EncodeTOMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer errorPanic(f.Close())
 	err = toml.NewEncoder(f).Encode(obj)
 	if err != nil {
 		return err

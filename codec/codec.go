@@ -16,26 +16,26 @@ func isSupportedExt(ext string) bool {
 	return false
 }
 
-// MustBytes returns bytes
-func MustBytes(data []byte, err error) []byte {
+func errorPanic(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// MustBytes returns bytes
+func MustBytes(data []byte, err error) []byte {
+	errorPanic(err)
 	return data
 }
 
 // MustToString returns string
 func MustToString(data []byte, err error) string {
-	if err != nil {
-		panic(err)
-	}
+	errorPanic(err)
 	return string(data)
 }
 
 // MustString returns string
 func MustString(data string, err error) string {
-	if err != nil {
-		panic(err)
-	}
+	errorPanic(err)
 	return data
 }
