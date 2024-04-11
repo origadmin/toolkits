@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/pkg/errors"
 )
 
 // Define  constant IDs for various Error status codes
 const (
+	UnknownID               = "http.response.status.unknown"                  // ID for Unknown status
 	BadRequestID            = "http.response.status.bad_request"              // ID for Bad Request status
 	UnauthorizedID          = "http.response.status.unauthorized"             // ID for Unauthorized status
 	ForbiddenID             = "http.response.status.forbidden"                // ID for Forbidden status
@@ -21,6 +23,29 @@ const (
 	ConflictID              = "http.response.status.conflict"                 // ID for Conflict status
 	RequestTimeoutID        = "http.response.status.request_timeout"          // ID for Request Timeout status
 )
+
+var (
+	ids = map[int32]string{
+		http.StatusBadRequest:            BadRequestID,
+		http.StatusUnauthorized:          UnauthorizedID,
+		http.StatusForbidden:             ForbiddenID,
+		http.StatusNotFound:              NotFoundID,
+		http.StatusMethodNotAllowed:      MethodNotAllowedID,
+		http.StatusTooManyRequests:       TooManyRequestsID,
+		http.StatusRequestEntityTooLarge: RequestEntityTooLargeID,
+		http.StatusInternalServerError:   InternalServerErrorID,
+		http.StatusConflict:              ConflictID,
+		http.StatusRequestTimeout:        RequestTimeoutID,
+	}
+	mutex sync.RWMutex
+)
+
+// RegisterCode register a new error code with the given ID,or overwriting any existing one
+func RegisterCode(code int32, id string) {
+	mutex.Lock()
+	ids[code] = id
+	mutex.Unlock()
+}
 
 // Error customize the error structure for implementation errors.Error interface
 type Error struct {
@@ -212,6 +237,32 @@ func New(id string, code int32, detail string) error {
 
 // Newf generates an Error error
 func Newf(id string, code int32, format string, args ...any) error {
+	return &Error{
+		ID:     id,
+		Code:   code,
+		Detail: fmt.Sprintf(format, args...),
+	}
+}
+
+// Code generates an error for a given code
+func Code(code int32, detail string) error {
+	id, ok := ids[code]
+	if !ok {
+		id = UnknownID
+	}
+	return &Error{
+		ID:     id,
+		Code:   code,
+		Detail: detail,
+	}
+}
+
+// Codef generates an error for a given code
+func Codef(code int32, format string, args ...any) error {
+	id, ok := ids[code]
+	if !ok {
+		id = UnknownID
+	}
 	return &Error{
 		ID:     id,
 		Code:   code,

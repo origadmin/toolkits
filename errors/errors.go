@@ -9,6 +9,8 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+
+	"github.com/origadmin/toolkits/errors/http"
 )
 
 // Define alias from pkg/errors
@@ -21,6 +23,12 @@ var (
 	Wrap = errors.WithMessage
 	// Wrapf returns an error annotating err with a stack trace
 	Wrapf = errors.WithMessagef
+	// NewHTTP creates a new error with the given id and code and detail
+	NewHTTP = http.New
+	// CodeHTTP gets the code of the given error
+	CodeHTTP = http.Code
+	// RegisterCode register a new error code with the given http.StatusCode,or overwriting any existing one
+	RegisterCode = http.RegisterCode
 )
 
 // Define alias from stderr
