@@ -1,5 +1,6 @@
-
 # Contributor Covenant Code of Conduct
+
+【[中文版本][translation_cn]】
 
 ## Our Pledge
 
@@ -131,3 +132,4 @@ For answers to common questions about this code of conduct, see the FAQ at
 [Mozilla CoC]: https://github.com/mozilla/diversity
 [FAQ]: https://www.contributor-covenant.org/faq
 [translations]: https://www.contributor-covenant.org/translations
+[translation_cn]: https://github.com/origadmin/toolkits/blob/main/docs/CODE_OF_CONDUCT_CN.md
