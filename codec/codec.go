@@ -8,34 +8,34 @@ var supportedExts = []string{".json", ".yaml", ".yml", ".toml"}
 
 // isSupportedExt 检查文件扩展名是否支持。
 func isSupportedExt(ext string) bool {
-	for _, supportedExt := range supportedExts {
-		if ext == supportedExt {
-			return true
-		}
-	}
-	return false
+    for _, supportedExt := range supportedExts {
+        if ext == supportedExt {
+            return true
+        }
+    }
+    return false
 }
 
 func errorPanic(err error) {
-	if err != nil {
-		panic(err)
-	}
+    if err != nil {
+        panic(err)
+    }
 }
 
 // MustBytes returns bytes
 func MustBytes(data []byte, err error) []byte {
-	errorPanic(err)
-	return data
+    errorPanic(err)
+    return data
 }
 
 // MustToString returns string
 func MustToString(data []byte, err error) string {
-	errorPanic(err)
-	return string(data)
+    errorPanic(err)
+    return string(data)
 }
 
 // MustString returns string
 func MustString(data string, err error) string {
-	errorPanic(err)
-	return data
+    errorPanic(err)
+    return data
 }

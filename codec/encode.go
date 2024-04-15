@@ -4,13 +4,13 @@
 package codec
 
 import (
-	"os"
-	"path/filepath"
+    "os"
+    "path/filepath"
 
-	"github.com/origadmin/toolkits/codec/json"
-	"github.com/origadmin/toolkits/codec/toml"
-	"github.com/origadmin/toolkits/codec/yaml"
-	"github.com/origadmin/toolkits/errors"
+    "github.com/origadmin/toolkits/codec/json"
+    "github.com/origadmin/toolkits/codec/toml"
+    "github.com/origadmin/toolkits/codec/yaml"
+    "github.com/origadmin/toolkits/errors"
 )
 
 const (
@@ -23,7 +23,9 @@ func EncodeJSONFile(name string, obj any) error {
     if err != nil {
         return err
     }
-    defer errorPanic(f.Close())
+    defer func() {
+        errorPanic(f.Close())
+    }()
     err = json.NewEncoder(f).Encode(obj)
     if err != nil {
         return err
@@ -37,7 +39,9 @@ func EncodeYAMLFile(name string, obj any) error {
     if err != nil {
         return err
     }
-    defer errorPanic(f.Close())
+    defer func() {
+        errorPanic(f.Close())
+    }()
     err = yaml.NewEncoder(f).Encode(obj)
     if err != nil {
         return err
@@ -51,7 +55,9 @@ func EncodeTOMLFile(name string, obj any) error {
     if err != nil {
         return err
     }
-    defer errorPanic(f.Close())
+    defer func() {
+        errorPanic(f.Close())
+    }()
     err = toml.NewEncoder(f).Encode(obj)
     if err != nil {
         return err
