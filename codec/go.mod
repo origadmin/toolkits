@@ -5,7 +5,7 @@ go 1.22.1
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/json-iterator/go v1.1.12
-	github.com/origadmin/toolkits/errors v0.0.0-20240411122307-50e6557f7270
+	github.com/origadmin/toolkits/errors v0.0.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
