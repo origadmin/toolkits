@@ -17,9 +17,13 @@ import (
 	"github.com/origadmin/toolkits/orm/internal/helpers"
 )
 
-type Builder func(driver *sql.Driver, config orm.Config) (any, error)
+type DB struct {
+	config orm.Config
+	once   *sync.Once
+	drv    *sql.Driver
+}
 
-func New(ctx context.Context, config orm.Config) (*orm.ORM, error) {
+func Open(ctx context.Context, config orm.Config) (*DB, error) {
 	var drv *sql.Driver
 	var err error
 	dialect := strings.ToLower(config.Dialect)
@@ -29,7 +33,7 @@ func New(ctx context.Context, config orm.Config) (*orm.ORM, error) {
 			return nil, fmt.Errorf("failed to create database: %v", err)
 		}
 		dialect = "mysql"
-	case "postgres", "cockroachdb":
+	case "postgres":
 	case "sqlite3":
 		_ = os.MkdirAll(filepath.Dir(config.DSN), os.ModePerm)
 	default:
@@ -47,55 +51,50 @@ func New(ctx context.Context, config orm.Config) (*orm.ORM, error) {
 	sqlDB.SetConnMaxLifetime(time.Duration(config.MaxLifetime) * time.Second)
 	sqlDB.SetConnMaxIdleTime(time.Duration(config.MaxIdleTime) * time.Second)
 
-	if config.Connector == nil {
-		config.Connector = &Connect{
-			driver: drv,
-		}
+	if config.Context == nil {
+		config.Context = ctx
 	}
-
-	db := orm.New(config)
-	var name string
-	for _, name = range config.Names {
-		err = db.Open(name)
-		if err != nil {
-			return nil, err
-		}
+	var once *sync.Once
+	if config.Once {
+		once = new(sync.Once)
+	}
+	db := &DB{
+		config: config,
+		once:   once,
+		drv:    drv,
 	}
 	return db, nil
 }
 
-type Connect struct {
-	driver *sql.Driver
-	once   *sync.Once
-	build  func(driver *sql.Driver, config orm.Config) (any, error)
-}
-
-// Open builds ORM instances.
-func (c *Connect) Open(config orm.Config) (any, error) {
-	if c.once == nil && config.Once {
-		c.once = new(sync.Once)
-	}
-	return c.build(c.driver, config)
-}
-
-func (c *Connect) Close() error {
+func (db *DB) Close() error {
 	var err error
-	if c.once != nil {
-		c.once.Do(func() {
-			err = c.driver.Close()
+	if db.once != nil {
+		db.once.Do(func() {
+			err = db.drv.Close()
 		})
 	}
 	return err
 }
 
-// Connector builds ORM instances.
-func Connector(driver *sql.Driver, builds ...func(driver *sql.Driver, config orm.Config) (any, error)) *Connect {
-	if len(builds) == 0 {
-		builds = append(builds, builder)
-	}
+type Connect struct {
+	db      *DB
+	builder func(driver *sql.Driver, config orm.Config) (any, error)
+}
+
+// Open builds DB instances.
+func (c *Connect) Open(config orm.Config) (any, error) {
+	return c.builder(c.db.drv, config)
+}
+
+func (c *Connect) Close() error {
+	return c.db.Close()
+}
+
+// Connector builds DB instances.
+func Connector(db *DB, builder Builder) *Connect {
 	return &Connect{
-		driver: driver,
-		build:  builds[0],
+		db:      db,
+		builder: builder,
 	}
 }
 

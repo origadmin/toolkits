@@ -1,67 +1,63 @@
 package orm
 
-import (
-	"context"
-	"sync"
-)
+import "sync"
 
 type Connector interface {
 	Open(config Config) (any, error)
 	Close() error
 }
 
-type ORM struct {
+type ORM interface {
+	Config() Config
+	Connect(name string, connector Connector) error
+	DB(name string) any
+	Close() error
+}
+
+type orm struct {
 	sync.RWMutex
+	config Config
 	dbs    map[string]any
-	conns  map[string]Connector
-	closes []func() error
-	cfg    Config
+	cls    []func() error
 }
 
-func New(config Config) *ORM {
-	if config.Context == nil {
-		config.Context = context.Background()
+func (o *orm) Connect(name string, conn Connector) error {
+	db, err := conn.Open(o.config)
+	if err != nil {
+		return err
 	}
-	orm := &ORM{
-		cfg: config,
-		dbs: make(map[string]any),
+	o.Lock()
+	o.dbs[name] = db
+	o.cls = append(o.cls, conn.Close)
+	o.Unlock()
+	return nil
+}
+
+func (o *orm) Config() Config {
+	return o.config
+}
+
+func (o *orm) DB(name string) any {
+	o.RLock()
+	db, ok := o.dbs[name]
+	o.RUnlock()
+	if !ok {
+		panic("db not found " + name)
 	}
-	return orm
+	return db
 }
 
-func (o *ORM) Config() Config {
-	return o.cfg
-}
-
-func (o *ORM) Close() error {
-	var cls func() error
-	for _, cls = range o.closes {
-		if err := cls(); err != nil {
+func (o *orm) Close() error {
+	for i := range o.cls {
+		if err := o.cls[i](); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (o *ORM) Open(name string) error {
-	conn, ok := o.conns[name]
-	if !ok {
-		conn = o.cfg.Connector
-	}
-	db, err := conn.Open(o.cfg)
-	if err != nil {
-		return err
-	}
-	o.Lock()
-	o.closes = append(o.closes, conn.Close)
-	o.dbs[name] = db
-	o.Unlock()
-	return nil
+func New(config Config) ORM {
+	return &orm{config: config, dbs: make(map[string]any)}
 }
 
-func (o *ORM) DB(name string) any {
-	o.RLock()
-	db := o.dbs[name]
-	o.RUnlock()
-	return db
-}
+var _ ORM = (*orm)(nil)
