@@ -11,6 +11,7 @@ require (
 	github.com/nats-io/nats.go v1.34.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

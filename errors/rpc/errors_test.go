@@ -1,4 +1,4 @@
-package http
+package rpc
 
 import (
 	er "errors"
@@ -38,12 +38,12 @@ func TestBadRequest(t *testing.T) {
 func TestFromError(t *testing.T) {
 	err := NotFound("errors.rpc.test", "%s", "example")
 	merr := FromError(err)
-	if merr.ID != "errors.rpc.test" || merr.Code != 404 {
+	if merr.Id != "errors.rpc.test" || merr.Code != 404 {
 		t.Fatalf("invalid conversation %v != %v", err, merr)
 	}
 	err = er.New(err.Error())
 	merr = FromError(err)
-	if merr.ID != "errors.rpc.test" || merr.Code != 404 {
+	if merr.Id != "errors.rpc.test" || merr.Code != 404 {
 		t.Fatalf("invalid conversation %v != %v", err, merr)
 	}
 	merr = FromError(nil)
@@ -77,14 +77,14 @@ func TestEqual(t *testing.T) {
 func TestErrors(t *testing.T) {
 	testData := []*Error{
 		{
-			ID:     "test",
+			Id:     "test",
 			Code:   500,
 			Detail: "Internal server error",
 		},
 	}
 
 	for _, e := range testData {
-		ne := New(e.ID, e.Code, e.Detail)
+		ne := New(e.Id, e.Code, e.Detail)
 
 		if e.Error() != ne.Error() {
 			t.Fatalf("Expected %s got %s", e.Error(), ne.Error())
@@ -96,8 +96,8 @@ func TestErrors(t *testing.T) {
 			t.Fatalf("Expected error got nil %v", pe)
 		}
 
-		if pe.ID != e.ID {
-			t.Fatalf("Expected %s got %s", e.ID, pe.ID)
+		if pe.Id != e.Id {
+			t.Fatalf("Expected %s got %s", e.Id, pe.Id)
 		}
 
 		if pe.Detail != e.Detail {
@@ -117,7 +117,7 @@ func TestAs(t *testing.T) {
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
 	}
-	if target.ID != "errors.rpc.test" || target.Code != 404 || target.Detail != "example" {
+	if target.Id != "errors.rpc.test" || target.Code != 404 || target.Detail != "example" {
 		t.Fatalf("invalid conversation %v != %v", err, target)
 	}
 	err = er.New(err.Error())
@@ -125,5 +125,75 @@ func TestAs(t *testing.T) {
 	match = er.As(err, &target)
 	if match || target != nil {
 		t.Fatalf("%v should not convert to *Error", err)
+	}
+}
+
+func TestAppend(t *testing.T) {
+	mError := NewMultiError()
+	testData := []*Error{
+		{
+			Id:     "test1",
+			Code:   500,
+			Detail: "Internal server error",
+		},
+		{
+			Id:     "test2",
+			Code:   400,
+			Detail: "Bad Request",
+		},
+		{
+			Id:     "test3",
+			Code:   404,
+			Detail: "Not Found",
+		},
+	}
+
+	for _, e := range testData {
+		mError.Append(&Error{
+			Id:     e.Id,
+			Code:   e.Code,
+			Detail: e.Detail,
+		})
+	}
+
+	if len(mError.Errors) != 3 {
+		t.Fatalf("Expected 3 got %v", len(mError.Errors))
+	}
+}
+
+func TestHasErrors(t *testing.T) {
+	mError := NewMultiError()
+	testData := []*Error{
+		{
+			Id:     "test1",
+			Code:   500,
+			Detail: "Internal server error",
+		},
+		{
+			Id:     "test2",
+			Code:   400,
+			Detail: "Bad Request",
+		},
+		{
+			Id:     "test3",
+			Code:   404,
+			Detail: "Not Found",
+		},
+	}
+
+	if mError.HasErrors() {
+		t.Fatal("Expected no error")
+	}
+
+	for _, e := range testData {
+		mError.Errors = append(mError.Errors, &Error{
+			Id:     e.Id,
+			Code:   e.Code,
+			Detail: e.Detail,
+		})
+	}
+
+	if !mError.HasErrors() {
+		t.Fatal("Expected errors")
 	}
 }

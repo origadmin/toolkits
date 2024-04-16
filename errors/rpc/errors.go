@@ -1,4 +1,6 @@
-package http
+// Package rpc provides a way to return detailed information
+// for an RPC request error. The error is normally JSON encoded.
+package rpc
 
 import (
 	"encoding/json"
@@ -7,6 +9,8 @@ import (
 	"net/http"
 	"sync"
 )
+
+//go:generate protoc -M -I. --go_out=paths=source_relative:. errors.proto
 
 // Define  constant IDs for various Error status codes
 const (
@@ -46,19 +50,8 @@ func RegisterCode(code int32, id string) {
 	mutex.Unlock()
 }
 
-// Error customize the error structure for implementation errors.Error interface
-type Error struct {
-	ID     string `json:"id,omitempty"`
-	Code   int32  `json:"code,omitempty"`
-	Detail string `json:"detail,omitempty"`
-}
-
 // Error returns the JSON representation of the error
 func (obj *Error) Error() string {
-	return obj.String()
-}
-
-func (obj *Error) String() string {
 	v, _ := json.Marshal(obj)
 	return string(v)
 }
@@ -73,20 +66,32 @@ func (obj *Error) Is(err error) bool {
 	}
 	var target *Error
 	if errors.As(err, &target) {
-		return obj.ID == target.ID && obj.Code == target.Code
+		return obj.Id == target.Id && obj.Code == target.Code
 	}
+	return false
+}
+
+func (obj *Error) As(v any) bool {
+	if v == nil {
+		return false
+	}
+
+	if errors.As(obj, v) {
+		return true
+	}
+
 	return false
 }
 
 // Parse tries to parse a JSON string into an error. If that
 // fails, it will set the given string as the error detail.
 func Parse(err string) *Error {
-	obj := new(Error)
-	err2 := json.Unmarshal([]byte(err), obj)
-	if err2 != nil {
-		obj.Detail = err
+	e := new(Error)
+	errr := json.Unmarshal([]byte(err), e)
+	if errr != nil {
+		e.Detail = err
 	}
-	return obj
+	return e
 }
 
 // FromError tries to convert a Go error to *Error
@@ -108,7 +113,7 @@ func BadRequest(id, format string, obj ...any) error {
 		id = BadRequestID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusBadRequest,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -120,7 +125,7 @@ func Unauthorized(id, format string, obj ...any) error {
 		id = UnauthorizedID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusUnauthorized,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -132,7 +137,7 @@ func Forbidden(id, format string, obj ...any) error {
 		id = ForbiddenID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusForbidden,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -144,7 +149,7 @@ func NotFound(id, format string, obj ...any) error {
 		id = NotFoundID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusNotFound,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -156,7 +161,7 @@ func MethodNotAllowed(id, format string, obj ...any) error {
 		id = MethodNotAllowedID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusMethodNotAllowed,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -168,7 +173,7 @@ func TooManyRequests(id, format string, obj ...any) error {
 		id = TooManyRequestsID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusTooManyRequests,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -180,7 +185,7 @@ func Timeout(id, format string, obj ...any) error {
 		id = RequestTimeoutID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusRequestTimeout,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -193,7 +198,7 @@ func Conflict(id, format string, obj ...any) error {
 		id = ConflictID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusConflict,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -206,7 +211,7 @@ func RequestEntityTooLarge(id, format string, obj ...any) error {
 		id = RequestEntityTooLargeID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusRequestEntityTooLarge,
 		Detail: fmt.Sprintf(format, obj...),
 	}
@@ -219,16 +224,16 @@ func InternalServerError(id, format string, obj ...any) error {
 		id = InternalServerErrorID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   http.StatusInternalServerError,
 		Detail: fmt.Sprintf(format, obj...),
 	}
 }
 
-// New generates an Error error
+// New generates a custom error.
 func New(id string, code int32, detail string) error {
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   code,
 		Detail: detail,
 	}
@@ -237,7 +242,7 @@ func New(id string, code int32, detail string) error {
 // Newf generates an Error error
 func Newf(id string, code int32, format string, args ...any) error {
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   code,
 		Detail: fmt.Sprintf(format, args...),
 	}
@@ -250,7 +255,7 @@ func Code(code int32, detail string) error {
 		id = UnknownID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   code,
 		Detail: detail,
 	}
@@ -263,10 +268,29 @@ func Codef(code int32, format string, args ...any) error {
 		id = UnknownID
 	}
 	return &Error{
-		ID:     id,
+		Id:     id,
 		Code:   code,
 		Detail: fmt.Sprintf(format, args...),
 	}
+}
+
+func NewMultiError() *MultiError {
+	return &MultiError{
+		Errors: make([]*Error, 0),
+	}
+}
+
+func (e *MultiError) Append(err *Error) {
+	e.Errors = append(e.Errors, err)
+}
+
+func (e *MultiError) HasErrors() bool {
+	return len(e.Errors) > 0
+}
+
+func (e *MultiError) Error() string {
+	b, _ := json.Marshal(e)
+	return string(b)
 }
 
 // Equal tries to compare errors, which are equal if they have the same Code
