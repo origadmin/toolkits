@@ -56,8 +56,22 @@ func (o *orm) Close() error {
 	return nil
 }
 
-func New(config Config) ORM {
-	return &orm{config: config, dbs: make(map[string]any)}
+func New(config Config) (ORM, error) {
+	var (
+		err  error
+		name string
+		conn Connector
+	)
+	dbs := make(map[string]any, len(config.Connectors))
+	if len(config.Connectors) != 0 {
+		for name, conn = range config.Connectors {
+			dbs[name], err = conn.Open(config)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return &orm{config: config, dbs: dbs}, nil
 }
 
 var _ ORM = (*orm)(nil)
