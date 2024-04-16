@@ -2,7 +2,6 @@ package service
 
 import (
 	"crypto/tls"
-	"log/slog"
 	"time"
 )
 
@@ -11,7 +10,7 @@ type Config struct {
 	Timeout   time.Duration
 	Secure    bool
 	TLSConfig *tls.Config
-	Options   map[string]slog.Value
+	Options   map[string]any
 }
 
 type DiscoveryConfig struct {
