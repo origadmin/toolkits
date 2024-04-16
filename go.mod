@@ -3,7 +3,9 @@ module github.com/origadmin/toolkits
 go 1.22.0
 
 require (
+	entgo.io/ent v0.13.1
 	github.com/BurntSushi/toml v1.3.2
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats.go v1.34.1
@@ -13,7 +15,9 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
