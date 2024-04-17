@@ -23,6 +23,9 @@ type DB struct {
 }
 
 func Open(ctx context.Context, config orm.Config) (*DB, error) {
+	if config.Context == nil {
+		config.Context = context.Background()
+	}
 	var drv *sql.Driver
 	var err error
 	dialect := strings.ToLower(config.Dialect)
@@ -54,9 +57,7 @@ func Open(ctx context.Context, config orm.Config) (*DB, error) {
 	if config.Once {
 		once = new(sync.Once)
 	}
-	if config.Context == nil {
-		config.Context = ctx
-	}
+
 	db := &DB{
 		config: config,
 		once:   once,
