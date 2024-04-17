@@ -5,7 +5,8 @@ import "context"
 type Config struct {
 	Context      context.Context
 	Debug        bool
-	Once         bool                 // use once for close db,when connector used same driver
+	Once         bool // use once for close db,when connector used same driver
+	Names        []string
 	Connector    Connector            // use for single database
 	Connectors   map[string]Connector // use for multi database, if needed
 	Dialect      string               // mysql/postgres/sqlite3/...
@@ -15,5 +16,5 @@ type Config struct {
 	MaxIdleTime  int
 	MaxOpenConns int
 	MaxIdleConns int
-	Names        []string
+	Hooks        map[string]Hook
 }

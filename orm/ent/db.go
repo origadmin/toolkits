@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 
 	"github.com/origadmin/toolkits/errors"
-
 	"github.com/origadmin/toolkits/orm"
 	"github.com/origadmin/toolkits/orm/internal/helpers"
 )
@@ -51,12 +50,12 @@ func Open(ctx context.Context, config orm.Config) (*DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Duration(config.MaxLifetime) * time.Second)
 	sqlDB.SetConnMaxIdleTime(time.Duration(config.MaxIdleTime) * time.Second)
 
-	if config.Context == nil {
-		config.Context = ctx
-	}
 	var once *sync.Once
 	if config.Once {
 		once = new(sync.Once)
+	}
+	if config.Context == nil {
+		config.Context = ctx
 	}
 	db := &DB{
 		config: config,
@@ -74,6 +73,16 @@ func (db *DB) Close() error {
 		})
 	}
 	return err
+}
+
+func (db *DB) Before(ctx context.Context, funcs ...Before) error {
+	for _, fn := range funcs {
+		err := fn(ctx, db.drv)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type Connect struct {
@@ -100,4 +109,8 @@ func Connector(db *DB, builder Builder) *Connect {
 
 func builder(driver *sql.Driver, config orm.Config) (any, error) {
 	return nil, errors.New("not implemented")
+}
+
+func before(ctx context.Context, drv *sql.Driver) (err error) {
+	return
 }
