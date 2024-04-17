@@ -36,14 +36,14 @@ var (
 		http.StatusConflict:              ConflictID,
 		http.StatusRequestTimeout:        RequestTimeoutID,
 	}
-	mutex sync.RWMutex
+	idsMu sync.RWMutex
 )
 
 // RegisterCode register a new error code with the given ID,or overwriting any existing one
 func RegisterCode(code int32, id string) {
-	mutex.Lock()
+	idsMu.Lock()
 	ids[code] = id
-	mutex.Unlock()
+	idsMu.Unlock()
 }
 
 // Error customize the error structure for implementation errors.Error interface
@@ -55,12 +55,12 @@ type Error struct {
 
 // Error returns the JSON representation of the error
 func (obj *Error) Error() string {
-	return obj.String()
+	v, _ := json.Marshal(obj)
+	return string(v)
 }
 
 func (obj *Error) String() string {
-	v, _ := json.Marshal(obj)
-	return string(v)
+	return fmt.Sprintf(`id:"%s" code:%d detail:"%s"`, obj.ID, obj.Code, obj.Detail)
 }
 
 func (obj *Error) Status() string {

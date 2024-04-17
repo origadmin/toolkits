@@ -71,18 +71,6 @@ func (obj *Error) Is(err error) bool {
 	return false
 }
 
-func (obj *Error) As(v any) bool {
-	if v == nil {
-		return false
-	}
-
-	if errors.As(obj, v) {
-		return true
-	}
-
-	return false
-}
-
 // Parse tries to parse a JSON string into an error. If that
 // fails, it will set the given string as the error detail.
 func Parse(err string) *Error {

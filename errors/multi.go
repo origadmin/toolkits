@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
 
@@ -32,7 +33,7 @@ type ThreadSafeMultiError struct {
 func (e *ThreadSafeMultiError) Append(err error) {
 	e.lock.Lock()
 	defer e.lock.Unlock()
-	e.merr.Errors = append(e.Errors(), err)
+	e.merr.Errors = append(e.merr.Errors, err)
 }
 
 // HasErrors checks if the MultiError collection has any merr
@@ -42,7 +43,8 @@ func (e *ThreadSafeMultiError) HasErrors() bool {
 	return len(e.merr.Errors) > 0
 }
 
-func (e *ThreadSafeMultiError) Has(err error) error {
+// Has checks if the MultiError collection has the given merr or not
+func (e *ThreadSafeMultiError) Has(err any) error {
 	var idx = -1
 	e.lock.Lock()
 	defer e.lock.Unlock()
@@ -58,10 +60,10 @@ func (e *ThreadSafeMultiError) Has(err error) error {
 func (e *ThreadSafeMultiError) Unsafe() *MultiError {
 	e.lock.Lock()
 	defer e.lock.Unlock()
-	merr := new(MultiError)
-	merr.ErrorFormat = e.ErrorFormat
-	merr.Errors = append(merr.Errors, e.merr.Errors...)
-	return merr
+	me := new(MultiError)
+	me.ErrorFormat = e.ErrorFormat
+	me.Errors = append(me.Errors, e.merr.Errors...)
+	return me
 }
 
 // Error returns the JSON representation of the MultiError collection
@@ -82,7 +84,7 @@ func (e *ThreadSafeMultiError) Errors() []error {
 // ThreadSafe creates a new ThreadSafeMultiError collection
 func ThreadSafe(err error, fns ...ErrorFormatFunc) *ThreadSafeMultiError {
 	if len(fns) == 0 {
-		fns = append(fns, ListFormatFunc)
+		fns = append(fns, ErrorFormatJSON)
 	}
 
 	if err == nil {
@@ -108,4 +110,13 @@ func ThreadSafe(err error, fns ...ErrorFormatFunc) *ThreadSafeMultiError {
 			Errors:      []error{err},
 		},
 	}
+}
+
+func ErrorFormatJSON(i []error) string {
+	var errStrs []string
+	for _, e := range i {
+		errStrs = append(errStrs, e.Error())
+	}
+	bytes, _ := json.Marshal(errStrs)
+	return string(bytes)
 }
