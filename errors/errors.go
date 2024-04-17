@@ -21,6 +21,8 @@ var (
 	Wrap = errors.WithMessage
 	// Wrapf returns an error annotating err with a stack trace
 	Wrapf = errors.WithMessagef
+	// WithStack annotates err with a stack trace
+	WithStack = errors.WithStack
 )
 
 // Define alias from stderr
