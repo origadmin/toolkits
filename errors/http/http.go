@@ -73,7 +73,7 @@ func (obj *Error) Is(err error) bool {
 	}
 	var target *Error
 	if errors.As(err, &target) {
-		return obj.ID == target.ID && obj.Code == target.Code
+		return obj.Code == target.Code
 	}
 	return false
 }
