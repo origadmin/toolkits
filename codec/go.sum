@@ -18,6 +18,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/origadmin/toolkits/errors v0.0.3 h1:Y8lSUykYBHtx1kehc8yam2SFhHQkMvr6tCE6ESrcqhY=
 github.com/origadmin/toolkits/errors v0.0.3/go.mod h1:YMmAVVxISocot+IUZQUgU654FPXl6HtZphQJQurEXuA=
+github.com/origadmin/toolkits/errors v0.0.4 h1:ldr4/kiGmwQ1VA0+5dG+pHnXCFnKgND+lPAkD/ZlvcQ=
+github.com/origadmin/toolkits/errors v0.0.4/go.mod h1:YMmAVVxISocot+IUZQUgU654FPXl6HtZphQJQurEXuA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
