@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	entgo.io/ent v0.13.1
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/origadmin/toolkits/errors v0.0.3
+	github.com/origadmin/toolkits/errors v0.0.4
 )
 
 require (
