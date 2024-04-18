@@ -17,12 +17,14 @@ var (
 	Stack = errors.New
 	// Stackf adds stack trace to error, with format specifier
 	Stackf = errors.Errorf
-	// Wrap returns an error annotating err with a stack trace
+	// Wrap returns an error annotating err without stack trace
 	Wrap = errors.WithMessage
-	// Wrapf returns an error annotating err with a stack trace
+	// Wrapf returns an error annotating err without stack trace
 	Wrapf = errors.WithMessagef
 	// WithStack annotates err with a stack trace
 	WithStack = errors.WithStack
+	// Cause returns the underlying cause of the error, if possible.
+	Cause = errors.Cause
 )
 
 // Define alias from stderr
