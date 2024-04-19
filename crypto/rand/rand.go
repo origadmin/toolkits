@@ -39,9 +39,9 @@ const (
 )
 
 type Rand struct {
-	randType Kind
-	length   int
-	charset  string
+	kind    Kind
+	length  int
+	charset string
 }
 
 // predefined charsets for different random types
@@ -99,11 +99,20 @@ func (k Kind) String() string {
 // Return:
 // - []byte: the generated random byte slice.
 func (r Rand) RandBytes(size int) []byte {
-	ret := make([]byte, 0, size)
+	ret := make([]byte, size)
 	for ; size > 0; size-- {
-		ret[size-1] = r.charset[rand.IntN(r.length)]
+		ch := rand.IntN(r.length)
+		ret[size-1] = r.charset[ch]
 	}
 	return ret
+}
+
+func (r Rand) Read(p []byte) (n int, err error) {
+	n = len(p)
+	for i := 0; i < n; i++ {
+		p[i] = r.charset[rand.IntN(r.length)]
+	}
+	return n, nil
 }
 
 func loadCharset(rand Kind) string {
@@ -132,12 +141,12 @@ func getStringIndex(idx int) (int, int) {
 //
 // Return:
 // - a pointer to a Rand object.
-func NewRand(rndType Kind) *Rand {
-	charset := loadCharset(rndType)
+func NewRand(kind Kind) *Rand {
+	charset := loadCharset(kind)
 	return &Rand{
-		randType: rndType,
-		length:   len(charset),
-		charset:  charset,
+		kind:    kind,
+		length:  len(charset),
+		charset: charset,
 	}
 }
 
@@ -150,8 +159,8 @@ func NewRand(rndType Kind) *Rand {
 // - a pointer to a Rand object.
 func CustomRand(charset string) *Rand {
 	return &Rand{
-		randType: KindCustom,
-		length:   len(charset),
-		charset:  charset,
+		kind:    KindCustom,
+		length:  len(charset),
+		charset: charset,
 	}
 }
