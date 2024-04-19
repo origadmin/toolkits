@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 
 	"github.com/origadmin/toolkits/errors"
+
 	"github.com/origadmin/toolkits/orm"
 	"github.com/origadmin/toolkits/orm/internal/helpers"
 )
@@ -72,8 +73,13 @@ func (db *DB) Close() error {
 		db.once.Do(func() {
 			err = db.drv.Close()
 		})
+		return err
 	}
-	return err
+	err = db.drv.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (db *DB) Before(ctx context.Context, funcs ...Before) error {
