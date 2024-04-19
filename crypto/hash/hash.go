@@ -7,14 +7,14 @@ import (
 	"encoding/hex"
 	"os"
 
-	"github.com/pkg/errors"
+	"github.com/origadmin/toolkits/errors"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
 )
 
 // ErrPasswordNotMatch error when password not match
-var ErrPasswordNotMatch = errors.New("password not match")
+var ErrPasswordNotMatch = errors.String("password not match")
 
 // Type hash type
 type Type string
