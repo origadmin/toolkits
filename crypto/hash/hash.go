@@ -24,6 +24,8 @@ const (
 	TypeMD5 Type = "md5"
 	// TypeSHA1 sha1 type
 	TypeSHA1 Type = "sha1"
+	// TypeSHA256 sha256 type
+	TypeSHA256 Type = "sha256"
 	// TypeArgon2 argon2 type
 	TypeArgon2 Type = "argon2"
 	// TypeScrypt scrypt type
@@ -36,7 +38,7 @@ const (
 type GenerateFunc func(password string, salt string) (string, error)
 
 // CompareFunc compare password hash function
-type CompareFunc func(hashedPassword, password, salt string) error
+type CompareFunc func(hashpass, password, salt string) error
 
 // GenerateAndCompare hash type Generate and Compare functions
 type GenerateAndCompare struct {
@@ -48,6 +50,7 @@ var (
 	hashes = map[Type]GenerateAndCompare{
 		TypeMD5:    {Generate: GenerateMD5Password, Compare: CompareMD5HashAndPassword},
 		TypeSHA1:   {Generate: GenerateSHA1Password, Compare: CompareSHA1HashAndPassword},
+		TypeSHA256: {Generate: GenerateSHA256Password, Compare: CompareSHA256HashAndPassword},
 		TypeArgon2: {Generate: GenerateArgon2Password, Compare: CompareArgon2HashAndPassword},
 		TypeScrypt: {Generate: GenerateScryptPassword, Compare: CompareScryptHashAndPassword},
 		TypeBcrypt: {Generate: GenerateBcryptPassword, Compare: CompareBcryptHashAndPassword},
@@ -92,6 +95,11 @@ func UseSHA1() {
 	gac = hashes[TypeSHA1]
 }
 
+// UseSHA256 sets the global hash compare function to the one corresponding to the TypeSHA256 hash type.
+func UseSHA256() {
+	gac = hashes[TypeSHA256]
+}
+
 // UseBcrypt sets the global hash compare function to the one corresponding to the TypeBcrypt hash type.
 func UseBcrypt() {
 	gac = hashes[TypeBcrypt]
@@ -122,32 +130,14 @@ func Generate(password string, salt string) (string, error) {
 // hash compare function. It returns an error if the comparison fails.
 //
 // Parameters:
-// - hashedPassword: the hashed password to compare.
+// - hashpass: the hashed password to compare.
 // - password: the plaintext password to compare.
 // - salt: the salt to use for the comparison.
 //
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
-func Compare(hashedPassword, password, salt string) error {
-	return gac.Compare(hashedPassword, password, salt)
-}
-
-// CompareSHA1HashAndPassword compares a given SHA1 hashed password with a plaintext password
-// using a provided salt value. It returns an error if the comparison fails.
-//
-// Parameters:
-// - hashedPassword: the hashed password to compare.
-// - password: the plaintext password to compare.
-// - salt: the salt to use for the comparison.
-//
-// Returns:
-// - error: an error if the comparison fails, otherwise nil.
-func CompareSHA1HashAndPassword(hashedPassword string, password string, salt string) error {
-	pass := SHA1([]byte(salt + password + salt))
-	if hashedPassword != pass {
-		return ErrPasswordNotMatch
-	}
-	return nil
+func Compare(hashpass, password, salt string) error {
+	return gac.Compare(hashpass, password, salt)
 }
 
 // GenerateSHA1Password generates a SHA1 password hash using the provided password and salt.
@@ -161,6 +151,54 @@ func CompareSHA1HashAndPassword(hashedPassword string, password string, salt str
 // - error: nil if the hash generation is successful, otherwise an error.
 func GenerateSHA1Password(password string, salt string) (string, error) {
 	return SHA1String(salt + password + salt), nil
+}
+
+// CompareSHA1HashAndPassword compares a given SHA1 hashed password with a plaintext password
+// using a provided salt value. It returns an error if the comparison fails.
+//
+// Parameters:
+// - hashpass: the hashed password to compare.
+// - password: the plaintext password to compare.
+// - salt: the salt to use for the comparison.
+//
+// Returns:
+// - error: an error if the comparison fails, otherwise nil.
+func CompareSHA1HashAndPassword(hashpass string, password string, salt string) error {
+	pass := SHA1String(salt + password + salt)
+	if hashpass != pass {
+		return ErrPasswordNotMatch
+	}
+	return nil
+}
+
+// GenerateSHA256Password generates an SHA256 password hash using the provided password and salt.
+//
+// Parameters:
+// - password: the plaintext password to be hashed.
+// - salt: the salt value to be used for hashing.
+//
+// Returns:
+// - string: the MD5 hashed password.
+// - error: nil if the hash generation is successful, otherwise an error.
+func GenerateSHA256Password(password string, salt string) (string, error) {
+	return SHA256String(salt + password + salt), nil
+}
+
+// CompareSHA256HashAndPassword compares an SHA256 hashed password with a plaintext password using a provided salt value.
+//
+// Parameters:
+// - hashpass: the hashed password to compare.
+// - password: the plaintext password to compare.
+// - salt: the salt value to use for the comparison.
+//
+// Returns:
+// - error: an error if the comparison fails, otherwise nil.
+func CompareSHA256HashAndPassword(hashpass string, password string, salt string) error {
+	pass := SHA256String(salt + password + salt)
+	if hashpass != pass {
+		return ErrPasswordNotMatch
+	}
+	return nil
 }
 
 // GenerateMD5Password generates an MD5 password hash using the provided password and salt.
@@ -179,15 +217,15 @@ func GenerateMD5Password(password string, salt string) (string, error) {
 // CompareMD5HashAndPassword compares an MD5 hashed password with a plaintext password using a provided salt value.
 //
 // Parameters:
-// - hashedPassword: the hashed password to compare.
+// - hashpass: the hashed password to compare.
 // - password: the plaintext password to compare.
 // - salt: the salt value to use for the comparison.
 //
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
-func CompareMD5HashAndPassword(hashedPassword, password, salt string) error {
+func CompareMD5HashAndPassword(hashpass, password, salt string) error {
 	pass := MD5String(salt + password + salt)
-	if hashedPassword != pass {
+	if hashpass != pass {
 		return ErrPasswordNotMatch
 	}
 	return nil
@@ -209,14 +247,14 @@ func GenerateBcryptPassword(password string, _ string) (string, error) {
 // CompareBcryptHashAndPassword compares a bcrypt hashed password with a plaintext password.
 //
 // Parameters:
-// - hashedPassword: The hashed password to compare.
+// - hashpass: The hashed password to compare.
 // - password: The plaintext password to compare.
 // - _: Unused parameter.
 //
 // Returns:
 // - error: An error if the hashed password does not match the plaintext password.
-func CompareBcryptHashAndPassword(hashedPassword, password, _ string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+func CompareBcryptHashAndPassword(hashpass, password, _ string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
 }
 
 // GenerateScryptPassword generates a password hash using the scrypt algorithm.
@@ -240,18 +278,18 @@ func GenerateScryptPassword(password, salt string) (string, error) {
 // CompareScryptHashAndPassword compares a scrypt hashed password with a plaintext password using a provided salt value.
 //
 // Parameters:
-// - hashedPassword: the hashed password to compare.
+// - hashpass: the hashed password to compare.
 // - password: the plaintext password to compare.
 // - salt: the salt value to use for the comparison.
 //
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
-func CompareScryptHashAndPassword(hashedPassword, password string, salt string) error {
+func CompareScryptHashAndPassword(hashpass, password string, salt string) error {
 	pass, err := GenerateScryptPassword(password, salt)
 	if err != nil {
 		return err
 	}
-	if hashedPassword != pass {
+	if hashpass != pass {
 		return ErrPasswordNotMatch
 	}
 	return nil
@@ -271,14 +309,14 @@ func GenerateArgon2Password(password, salt string) (string, error) {
 // CompareArgon2HashAndPassword compares an Argon2 hashed password with a plaintext password using a provided salt value.
 //
 // Parameters:
-// - hashedPassword: the hashed password to compare.
+// - hashpass: the hashed password to compare.
 // - password: the plaintext password to compare.
 // - salt: the salt value to use for the comparison.
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
-func CompareArgon2HashAndPassword(hashedPassword, password string, salt string) error {
+func CompareArgon2HashAndPassword(hashpass, password string, salt string) error {
 	pass, _ := GenerateArgon2Password(password, salt)
-	if hashedPassword != pass {
+	if hashpass != pass {
 		return ErrPasswordNotMatch
 	}
 	return nil

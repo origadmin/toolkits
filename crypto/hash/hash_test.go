@@ -122,6 +122,7 @@ func TestCompare(t *testing.T) {
 	UseMD5()
 
 	hashedPassword, err = Generate(password, salt)
+	t.Logf("MD5: %s", hashedPassword)
 	err = Compare(hashedPassword, password, salt)
 	assert.NoError(t, err, "Expected no error on successful comparison")
 
@@ -133,6 +134,7 @@ func TestCompare(t *testing.T) {
 	UseSHA1()
 
 	hashedPassword, err = Generate(password, salt)
+	t.Logf("SHA1: %s", hashedPassword)
 	err = Compare(hashedPassword, password, salt)
 	assert.NoError(t, err, "Expected no error on successful comparison")
 
@@ -144,6 +146,7 @@ func TestCompare(t *testing.T) {
 	UseScrypt()
 
 	hashedPassword, err = Generate(password, salt)
+	t.Logf("Scrypt: %s", hashedPassword)
 	err = Compare(hashedPassword, password, salt)
 	assert.NoError(t, err, "Expected no error on successful comparison")
 
@@ -155,6 +158,7 @@ func TestCompare(t *testing.T) {
 	UseBcrypt()
 
 	hashedPassword, err = Generate(password, salt)
+	t.Logf("Bcrypt: %s", hashedPassword)
 	err = Compare(hashedPassword, password, salt)
 	assert.NoError(t, err, "Expected no error on successful comparison")
 
@@ -166,6 +170,19 @@ func TestCompare(t *testing.T) {
 	UseArgon2()
 
 	hashedPassword, err = Generate(password, salt)
+	t.Logf("Argon2: %s", hashedPassword)
+	err = Compare(hashedPassword, password, salt)
+	assert.NoError(t, err, "Expected no error on successful comparison")
+
+	// Test case 2: failed comparison
+	hashedPassword = "hashedPassword456"
+	err = Compare(hashedPassword, password, salt)
+	assert.Error(t, err, "Expected error on failed comparison")
+
+	UseSHA256()
+
+	hashedPassword, err = Generate(password, salt)
+	t.Logf("SHA256: %s", hashedPassword)
 	err = Compare(hashedPassword, password, salt)
 	assert.NoError(t, err, "Expected no error on successful comparison")
 
