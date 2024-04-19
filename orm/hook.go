@@ -1,4 +1,9 @@
 package orm
 
-type Hook interface {
-}
+const (
+    HookBefore = "before"
+    HookAfter  = "after"
+    HookError  = "error"
+)
+
+type Hook func(dsn string) error
