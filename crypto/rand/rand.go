@@ -107,12 +107,21 @@ func (r Rand) RandBytes(size int) []byte {
 	return ret
 }
 
+// The Read method populates the given byte slice by randomly selecting characters.
+//
+// Parameters:
+// p []byte: The byte slice to be populated.
+//
+// Return values:
+// n int: The number of bytes actually populated.
+// err error: An error encountered during population, always nil in this implementation.
 func (r Rand) Read(p []byte) (n int, err error) {
-	n = len(p)
+	n = len(p) // Set n to the length of p, indicating the number of bytes to populate.
 	for i := 0; i < n; i++ {
+		// Randomly select a character for each position in p.
 		p[i] = r.charset[rand.IntN(r.length)]
 	}
-	return n, nil
+	return n, nil // Return the populated byte count and a nil error.
 }
 
 func loadCharset(rand Kind) string {
