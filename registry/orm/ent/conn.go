@@ -17,6 +17,7 @@ func (c *conn) Open(config orm.Config) (any, error) {
 	return c.builder(c.db.drv, config)
 }
 
+// Before executes the given functions before opening the database.
 func (c *conn) Before(ctx context.Context, funcs ...Before) error {
 	for _, fn := range funcs {
 		err := fn(ctx, c.db.drv)
@@ -27,6 +28,18 @@ func (c *conn) Before(ctx context.Context, funcs ...Before) error {
 	return nil
 }
 
+// After executes the given functions after opening the database.
+func (c *conn) After(ctx context.Context, funcs ...After) error {
+	for _, fn := range funcs {
+		err := fn(ctx, c.db.drv)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Close closes the database connection.
 func (c *conn) Close() error {
 	return c.db.Close()
 }

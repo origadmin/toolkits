@@ -13,6 +13,7 @@ import (
 	"github.com/origadmin/toolkits/orm"
 )
 
+// DB is the database client.
 type DB struct {
 	config orm.Config
 	once   *sync.Once
@@ -32,14 +33,8 @@ func open(config orm.Config) (*DB, error) {
 	default:
 		err = fmt.Errorf("unsupported database type: %s", config.Dialect)
 	}
-	if fn, ok := config.Hooks[orm.HookBefore]; ok {
-		err = fn(config.DSN)
-		if err != nil {
-			return nil, err
-		}
-	}
-	drv, err = sql.Open(dialect, config.DSN)
 
+	drv, err = sql.Open(dialect, config.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
@@ -56,6 +51,7 @@ func open(config orm.Config) (*DB, error) {
 	}, nil
 }
 
+// Close closes the database connection.
 func (db *DB) Close() error {
 	var err error
 	if db.once != nil {
@@ -67,6 +63,7 @@ func (db *DB) Close() error {
 	return db.drv.Close()
 }
 
+// Before executes the hooks before the database connection.
 func (db *DB) Before(ctx context.Context, fns ...Before) error {
 	for i := range fns {
 		err := fns[i](ctx, db.drv)
@@ -77,16 +74,32 @@ func (db *DB) Before(ctx context.Context, fns ...Before) error {
 	return nil
 }
 
+// After executes the hooks after the database connection.
+func (db *DB) After(ctx context.Context, fns ...After) error {
+	for i := range fns {
+		err := fns[i](ctx, db.drv)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Connector returns a new database connector.
 func (db *DB) Connector(builder Builder) orm.Connector {
 	return connector(db, builder)
 }
 
+// Driver returns the underlying database driver.
+func (db *DB) Driver() *sql.Driver {
+	return db.drv
+}
+
+// New creates a new database instance.
 func New(config orm.Config) (*DB, error) {
 	if config.Context == nil {
 		config.Context = context.Background()
 	}
-	if config.Hooks == nil {
-		config.Hooks = make(map[string]orm.Hook)
-	}
+
 	return open(config)
 }

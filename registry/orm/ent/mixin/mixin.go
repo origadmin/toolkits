@@ -112,3 +112,24 @@ func (DeletedSchema) Indexes() []ent.Index {
 		index.Fields("deleted_at"),
 	}
 }
+
+// SoftDeleteSchema schema to include control and time fields.
+type SoftDeleteSchema struct {
+	mixin.Schema
+}
+
+// Fields of the mixin.
+func (SoftDeleteSchema) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("deleted_at").
+			Optional().
+			Nillable(),
+	}
+}
+
+// Indexes of the mixin.
+func (SoftDeleteSchema) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("deleted_at"),
+	}
+}
