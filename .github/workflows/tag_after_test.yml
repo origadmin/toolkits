@@ -46,24 +46,12 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
+          chmod +x ./scripts/git/next_tag.sh
           chmod +x ./scripts/git/commit_tag.sh
           LATEST_TAG=$(./scripts/git/commit_tag.sh)
-          echo "LATEST_TAG=$LATEST_TAG"
-          if [[ -z "$LATEST_TAG" ]]; then
-            NEXT_TAG="v0.0.1"
-          else
-            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
-            # Remove 'v' prefix using bash parameter expansion
-            LATEST_TAG=${LATEST_TAG#v}
-            IFS='.' read -r -a VERSION_ARRAY <<< "$LATEST_TAG"
-            MAJOR=${VERSION_ARRAY[0]}
-            MINOR=${VERSION_ARRAY[1]}
-            PATCH=${VERSION_ARRAY[2]}
-            (( PATCH++ ))
-            NEXT_TAG=v$MAJOR.$MINOR.$PATCH
-            echo "NEXT_TAG=$NEXT_TAG"
-            echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
-          fi
+          NEXT_TAG=$(./scripts/git/next_tag.sh)          
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
         id: generate_changelog
@@ -82,10 +70,20 @@ jobs:
           fi
 
       - name: Create release
-        if: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+        if: ${{ !steps.determine_next_version.outputs.LATEST_TAG }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          body: |
+            # Changelog
+            ${{ steps.generate_changelog.outputs.CHANGELOG_FILE }}
+          draft: false
+          prerelease: false
+
+      - name: Create release
+        if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
+        uses: softprops/action-gh-release@v1
+        with:
           body: |
             # Changelog
             ${{ steps.generate_changelog.outputs.CHANGELOG_FILE }}
