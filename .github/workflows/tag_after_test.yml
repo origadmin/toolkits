@@ -1,4 +1,4 @@
-name: Auto Tagging After Tests
+name: Auto Tagging And Release After Tests
 
 on:
   push:
