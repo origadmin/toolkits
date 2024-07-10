@@ -1,25 +1,59 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
-
-// Package ident provides the helpers functions.
-package ident
+package ident_test
 
 import (
-	"strings"
 	"testing"
+
+	"github.com/origadmin/toolkits/ident"
 )
 
-func TestNewXID(t *testing.T) {
-	t.Logf("xid: %s", strings.ToUpper(NewXID()))
-	t.Logf("xid string size: %d", len(NewXID()))
+type mockIdentifier struct{}
+
+func (m *mockIdentifier) Name() string {
+	return "MockIdentifier"
 }
 
-func TestMustNewUUID(t *testing.T) {
-	t.Logf("uuid: %s", strings.ToUpper(MustNewUUID()))
-	t.Logf("uuid string size: %d", len(MustNewUUID()))
+func (m *mockIdentifier) Gen() string {
+	return "mock-generated-id"
 }
 
-func TestMustNewULID(t *testing.T) {
-	t.Logf("ulid: %s", strings.ToUpper(MustNewULID()))
-	t.Logf("ulid string size: %d", len(MustNewULID()))
-	MustNewULID()
+func (m *mockIdentifier) Validate(id string) bool {
+	return id == "mock-generated-id"
+}
+
+func (m *mockIdentifier) Size() int {
+	return 12 // Replace with the actual size of the generated identifier
+}
+
+func TestGenID(t *testing.T) {
+	ident.Use(&mockIdentifier{})
+	generatedID := ident.GenID()
+	expectedID := "mock-generated-id"
+
+	if generatedID != expectedID {
+		t.Errorf("GenID() = %v, want %v", generatedID, expectedID)
+	}
+}
+
+func TestGenSize(t *testing.T) {
+	ident.Use(&mockIdentifier{})
+	size := ident.GenSize()
+	expectedSize := 12 // Replace with the actual size of the generated identifier
+
+	if size != expectedSize {
+		t.Errorf("GenSize() = %v, want %v", size, expectedSize)
+	}
+}
+
+func TestValidate(t *testing.T) {
+	ident.Use(&mockIdentifier{})
+	validID := "mock-generated-id"
+	invalidID := "invalid-id"
+
+	if !ident.Validate(validID) {
+		t.Errorf("Validate(%v) = %v, want %v", validID, false, true)
+	}
+
+	if ident.Validate(invalidID) {
+		t.Errorf("Validate(%v) = %v, want %v", invalidID, true, false)
+	}
 }
