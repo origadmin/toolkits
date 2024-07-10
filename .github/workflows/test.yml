@@ -1,0 +1,26 @@
+name: Go Test Workflow
+
+on:
+  push:
+    branches:
+      - main  # Or your default branch name
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout toolkits code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.22.5  # Or use the 'stable' or 'latest' keyword to automatically get the latest stable version
+          cache: true
+
+      - name: Run tests
+        run: |
+          go test -v ./...
