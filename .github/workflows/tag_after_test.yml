@@ -22,7 +22,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test -v ./...
+          go test -race -v ./...
 
   tagging:
     needs: [ test ]
@@ -37,23 +37,6 @@ jobs:
           ref: main
           fetch-depth: 0 # Fetch all history
 
-      - name: Check for existing tags on latest main
-        id: check_tags
-        run: |
-          # Gets the hash of the current HEAD
-          CURRENT_COMMIT=$(git rev-parse HEAD)
-          # Finds labels that match the current commit
-          TAG_FOR_CURRENT_COMMIT=$(git tag --points-at "$CURRENT_COMMIT")
-          # Check for labels
-          if [ -n "$TAG_FOR_CURRENT_COMMIT" ]; then
-          # Converts a list of labels to an array
-          IFS=$'\n' read -d '' -r -a TAGS_ARRAY <<< "$TAG_FOR_CURRENT_COMMIT"
-          # Find the latest tags, assuming the tags are in chronological order
-          LATEST_TAG=${TAGS_ARRAY[-1]}
-          echo "$LATEST_TAG"
-          fi
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
-
       - name: Get latest release
         id: get_latest_release
         run: |
@@ -63,18 +46,21 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
-          LATEST_TAG=${{ steps.check_tags.outputs.LATEST_TAG }}
+          LATEST_TAG=$(./scripts/git/commit_tag.sh)
           if [[ -z "$LATEST_TAG" ]]; then
             NEXT_TAG="v0.0.1"
           else
-          VERSION_ARRAY=(${{ steps.check_tags.outputs.LATEST_TAG }#.v}~'.')
-          MAJOR=${VERSION_ARRAY[0]}
-          MINOR=${VERSION_ARRAY[1]}
-          PATCH=${VERSION_ARRAY[2]}
-          let PATCH+=1
-          NEXT_TAG=v$MAJOR.$MINOR.$PATCH
+            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+            # Remove 'v' prefix using bash parameter expansion
+            LATEST_TAG=${LATEST_TAG#v}
+            IFS='.' read -r -a VERSION_ARRAY <<< "$LATEST_TAG"
+            MAJOR=${VERSION_ARRAY[0]}
+            MINOR=${VERSION_ARRAY[1]}
+            PATCH=${VERSION_ARRAY[2]}
+            (( PATCH++ ))
+            NEXT_TAG=v$MAJOR.$MINOR.$PATCH
+            echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
           fi
-          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
         id: generate_changelog
