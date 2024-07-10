@@ -58,17 +58,17 @@ jobs:
       - name: Generate changelog
         id: generate_changelog
         run: |
-          echo "CHANGELOG_FILE=$(cat changelog.txt)" >> $GITHUB_OUTPUT
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
+          echo "# Changelog" > changelog.txt
           if [[ -n "$LATEST_RELEASE" ]]; then
             # If there's no previous release, get only the current commit's log
             git config --global core.pager cat
             # git log --pretty=format:"* %s (%an, %ar)"
-            git log --pretty=format:"* %s (%an, %ar)" > changelog.txt
+            git log --pretty=format:"* %s (%an, %ar)" >> changelog.txt
           else
             # Get all submission information since the last release
             CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)")
-            git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)" > changelog.txt
+            git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)" >> changelog.txt
           fi
 
       - name: Create release
@@ -76,9 +76,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
-          body: |
-            # Changelog
-            ${{ steps.generate_changelog.outputs.CHANGELOG_FILE }}
+          body_path: changelog.txt
           draft: false
           prerelease: false
 
@@ -86,8 +84,6 @@ jobs:
         if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
         uses: softprops/action-gh-release@v1
         with:
-          body: |
-            # Changelog
-            ${{ steps.generate_changelog.outputs.CHANGELOG_FILE }}
+          body_path: changelog.txt
           draft: false
           prerelease: false
