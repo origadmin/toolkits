@@ -50,12 +50,12 @@ func RegisterCode(code int32, id string) {
 	mutex.Unlock()
 }
 
-// LookupCode looks up the identifier corresponding to the given code.
+// LookupID looks up the identifier corresponding to the given code.
 // This function uses a read lock to ensure safe concurrent access to shared resources.
 // Parameters: code - The integer value of the code to look up.
 //
 // Returns: The string identifier corresponding to the code.
-func LookupCode(code int32) (string, bool) {
+func LookupID(code int32) (string, bool) {
 	// Acquire the read lock to ensure data consistency during concurrent reads
 	mutex.RLock()
 	// Look up the identifier corresponding to the code
@@ -254,7 +254,7 @@ func NewFormat(id string, code int32, format string, args ...any) error {
 
 // Code generates an error for a given code
 func Code(code int32, detail string) error {
-	id, ok := ids[code]
+	id, ok := LookupID(code)
 	if !ok {
 		id = UnknownID
 	}
