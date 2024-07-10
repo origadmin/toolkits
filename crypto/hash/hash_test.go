@@ -39,6 +39,23 @@ func TestSHA1(t *testing.T) {
 	}
 }
 
+func TestSHA256(t *testing.T) {
+	origin := "OrigAdmin@123456"
+	hashVal := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	if v := SHA256String(origin); v != hashVal {
+		t.Error("Failed to generate MD5 hash: ", v)
+	}
+}
+
+func TestHMAC256(t *testing.T) {
+	origin := "OrigAdmin@123456"
+	key := "key"
+	hashVal := "47f03a422b85f8bc524f283e78b70c9f026db157de8c21cf2330238cfb54cd56"
+	if v := HMAC256String(origin, key); v != hashVal {
+		t.Error("Failed to generate HMAC256 hash: ", v)
+	}
+}
+
 func TestGenerateScryptPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
@@ -88,8 +105,8 @@ func TestGenerate(t *testing.T) {
 
 	expectedHash := "generatedHash123"
 
-	// Mocking the Generate function of gac package
-	gac.Generate = func(password, salt string) (string, error) {
+	// Mocking the Generate function of defaultGAC package
+	defaultGAC.Generate = func(password, salt string) (string, error) {
 		return expectedHash, nil
 	}
 
@@ -101,8 +118,8 @@ func TestGenerate(t *testing.T) {
 	// Test case 2: Generation fails
 	expectedError := "generation failed"
 
-	// Mocking the Generate function of gac package
-	gac.Generate = func(password, salt string) (string, error) {
+	// Mocking the Generate function of defaultGAC package
+	defaultGAC.Generate = func(password, salt string) (string, error) {
 		return "", errors.New(expectedError)
 	}
 

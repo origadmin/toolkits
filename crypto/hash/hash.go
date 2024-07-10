@@ -13,25 +13,11 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-// ErrPasswordNotMatch error when password not match
-var ErrPasswordNotMatch = errors.String("password not match")
-
-// Type hash type
-type Type string
-
 const (
-	// TypeMD5 md5 type
-	TypeMD5 Type = "md5"
-	// TypeSHA1 sha1 type
-	TypeSHA1 Type = "sha1"
-	// TypeSHA256 sha256 type
-	TypeSHA256 Type = "sha256"
-	// TypeArgon2 argon2 type
-	TypeArgon2 Type = "argon2"
-	// TypeScrypt scrypt type
-	TypeScrypt Type = "scrypt"
-	// TypeBcrypt bcrypt type
-	TypeBcrypt Type = "bcrypt"
+	// ENV environment variable name
+	ENV = "ORIG_ADMIN_HASH_TYPE"
+	// ErrPasswordNotMatch error when password not match
+	ErrPasswordNotMatch = errors.String("password not match")
 )
 
 // GenerateFunc generate password hash function
@@ -56,23 +42,23 @@ var (
 		TypeBcrypt: {Generate: GenerateBcryptPassword, Compare: CompareBcryptHashAndPassword},
 	}
 
-	// gac default generate and compare function
-	gac GenerateAndCompare
+	// defaultGAC default generate and compare function
+	defaultGAC GenerateAndCompare
 )
 
 func init() {
-	gac = GenerateAndCompare{
+	defaultGAC = GenerateAndCompare{
 		Generate: GenerateMD5Password,
 		Compare:  CompareMD5HashAndPassword,
 	}
 
-	env := os.Getenv("ARIGADMIN_HASH_TYPE")
+	env := os.Getenv(ENV)
 	if env == "" {
 		return
 	}
 
 	if v, ok := hashes[Type(env)]; ok {
-		gac = v
+		defaultGAC = v
 	}
 }
 
@@ -81,38 +67,38 @@ func init() {
 // t Type - the hash type to update the functions with.
 func UseCrypto(t Type) {
 	if v, ok := hashes[t]; ok {
-		gac = v
+		defaultGAC = v
 	}
 }
 
 // UseMD5 sets the global hash compare function to the one corresponding to the TypeMD5 hash type.
 func UseMD5() {
-	gac = hashes[TypeMD5]
+	defaultGAC = hashes[TypeMD5]
 }
 
 // UseSHA1 sets the global hash compare function to the one corresponding to the TypeSHA1 hash type.
 func UseSHA1() {
-	gac = hashes[TypeSHA1]
+	defaultGAC = hashes[TypeSHA1]
 }
 
 // UseSHA256 sets the global hash compare function to the one corresponding to the TypeSHA256 hash type.
 func UseSHA256() {
-	gac = hashes[TypeSHA256]
+	defaultGAC = hashes[TypeSHA256]
 }
 
 // UseBcrypt sets the global hash compare function to the one corresponding to the TypeBcrypt hash type.
 func UseBcrypt() {
-	gac = hashes[TypeBcrypt]
+	defaultGAC = hashes[TypeBcrypt]
 }
 
 // UseScrypt sets the global hash compare function to the one corresponding to the TypeScrypt hash type.
 func UseScrypt() {
-	gac = hashes[TypeScrypt]
+	defaultGAC = hashes[TypeScrypt]
 }
 
 // UseArgon2 sets the global hash compare function to the one corresponding to the TypeArgon2 hash type.
 func UseArgon2() {
-	gac = hashes[TypeArgon2]
+	defaultGAC = hashes[TypeArgon2]
 }
 
 // Generate generates a password hash using the global hash compare function.
@@ -123,7 +109,7 @@ func UseArgon2() {
 //
 // It returns a string representing the generated password hash and an error if the generation fails.
 func Generate(password string, salt string) (string, error) {
-	return gac.Generate(password, salt)
+	return defaultGAC.Generate(password, salt)
 }
 
 // Compare compares the given hashed password, password, and salt with the global
@@ -137,7 +123,7 @@ func Generate(password string, salt string) (string, error) {
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
 func Compare(hashpass, password, salt string) error {
-	return gac.Compare(hashpass, password, salt)
+	return defaultGAC.Compare(hashpass, password, salt)
 }
 
 // GenerateSHA1Password generates a SHA1 password hash using the provided password and salt.
@@ -195,6 +181,36 @@ func GenerateSHA256Password(password string, salt string) (string, error) {
 // - error: an error if the comparison fails, otherwise nil.
 func CompareSHA256HashAndPassword(hashpass string, password string, salt string) error {
 	pass := SHA256String(salt + password + salt)
+	if hashpass != pass {
+		return ErrPasswordNotMatch
+	}
+	return nil
+}
+
+// GenerateHMAC256Password generates an HMAC256 password hash using the provided password and salt.
+//
+// Parameters:
+// - password: the plaintext password to be hashed.
+// - salt: the salt value to be used for hashing.
+//
+// Returns:
+// - string: the MD5 hashed password.
+// - error: nil if the hash generation is successful, otherwise an error.
+func GenerateHMAC256Password(password string, salt string) (string, error) {
+	return HMAC256String(password, salt), nil
+}
+
+// CompareHMAC256HashAndPassword compares an HMAC256 hashed password with a plaintext password using a provided salt value.
+//
+// Parameters:
+// - hashpass: the hashed password to compare.
+// - password: the plaintext password to compare.
+// - salt: the salt value to use for the comparison.
+//
+// Returns:
+// - error: an error if the comparison fails, otherwise nil.
+func CompareHMAC256HashAndPassword(hashpass string, password string, salt string) error {
+	pass := HMAC256String(password, salt)
 	if hashpass != pass {
 		return ErrPasswordNotMatch
 	}
