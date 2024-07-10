@@ -13,15 +13,27 @@ var generator Ident
 
 // Ident is the interface of ident.
 type Ident interface {
+	Name() string
 	Gen() string
 	Validate(id string) bool
 	Size() int
 }
 
 type ident struct {
+	name     string
 	gen      func() string
 	validate func(id string) bool
 	size     int
+}
+
+// Name returns the name of the object identifier.
+//
+// This method, associated with the ident type, aims to retrieve the name of the object.
+// It is particularly useful in scenarios where unique identification or representation is required.
+// The method does not accept any parameters as it is intended to access an inherent property of the object itself.
+// The return value is a string that represents the name of the object.
+func (obj ident) Name() string {
+	return obj.name
 }
 
 // Gen method generates an identifier.
@@ -47,6 +59,7 @@ func (obj ident) Size() int {
 
 func init() {
 	generator = ident{
+		name:     "ulid",
 		gen:      MustNewULID,
 		validate: ValidateULID,
 		size:     len(MustNewULID()),
