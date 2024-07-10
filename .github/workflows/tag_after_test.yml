@@ -63,7 +63,8 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
-          if [[ -z "${{ steps.check_tags.outputs.LATEST_TAG }}" ]]; then
+          LATEST_TAG=${{ steps.check_tags.outputs.LATEST_TAG }}
+          if [[ -z "$LATEST_TAG" ]]; then
             NEXT_TAG="v0.0.1"
           else
           VERSION_ARRAY=(${{ steps.check_tags.outputs.LATEST_TAG }#.v}~'.')
@@ -89,7 +90,7 @@ jobs:
           echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: Create release
-        if: ${{ steps.determine_next_version.outputs.NEXT_TAG != '' }}
+        if: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
