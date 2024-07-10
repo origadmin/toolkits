@@ -34,12 +34,13 @@ type GenerateAndCompare struct {
 
 var (
 	hashes = map[Type]GenerateAndCompare{
-		TypeMD5:    {Generate: GenerateMD5Password, Compare: CompareMD5HashAndPassword},
-		TypeSHA1:   {Generate: GenerateSHA1Password, Compare: CompareSHA1HashAndPassword},
-		TypeSHA256: {Generate: GenerateSHA256Password, Compare: CompareSHA256HashAndPassword},
-		TypeArgon2: {Generate: GenerateArgon2Password, Compare: CompareArgon2HashAndPassword},
-		TypeScrypt: {Generate: GenerateScryptPassword, Compare: CompareScryptHashAndPassword},
-		TypeBcrypt: {Generate: GenerateBcryptPassword, Compare: CompareBcryptHashAndPassword},
+		TypeMD5:     {Generate: GenerateMD5Password, Compare: CompareMD5HashAndPassword},
+		TypeSHA1:    {Generate: GenerateSHA1Password, Compare: CompareSHA1HashAndPassword},
+		TypeSHA256:  {Generate: GenerateSHA256Password, Compare: CompareSHA256HashAndPassword},
+		TypeArgon2:  {Generate: GenerateArgon2Password, Compare: CompareArgon2HashAndPassword},
+		TypeScrypt:  {Generate: GenerateScryptPassword, Compare: CompareScryptHashAndPassword},
+		TypeBcrypt:  {Generate: GenerateBcryptPassword, Compare: CompareBcryptHashAndPassword},
+		TypeHMAC256: {Generate: GenerateHMAC256Password, Compare: CompareHMAC256HashAndPassword},
 	}
 
 	// defaultGAC default generate and compare function
