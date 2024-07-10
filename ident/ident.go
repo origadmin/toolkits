@@ -9,10 +9,10 @@ import (
 	"github.com/rs/xid"
 )
 
-var generator Ident
+var generator Identifier
 
-// Ident is the interface of ident.
-type Ident interface {
+// Identifier is the interface of ident.
+type Identifier interface {
 	Name() string
 	Gen() string
 	Validate(id string) bool
@@ -67,12 +67,12 @@ func init() {
 }
 
 // Use sets the generator ident.
-func Use(ident Ident) {
+func Use(ident Identifier) {
 	generator = ident
 }
 
 // Default method returns the default generator ident.
-func Default() Ident {
+func Default() Identifier {
 	return generator
 }
 
