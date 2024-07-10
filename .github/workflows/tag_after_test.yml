@@ -2,14 +2,8 @@ name: Manual Tagging After Tests
 
 on:
   push:
-    tags:
-      - "v*" # The pattern here matches the tag naming convention you will use
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: "Tag name"
-        required: true
-        default: "v0.0.1"
+    branches:
+      - main
 
 jobs:
   test:
@@ -17,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
 
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -26,25 +23,6 @@ jobs:
       - name: Run tests
         run: |
           go test -v ./...
-
-  untagging:
-    needs: [ test ]
-    if: failure()
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use your PAT here instead of the default token
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Untag release
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "Github Actions"
-          git tag -d ${{ github.ref_name }} # Delete local tag
-          git push origin :refs/tags/${{ github.ref_name }} # Delete remote tag
 
   tagging:
     needs: [ test ]
@@ -56,11 +34,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
+          ref: main
+          fetch-depth: 0 # Fetch all history
+
+      - name: Get current version
+        id: get_current_version
+        run: |
+          CURRENT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Determine next version
+        id: determine_next_version
+        run: |
+          if [[ -z "${{ steps.get_current_version.outputs.CURRENT_TAG }}" ]]; then
+          NEXT_TAG="v0.0.1"
+          else
+          VERSION_ARRAY=(${{
+            steps.get_current_version.outputs.CURRENT_TAG
+          }#.v}~'.')
+          MAJOR=${VERSION_ARRAY[0]}
+          MINOR=${VERSION_ARRAY[1]}
+          PATCH=${VERSION_ARRAY[2]}
+          let PATCH+=1
+          NEXT_TAG=v$MAJOR.$MINOR.$PATCH
+          fi
+          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Tag release
+        if: ${{ steps.determine_next_version.outputs.NEXT_TAG != '' }}
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "Github Actions"
-          git tag ${{ github.event.inputs.tag_name }}
-          git push origin ${{ github.event.inputs.tag_name }}
+          git tag ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          git push origin ${{ steps.determine_next_version.outputs.NEXT_TAG }}
