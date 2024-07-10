@@ -71,6 +71,8 @@ jobs:
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
           if [[ -n "$LATEST_RELEASE" ]]; then
             # If there's no previous release, get only the current commit's log
+            git config --global core.pager cat
+            # git log --pretty=format:"* %s (%an, %ar)"
             CHANGELOG=$(git log --pretty=format:"* %s (%an, %ar)")
             echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
           else
