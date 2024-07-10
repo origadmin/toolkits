@@ -46,6 +46,7 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
+          chmod +x ./scripts/git/commit_tag.sh
           LATEST_TAG=$(./scripts/git/commit_tag.sh)
           if [[ -z "$LATEST_TAG" ]]; then
             NEXT_TAG="v0.0.1"
