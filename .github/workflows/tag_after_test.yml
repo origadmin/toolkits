@@ -31,6 +31,8 @@ jobs:
     needs: [ test ]
     if: failure()
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use your PAT here instead of the default token
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -48,6 +50,8 @@ jobs:
     needs: [ test ]
     if: success()
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use your PAT here instead of the default token
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
