@@ -71,12 +71,13 @@ jobs:
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
           if [[ -n "$LATEST_RELEASE" ]]; then
             # If there's no previous release, get only the current commit's log
-            CHANGELOG=$(git show --pretty=format:"* %s (%an, %ar)")
+            CHANGELOG=$(git log --pretty=format:"* %s (%an, %ar)")
+            echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
           else
             # Get all submission information since the last release
             CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)")
+            echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
           fi
-          echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: Create release
         if: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
