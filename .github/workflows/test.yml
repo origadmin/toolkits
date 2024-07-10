@@ -1,4 +1,4 @@
-name: Go Test Workflow
+name: Go Test and Tagging Workflow
 
 on:
   push:
@@ -11,16 +11,38 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: [ "" ]
     steps:
-      - name: Checkout toolkits code
+      - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for .GitInfo parsing
 
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.22.5  # Or use the 'stable' or 'latest' keyword to automatically get the latest stable version
+          go-version: 1.22.5
           cache: true
 
       - name: Run tests
         run: |
+          cd ${{ matrix.directory }}
           go test -v ./...
+
+      - name: Bump Version and Tag
+        if: success() && github.event_name == 'push' || github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ matrix.directory }}
+          # Determine current version
+          current_version=$(git describe --tags --abbrev=0 || echo "v0.0.1")
+          # Increment patch version
+          new_version=$(echo "${current_version}" | awk '{split($0,a,"."); print a[1]"."a[2]"."(a[3]+1)}')
+          # Tag and push
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git tag -a "$new_version" -m "Bumped version to $new_version"
+          git push origin "$new_version"
