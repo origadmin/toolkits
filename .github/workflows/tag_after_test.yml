@@ -1,4 +1,4 @@
-name: Manual Tagging After Tests
+name: Auto Tagging After Tests
 
 on:
   push:
@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 1.22.5
 
@@ -29,29 +29,44 @@ jobs:
     if: success()
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use your PAT here instead of the default token
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
 
-      - name: Get current version
-        id: get_current_version
+      - name: Check for existing tags on latest main
+        id: check_tags
         run: |
-          CURRENT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_OUTPUT
+          # Gets the hash of the current HEAD
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          # Finds labels that match the current commit
+          TAG_FOR_CURRENT_COMMIT=$(git tag --points-at "$CURRENT_COMMIT")
+          # Check for labels
+          if [ -n "$TAG_FOR_CURRENT_COMMIT" ]; then
+          # Converts a list of labels to an array
+          IFS=$'\n' read -d '' -r -a TAGS_ARRAY <<< "$TAG_FOR_CURRENT_COMMIT"
+          # Find the latest tags, assuming the tags are in chronological order
+          LATEST_TAG=${TAGS_ARRAY[-1]}
+          echo "$LATEST_TAG"
+          fi
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Get latest release
+        id: get_latest_release
+        run: |
+          LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ env.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
+          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_OUTPUT
 
       - name: Determine next version
         id: determine_next_version
         run: |
-          if [[ -z "${{ steps.get_current_version.outputs.CURRENT_TAG }}" ]]; then
-          NEXT_TAG="v0.0.1"
+          if [[ -z "${{ steps.check_tags.outputs.LATEST_TAG }}" ]]; then
+            NEXT_TAG="v0.0.1"
           else
-          VERSION_ARRAY=(${{
-            steps.get_current_version.outputs.CURRENT_TAG
-          }#.v}~'.')
+          VERSION_ARRAY=(${{ steps.check_tags.outputs.LATEST_TAG }#.v}~'.')
           MAJOR=${VERSION_ARRAY[0]}
           MINOR=${VERSION_ARRAY[1]}
           PATCH=${VERSION_ARRAY[2]}
@@ -60,10 +75,26 @@ jobs:
           fi
           echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
-      - name: Tag release
-        if: ${{ steps.determine_next_version.outputs.NEXT_TAG != '' }}
+      - name: Generate changelog
+        id: generate_changelog
         run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "Github Actions"
-          git tag ${{ steps.determine_next_version.outputs.NEXT_TAG }}
-          git push origin ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
+          if [[ -z "$LATEST_RELEASE" ]]; then
+            # If no release, start from the first commit
+            CHANGELOG=$(git log --pretty=format:"* %s (%an, %ar)" --reverse)
+          else
+            # Get all submission information since the last release
+            CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)")
+          fi
+          echo "CHANGELOG=$CHANGELOG" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        if: ${{ steps.determine_next_version.outputs.NEXT_TAG != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          body: |
+            # Changelog
+            ${{ steps.generate_changelog.outputs.CHANGELOG }}
+          draft: false
+          prerelease: false
