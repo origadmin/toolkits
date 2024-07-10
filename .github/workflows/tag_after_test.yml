@@ -48,6 +48,7 @@ jobs:
         run: |
           chmod +x ./scripts/git/commit_tag.sh
           LATEST_TAG=$(./scripts/git/commit_tag.sh)
+          echo "LATEST_TAG=$LATEST_TAG"
           if [[ -z "$LATEST_TAG" ]]; then
             NEXT_TAG="v0.0.1"
           else
@@ -60,6 +61,7 @@ jobs:
             PATCH=${VERSION_ARRAY[2]}
             (( PATCH++ ))
             NEXT_TAG=v$MAJOR.$MINOR.$PATCH
+            echo "NEXT_TAG=$NEXT_TAG"
             echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
           fi
 
@@ -69,7 +71,8 @@ jobs:
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
           if [[ -z "$LATEST_RELEASE" ]]; then
             # If no release, start from the first commit
-            CHANGELOG=$(git log --pretty=format:"* %s (%an, %ar)" --reverse)
+            # Use --all to get all commits, even before the first one
+            CHANGELOG=$(git log --all --pretty=format:"* %s (%an, %ar)" --reverse)
           else
             # Get all submission information since the last release
             CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s (%an, %ar)")
