@@ -75,7 +75,8 @@ jobs:
         if: ${{ !steps.determine_next_version.outputs.LATEST_TAG }}
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
           body_path: changelog.txt
           draft: false
           prerelease: false
@@ -84,6 +85,7 @@ jobs:
         if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
         uses: softprops/action-gh-release@v1
         with:
+          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
           body_path: changelog.txt
           draft: false
           prerelease: false
