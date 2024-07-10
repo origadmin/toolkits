@@ -1,0 +1,42 @@
+name: Manual Tagging After Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name'
+        required: true
+        default: 'v0.0.1'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.22.5
+
+      - name: Run tests
+        run: |
+          go test -v ./...
+
+  tagging:
+    needs: [ test ]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Tag release
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "Github Actions"
+          git tag ${{ github.event.inputs.tag_name }}
+          git push origin ${{ github.event.inputs.tag_name }}
