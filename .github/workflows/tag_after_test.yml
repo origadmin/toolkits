@@ -3,13 +3,13 @@ name: Manual Tagging After Tests
 on:
   push:
     tags:
-      - 'v*' # The pattern here matches the tag naming convention you will use
+      - "v*" # The pattern here matches the tag naming convention you will use
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag name'
+        description: "Tag name"
         required: true
-        default: 'v0.0.1'
+        default: "v0.0.1"
 
 jobs:
   test:
@@ -28,23 +28,22 @@ jobs:
           go test -v ./...
 
   untagging:
-    - name: Remove tag if tests fail
-      needs: [ test ]
-      if: failure()
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
-          with:
-            ref: ${{ github.ref }}
+    needs: [ test ]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
 
-        - name: Untag release
-          run: |
-            git config --global user.email "actions@github.com"
-            git config --global user.name "Github Actions"
-            git tag -d ${{ github.ref_name }} # Delete local tag
-            git push origin :refs/tags/${{ github.ref_name }} # Delete remote tag
-              
+      - name: Untag release
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "Github Actions"
+          git tag -d ${{ github.ref_name }} # Delete local tag
+          git push origin :refs/tags/${{ github.ref_name }} # Delete remote tag
+
   tagging:
     needs: [ test ]
     if: success()
@@ -61,4 +60,3 @@ jobs:
           git config --global user.name "Github Actions"
           git tag ${{ github.event.inputs.tag_name }}
           git push origin ${{ github.event.inputs.tag_name }}
-
