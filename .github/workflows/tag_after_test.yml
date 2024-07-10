@@ -1,6 +1,9 @@
 name: Manual Tagging After Tests
 
 on:
+  push:
+    tags:
+      - 'v*' # The pattern here matches the tag naming convention you will use
   workflow_dispatch:
     inputs:
       tag_name:
