@@ -50,6 +50,22 @@ func RegisterCode(code int32, id string) {
 	mutex.Unlock()
 }
 
+// LookupCode looks up the identifier corresponding to the given code.
+// This function uses a read lock to ensure safe concurrent access to shared resources.
+// Parameters: code - The integer value of the code to look up.
+//
+// Returns: The string identifier corresponding to the code.
+func LookupCode(code int32) (string, bool) {
+	// Acquire the read lock to ensure data consistency during concurrent reads
+	mutex.RLock()
+	// Look up the identifier corresponding to the code
+	id, ok := ids[code]
+	// Release the read lock
+	mutex.RUnlock()
+	// Return the found identifier
+	return id, ok
+}
+
 // Error returns the JSON representation of the error
 func (obj *Error) Error() string {
 	v, _ := json.Marshal(obj)
@@ -227,8 +243,8 @@ func New(id string, code int32, detail string) error {
 	}
 }
 
-// Newf generates an Error error
-func Newf(id string, code int32, format string, args ...any) error {
+// NewFormat generates an Error error
+func NewFormat(id string, code int32, format string, args ...any) error {
 	return &Error{
 		Id:     id,
 		Code:   code,
@@ -249,8 +265,8 @@ func Code(code int32, detail string) error {
 	}
 }
 
-// Codef generates an error for a given code
-func Codef(code int32, format string, args ...any) error {
+// CodeFormat generates an error for a given code
+func CodeFormat(code int32, format string, args ...any) error {
 	id, ok := ids[code]
 	if !ok {
 		id = UnknownID

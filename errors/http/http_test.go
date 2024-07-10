@@ -641,7 +641,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewf(t *testing.T) {
-	err := Newf("custom_id", 500, "Custom error with %s", "data")
+	err := NewFormat("custom_id", 500, "Custom error with %s", "data")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
