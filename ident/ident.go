@@ -3,14 +3,6 @@
 // Package ident provides the helpers functions.
 package ident
 
-import (
-	"github.com/google/uuid"
-	"github.com/oklog/ulid/v2"
-	"github.com/rs/xid"
-)
-
-var generator Identifier
-
 // Identifier is the interface of ident.
 type Identifier interface {
 	Name() string
@@ -19,123 +11,35 @@ type Identifier interface {
 	Size() int
 }
 
-type ident struct {
-	name     string
-	gen      func() string
-	validate func(id string) bool
-	size     int
-}
-
-// Name returns the name of the object identifier.
-//
-// This method, associated with the ident type, aims to retrieve the name of the object.
-// It is particularly useful in scenarios where unique identification or representation is required.
-// The method does not accept any parameters as it is intended to access an inherent property of the object itself.
-// The return value is a string that represents the name of the object.
-func (obj ident) Name() string {
-	return obj.name
-}
-
-// Gen method generates an identifier.
-// It returns a string which represents the generated identifier.
-func (obj ident) Gen() string {
-	return obj.gen()
-}
-
-// Validate method checks if the given identifier is valid.
-// It takes an argument:
-//   - id: a string, the identifier to be validated.
-//
-// The function returns a boolean indicating whether the given identifier is valid or not.
-func (obj ident) Validate(id string) bool {
-	return obj.validate(id)
-}
-
-// Size method returns the size of the identifier.
-// It returns an integer representing the size.
-func (obj ident) Size() int {
-	return obj.size
-}
+var defaultGenerator Identifier
 
 func init() {
-	generator = ident{
-		name:     "ulid",
-		gen:      MustNewULID,
-		validate: ValidateULID,
-		size:     len(MustNewULID()),
-	}
+	defaultGenerator = newNumber()
 }
 
-// Use sets the generator ident.
+// Use sets the defaultGenerator ident.
 func Use(ident Identifier) {
-	generator = ident
+	defaultGenerator = ident
 }
 
-// Default method returns the default generator ident.
+// Default method returns the default defaultGenerator ident.
 func Default() Identifier {
-	return generator
+	return defaultGenerator
 }
 
-// GenID The function "GenID" generates a new unique identifier (XID) and returns it as a string.
+// GenID The function "GenID" generates a new unique identifier and returns it as a string.
 func GenID() string {
-	return generator.Gen()
+	return defaultGenerator.Gen()
 }
 
 // GenSize The function "GenSize" returns the size of the generated identifier
 func GenSize() int {
-	return generator.Size()
+	return defaultGenerator.Size()
 }
 
 // Validate The function "Validate" checks whether the given identifier is valid or not.
 func Validate(id string) bool {
-	return generator.Validate(id)
-}
-
-// NewXID The function "NewXID" generates a new unique identifier (XID) and returns it as a string.
-func NewXID() string {
-	return xid.New().String()
-}
-
-// ParseXID The function "ParseXID" parses a string into an XID and returns it.
-func ParseXID(id string) (xid.ID, error) {
-	return xid.FromString(id)
-}
-
-func ValidateXID(id string) bool {
-	_, err := ParseXID(id)
-	return err == nil
-}
-
-// MustNewUUID The function generates a new UUID and panics if there is an error.
-func MustNewUUID() string {
-	return uuid.Must(uuid.NewRandom()).String()
-}
-
-// ParseUUID The function "ParseUUID" parses a UUID string and returns the UUID value and an error.
-func ParseUUID(id string) (uuid.UUID, error) {
-	return uuid.Parse(id)
-}
-
-// ValidateUUID The function validates a UUID.
-func ValidateUUID(id string) bool {
-	_, err := uuid.Parse(id)
-	return err == nil
-}
-
-// MustNewULID The function generates a new ULID and returns it as a string.
-func MustNewULID() string {
-	return ulid.Make().String()
-}
-
-// ParseULID The function parses a ULID from a string.
-func ParseULID(id string) (ulid.ULID, error) {
-	return ulid.Parse(id)
-}
-
-// ValidateULID The function validates a ULID.
-func ValidateULID(id string) bool {
-	_, err := ulid.Parse(id)
-	return err == nil
+	return defaultGenerator.Validate(id)
 }
 
 var (
@@ -143,10 +47,4 @@ var (
 	_ = GenID
 	_ = GenSize
 	_ = Validate
-	_ = ParseXID
-	_ = ParseUUID
-	_ = ParseULID
-	_ = ValidateXID
-	_ = ValidateUUID
-	_ = ValidateULID
 )
