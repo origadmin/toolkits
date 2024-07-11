@@ -35,7 +35,7 @@ func (x XID) Gen() string {
 // Validate checks if the provided id is a valid xid.
 func (x XID) Validate(id string) bool {
 	_, err := xid.FromString(id)
-	return err != nil
+	return err == nil
 }
 
 // Size returns the size of the xid in bits.

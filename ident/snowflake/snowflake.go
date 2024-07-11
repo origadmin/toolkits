@@ -42,7 +42,7 @@ func (s Snowflake) Gen() string {
 // Validate checks if the provided ID is a valid Snowflake ID.
 func (s Snowflake) Validate(id string) bool {
 	_, err := snowflake.ParseString(id)
-	return err != nil
+	return err == nil
 }
 
 // Size returns the bit size of the generated Snowflake ID.

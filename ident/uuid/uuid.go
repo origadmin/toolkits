@@ -34,7 +34,7 @@ func (U UUID) Gen() string {
 // Validate checks if the provided ID is a valid UUID
 func (U UUID) Validate(id string) bool {
 	_, err := uuid.Parse(id)
-	return err != nil
+	return err == nil
 }
 
 // Size returns the size of the UUID in bits

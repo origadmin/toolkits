@@ -37,8 +37,8 @@ func GenID() string {
 	return defaultIdentifier.Gen()
 }
 
-// GenSize The function "GenSize" returns the size of the generated identifier
-func GenSize() int {
+// Size The function "Size" returns the size of the generated identifier
+func Size() int {
 	return defaultIdentifier.Size()
 }
 
@@ -49,6 +49,6 @@ func Validate(id string) bool {
 
 var (
 	_ = GenID
-	_ = GenSize
+	_ = Size
 	_ = Validate
 )
