@@ -1,10 +1,10 @@
 module github.com/origadmin/toolkits/registry/orm/ent
 
-go 1.22.2
+go 1.22.5
 
 require (
 	entgo.io/ent v0.13.1
-	github.com/origadmin/toolkits v0.0.15
+	github.com/origadmin/toolkits v0.0.29
 )
 
 require (
