@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Use git describe to find the latest tag
-NEXT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+NEXT_TAG=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 
 if [[ -z "$NEXT_TAG" ]]; then
   NEXT_TAG="v0.0.1"
