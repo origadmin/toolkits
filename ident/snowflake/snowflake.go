@@ -13,7 +13,7 @@ import (
 
 // nodeNumber range from 0 to 1023 is used for generating unique node ID.
 var (
-	nodeNumber = rand.Int63n(1023)
+	nodeNumber = rand.Int64N(1023)
 	bitSize    = 0 // bitSize is used to store the length of generated ID.
 )
 
