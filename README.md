@@ -21,18 +21,19 @@ Go projects. This README focuses on the Toolkit, detailing its contents, usage, 
 
 ## Available Packages
 
+The Toolkit main package is `toolkit` and is the interface package.:
+
+1. **`[registry](registry)`**: The registry package is register implementation for the main package definition.
+
 The Toolkit currently offers the following packages:
 
-1. **`errors`**: Enhanced error handling utilities, such as error wrapping, context propagation, and error inspection.
-2. **`httpclient`**: A configurable and extensible HTTP client with support for timeouts, retries, and middleware
-   chaining.
-3. **`jsonutil`**: Convenient functions for JSON encoding, decoding, and manipulation, including custom JSON
-   marshalers/unmarshalers and error handling improvements.
-4. **`concurrency`**: Tools for managing concurrent tasks, synchronization primitives, and thread-safe data structures.
-5. **`config`**: Simplified configuration management, supporting various file formats and environment variable
-   integration.
-6. **`logging`**: A flexible logging framework with customizable log levels, formatters, and integrations with popular
-   logging backends.
+1. **`[codec](codec)`**: A set of utilities for serializing and deserializing data in a variety of formats.
+2. **`[context](context)`**: A set of utilities for managing context values and cancellation signals.
+3. **`[errors](errors)`**: Enhanced error handling utilities, such as error wrapping, context propagation, and error
+   inspection.
+4. **`[ident](ident)`**: A package for generating unique identifiers.
+5. **`[scripts](scripts)`**: A set of utilities for managing scripts and tasks.
+6. **`[runtime](runtime)`**: The runtime package Implements some common functions in toolkits.
 
 ## Getting Started
 
