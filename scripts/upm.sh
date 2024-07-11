@@ -50,7 +50,7 @@ git_commit_changes() {
 
 
     echo "Checking update ${module_name}/(go.mod|go.sum)"
-    if git status --porcelain | grep -q -E "^[ ]?(M)[ ]? codec/(go\.mod|go\.sum)$"; then
+    if git status --porcelain | grep -q -E "^[ ]?(M)[ ]? ${module_name}/(go\.mod|go\.sum)$"; then
       # Add go.mod and go.sum to the Git staging area
       git add go.mod go.sum
 
