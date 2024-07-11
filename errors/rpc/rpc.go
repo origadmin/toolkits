@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-//go:generate protoc -M -I. --go_out=paths=source_relative:. errors.proto
+//go:generate protoc -I. --go_out=paths=source_relative:. rpc.proto
 
 // Define  constant IDs for various Error status codes
 const (
@@ -77,11 +77,17 @@ func (obj *Error) Status() string {
 }
 
 func (obj *Error) Is(err error) bool {
+	// If both obj and err are nil, return true.
+	if obj == nil && err == nil {
+		return true
+	}
+
 	if err == nil {
 		return false
 	}
+
 	var target *Error
-	if errors.As(err, &target) {
+	if obj != nil && errors.As(err, &target) {
 		return obj.Code == target.Code
 	}
 	return false

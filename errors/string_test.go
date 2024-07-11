@@ -1,21 +1,21 @@
 package errors
 
 import (
-	er "errors"
+	stderr "errors"
 	"testing"
 )
 
 func TestAs(t *testing.T) {
 	var err error = String("errors.rpc.test")
 	var target String
-	match := er.As(err, &target)
+	match := stderr.As(err, &target)
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
 	}
 
-	err = er.New(err.Error())
+	err = stderr.New(err.Error())
 	target = ""
-	match = er.As(err, &target)
+	match = stderr.As(err, &target)
 	if match || target != "" {
 		t.Fatalf("%v should not convert to *Error", err)
 	}
@@ -24,14 +24,14 @@ func TestAs(t *testing.T) {
 func TestIs(t *testing.T) {
 	var err error = String("errors.rpc.test")
 	var target = String("errors.rpc.test")
-	match := er.Is(err, &target)
+	match := stderr.Is(err, target)
 	if !match {
 		t.Fatalf("%v should convert to String", err)
 	}
 
-	err = er.New(err.Error())
+	err = stderr.New(err.Error())
 	target = "errors.rpc.test"
-	match = er.Is(err, &target)
+	match = stderr.Is(err, &target)
 	if match {
 		t.Fatalf("%v should not equal to String", err)
 	}

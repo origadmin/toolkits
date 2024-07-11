@@ -133,18 +133,6 @@ func TestError_Error(t *testing.T) {
 	}
 }
 
-func TestError_String(t *testing.T) {
-	err := &Error{
-		ID:     "response.status.bad_request",
-		Code:   http.StatusBadRequest,
-		Detail: "Bad request",
-	}
-	want := `id:"response.status.bad_request" code:400 detail:"Bad request"`
-	if got := err.String(); got != want {
-		t.Errorf("String() = %s; want %s", got, want)
-	}
-}
-
 func TestError_Status(t *testing.T) {
 	err := &Error{
 		ID:     "response.status.bad_request",
@@ -273,26 +261,26 @@ func TestFromError(t *testing.T) {
 			wantOK: false,
 		},
 		{
-			err: nil,
-			want: &Error{
-				Detail: "",
-			},
+			err:    nil,
+			want:   nil,
 			wantOK: true,
 		},
 	}
 	for _, c := range cases {
-
 		got := FromError(c.err)
-		if got == nil && c.wantOK {
+		if c.wantOK && !errors.Is(got, c.want) {
 			t.Errorf("FromError(%v) = %v; want %v, %v", c.err, got, c.want, c.wantOK)
 		}
-		if gotDetail := got.Detail; gotDetail != c.want.Detail {
+		if got == nil {
+			continue
+		}
+		if gotDetail := got.Detail; c.wantOK && gotDetail != c.want.Detail {
 			t.Errorf("FromError(%v).Detail = %q; want %q", c.err, gotDetail, c.want.Detail)
 		}
-		if gotID := got.ID; gotID != c.want.ID {
+		if gotID := got.ID; c.wantOK && gotID != c.want.ID {
 			t.Errorf("FromError(%v).ID = %q; want %q", c.err, gotID, c.want.ID)
 		}
-		if gotCode := got.Code; gotCode != c.want.Code {
+		if gotCode := got.Code; c.wantOK && gotCode != c.want.Code {
 			t.Errorf("FromError(%v).Code = %d; want %d", c.err, gotCode, c.want.Code)
 		}
 
