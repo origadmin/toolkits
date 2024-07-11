@@ -80,12 +80,12 @@ jobs:
           body_path: changelog.txt
           draft: false
           prerelease: false
-
-      - name: Create release (only if LATEST_TAG exists)
-        if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
-          body_path: changelog.txt
-          draft: false
-          prerelease: false
+#      # Skip this step if LATEST_TAG is not empty, Because the commit is tagged for the submodule
+#      - name: Create release (only if LATEST_TAG exists)
+#        if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+#          body_path: changelog.txt
+#          draft: false
+#          prerelease: false
