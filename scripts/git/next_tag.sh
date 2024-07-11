@@ -24,10 +24,12 @@ get_next_version_tag() {
     local pattern="${module_name:+$module_name/}v*"
 
     # Get all tags that match the pattern
-    local tags=$(get_tags_matching_pattern "$pattern")
+    local tags=""
+    tags=$(get_tags_matching_pattern "$pattern")
 
     # Get the latest tag
-    local latest_tag=$(get_latest_tag "$tags")
+    local latest_tag=""
+    latest_tag=$(get_latest_tag "$tags")
 
     if [[ -z "$latest_tag" ]]; then
         # Default to v0.0.1
