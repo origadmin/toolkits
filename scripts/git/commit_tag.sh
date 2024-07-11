@@ -1,23 +1,48 @@
 #!/bin/bash
 
-# 设置 Git 用户信息
-git config user.name "GitHub Action"
-git config user.email "action@github.com"
+# Get the module name as a parameter
+MODULE_NAME=$1
 
-#git config user.name "godcong"
-#git config user.email "jumbycc@163.com"
+# Function to find the latest tag matching the module name
+find_latest_tag() {
+    current_commit=$(git rev-parse HEAD)
+    module_name=$1
+    latest_tag=""
 
-# 获取当前HEAD的哈希值
-CURRENT_COMMIT=$(git rev-parse HEAD)
+    # Get all tags that point to the current commit
+    tags_for_current_commit=$(git tag --points-at "$current_commit")
 
-# 查找与当前提交匹配的标签
-TAG_FOR_CURRENT_COMMIT=$(git tag --points-at "$CURRENT_COMMIT")
+    # If a module name is provided, filter out matching tags
+    if [ -n "$module_name" ]; then
+        # Convert the tag list into an array
+        IFS=$'\n' read -d '' -r -a tags_array <<< "$tags_for_current_commit"
 
-# 检查是否有标签
-if [ -n "$TAG_FOR_CURRENT_COMMIT" ]; then
-   # 将标签列表转换为数组
-   IFS=$'\n' read -d '' -r -a TAGS_ARRAY <<< "$TAG_FOR_CURRENT_COMMIT"
-   # 找到最新的标签，假设标签按时间顺序排列
-   LATEST_TAG=${TAGS_ARRAY[-1]}
-   echo "$LATEST_TAG"
-fi
+        # Iterate over all tags, looking for tags that match the module name
+        for tag in "${tags_array[@]}"; do
+            if [[ "$tag" == "$module_name"* ]]; then
+                # If it's the first matching tag or newer than the existing tag, update latest_tag
+                if [[ -z "$latest_tag" ]] || [[ "$tag" > "$latest_tag" ]]; then
+                    latest_tag=$tag
+                fi
+            fi
+        done
+    else
+        # Read tags line by line
+        while IFS= read -r tag; do
+            # Check if the tag matches the vx.y.z format
+            if [[ $tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+                # If it's the first matching tag or newer than the existing tag, update latest_tag
+                if [[ -z "$latest_tag" ]] || [[ "$tag" > "$latest_tag" ]]; then
+                    latest_tag=$tag
+                fi
+            fi
+        done <<< "$tags_for_current_commit"
+    fi
+
+    # Output the latest tag
+    echo "$latest_tag"
+}
+
+# Call the function
+LATEST_TAG=$(find_latest_tag "$MODULE_NAME")
+echo "$LATEST_TAG"
