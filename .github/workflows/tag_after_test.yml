@@ -49,10 +49,10 @@ jobs:
         id: determine_next_version
         run: |
           chmod +x ./scripts/git/next_tag.sh
-          chmod +x ./scripts/git/commit_tag.sh
-          LATEST_TAG=$(./scripts/git/commit_tag.sh)
+          chmod +x ./scripts/git/head_tag.sh
+          HEAD_TAG=$(./scripts/git/head_tag.sh)
           NEXT_TAG=$(./scripts/git/next_tag.sh)          
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "HEAD_TAG=$HEAD_TAG" >> $GITHUB_OUTPUT
           echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Create release
-        if: ${{ !steps.determine_next_version.outputs.LATEST_TAG }}
+        if: ${{ !steps.determine_next_version.outputs.HEAD_TAG }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
@@ -80,9 +80,9 @@ jobs:
           body_path: changelog.txt
           draft: false
           prerelease: false
-#      # Skip this step if LATEST_TAG is not empty, Because the commit is tagged for the submodule
-#      - name: Create release (only if LATEST_TAG exists)
-#        if: ${{ steps.determine_next_version.outputs.LATEST_TAG }}
+#      # Skip this step if HEAD_TAG is not empty, Because the commit is tagged for the submodule
+#      - name: Create release (only if HEAD_TAG exists)
+#        if: ${{ steps.determine_next_version.outputs.HEAD_TAG }}
 #        uses: softprops/action-gh-release@v1
 #        with:
 #          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
