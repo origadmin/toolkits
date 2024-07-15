@@ -3,7 +3,9 @@
 // Package replacer provides a string replacement mechanism with custom replace functions and delimiters.
 package replacer
 
-import "strings"
+import (
+	"strings"
+)
 
 // DefaultDelimiter defines the default delimiter.
 const DefaultDelimiter = "$$"
@@ -13,6 +15,7 @@ type ReplaceFunc func(string) string
 
 // Replacer interface defines methods for setting delimiters and performing replacements.
 type Replacer interface {
+	AddHook(string, ReplaceFunc)              // Adds a new replace hook.
 	SetDelimiter(string)                      // Sets the delimiter.
 	Replace(string, map[string]string) string // Replaces substrings based on provided key-value pairs.
 }
@@ -23,21 +26,19 @@ type replace struct {
 	Delimiter string                 // The currently used delimiter.
 }
 
-var replacer = New()
+// getKey returns the key wrapped with the current delimiter.
+func (r *replace) getKey(key string) string {
+	return r.Delimiter + key + r.Delimiter
+}
 
-// Replace replaces substrings in the source string based on provided key-value pairs.
-func Replace(src string, values map[string]string) string {
-	return replacer.Replace(src, values)
+// AddHook adds a new replace hook.
+func (r *replace) AddHook(s string, replaceFunc ReplaceFunc) {
+	r.Hooks[s] = replaceFunc
 }
 
 // SetDelimiter sets the delimiter used by the replacer.
 func (r *replace) SetDelimiter(s string) {
 	r.Delimiter = s
-}
-
-// getKey returns the key wrapped with the current delimiter.
-func (r *replace) getKey(key string) string {
-	return getDelimiterKey(key, r.Delimiter)
 }
 
 // Replace within the replacement struct iterates through the values map, applying custom hooks and
@@ -62,6 +63,14 @@ func New() Replacer {
 	}
 }
 
+// WithDelimiter returns a new Replacer instance with the specified delimiter.
+func WithDelimiter(delimiter string) Replacer {
+	return &replace{
+		Hooks:     map[string]ReplaceFunc{},
+		Delimiter: delimiter,
+	}
+}
+
 // WithHooks returns a new Replacer instance with the specified hooks.
 func WithHooks(hooks map[string]ReplaceFunc) Replacer {
 	return &replace{
@@ -70,7 +79,10 @@ func WithHooks(hooks map[string]ReplaceFunc) Replacer {
 	}
 }
 
-// getDelimiterKey wraps the key with the provided delimiter.
-func getDelimiterKey(key string, delimiter string) string {
-	return delimiter + key + delimiter
+// WithHooksAndDelimiter returns a new Replacer instance with the specified hooks and delimiter.
+func WithHooksAndDelimiter(hooks map[string]ReplaceFunc, delimiter string) Replacer {
+	return &replace{
+		Hooks:     hooks,
+		Delimiter: delimiter,
+	}
 }
