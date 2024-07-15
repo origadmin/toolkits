@@ -13,32 +13,9 @@ import (
 	"github.com/origadmin/toolkits/metrics"
 )
 
-const (
-	defaultApplication = "application_orig_admin"
-	defaultNamespace   = "namespace_orig_admin"
-	defaultSubSystem   = "admin"
-	defaultListenPort  = 9100
-)
-
-// Config holds the configuration settings for the Prometheus wrapper
-type Config struct {
-	Enable         bool                // Enable flag
-	Application    string              // Application name
-	Namespace      string              // Namespace for Prometheus
-	SubSystem      string              // Subsystem for Prometheus
-	ListenPort     int                 // Port to listen on
-	BasicUserName  string              // Basic authentication username
-	BasicPassword  string              // Basic authentication password
-	LogAPI         map[string]struct{} // Map of APIs to log
-	LogMethod      map[string]struct{} // Map of methods to log
-	Buckets        []float64           // Buckets for histogram
-	Objectives     map[float64]float64 // Objectives for summary
-	DefaultCollect bool                // Flag to enable default collectors
-}
-
 // Metrics is a Prometheus wrapper
 type Metrics struct {
-	config                             Config
+	config                             metrics.Config
 	gatherer                           prometheus.Gatherer
 	registerer                         prometheus.Registerer
 	registry                           *prometheus.Registry
@@ -339,28 +316,28 @@ func (m *Metrics) RegisterCustomCollector(c prometheus.Collector) {
 // NewMetrics creates a Prometheus wrapper with given config.
 //
 // conf: the config for the wrapper.
-func NewMetrics(conf *Config) *Metrics {
+func NewMetrics(conf *metrics.Config) *Metrics {
 	// Initialize and run the metrics if enabled.
 	if !conf.Enable {
 		return nil
 	}
 
-	if conf.Application == "" {
-		conf.Application = defaultApplication
-	}
-
-	if conf.Namespace == "" {
-		conf.Namespace = defaultNamespace
-	}
-
-	if conf.SubSystem == "" {
-		conf.SubSystem = defaultSubSystem
-	}
-
-	// Set default listen port if not provided and enable Prometheus.
-	if conf.Enable && conf.ListenPort == 0 {
-		conf.ListenPort = defaultListenPort
-	}
+	// if conf.Application == "" {
+	// 	conf.Application = defaultApplication
+	// }
+	//
+	// if conf.Namespace == "" {
+	// 	conf.Namespace = defaultNamespace
+	// }
+	//
+	// if conf.SubSystem == "" {
+	// 	conf.SubSystem = defaultSubSystem
+	// }
+	//
+	// // Set default listen port if not provided and enable Prometheus.
+	// if conf.Enable && conf.ListenPort == 0 {
+	// 	conf.ListenPort = defaultListenPort
+	// }
 
 	// Create wrapper with given config.
 	m := &Metrics{
