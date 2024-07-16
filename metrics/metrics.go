@@ -3,10 +3,6 @@
 // Package metrics provides the metrics recorder
 package metrics
 
-import (
-	"github.com/prometheus/client_golang/prometheus"
-)
-
 type MetricType string
 
 const (
@@ -94,7 +90,5 @@ func (d dummyMetrics) SiteEventLog(module, event, site string) {}
 func (d dummyMetrics) StateLog(module, state string, value float64) {}
 
 func (d dummyMetrics) ResetCounter() {}
-
-func (d dummyMetrics) RegisterCustomCollector(c prometheus.Collector) {}
 
 var DummyMetrics Metrics = dummyMetrics{}

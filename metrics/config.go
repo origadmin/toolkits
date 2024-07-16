@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -31,6 +32,7 @@ type Config struct {
 	LogMethod       map[string]struct{}     // LogMethod is the set of methods to log.
 	LogAPI          map[string]struct{}     // LogAPI is the set of APIs to log.
 	Application     string                  // Application is the name of the application.
+	Handler         http.Handler            // Handler is the HTTP handler
 }
 
 // DefaultConfig returns the default configuration for the Service server.
