@@ -4,8 +4,10 @@
 package rand
 
 import (
+	"bytes"
 	"math/rand/v2"
 	"strings"
+	"sync"
 )
 
 const (
@@ -45,6 +47,14 @@ type Rand struct {
 }
 
 // predefined charsets for different random types
+// Digit             - Represents digit characters.
+// LowerCase         - Represents lowercase letter characters.
+// UpperCase         - Represents uppercase letter characters.
+// Symbol            - Represents symbol characters.
+// LowerAndUpperCase - Represents lowercase and uppercase letter characters.
+// DigitAndLowerCase - Represents digit and lowercase letter characters.
+// DigitAndUpperCase - Represents digit and uppercase letter characters.
+
 var (
 	Digit             = NewRand(KindDigit)
 	LowerCase         = NewRand(KindLowerCase)
@@ -55,6 +65,12 @@ var (
 	DigitAndUpperCase = NewRand(KindDigit | KindUpperCase)
 	All               = NewRand(KindAll)
 )
+
+var randPool = sync.Pool{
+	New: func() interface{} {
+		return &Rand{}
+	},
+}
 
 var stringIndex = [randomMax][2]int{
 	randomDigit:     {0, 10},
@@ -98,13 +114,26 @@ func (k Kind) String() string {
 //
 // Return:
 // - []byte: the generated random byte slice.
-func (r Rand) RandBytes(size int) []byte {
+func (r *Rand) RandBytes(size int) []byte {
+	if r.length == 0 {
+		return nil
+	}
 	ret := make([]byte, size)
 	for ; size > 0; size-- {
-		ch := rand.IntN(r.length)
-		ret[size-1] = r.charset[ch]
+		ret[size-1] = r.charset[rand.IntN(r.length)]
 	}
 	return ret
+}
+
+// RandString generates a random string of given size using the given charset.
+//
+// Parameters:
+// - size: the length of the string to be generated.
+//
+// Return:
+// - string: the generated random string.
+func (r *Rand) RandString(size int) string {
+	return string(r.RandBytes(size))
 }
 
 // The Read method populates the given byte slice by randomly selecting characters.
@@ -115,7 +144,10 @@ func (r Rand) RandBytes(size int) []byte {
 // Return values:
 // n int: The number of bytes actually populated.
 // err error: An error encountered during population, always nil in this implementation.
-func (r Rand) Read(p []byte) (n int, err error) {
+func (r *Rand) Read(p []byte) (n int, err error) {
+	if r.length == 0 {
+		return 0, nil
+	}
 	n = len(p) // Set n to the length of p, indicating the number of bytes to populate.
 	for i := 0; i < n; i++ {
 		// Randomly select a character for each position in p.
@@ -124,19 +156,32 @@ func (r Rand) Read(p []byte) (n int, err error) {
 	return n, nil // Return the populated byte count and a nil error.
 }
 
+// Close releases the resources associated with the Rand object.
+func (r *Rand) Close() {
+	r.Reset()
+	randPool.Put(r)
+}
+
+// Reset resets the Rand object to its initial state.
+func (r *Rand) Reset() {
+	r.kind = 0
+	r.length = 0
+	r.charset = ""
+}
+
 func loadCharset(rand Kind) string {
-	var charset string
 	if rand >= KindAll {
 		return randCharset
 	}
 	var sta, end int
+	var buf bytes.Buffer
 	for i := 0; i < randomMax-1; i++ {
 		if rand&(1<<uint(i)) != 0 {
 			sta, end = getStringIndex(i)
-			charset += randCharset[sta:end]
+			buf.WriteString(randCharset[sta:end])
 		}
 	}
-	return charset
+	return buf.String()
 }
 
 func getStringIndex(idx int) (int, int) {
@@ -151,12 +196,7 @@ func getStringIndex(idx int) (int, int) {
 // Return:
 // - a pointer to a Rand object.
 func NewRand(kind Kind) *Rand {
-	charset := loadCharset(kind)
-	return &Rand{
-		kind:    kind,
-		length:  len(charset),
-		charset: charset,
-	}
+	return newRand(kind)
 }
 
 // CustomRand creates a new Rand object with a custom charset.
@@ -167,9 +207,17 @@ func NewRand(kind Kind) *Rand {
 // Return:
 // - a pointer to a Rand object.
 func CustomRand(charset string) *Rand {
-	return &Rand{
-		kind:    KindCustom,
-		length:  len(charset),
-		charset: charset,
-	}
+	r := randPool.Get().(*Rand)
+	r.kind = KindCustom
+	r.charset = charset
+	r.length = len(charset)
+	return r
+}
+
+func newRand(kind Kind) *Rand {
+	r := randPool.Get().(*Rand)
+	r.kind = kind
+	r.charset = loadCharset(kind)
+	r.length = len(r.charset)
+	return r
 }
