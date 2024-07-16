@@ -3,7 +3,7 @@ module github.com/origadmin/toolkits/registry/metrics/prometheus
 go 1.22.5
 
 require (
-	github.com/origadmin/toolkits v0.0.34
+	github.com/origadmin/toolkits v0.0.36
 	github.com/prometheus/client_golang v1.19.1
 )
 
