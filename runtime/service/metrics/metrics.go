@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
-
-	"github.com/origadmin/toolkits/metrics"
 )
 
 type Metrics struct {
@@ -31,23 +28,12 @@ func (s Metrics) Stop(ctx context.Context) error {
 }
 
 // New creates a new instance of the Metrics based on the provided configuration.
-func New(conf *metrics.Config) (*Metrics, error) {
-	if conf.ListenPort == 0 {
-		return nil, fmt.Errorf("listen port is empty")
-	}
-	if conf.ReadTimeout == 0 {
-		conf.ReadTimeout = 10 * time.Second
-	}
-	if conf.WriteTimeout == 0 {
-		conf.WriteTimeout = 10 * time.Second
-	}
-	if conf.MaxHeaderBytes == 0 {
-		conf.MaxHeaderBytes = 1 << 20
-	}
-
+func New(conf *Config) (*Metrics, error) {
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", conf.HandlerFunc)
 	serv := &http.Server{
 		Addr:           fmt.Sprintf(":%d", conf.ListenPort),
-		Handler:        conf.Handler,
+		Handler:        mux,
 		ReadTimeout:    conf.ReadTimeout,
 		WriteTimeout:   conf.WriteTimeout,
 		MaxHeaderBytes: conf.MaxHeaderBytes,

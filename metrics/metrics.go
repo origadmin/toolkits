@@ -6,15 +6,16 @@ package metrics
 type MetricType string
 
 const (
-	MetricRequestTotal     MetricType = "request_total"
-	MetricSendBytes        MetricType = "send_bytes"
-	MetricRecvBytes        MetricType = "recv_bytes"
-	MetricException        MetricType = "exception"
-	MetricEvent            MetricType = "event"
-	MetricSiteEvent        MetricType = "site_event"
-	MetricHistogramLatency MetricType = "histogram_latency"
-	MetricSummaryLatency   MetricType = "summary_latency"
-	MetricGaugeState       MetricType = "gauge_state"
+	MetricRequestsTotal          MetricType = "requests_total"
+	MetricSlowRequestsTotal      MetricType = "requests_slow_total"
+	MetricResponseSizeBytes      MetricType = "response_size_bytes"
+	MetricRequestSizeBytes       MetricType = "request_size_bytes"
+	MetricErrorsTotal            MetricType = "errors_total"
+	MetricEvent                  MetricType = "event"
+	MetricSiteEvent              MetricType = "site_event"
+	MetricRequestDurationSeconds MetricType = "request_duration_seconds"
+	MetricSummaryLatency         MetricType = "summary_latency"
+	MetricRequestsInFlight       MetricType = "requests_in_flight"
 )
 
 func (m MetricType) String() string {
@@ -27,33 +28,42 @@ type dummyMetrics struct{}
 type Metrics interface {
 	Enabled() bool // Enabled returns whether metrics is enabled
 	Observe(reporter Reporter)
-	Log(api, method, code string, sendBytes, recvBytes, latency float64)
-	RequestLog(module, api, method, code string)
-	SendBytesLog(module, api, method, code string, length float64)
-	RecvBytesLog(module, api, method, code string, length float64)
-	HistogramLatencyLog(module, api, method string, latency float64)
-	SummaryLatencyLog(module, api, method string, latency float64)
-	ExceptionLog(module, exception string)
-	EventLog(module, event string)
-	SiteEventLog(module, event, site string)
-	StateLog(module, state string, value float64)
+	Log(handler, method, code string, sendBytes, recvBytes, latency float64)
+	RequestTotal(module, handler, method, code string)
+	ResponseSize(module, handler, method, code string, length float64)
+	RequestSize(module, handler, method, code string, length float64)
+	RequestDurationSeconds(module, handler, method string, latency float64)
+	SummaryLatencyLog(module, handler, method string, latency float64)
+	ErrorsTotal(module, errors string)
+	Event(module, event string)
+	SiteEvent(module, event, site string)
+	RequestsInFlight(module, state string, value float64)
 }
 
-var metricLabels = map[MetricType][]string{
-	MetricRequestTotal:     {"app", "module", "api", "method", "code"},
-	MetricSendBytes:        {"app", "module", "api", "method", "code"},
-	MetricRecvBytes:        {"app", "module", "api", "method", "code"},
-	MetricException:        {"app", "module", "exception"},
-	MetricEvent:            {"app", "module", "event"},
-	MetricSiteEvent:        {"app", "module", "event", "site"},
-	MetricHistogramLatency: {"app", "module", "api", "method"},
-	MetricSummaryLatency:   {"app", "module", "api", "method"},
-	MetricGaugeState:       {"app", "module", "state"},
+const (
+	MetricLabelInstance = "instance"
+	MetricLabelHandler  = "handler"
+	MetricLabelCode     = "code"
+	MetricLabelMethod   = "method"
+	MetricLabelJob      = "job"
+	MetricLabelError    = "error"
+)
+
+var metricLabelNames = map[MetricType][]string{
+	MetricRequestsTotal:          {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricRequestSizeBytes:       {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricResponseSizeBytes:      {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricRequestDurationSeconds: {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod},
+	MetricSummaryLatency:         {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod},
+	MetricErrorsTotal:            {MetricLabelInstance, MetricLabelJob, MetricLabelError},
+	MetricEvent:                  {MetricLabelInstance, MetricLabelJob, "event"},
+	MetricSiteEvent:              {MetricLabelInstance, MetricLabelJob, "event", "site"},
+	MetricRequestsInFlight:       {MetricLabelInstance, MetricLabelJob, "state"},
 }
 
-// MetricTypeLabels returns the labels for the given metric type
-func MetricTypeLabels(metricType MetricType) []string {
-	if v, ok := metricLabels[metricType]; ok {
+// MetricLabelNames returns the labels for the given metric type
+func MetricLabelNames(metricType MetricType) []string {
+	if v, ok := metricLabelNames[metricType]; ok {
 		return v
 	}
 	return []string{}
@@ -61,7 +71,7 @@ func MetricTypeLabels(metricType MetricType) []string {
 
 // MetricLabels returns the labels for the given metric type
 func MetricLabels() map[MetricType][]string {
-	return metricLabels
+	return metricLabelNames
 }
 
 func (d dummyMetrics) Enabled() bool {
@@ -69,25 +79,25 @@ func (d dummyMetrics) Enabled() bool {
 }
 func (d dummyMetrics) Observe(reporter Reporter) {}
 
-func (d dummyMetrics) Log(api, method, code string, sendBytes, recvBytes, latency float64) {}
+func (d dummyMetrics) Log(handler, method, code string, sendBytes, recvBytes, latency float64) {}
 
-func (d dummyMetrics) RequestLog(module, api, method, code string) {}
+func (d dummyMetrics) RequestTotal(module, handler, method, code string) {}
 
-func (d dummyMetrics) SendBytesLog(module, api, method, code string, byte float64) {}
+func (d dummyMetrics) RequestDurationSeconds(module, handler, method string, latency float64) {}
 
-func (d dummyMetrics) RecvBytesLog(module, api, method, code string, byte float64) {}
+func (d dummyMetrics) SummaryLatencyLog(module, handler, method string, latency float64) {}
 
-func (d dummyMetrics) HistogramLatencyLog(module, api, method string, latency float64) {}
+func (d dummyMetrics) ErrorsTotal(module, errors string) {}
 
-func (d dummyMetrics) SummaryLatencyLog(module, api, method string, latency float64) {}
+func (d dummyMetrics) Event(module, event string) {}
 
-func (d dummyMetrics) ExceptionLog(module, exception string) {}
+func (d dummyMetrics) SiteEvent(module, event, site string) {}
 
-func (d dummyMetrics) EventLog(module, event string) {}
+func (d dummyMetrics) RequestsInFlight(module, state string, value float64) {}
 
-func (d dummyMetrics) SiteEventLog(module, event, site string) {}
+func (d dummyMetrics) ResponseSize(module, handler, method, code string, length float64) {}
 
-func (d dummyMetrics) StateLog(module, state string, value float64) {}
+func (d dummyMetrics) RequestSize(module, handler, method, code string, length float64) {}
 
 func (d dummyMetrics) ResetCounter() {}
 

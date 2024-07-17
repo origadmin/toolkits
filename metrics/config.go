@@ -5,13 +5,6 @@ import (
 	"time"
 )
 
-const (
-	defaultApplication = "origadmin"
-	defaultNamespace   = "backend"
-	defaultSubSystem   = "http"
-	defaultListenPort  = 9100
-)
-
 // Config represents the configuration for the Service server.
 type Config struct {
 	Enable          bool                    // Enable specifies if the server is enabled.
@@ -30,7 +23,7 @@ type Config struct {
 	BasicPassword   string                  // BasicPassword is the password for basic authentication.
 	MetricLabels    map[MetricType][]string // MetricLabels is the set of labels for each metric type.
 	LogMethod       map[string]struct{}     // LogMethod is the set of methods to log.
-	LogAPI          map[string]struct{}     // LogAPI is the set of APIs to log.
+	LogHandler      map[string]struct{}     // LogHandler is the set of APIs to log.
 	Application     string                  // Application is the name of the application.
 	Handler         http.Handler            // Handler is the HTTP handler
 }
@@ -40,7 +33,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		ListenPort:     defaultListenPort,
 		LogMethod:      map[string]struct{}{},
-		LogAPI:         map[string]struct{}{},
+		LogHandler:     map[string]struct{}{},
 		Application:    defaultApplication,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

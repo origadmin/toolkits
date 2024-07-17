@@ -8,16 +8,16 @@ import (
 type Reporter interface {
 	// Context returns the context of the reporter.
 	Context() context.Context
-	// API returns the API endpoint associated with the metric.
-	API() string
-	// Method returns the HTTP method used for the API call.
+	// Handler returns the Handler Handler endpoint associated with the metric.
+	Handler() string
+	// Method returns the HTTP method used for the Handler call.
 	Method() string
-	// Code returns the status code of the API response.
+	// Code returns the status code of the Handler response.
 	Code() string
-	// BytesWritten returns the number of bytes written in the response.
-	BytesWritten() int64
-	// BytesReceived returns the number of bytes received in the request.
-	BytesReceived() int64
+	// WriteSize returns the number of bytes write in the response.
+	WriteSize() int64
+	// ReadSize returns the number of bytes read in the request.
+	ReadSize() int64
 	// Succeed returns a boolean indicating if the request was successful.
 	Succeed() bool
 	// TraceID returns the unique trace ID associated with the request.
