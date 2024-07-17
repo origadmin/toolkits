@@ -109,31 +109,34 @@ func ParseHeader(auth string) (*Authorize, bool) {
 	}
 }
 
-// RFC7617UserPass base64 encodes a user-id and password per:
-// https://tools.ietf.org/html/rfc7617#section-2
-func RFC7617UserPass(username, password string) string {
-	if strings.Contains(username, ":") {
-		panic(fmt.Errorf("RFC7617 user-id cannot include a colon (':') [%v]", username))
+// BasicAuthUserPass base64 encodes userid and password and returns the encoded string.:
+// https://datatracker.ietf.org/doc/html/rfc2617#section-2
+// user-pass   = userid ":" password
+// userid      = *<TEXT excluding ":">
+// password    = *TEXT
+func BasicAuthUserPass(userid, password string) string {
+	if strings.Contains(userid, ":") {
+		panic(fmt.Errorf("RFC7617 user-id cannot include a colon (':') [%v]", userid))
 	}
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
+	userpass := userid + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(userpass))
 }
 
-// BasicHeader creates a basic auth header.
-func BasicHeader(userid, password string) string {
-	apiKey := RFC7617UserPass(userid, password)
-	return TypeBasic.String() + " " + apiKey
+// BasicAuthHeader creates a basic auth header.
+func BasicAuthHeader(userid, password string) string {
+	userpass := BasicAuthUserPass(userid, password)
+	return TypeBasic.String() + " " + userpass
 }
 
-// ParseBasicHeader parses the basic authentication header and returns the username and password.
+// ParseBasicAuthHeader parses the basic authentication header and returns the username and password.
 // It takes the authentication header string as input and returns the username, password, and a boolean indicating success.
 // If the header is not in the correct format or decoding fails, it returns empty strings and false.
-func ParseBasicHeader(auth string) (string, string, bool) {
-	prefix := TypeBasic.Lower() + ""
-	if len(auth) < len(prefix) || strings.EqualFold(auth[:len(prefix)], prefix) {
+func ParseBasicAuthHeader(header string) (string, string, bool) {
+	prefix := TypeBasic.Lower() + " "
+	if len(header) < len(prefix) || strings.EqualFold(header[:len(prefix)], prefix) {
 		return "", "", false
 	}
-	c, err := base64.StdEncoding.DecodeString(auth[len(prefix):])
+	c, err := base64.StdEncoding.DecodeString(header[len(prefix):])
 	if err != nil {
 		return "", "", false
 	}
