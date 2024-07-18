@@ -24,7 +24,7 @@ type Prometheus struct {
 	requestDurationSeconds *prometheus.HistogramVec
 	summaryLatency         *prometheus.SummaryVec
 	requestTotal           *prometheus.CounterVec
-	slowRequestsTotal      *prometheus.CounterVec
+	requestsSlowTotal      *prometheus.CounterVec
 	errorsTotal            *prometheus.CounterVec
 	responseSize           *prometheus.HistogramVec
 	requestSize            *prometheus.HistogramVec
@@ -33,140 +33,141 @@ type Prometheus struct {
 }
 
 // register initializes the Prometheus wrapper
-func (p *Prometheus) register() {
-	p.requestTotal = prometheus.NewCounterVec(
+func (obj *Prometheus) register() {
+	obj.requestTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricRequestsTotal.String(),
 			Help:      "How many HTTP requests processed, partitioned by status code and HTTP method.",
 		},
-		p.config.MetricLabels[metrics.MetricRequestsTotal],
+		obj.config.MetricLabels[metrics.MetricRequestsTotal],
 	)
+	obj.registry.MustRegister(obj.requestTotal)
 
-	p.event = prometheus.NewCounterVec(
+	obj.event = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricEvent.String(),
 			Help:      "number of module event",
 		},
-		p.config.MetricLabels[metrics.MetricEvent],
+		obj.config.MetricLabels[metrics.MetricEvent],
 	)
-	p.registry.MustRegister(p.event)
+	obj.registry.MustRegister(obj.event)
 
-	p.siteEvent = prometheus.NewCounterVec(
+	obj.siteEvent = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricSiteEvent.String(),
 			Help:      "number of module site event",
 		},
-		p.config.MetricLabels[metrics.MetricSiteEvent],
+		obj.config.MetricLabels[metrics.MetricSiteEvent],
 	)
-	p.registry.MustRegister(p.siteEvent)
+	obj.registry.MustRegister(obj.siteEvent)
 
-	p.errorsTotal = prometheus.NewCounterVec(
+	obj.errorsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricErrorsTotal.String(),
 			Help:      "The HTTP request errors counter",
 		},
-		p.config.MetricLabels[metrics.MetricErrorsTotal],
+		obj.config.MetricLabels[metrics.MetricErrorsTotal],
 	)
-	p.registry.MustRegister(p.errorsTotal)
+	obj.registry.MustRegister(obj.errorsTotal)
 
-	p.slowRequestsTotal = prometheus.NewCounterVec(
+	obj.requestsSlowTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricRequestsSlowTotal.String(),
 			Help:      "The HTTP request slow counter",
 		},
-		p.config.MetricLabels[metrics.MetricRequestsSlowTotal],
+		obj.config.MetricLabels[metrics.MetricRequestsSlowTotal],
 	)
-	p.registry.MustRegister(p.slowRequestsTotal)
+	obj.registry.MustRegister(obj.requestsSlowTotal)
 
 	// Request size requestDurationSeconds
-	p.requestSize = prometheus.NewHistogramVec(
+	obj.requestSize = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricRequestSizeBytes.String(),
 			Help:      "The HTTP request sizes in bytes.",
-			Buckets:   p.config.SizeBuckets,
+			Buckets:   obj.config.SizeBuckets,
 		},
-		p.config.MetricLabels[metrics.MetricRequestSizeBytes],
+		obj.config.MetricLabels[metrics.MetricRequestSizeBytes],
 	)
-	p.registry.MustRegister(p.requestSize)
+	obj.registry.MustRegister(obj.requestSize)
 
 	// Response size requestDurationSeconds
-	p.responseSize = prometheus.NewHistogramVec(
+	obj.responseSize = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricResponseSizeBytes.String(),
 			Help:      "The HTTP response sizes in bytes.",
-			Buckets:   p.config.SizeBuckets,
+			Buckets:   obj.config.SizeBuckets,
 		},
-		p.config.MetricLabels[metrics.MetricResponseSizeBytes],
+		obj.config.MetricLabels[metrics.MetricResponseSizeBytes],
 	)
-	p.registry.MustRegister(p.responseSize)
+	obj.registry.MustRegister(obj.responseSize)
 
 	// Request Duration Seconds for module latency
-	p.requestDurationSeconds = prometheus.NewHistogramVec(
+	obj.requestDurationSeconds = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricRequestDurationSeconds.String(),
 			Help:      "The HTTP request latencies in seconds.",
-			Buckets:   p.config.DurationBuckets,
+			Buckets:   obj.config.DurationBuckets,
 		},
-		p.config.MetricLabels[metrics.MetricRequestDurationSeconds],
+		obj.config.MetricLabels[metrics.MetricRequestDurationSeconds],
 	)
-	p.registry.MustRegister(p.requestDurationSeconds)
+	obj.registry.MustRegister(obj.requestDurationSeconds)
 
-	p.slowRequestsTotal = prometheus.NewCounterVec(
+	obj.requestsSlowTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
-			Name:      metrics.MetricErrorsTotal.String(),
-			Help:      "The HTTP request errors counter",
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
+			Name:      metrics.MetricRequestsSlowTotal.String(),
+			Help:      "The HTTP request slow counter",
 		},
-		p.config.MetricLabels[metrics.MetricErrorsTotal],
+		obj.config.MetricLabels[metrics.MetricRequestsSlowTotal],
 	)
-	p.registry.MustRegister(p.slowRequestsTotal)
+	obj.registry.MustRegister(obj.requestsSlowTotal)
 
 	// Summary for module latency
-	p.summaryLatency = prometheus.NewSummaryVec(
+	obj.summaryLatency = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace:  p.config.Namespace,
-			Subsystem:  p.config.SubSystem,
+			Namespace:  obj.config.Namespace,
+			Subsystem:  obj.config.SubSystem,
 			Name:       metrics.MetricSummaryLatency.String(),
 			Help:       "summaryLatency of module latency",
-			Objectives: p.config.Objectives,
+			Objectives: obj.config.Objectives,
 		},
-		p.config.MetricLabels[metrics.MetricSummaryLatency],
+		obj.config.MetricLabels[metrics.MetricSummaryLatency],
 	)
-	p.registry.MustRegister(p.summaryLatency)
+	obj.registry.MustRegister(obj.summaryLatency)
 
 	// Gauge for app state
-	p.requestsInFlight = prometheus.NewGaugeVec(
+	obj.requestsInFlight = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: p.config.Namespace,
-			Subsystem: p.config.SubSystem,
+			Namespace: obj.config.Namespace,
+			Subsystem: obj.config.SubSystem,
 			Name:      metrics.MetricRequestsInFlight.String(),
 			Help:      "The HTTP requests in flight, partitioned by status code and HTTP method.",
 		},
-		p.config.MetricLabels[metrics.MetricRequestsInFlight],
+		obj.config.MetricLabels[metrics.MetricRequestsInFlight],
 	)
-	p.registry.MustRegister(p.requestsInFlight)
+	obj.registry.MustRegister(obj.requestsInFlight)
 
 	// Register default collectors if enabled
-	if p.config.DefaultCollect {
-		p.registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-		p.registry.MustRegister(collectors.NewGoCollector())
+	if obj.config.DefaultCollect {
+		obj.registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+		obj.registry.MustRegister(collectors.NewGoCollector())
 	}
 }
 
@@ -180,47 +181,47 @@ func (p *Prometheus) register() {
 // The method does not return any value; its primary purpose is to update and maintain
 // the internal metric collectors of Prometheus. By calling this method, one can ensure
 // that relevant metric data is correctly collected and stored for subsequent analysis and querying.
-func (p *Prometheus) Observe(reporter metrics.Reporter) {
-	p.Log(reporter.Handler(), reporter.Method(), reporter.Code(), float64(reporter.WriteSize()), float64(reporter.ReadSize()), float64(reporter.Latency()))
+func (obj *Prometheus) Observe(reporter metrics.Reporter) {
+	obj.Log(reporter.Handler(), reporter.Method(), reporter.Code(), float64(reporter.WriteSize()), float64(reporter.ReadSize()), float64(reporter.Latency()))
 }
 
 // Log logs the Handler request and its details.
 //
 // Parameters: code string, method string, handler string, sendBytes float64, recvBytes float64, latency float64.
-func (p *Prometheus) Log(code string, method, handler string, sendBytes, recvBytes, latency float64) {
-	if len(p.config.LogMethod) > 0 {
-		if _, ok := p.config.LogMethod[method]; !ok {
+func (obj *Prometheus) Log(code string, method, handler string, sendBytes, recvBytes, latency float64) {
+	if len(obj.config.LogMethod) > 0 {
+		if _, ok := obj.config.LogMethod[method]; !ok {
 			return // ignore
 		}
 	}
-	if len(p.config.LogHandler) > 0 {
-		if _, ok := p.config.LogHandler[handler]; !ok {
+	if len(obj.config.LogHandler) > 0 {
+		if _, ok := obj.config.LogHandler[handler]; !ok {
 			return // ignore
 		}
 	}
 
-	p.RequestTotal("this", handler, method, code)
-	p.ResponseSize("this", handler, method, code, sendBytes)
-	p.RequestSize("this", handler, method, code, recvBytes)
-	p.RequestDurationSeconds("this", handler, method, latency)
-	p.SummaryLatencyLog("this", handler, method, latency)
+	obj.RequestTotal("this", handler, method, code)
+	obj.ResponseSize("this", handler, method, code, sendBytes)
+	obj.RequestSize("this", handler, method, code, recvBytes)
+	obj.RequestDurationSeconds("this", handler, method, latency)
+	obj.SummaryLatencyLog("this", handler, method, latency)
 }
 
 // RequestTotal logs the request with the given module, handler, method, and code.
 //
 // Parameters: module string, handler string, method string, code string.
 // Return type: none.
-func (p *Prometheus) RequestTotal(module, handler, method, code string) {
-	p.requestTotal.WithLabelValues(p.config.Application, module, handler, method, code)
+func (obj *Prometheus) RequestTotal(module, handler, method, code string) {
+	obj.requestTotal.WithLabelValues(obj.config.Application, module, handler, method, code)
 }
 
 // ResponseSize logs the byte count for a specific module, Handler, method, and code.
 //
 // It takes the following parameters: module (string), handler (string), method (string), code (string), length (float64).
 // It does not return anything.
-func (p *Prometheus) ResponseSize(module, handler, method, code string, length float64) {
+func (obj *Prometheus) ResponseSize(module, handler, method, code string, length float64) {
 	if length > 0 {
-		p.responseSize.WithLabelValues(p.config.Application, module, handler, method, code).Observe(length)
+		obj.responseSize.WithLabelValues(obj.config.Application, module, handler, method, code).Observe(length)
 	}
 }
 
@@ -228,9 +229,9 @@ func (p *Prometheus) ResponseSize(module, handler, method, code string, length f
 //
 // It takes the following parameters: module (string), handler (string), method (string), code (string), length (float64).
 // It does not return anything.
-func (p *Prometheus) RequestSize(module, handler, method, code string, length float64) {
+func (obj *Prometheus) RequestSize(module, handler, method, code string, length float64) {
 	if length > 0 {
-		p.requestSize.WithLabelValues(p.config.Application, module, handler, method, code).Observe(length)
+		obj.requestSize.WithLabelValues(obj.config.Application, module, handler, method, code).Observe(length)
 	}
 }
 
@@ -240,9 +241,9 @@ func (p *Prometheus) RequestSize(module, handler, method, code string, length fl
 // handler: the name of the Handler handler.
 // method: the name of the method.
 // latency: the latency of the Handler call.
-func (p *Prometheus) RequestDurationSeconds(module, handler, method string, latency float64) {
-	if len(p.config.DurationBuckets) > 0 {
-		p.requestDurationSeconds.WithLabelValues(p.config.Application, module, handler, method).Observe(latency)
+func (obj *Prometheus) RequestDurationSeconds(module, handler, method string, latency float64) {
+	if len(obj.config.DurationBuckets) > 0 {
+		obj.requestDurationSeconds.WithLabelValues(obj.config.Application, module, handler, method).Observe(latency)
 	}
 }
 
@@ -252,24 +253,24 @@ func (p *Prometheus) RequestDurationSeconds(module, handler, method string, late
 // handler: the name of the Handler handler.
 // method: the name of the method.
 // latency: the latency of the Handler call.
-func (p *Prometheus) SummaryLatencyLog(module, handler, method string, latency float64) {
-	p.summaryLatency.WithLabelValues(p.config.Application, module, handler, method).Observe(latency)
+func (obj *Prometheus) SummaryLatencyLog(module, handler, method string, latency float64) {
+	obj.summaryLatency.WithLabelValues(obj.config.Application, module, handler, method).Observe(latency)
 }
 
 // ErrorsTotal logs the occurrence of an exception in a module.
 //
 // module: the name of the module.
 // errors: the name of the errors.
-func (p *Prometheus) ErrorsTotal(module, handler, method, errors string) {
-	p.errorsTotal.WithLabelValues(p.config.Application, module, handler, method, errors).Inc()
+func (obj *Prometheus) ErrorsTotal(module, handler, method, errors string) {
+	obj.errorsTotal.WithLabelValues(obj.config.Application, module, handler, method, errors).Inc()
 }
 
 // Event logs an event in a module.
 //
 // module: the name of the module.
 // event: the name of the event.
-func (p *Prometheus) Event(module, event string) {
-	p.event.WithLabelValues(p.config.Application, module, event)
+func (obj *Prometheus) Event(module, event string) {
+	obj.event.WithLabelValues(obj.config.Application, module, event)
 }
 
 // SiteEvent logs an event in a module for a specific site.
@@ -277,8 +278,8 @@ func (p *Prometheus) Event(module, event string) {
 // module: the name of the module.
 // event: the name of the event.
 // site: the name of the site.
-func (p *Prometheus) SiteEvent(module, event, site string) {
-	p.event.WithLabelValues(p.config.Application, module, event, site)
+func (obj *Prometheus) SiteEvent(module, event, site string) {
+	obj.event.WithLabelValues(obj.config.Application, module, event, site)
 }
 
 // RequestsInFlight logs a state in a module.
@@ -286,8 +287,8 @@ func (p *Prometheus) SiteEvent(module, event, site string) {
 // module: the name of the module.
 // state: the name of the state.
 // value: the value of the state.
-func (p *Prometheus) RequestsInFlight(module, state string, value float64) {
-	p.requestsInFlight.WithLabelValues(p.config.Application, module, state).Set(value)
+func (obj *Prometheus) RequestsInFlight(module, state string, value float64) {
+	obj.requestsInFlight.WithLabelValues(obj.config.Application, module, state).Set(value)
 }
 
 // WithPrometheus creates a Prometheus metrics with given config.
@@ -306,9 +307,8 @@ func WithPrometheus(conf *Config) *Prometheus {
 	return m
 }
 
-func HTTPHandler(prom *Prometheus) http.Handler {
-	handle := promhttp.HandlerFor(prom.registry, promhttp.HandlerOpts{})
+func Handler(prom *Prometheus) http.Handler {
 	return promhttp.InstrumentMetricHandler(
 		prom.registry,
-		handle)
+		promhttp.HandlerFor(prom.registry, promhttp.HandlerOpts{}))
 }
