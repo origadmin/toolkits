@@ -187,7 +187,13 @@ func (obj *Prometheus) Observe(reporter metrics.Reporter) {
 
 // Log logs the Handler request and its details.
 //
-// Parameters: code string, method string, handler string, sendBytes float64, recvBytes float64, latency float64.
+// Parameters:
+// - code (string): the code of the request.
+// - method (string): the HTTP method of the request.
+// - handler (string): the name of the handler.
+// - sendBytes (float64): the number of bytes sent in the request.
+// - recvBytes (float64): the number of bytes received in the request.
+// - latency (float64): the latency of the request.
 func (obj *Prometheus) Log(code string, method, handler string, sendBytes, recvBytes, latency float64) {
 	if len(obj.config.LogMethod) > 0 {
 		if _, ok := obj.config.LogMethod[method]; !ok {
@@ -209,38 +215,64 @@ func (obj *Prometheus) Log(code string, method, handler string, sendBytes, recvB
 
 // RequestTotal logs the request with the given module, handler, method, and code.
 //
-// Parameters: module string, handler string, method string, code string.
-// Return type: none.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - code (string): the code of the request.
 func (obj *Prometheus) RequestTotal(module, handler, method, code string) {
 	obj.requestTotal.WithLabelValues(obj.config.Application, module, handler, method, code)
 }
 
+// RequestSlowTotal logs the request with the given module, handler, method, code and latency.
+//
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - code (string): the code of the request.
+// - latency (float64): the latency of the request.
+func (obj *Prometheus) RequestSlowTotal(module, handler, method, code string, latency float64) {
+	if latency > obj.config.SlowTime {
+		obj.requestsSlowTotal.WithLabelValues(obj.config.Application, module, handler, method, code)
+	}
+}
+
 // ResponseSize logs the byte count for a specific module, Handler, method, and code.
 //
-// It takes the following parameters: module (string), handler (string), method (string), code (string), length (float64).
-// It does not return anything.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - code (string): the code of the request.
+// - length (float64): the number of bytes sent in the response.
 func (obj *Prometheus) ResponseSize(module, handler, method, code string, length float64) {
 	if length > 0 {
 		obj.responseSize.WithLabelValues(obj.config.Application, module, handler, method, code).Observe(length)
 	}
 }
 
-// RequestSize is a Go function that logs received bytes.
+// RequestSize logs the byte count for a specific module, Handler, method, and code.
 //
-// It takes the following parameters: module (string), handler (string), method (string), code (string), length (float64).
-// It does not return anything.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - code (string): the code of the request.
+// - length (float64): the number of bytes received in the request.
 func (obj *Prometheus) RequestSize(module, handler, method, code string, length float64) {
 	if length > 0 {
 		obj.requestSize.WithLabelValues(obj.config.Application, module, handler, method, code).Observe(length)
 	}
 }
 
-// RequestDurationSeconds logs the latency of a requestDurationSeconds module, Handler, and method.
+// RequestDurationSeconds logs the latency of a request in seconds for a specific module, Handler, and method.
 //
-// module: the name of the module.
-// handler: the name of the Handler handler.
-// method: the name of the method.
-// latency: the latency of the Handler call.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - latency (float64): the latency of the request in seconds.
 func (obj *Prometheus) RequestDurationSeconds(module, handler, method string, latency float64) {
 	if len(obj.config.DurationBuckets) > 0 {
 		obj.requestDurationSeconds.WithLabelValues(obj.config.Application, module, handler, method).Observe(latency)
@@ -249,51 +281,59 @@ func (obj *Prometheus) RequestDurationSeconds(module, handler, method string, la
 
 // SummaryLatencyLog logs the latency of a summaryLatency module, Handler, and method.
 //
-// module: the name of the module.
-// handler: the name of the Handler handler.
-// method: the name of the method.
-// latency: the latency of the Handler call.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - latency (float64): the latency of the request.
 func (obj *Prometheus) SummaryLatencyLog(module, handler, method string, latency float64) {
 	obj.summaryLatency.WithLabelValues(obj.config.Application, module, handler, method).Observe(latency)
 }
 
 // ErrorsTotal logs the occurrence of an exception in a module.
 //
-// module: the name of the module.
-// errors: the name of the errors.
+// Parameters:
+// - module (string): the name of the module.
+// - handler (string): the name of the handler.
+// - method (string): the HTTP method of the request.
+// - errors (string): the description of the error.
 func (obj *Prometheus) ErrorsTotal(module, handler, method, errors string) {
 	obj.errorsTotal.WithLabelValues(obj.config.Application, module, handler, method, errors).Inc()
 }
 
 // Event logs an event in a module.
 //
-// module: the name of the module.
-// event: the name of the event.
+// Parameters:
+// - module (string): the name of the module.
+// - event (string): the name of the event.
 func (obj *Prometheus) Event(module, event string) {
 	obj.event.WithLabelValues(obj.config.Application, module, event)
 }
 
 // SiteEvent logs an event in a module for a specific site.
 //
-// module: the name of the module.
-// event: the name of the event.
-// site: the name of the site.
+// Parameters:
+// - module (string): the name of the module.
+// - event (string): the name of the event.
+// - site (string): the name of the site.
 func (obj *Prometheus) SiteEvent(module, event, site string) {
 	obj.event.WithLabelValues(obj.config.Application, module, event, site)
 }
 
 // RequestsInFlight logs a state in a module.
 //
-// module: the name of the module.
-// state: the name of the state.
-// value: the value of the state.
+// Parameters:
+// - module (string): the name of the module.
+// - state (string): the name of the state.
+// - value (float64): the value of the state.
 func (obj *Prometheus) RequestsInFlight(module, state string, value float64) {
 	obj.requestsInFlight.WithLabelValues(obj.config.Application, module, state).Set(value)
 }
 
 // WithPrometheus creates a Prometheus metrics with given config.
 //
-// conf: the config for the metrics.Metrics.
+// Parameters:
+// - conf (*Config): the config for the metrics.
 func WithPrometheus(conf *Config) *Prometheus {
 	conf.setup()
 

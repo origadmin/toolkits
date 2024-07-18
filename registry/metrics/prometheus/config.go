@@ -21,6 +21,7 @@ type Config struct {
 	Application     string
 	Namespace       string
 	SubSystem       string
+	SlowTime        float64
 	SizeBuckets     []float64
 	DurationBuckets []float64
 	Objectives      map[float64]float64
