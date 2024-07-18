@@ -8,7 +8,7 @@ import (
 type Reporter interface {
 	// Context returns the context of the reporter.
 	Context() context.Context
-	// Handler returns the Handler Handler endpoint associated with the metric.
+	// Handler returns the Handler in the endpoint associated with the metric.
 	Handler() string
 	// Method returns the HTTP method used for the Handler call.
 	Method() string

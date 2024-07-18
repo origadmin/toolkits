@@ -6,16 +6,16 @@ package metrics
 type MetricType string
 
 const (
-	MetricRequestsTotal          MetricType = "requests_total"
-	MetricSlowRequestsTotal      MetricType = "requests_slow_total"
-	MetricResponseSizeBytes      MetricType = "response_size_bytes"
 	MetricRequestSizeBytes       MetricType = "request_size_bytes"
+	MetricRequestDurationSeconds MetricType = "request_duration_seconds"
+	MetricRequestsTotal          MetricType = "requests_total"
+	MetricRequestsSlowTotal      MetricType = "requests_slow_total"
+	MetricRequestsInFlight       MetricType = "requests_in_flight"
+	MetricResponseSizeBytes      MetricType = "response_size_bytes"
 	MetricErrorsTotal            MetricType = "errors_total"
 	MetricEvent                  MetricType = "event"
 	MetricSiteEvent              MetricType = "site_event"
-	MetricRequestDurationSeconds MetricType = "request_duration_seconds"
 	MetricSummaryLatency         MetricType = "summary_latency"
-	MetricRequestsInFlight       MetricType = "requests_in_flight"
 )
 
 func (m MetricType) String() string {
@@ -45,20 +45,20 @@ const (
 	MetricLabelHandler  = "handler"
 	MetricLabelCode     = "code"
 	MetricLabelMethod   = "method"
-	MetricLabelJob      = "job"
+	MetricLabelModule   = "module"
 	MetricLabelError    = "error"
 )
 
 var metricLabelNames = map[MetricType][]string{
-	MetricRequestsTotal:          {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
-	MetricRequestSizeBytes:       {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
-	MetricResponseSizeBytes:      {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
-	MetricRequestDurationSeconds: {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod},
-	MetricSummaryLatency:         {MetricLabelInstance, MetricLabelJob, MetricLabelHandler, MetricLabelMethod},
-	MetricErrorsTotal:            {MetricLabelInstance, MetricLabelJob, MetricLabelError},
-	MetricEvent:                  {MetricLabelInstance, MetricLabelJob, "event"},
-	MetricSiteEvent:              {MetricLabelInstance, MetricLabelJob, "event", "site"},
-	MetricRequestsInFlight:       {MetricLabelInstance, MetricLabelJob, "state"},
+	MetricRequestsTotal:          {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricRequestSizeBytes:       {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricResponseSizeBytes:      {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
+	MetricRequestDurationSeconds: {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod},
+	MetricSummaryLatency:         {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod},
+	MetricErrorsTotal:            {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelError},
+	MetricEvent:                  {MetricLabelInstance, MetricLabelModule, "event"},
+	MetricSiteEvent:              {MetricLabelInstance, MetricLabelModule, "event", "site"},
+	MetricRequestsInFlight:       {MetricLabelInstance, MetricLabelModule, "state"},
 }
 
 // MetricLabelNames returns the labels for the given metric type
