@@ -1,6 +1,6 @@
 // Copyright (config) 2024 OrigAdmin. All rights reserved.
 
-// Package prometheus is the data access object
+// Package prometheus is a Prometheus metrics wrapper for metrics.
 package prometheus
 
 import (
