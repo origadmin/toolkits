@@ -96,6 +96,14 @@ func Join(errs ...error) error {
 	return aliases.join(errs...)
 }
 
+// Must panics if the error is not nil.
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Aliases provides access to the aliased error functions from both the standard library and 'pkg/errors'.
 var aliases = errorAliases{
 	// pkg/errors aliases

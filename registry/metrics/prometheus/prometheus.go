@@ -5,7 +5,6 @@ package prometheus
 
 import (
 	"net/http"
-	"sync/atomic"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -17,15 +16,14 @@ import (
 // Prometheus is a Prometheus wrapper
 // counter only statistics count value in prometheus
 // requestDurationSeconds statistics bucket,count,sum in prometheus
-// summary statistics count,sum in prometheus
+// summaryLatency statistics count,sum in prometheus
 type Prometheus struct {
 	config                 *Config
-	module                 *atomic.Value
 	registry               *prometheus.Registry
-	requestsInFlightVec    *prometheus.GaugeVec
+	requestsInFlight       *prometheus.GaugeVec
 	requestDurationSeconds *prometheus.HistogramVec
-	summary                *prometheus.SummaryVec
-	requestTotalVec        *prometheus.CounterVec
+	summaryLatency         *prometheus.SummaryVec
+	requestTotal           *prometheus.CounterVec
 	slowRequestsTotal      *prometheus.CounterVec
 	errorsTotal            *prometheus.CounterVec
 	responseSize           *prometheus.HistogramVec
@@ -36,7 +34,7 @@ type Prometheus struct {
 
 // register initializes the Prometheus wrapper
 func (p *Prometheus) register() {
-	p.requestTotalVec = prometheus.NewCounterVec(
+	p.requestTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: p.config.Namespace,
 			Subsystem: p.config.SubSystem,
@@ -97,6 +95,7 @@ func (p *Prometheus) register() {
 			Subsystem: p.config.SubSystem,
 			Name:      metrics.MetricRequestSizeBytes.String(),
 			Help:      "The HTTP request sizes in bytes.",
+			Buckets:   p.config.SizeBuckets,
 		},
 		p.config.MetricLabels[metrics.MetricRequestSizeBytes],
 	)
@@ -109,6 +108,7 @@ func (p *Prometheus) register() {
 			Subsystem: p.config.SubSystem,
 			Name:      metrics.MetricResponseSizeBytes.String(),
 			Help:      "The HTTP response sizes in bytes.",
+			Buckets:   p.config.SizeBuckets,
 		},
 		p.config.MetricLabels[metrics.MetricResponseSizeBytes],
 	)
@@ -121,7 +121,7 @@ func (p *Prometheus) register() {
 			Subsystem: p.config.SubSystem,
 			Name:      metrics.MetricRequestDurationSeconds.String(),
 			Help:      "The HTTP request latencies in seconds.",
-			Buckets:   p.config.Buckets,
+			Buckets:   p.config.DurationBuckets,
 		},
 		p.config.MetricLabels[metrics.MetricRequestDurationSeconds],
 	)
@@ -139,20 +139,20 @@ func (p *Prometheus) register() {
 	p.registry.MustRegister(p.slowRequestsTotal)
 
 	// Summary for module latency
-	p.summary = prometheus.NewSummaryVec(
+	p.summaryLatency = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Namespace:  p.config.Namespace,
 			Subsystem:  p.config.SubSystem,
 			Name:       metrics.MetricSummaryLatency.String(),
-			Help:       "summary of module latency",
+			Help:       "summaryLatency of module latency",
 			Objectives: p.config.Objectives,
 		},
 		p.config.MetricLabels[metrics.MetricSummaryLatency],
 	)
-	p.registry.MustRegister(p.summary)
+	p.registry.MustRegister(p.summaryLatency)
 
 	// Gauge for app state
-	p.requestsInFlightVec = prometheus.NewGaugeVec(
+	p.requestsInFlight = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: p.config.Namespace,
 			Subsystem: p.config.SubSystem,
@@ -161,7 +161,7 @@ func (p *Prometheus) register() {
 		},
 		p.config.MetricLabels[metrics.MetricRequestsInFlight],
 	)
-	p.registry.MustRegister(p.requestsInFlightVec)
+	p.registry.MustRegister(p.requestsInFlight)
 
 	// Register default collectors if enabled
 	if p.config.DefaultCollect {
@@ -211,7 +211,7 @@ func (p *Prometheus) Log(code string, method, handler string, sendBytes, recvByt
 // Parameters: module string, handler string, method string, code string.
 // Return type: none.
 func (p *Prometheus) RequestTotal(module, handler, method, code string) {
-	p.requestTotalVec.WithLabelValues(p.config.Application, module, handler, method, code)
+	p.requestTotal.WithLabelValues(p.config.Application, module, handler, method, code)
 }
 
 // ResponseSize logs the byte count for a specific module, Handler, method, and code.
@@ -241,19 +241,19 @@ func (p *Prometheus) RequestSize(module, handler, method, code string, length fl
 // method: the name of the method.
 // latency: the latency of the Handler call.
 func (p *Prometheus) RequestDurationSeconds(module, handler, method string, latency float64) {
-	if len(p.config.Buckets) > 0 {
+	if len(p.config.DurationBuckets) > 0 {
 		p.requestDurationSeconds.WithLabelValues(p.config.Application, module, handler, method).Observe(latency)
 	}
 }
 
-// SummaryLatencyLog logs the latency of a summary module, Handler, and method.
+// SummaryLatencyLog logs the latency of a summaryLatency module, Handler, and method.
 //
 // module: the name of the module.
 // handler: the name of the Handler handler.
 // method: the name of the method.
 // latency: the latency of the Handler call.
 func (p *Prometheus) SummaryLatencyLog(module, handler, method string, latency float64) {
-	p.summary.WithLabelValues(p.config.Application, module, handler, method).Observe(latency)
+	p.summaryLatency.WithLabelValues(p.config.Application, module, handler, method).Observe(latency)
 }
 
 // ErrorsTotal logs the occurrence of an exception in a module.
@@ -287,19 +287,7 @@ func (p *Prometheus) SiteEvent(module, event, site string) {
 // state: the name of the state.
 // value: the value of the state.
 func (p *Prometheus) RequestsInFlight(module, state string, value float64) {
-	p.requestsInFlightVec.WithLabelValues(p.config.Application, module, state).Set(value)
-}
-
-func (p *Prometheus) SetModule(module string) {
-	p.module.Store(module)
-}
-
-func (p *Prometheus) GetModule() string {
-	return p.module.Load().(string)
-	// if v, ok := p.module.Load().(string); ok {
-	// 	return v
-	// }
-	// return "this"
+	p.requestsInFlight.WithLabelValues(p.config.Application, module, state).Set(value)
 }
 
 // WithPrometheus creates a Prometheus metrics with given config.
@@ -311,12 +299,8 @@ func WithPrometheus(conf *Config) *Prometheus {
 	// Create Prometheus metrics with given config.
 	m := &Prometheus{
 		config:   conf,
-		module:   &atomic.Value{},
 		registry: prometheus.NewRegistry(),
 	}
-
-	// Set default module if not provided.
-	m.module.Store("this")
 
 	m.register()
 	return m

@@ -16,25 +16,27 @@ const (
 )
 
 type Config struct {
-	LogHandler     map[string]struct{}
-	LogMethod      map[string]struct{}
-	Application    string
-	Namespace      string
-	SubSystem      string
-	Buckets        []float64
-	Objectives     map[float64]float64
-	DefaultCollect bool
-	MetricLabels   map[metrics.MetricType][]string
-	UseSecure      bool
-	BasicUserName  string
-	BasicPassword  string
-	HandlerFunc    http.HandlerFunc
+	LogHandler      map[string]struct{}
+	LogMethod       map[string]struct{}
+	Application     string
+	Namespace       string
+	SubSystem       string
+	SizeBuckets     []float64
+	DurationBuckets []float64
+	Objectives      map[float64]float64
+	DefaultCollect  bool
+	MetricLabels    map[metrics.MetricType][]string
+	UseSecure       bool
+	BasicUserName   string
+	BasicPassword   string
+	HandlerFunc     http.HandlerFunc
 }
 
 func (c *Config) setup() {
 	if c.Application == "" {
 		c.Application = defaultApplication
 	}
+
 	if c.Namespace == "" {
 		c.Namespace = defaultNamespace
 	}
@@ -43,13 +45,12 @@ func (c *Config) setup() {
 		c.SubSystem = defaultSubSystem
 	}
 
-	// Set default listen port if not provided and enable Prometheus.
-	if c.Enable && c.ListenPort == 0 {
-		c.ListenPort = defaultListenPort
+	if len(c.DurationBuckets) == 0 {
+		c.DurationBuckets = prometheus.DefBuckets
 	}
 
-	if len(c.Buckets) == 0 {
-		c.Buckets = prometheus.DefBuckets
+	if len(c.SizeBuckets) == 0 {
+		c.SizeBuckets = prometheus.ExponentialBuckets(100, 10, 8)
 	}
 
 	if len(c.Objectives) == 0 {

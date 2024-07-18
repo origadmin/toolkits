@@ -46,7 +46,7 @@ const (
 	MetricLabelCode     = "code"
 	MetricLabelMethod   = "method"
 	MetricLabelModule   = "module"
-	MetricLabelError    = "error"
+	MetricLabelErrors   = "errors"
 )
 
 var metricLabelNames = map[MetricType][]string{
@@ -55,7 +55,7 @@ var metricLabelNames = map[MetricType][]string{
 	MetricResponseSizeBytes:      {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelCode},
 	MetricRequestDurationSeconds: {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod},
 	MetricSummaryLatency:         {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod},
-	MetricErrorsTotal:            {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelError},
+	MetricErrorsTotal:            {MetricLabelInstance, MetricLabelModule, MetricLabelHandler, MetricLabelMethod, MetricLabelErrors},
 	MetricEvent:                  {MetricLabelInstance, MetricLabelModule, "event"},
 	MetricSiteEvent:              {MetricLabelInstance, MetricLabelModule, "event", "site"},
 	MetricRequestsInFlight:       {MetricLabelInstance, MetricLabelModule, "state"},
@@ -73,32 +73,3 @@ func MetricLabelNames(metricType MetricType) []string {
 func MetricLabels() map[MetricType][]string {
 	return metricLabelNames
 }
-
-func (d dummyMetrics) Enabled() bool {
-	return false
-}
-func (d dummyMetrics) Observe(reporter Reporter) {}
-
-func (d dummyMetrics) Log(handler, method, code string, sendBytes, recvBytes, latency float64) {}
-
-func (d dummyMetrics) RequestTotal(module, handler, method, code string) {}
-
-func (d dummyMetrics) RequestDurationSeconds(module, handler, method string, latency float64) {}
-
-func (d dummyMetrics) SummaryLatencyLog(module, handler, method string, latency float64) {}
-
-func (d dummyMetrics) ErrorsTotal(module, errors string) {}
-
-func (d dummyMetrics) Event(module, event string) {}
-
-func (d dummyMetrics) SiteEvent(module, event, site string) {}
-
-func (d dummyMetrics) RequestsInFlight(module, state string, value float64) {}
-
-func (d dummyMetrics) ResponseSize(module, handler, method, code string, length float64) {}
-
-func (d dummyMetrics) RequestSize(module, handler, method, code string, length float64) {}
-
-func (d dummyMetrics) ResetCounter() {}
-
-var DummyMetrics Metrics = dummyMetrics{}
