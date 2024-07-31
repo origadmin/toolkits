@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 )
 
-// Int64ToBytes converts a slice of uint64 values to a byte slice.
+// Uint64ToBytes converts a slice of uint64 values to a byte slice.
 // Each uint64 value is encoded as 8 bytes in big-endian order.
 // The resulting byte slice can be used to store the uint64 values in a binary format.
 //
@@ -16,7 +16,7 @@ import (
 //
 // Returns:
 // - a byte slice containing the encoded uint64 values.
-func Int64ToBytes(ints ...uint64) []byte {
+func Uint64ToBytes(ints ...uint64) []byte {
 	// Create a byte slice with a length equal to the number of uint64 values multiplied by 8.
 	var buf = make([]byte, 8*len(ints))
 
@@ -30,7 +30,7 @@ func Int64ToBytes(ints ...uint64) []byte {
 	return buf
 }
 
-// BytesToInt64 converts a byte slice to a slice of uint64 values.
+// BytesToUint64 converts a byte slice to a slice of uint64 values.
 // Each 8 bytes in the byte slice are decoded as a single uint64 value in big-endian order.
 // The resulting slice of uint64 values can be used to retrieve the original uint64 values from the byte slice.
 //
@@ -39,7 +39,7 @@ func Int64ToBytes(ints ...uint64) []byte {
 //
 // Returns:
 // - a slice of uint64 values decoded from the byte slice.
-func BytesToInt64(buf []byte) []uint64 {
+func BytesToUint64(buf []byte) []uint64 {
 	// Get the length of the byte slice.
 	size := len(buf)
 

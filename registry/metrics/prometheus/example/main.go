@@ -10,7 +10,7 @@ import (
 func main() {
 	cfg := &prometheus.Config{}
 	prom := prometheus.WithPrometheus(cfg)
-	next := prometheus.HTTPHandler(prom)
+	next := prometheus.Handler(prom)
 	mcfg := &metrics.Config{
 		Enable:        true,
 		ListenPort:    9100,
