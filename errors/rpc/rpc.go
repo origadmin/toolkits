@@ -118,126 +118,53 @@ func FromError(err error) *Error {
 }
 
 // BadRequest generates a 400 error.
-func BadRequest(id, format string, obj ...any) error {
-	if id == "" {
-		id = BadRequestID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusBadRequest,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func BadRequest(format string, obj ...any) error {
+	return NewFormat(BadRequestID, http.StatusBadRequest, format, obj...)
 }
 
 // Unauthorized generates a 401 error.
-func Unauthorized(id, format string, obj ...any) error {
-	if id == "" {
-		id = UnauthorizedID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusUnauthorized,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func Unauthorized(format string, obj ...any) error {
+	return NewFormat(UnauthorizedID, http.StatusUnauthorized, format, obj...)
 }
 
 // Forbidden generates a 403 error.
-func Forbidden(id, format string, obj ...any) error {
-	if id == "" {
-		id = ForbiddenID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusForbidden,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func Forbidden(format string, obj ...any) error {
+	return NewFormat(ForbiddenID, http.StatusForbidden, format, obj...)
 }
 
 // NotFound generates a 404 error.
-func NotFound(id, format string, obj ...any) error {
-	if id == "" {
-		id = NotFoundID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusNotFound,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func NotFound(format string, obj ...any) error {
+	return NewFormat(NotFoundID, http.StatusNotFound, format, obj...)
 }
 
 // MethodNotAllowed generates a 405 error.
-func MethodNotAllowed(id, format string, obj ...any) error {
-	if id == "" {
-		id = MethodNotAllowedID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusMethodNotAllowed,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func MethodNotAllowed(format string, obj ...any) error {
+	return NewFormat(MethodNotAllowedID, http.StatusMethodNotAllowed, format, obj...)
 }
 
 // TooManyRequests generates a 429 error.
-func TooManyRequests(id, format string, obj ...any) error {
-	if id == "" {
-		id = TooManyRequestsID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusTooManyRequests,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func TooManyRequests(format string, obj ...any) error {
+	return NewFormat(TooManyRequestsID, http.StatusTooManyRequests, format, obj...)
 }
 
 // Timeout generates a 408 error.
-func Timeout(id, format string, obj ...any) error {
-	if id == "" {
-		id = RequestTimeoutID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusRequestTimeout,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func Timeout(format string, obj ...any) error {
+	return NewFormat(RequestTimeoutID, http.StatusRequestTimeout, format, obj...)
 }
 
 // Conflict generates a 409 error.
-func Conflict(id, format string, obj ...any) error {
-	// Set  ID if not provided
-	if id == "" {
-		id = ConflictID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusConflict,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func Conflict(format string, obj ...any) error {
+	return NewFormat(ConflictID, http.StatusConflict, format, obj...)
 }
 
 // RequestEntityTooLarge generates a 413 error.
-func RequestEntityTooLarge(id, format string, obj ...any) error {
-	// Set  ID if not provided
-	if id == "" {
-		id = RequestEntityTooLargeID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusRequestEntityTooLarge,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func RequestEntityTooLarge(format string, obj ...any) error {
+	return NewFormat(RequestEntityTooLargeID, http.StatusRequestEntityTooLarge, format, obj...)
 }
 
 // InternalServerError generates a 500 error.
-func InternalServerError(id, format string, obj ...any) error {
-	// Set  ID if not provided
-	if id == "" {
-		id = InternalServerErrorID
-	}
-	return &Error{
-		Id:     id,
-		Code:   http.StatusInternalServerError,
-		Detail: fmt.Sprintf(format, obj...),
-	}
+func InternalServerError(format string, obj ...any) error {
+	return NewFormat(InternalServerErrorID, http.StatusInternalServerError, format, obj...)
 }
 
 // New generates a custom error.
@@ -260,12 +187,8 @@ func NewFormat(id string, code int32, format string, args ...any) error {
 
 // Code generates an error for a given code
 func Code(code int32, detail string) error {
-	id, ok := LookupID(code)
-	if !ok {
-		id = UnknownID
-	}
 	return &Error{
-		Id:     id,
+		Id:     lookupID(UnknownID, code),
 		Code:   code,
 		Detail: detail,
 	}
@@ -273,12 +196,8 @@ func Code(code int32, detail string) error {
 
 // CodeFormat generates an error for a given code
 func CodeFormat(code int32, format string, args ...any) error {
-	id, ok := ids[code]
-	if !ok {
-		id = UnknownID
-	}
 	return &Error{
-		Id:     id,
+		Id:     lookupID(UnknownID, code),
 		Code:   code,
 		Detail: fmt.Sprintf(format, args...),
 	}
@@ -319,4 +238,11 @@ func Equal(err1 error, err2 error) bool {
 	}
 
 	return errors.Is(err1, err2)
+}
+
+func lookupID(id string, code int32) string {
+	if v, ok := LookupID(code); ok {
+		return v
+	}
+	return id
 }
