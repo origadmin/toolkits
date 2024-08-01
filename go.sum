@@ -1,10 +1,8 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/goexts/ggb v0.0.3 h1:GdOcVG3RbJ3TMTPTHQJrgRBB+tQXOoLONEWBkKpVZgc=
-github.com/goexts/ggb v0.0.3/go.mod h1:ZsPLgk2q+tLUUGn5FVToJaSTefajJVAD8DTfUFx0IWI=
-github.com/goexts/ggb v0.0.4 h1:JliApPPNJncB7kpYJRjeL7R+M7STLCyJ4T2ag9dhFO8=
-github.com/goexts/ggb v0.0.4/go.mod h1:ZsPLgk2q+tLUUGn5FVToJaSTefajJVAD8DTfUFx0IWI=
+github.com/goexts/ggb v0.0.5 h1:w7Bc/nblWLPtl1AYmIPeHBKMYsopreBG1anP5QPIFmo=
+github.com/goexts/ggb v0.0.5/go.mod h1:ZsPLgk2q+tLUUGn5FVToJaSTefajJVAD8DTfUFx0IWI=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
