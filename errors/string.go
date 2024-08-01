@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -28,7 +27,7 @@ func (obj String) Is(err error) bool {
 	}
 
 	var e String
-	if errors.As(err, &e) {
+	if As(err, &e) {
 		return strings.Compare(obj.String(), e.String()) == 0
 	}
 

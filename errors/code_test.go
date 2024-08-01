@@ -5,34 +5,34 @@ import (
 	"testing"
 )
 
-func TestStringAs(t *testing.T) {
-	var err error = String("errors.rpc.test")
-	var target String
+func TestCodeAs(t *testing.T) {
+	var err error = Code(0)
+	var target Code
 	match := stderr.As(err, &target)
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
 	}
 
 	err = stderr.New(err.Error())
-	target = ""
+	target = 0
 	match = stderr.As(err, &target)
-	if match || target != "" {
+	if match || target != 0 {
 		t.Fatalf("%v should not convert to *Error", err)
 	}
 }
 
-func TestStringIs(t *testing.T) {
-	var err error = String("errors.rpc.test")
-	var target = String("errors.rpc.test")
+func TestCodeIs(t *testing.T) {
+	var err error = Code(0)
+	var target = Code(0)
 	match := stderr.Is(err, target)
 	if !match {
-		t.Fatalf("%v should convert to String", err)
+		t.Fatalf("%v should convert to Code", err)
 	}
 
 	err = stderr.New(err.Error())
-	target = "errors.rpc.test"
+	target = 0
 	match = stderr.Is(err, &target)
 	if match {
-		t.Fatalf("%v should not equal to String", err)
+		t.Fatalf("%v should not equal to Code", err)
 	}
 }
