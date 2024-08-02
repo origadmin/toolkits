@@ -1,6 +1,7 @@
 package context
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -159,4 +160,65 @@ func TestHandlesSpecialCharactersInTraceID(t *testing.T) {
 	if truth := FromRowLock(newCtx); !truth {
 		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
 	}
+}
+
+func BenchmarkWithValue(b *testing.B) {
+	N := 10000
+	ctx := Background()
+	for i := 0; i < N; i++ {
+		ctx = WithValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
+	}
+	b.ResetTimer()
+	count := 0
+	for i := 0; i < N; i++ {
+		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
+			count++
+		}
+	}
+	if count != N {
+		b.Fatalf("expected %d, got %d", b.N, count)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkWithMapValue(b *testing.B) {
+	N := 10000
+	ctx := Background()
+	for i := 0; i < N; i++ {
+		ctx = WithMapValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
+	}
+	b.ResetTimer()
+	count := 0
+	for i := 0; i < N; i++ {
+		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
+			count++
+		}
+	}
+	if count != N {
+		b.Fatalf("expected %d, got %d", b.N, count)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkWithRandValue(b *testing.B) {
+	N := 10000
+	ctx := Background()
+	for i := 0; i < N; i++ {
+		if i%2 == 0 {
+			ctx = WithValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
+		} else {
+			ctx = WithMapValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
+		}
+	}
+	b.ResetTimer()
+	count := 0
+	for i := 0; i < N; i++ {
+		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
+			count++
+		}
+	}
+	if count != N {
+		b.Fatalf("expected %d, got %d", b.N, count)
+	}
+	b.StopTimer()
 }

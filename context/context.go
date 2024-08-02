@@ -276,7 +276,6 @@ func WithMapValue(parent Context, key, val any) Context {
 	if !reflect.TypeOf(key).Comparable() {
 		panic("key is not comparable")
 	}
-
 	ctx := parent
 	for ctx != nil {
 		if mctx, ok := ctx.(*mapValueCtx); ok {
