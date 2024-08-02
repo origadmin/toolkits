@@ -23,7 +23,7 @@ type traceIDCtx struct{}
 //
 // It takes a context and a traceID string as parameters and returns a context.
 func NewTraceID(ctx Context, traceID string) Context {
-	return WithMapValue(ctx, traceIDCtx{}, traceID)
+	return WithValue(ctx, traceIDCtx{}, traceID)
 }
 
 // FromTraceID returns the trace ID from the context.
@@ -40,7 +40,7 @@ type transCtx struct{}
 
 // NewTrans creates a new context with the provided dbx client value.
 func NewTrans(ctx Context, db any) Context {
-	return WithMapValue(ctx, transCtx{}, db)
+	return WithValue(ctx, transCtx{}, db)
 }
 
 // FromTrans retrieves a dbx client from the context.
@@ -271,6 +271,7 @@ func (ctx *mapValueCtx) Value(key any) any {
 }
 
 // WithMapValue creates a new context with the provided key-value pair.
+// If the context saved over than 500 keys, use WithMapValue instead.
 func WithMapValue(parent Context, key, val any) Context {
 	if parent == nil {
 		panic("cannot create context from nil parent")

@@ -162,13 +162,13 @@ func TestHandlesSpecialCharactersInTraceID(t *testing.T) {
 	}
 }
 
+const N = 50000
+
 func BenchmarkWithValue(b *testing.B) {
-	N := 10000
 	ctx := Background()
 	for i := 0; i < N; i++ {
 		ctx = WithValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
 	}
-	b.ResetTimer()
 	count := 0
 	for i := 0; i < N; i++ {
 		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
@@ -182,12 +182,10 @@ func BenchmarkWithValue(b *testing.B) {
 }
 
 func BenchmarkWithMapValue(b *testing.B) {
-	N := 10000
 	ctx := Background()
 	for i := 0; i < N; i++ {
 		ctx = WithMapValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
 	}
-	b.ResetTimer()
 	count := 0
 	for i := 0; i < N; i++ {
 		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
@@ -201,7 +199,6 @@ func BenchmarkWithMapValue(b *testing.B) {
 }
 
 func BenchmarkWithRandValue(b *testing.B) {
-	N := 10000
 	ctx := Background()
 	for i := 0; i < N; i++ {
 		if i%2 == 0 {
@@ -210,7 +207,6 @@ func BenchmarkWithRandValue(b *testing.B) {
 			ctx = WithMapValue(ctx, fmt.Sprintf("key %d", i), fmt.Sprintf("value %d", i))
 		}
 	}
-	b.ResetTimer()
 	count := 0
 	for i := 0; i < N; i++ {
 		if v := ctx.Value(fmt.Sprintf("key %d", i)); v != nil {
