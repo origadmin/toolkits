@@ -1,5 +1,9 @@
 package context
 
+import (
+	"testing"
+)
+
 // unused check
 var (
 	_ = TODO
@@ -40,3 +44,119 @@ var (
 	_ = NewDB
 	_ = FromDB
 )
+
+// Creates a new context with a trace ID
+func TestCreatesNewContextWithTraceID(t *testing.T) {
+	// Arrr! Let's create a new context and see if it has a trace ID!
+	ctx := Background()
+	traceID := "trace-123"
+	newCtx := NewTraceID(ctx, traceID)
+
+	if newCtx == ctx {
+		t.Error("Shiver me timbers! The context should be new!")
+	}
+}
+
+// Uses the provided trace ID correctly
+func TestUsesProvidedTraceIDCorrectly(t *testing.T) {
+	// Ahoy! Let's check if the trace ID is used correctly!
+	ctx := Background()
+	traceID := "trace-456"
+	newCtx := NewTraceID(ctx, traceID)
+
+	if newCtx.Value(traceIDCtx{}) != traceID {
+		t.Error("Blimey! The trace ID wasn't set correctly!")
+	}
+}
+
+// Returns a context that includes the trace ID
+func TestReturnsContextWithTraceID(t *testing.T) {
+	// Yo-ho-ho! Let's see if the context includes the trace ID!
+	ctx := Background()
+	traceID := "trace-789"
+	newCtx := NewTraceID(ctx, traceID)
+	newCtx = NewTraceID(ctx, "trace-788")
+	newCtx = NewTraceID(ctx, "trace-788")
+	newCtx = NewTraceID(ctx, traceID)
+	if FromTraceID(newCtx) != traceID {
+		t.Error("Arrr! The context doesn't include the trace ID!")
+	}
+}
+
+// Manages empty string trace ID
+func TestManagesEmptyStringTraceID(t *testing.T) {
+	// Ahoy matey! Let's see how it handles an empty string trace ID!
+	ctx := Background()
+	traceID := ""
+	newCtx := NewTraceID(ctx, traceID)
+
+	if newCtx.Value(traceIDCtx{}) != traceID {
+		t.Error("Blimey! The empty string trace ID wasn't set correctly!")
+	}
+}
+
+// Deals with extremely long trace ID
+func TestDealsWithExtremelyLongTraceID(t *testing.T) {
+	// Yo-ho-ho! Let's see how it handles an extremely long trace ID!
+	ctx := Background()
+	traceID := string(make([]byte, 10000))
+	newCtx := NewTraceID(ctx, traceID)
+
+	if newCtx.Value(traceIDCtx{}) != traceID {
+		t.Error("Arrr! The extremely long trace ID wasn't set correctly!")
+	}
+}
+
+// Handles special characters in trace ID
+func TestHandlesSpecialCharactersInTraceID(t *testing.T) {
+	// Avast ye! Let's see how it handles special characters in the trace ID!
+	ctx := Background()
+	traceID := "!@#$%^&*()_+"
+	newCtx := NewTraceID(ctx, traceID)
+	newCtx = NewTrans(newCtx, "123")
+	newCtx = NewUserID(newCtx, "123")
+	newCtx = NewUserToken(newCtx, "NewUserToken")
+	newCtx = NewUserCache(newCtx, "NewUserCache")
+	newCtx = NewRowLock(newCtx)
+	newCtx = WithValue(newCtx, "456", "789")
+	newCtx = WithMapValue(newCtx, "456", "789")
+	newCtx = WithMapValue(newCtx, "ggb", "ggb")
+	t.Log(FromTraceID(newCtx))
+	if FromTraceID(newCtx) != traceID {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+
+	}
+	if v, ok := FromTrans(newCtx); !ok {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+		t.Log(v)
+	}
+
+	if v := newCtx.Value("456"); v == nil {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+		t.Log(v)
+	}
+
+	if v := FromUserID(newCtx); v == "" {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+		t.Log(v)
+	}
+
+	if v := FromUserToken(newCtx); v == "" {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+		t.Log(v)
+	}
+
+	if v, ok := FromUserCache(newCtx); !ok || v == nil {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	} else {
+		t.Log(v)
+	}
+	if truth := FromRowLock(newCtx); !truth {
+		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
+	}
+}
