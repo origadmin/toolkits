@@ -250,6 +250,8 @@ func FromStack(ctx Context) string {
 	return ""
 }
 
+type mapCtx struct{}
+
 // A mapValueCtx carries a key-value pair. It implements Value for that key and
 // delegates all other calls to the embedded Context.
 type mapValueCtx struct {
@@ -259,6 +261,9 @@ type mapValueCtx struct {
 
 // Value returns the value for the given key or nil if no value is present.
 func (ctx *mapValueCtx) Value(key any) any {
+	if any(mapCtx{}) == key {
+		return ctx.keyValues
+	}
 	if val, ok := ctx.keyValues[key]; ok {
 		return val
 	}
@@ -276,26 +281,22 @@ func WithMapValue(parent Context, key, val any) Context {
 	if !reflect.TypeOf(key).Comparable() {
 		panic("key is not comparable")
 	}
-	ctx := parent
-	for ctx != nil {
-		if mctx, ok := ctx.(*mapValueCtx); ok {
-			mctx.keyValues[key] = val
+
+	if v := parent.Value(mapCtx{}); v != nil {
+		if kv, ok := v.(map[any]any); ok {
+			kv[key] = val
 			return parent
 		}
-		ctx = Parent(ctx)
 	}
-
 	return &mapValueCtx{parent, map[any]any{key: val}}
 }
 
 // FromMapContext retrieves all values from the context.
 func FromMapContext(parent Context) map[any]any {
-	ctx := parent
-	for ctx != nil {
-		if mctx, ok := ctx.(*mapValueCtx); ok {
-			return mctx.keyValues
+	if v := parent.Value(mapCtx{}); v != nil {
+		if kv, ok := v.(map[any]any); ok {
+			return kv
 		}
-		ctx = Parent(ctx)
 	}
 	return map[any]any{}
 }
@@ -305,22 +306,23 @@ func Value(ctx Context, key any) any {
 	return ctx.Value(key)
 }
 
-// Parent retrieves the parent context.
-func Parent(ptr Context) Context {
-	if ptr == nil {
-		return nil
-	}
-	kind := reflect.TypeOf(ptr).Kind()
-	v := reflect.ValueOf(ptr)
-	if kind == reflect.Ptr {
-		v = v.Elem()
-	}
-	var field reflect.Value
-	for i := 0; i < v.NumField(); i++ {
-		field = v.Field(i)
-		if field.Type().Name() == "Context" {
-			return field.Interface().(Context)
-		}
-	}
-	return nil
-}
+//
+// // Parent retrieves the parent context.
+// func Parent(ptr Context) Context {
+// 	if ptr == nil {
+// 		return nil
+// 	}
+// 	kind := reflect.TypeOf(ptr).Kind()
+// 	v := reflect.ValueOf(ptr)
+// 	if kind == reflect.Ptr {
+// 		v = v.Elem()
+// 	}
+// 	var field reflect.Value
+// 	for i := 0; i < v.NumField(); i++ {
+// 		field = v.Field(i)
+// 		if field.Type().Name() == "Context" {
+// 			return field.Interface().(Context)
+// 		}
+// 	}
+// 	return nil
+// }
