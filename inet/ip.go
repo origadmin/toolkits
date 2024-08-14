@@ -11,7 +11,7 @@ func ParseIP(ip net.IP) int64 {
 		intip int64
 	)
 	if v4 := ip.To4(); len(v4) == net.IPv4len {
-		return int64(v4[0])<<24 | int64(v4[1])<<16 | int64(v4[2])<<8 | int64(v4[3])
+		ip = v4
 	}
 	for _, one = range ip {
 		intip = (intip << 8) | int64(one)
