@@ -4,10 +4,13 @@
 package codec
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/origadmin/toolkits/errors"
+
+	ggb "github.com/goexts/ggb"
 
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
@@ -18,15 +21,18 @@ const (
 	ErrUnsupportedDecodeType = errors.String("codec: unsupported decode type")
 )
 
+// Decoder interface
+type Decoder interface {
+	Decode(any) error
+}
+
 // DecodeJSONFile Decodes the given JSON file
 func DecodeJSONFile(name string, obj any) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		errorPanic(f.Close())
-	}()
+	defer errorPanic(f.Close())
 
 	return json.NewDecoder(f).Decode(obj)
 }
@@ -37,9 +43,8 @@ func DecodeTOMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		errorPanic(f.Close())
-	}()
+	defer errorPanic(f.Close())
+
 	_, err = toml.NewDecoder(f).Decode(obj)
 	if err != nil {
 		return err
@@ -53,9 +58,7 @@ func DecodeYAMLFile(name string, obj any) error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		errorPanic(f.Close())
-	}()
+	defer errorPanic(f.Close())
 
 	return yaml.NewDecoder(f).Decode(obj)
 }
@@ -63,7 +66,7 @@ func DecodeYAMLFile(name string, obj any) error {
 // DecodeFile Decodes the given file
 func DecodeFile(name string, obj any) error {
 	ext := filepath.Ext(name)
-	if ext == "" || !isSupportedExt(ext) {
+	if ext == "" || !isSupported(ext) {
 		return ErrUnsupportedDecodeType
 	}
 
@@ -74,6 +77,20 @@ func DecodeFile(name string, obj any) error {
 		return DecodeYAMLFile(name, obj)
 	case ".toml":
 		return DecodeTOMLFile(name, obj)
+	default:
+		return ErrUnsupportedDecodeType
+	}
+}
+
+// Decode Decodes the given reader with ext name into obj
+func Decode(rd io.Reader, obj any, ext string) error {
+	switch ext {
+	case ".json":
+		return json.NewDecoder(rd).Decode(obj)
+	case ".yaml", ".yml":
+		return yaml.NewDecoder(rd).Decode(obj)
+	case ".toml":
+		return ggb.OrNil(toml.NewDecoder(rd).Decode(obj))
 	default:
 		return ErrUnsupportedDecodeType
 	}

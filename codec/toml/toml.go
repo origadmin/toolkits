@@ -15,7 +15,7 @@ var (
 	NewDecoder = toml.NewDecoder
 	NewEncoder = toml.NewEncoder
 	DecodeFile = toml.DecodeFile
-	Decode     = toml.Decode
+	DecodeTOML = toml.Decode
 )
 
 type Value = toml.Primitive
@@ -45,4 +45,13 @@ func MustToString(v any) string {
 		panic(err)
 	}
 	return string(data)
+}
+
+// Decode decodes the given JSON string into v
+func Decode(data string, v any) error {
+	_, err := DecodeTOML(data, v)
+	if err != nil {
+		return err
+	}
+	return nil
 }
