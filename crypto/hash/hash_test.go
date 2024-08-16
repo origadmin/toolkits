@@ -6,8 +6,9 @@ package hash
 import (
 	"testing"
 
-	"github.com/origadmin/toolkits/errors"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/origadmin/toolkits/errors"
 )
 
 func TestGenerateScryptPassword(t *testing.T) {

@@ -7,10 +7,11 @@ import (
 	"encoding/hex"
 	"os"
 
-	"github.com/origadmin/toolkits/errors"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
+
+	"github.com/origadmin/toolkits/errors"
 )
 
 const (
