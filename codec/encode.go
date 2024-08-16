@@ -26,7 +26,7 @@ type Encoder interface {
 
 // EncodeJSONFile Encodes the given JSON file
 func EncodeJSONFile(name string, obj any) error {
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0o644)
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func EncodeJSONFile(name string, obj any) error {
 
 // EncodeYAMLFile Encodes the given YAML file
 func EncodeYAMLFile(name string, obj any) error {
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0o644)
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func EncodeYAMLFile(name string, obj any) error {
 
 // EncodeTOMLFile Encodes the given TOML file
 func EncodeTOMLFile(name string, obj any) error {
-	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0o644)
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
