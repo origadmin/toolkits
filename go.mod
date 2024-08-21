@@ -3,7 +3,7 @@ module github.com/origadmin/toolkits
 go 1.22.5
 
 require (
-	github.com/goexts/ggb v0.0.6
+	github.com/goexts/ggb v0.0.7
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/lmittmann/tint v1.0.5
 	github.com/pkg/errors v0.9.1
