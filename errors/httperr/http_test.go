@@ -1,4 +1,4 @@
-package rpc
+package httperr
 
 import (
 	"net/http"
@@ -33,17 +33,15 @@ func TestEqual(t *testing.T) {
 func TestErrors(t *testing.T) {
 	testData := []*Error{
 		{
-			Id:     "test",
+			ID:     "test",
 			Code:   500,
 			Detail: "Internal server error",
 		},
 	}
 
 	for _, e := range testData {
-		ne := New(e.Id, e.Code, e.Detail)
-		if ne == nil {
-			t.Fatalf("Expected error got nil %v", ne)
-		}
+		ne := New(e.ID, e.Code, e.Detail)
+
 		if e.Error() != ne.Error() {
 			t.Fatalf("Expected %s got %s", e.Error(), ne.Error())
 		}
@@ -54,8 +52,8 @@ func TestErrors(t *testing.T) {
 			t.Fatalf("Expected error got nil %v", pe)
 		}
 
-		if pe.Id != e.Id {
-			t.Fatalf("Expected %s got %s", e.Id, pe.Id)
+		if pe.ID != e.ID {
+			t.Fatalf("Expected %s got %s", e.ID, pe.ID)
 		}
 
 		if pe.Detail != e.Detail {
@@ -75,7 +73,7 @@ func TestAs(t *testing.T) {
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
 	}
-	if target.Id != "errors.rpc.test" || target.Code != 404 || target.Detail != "example" {
+	if target.ID != "errors.rpc.test" || target.Code != 404 || target.Detail != "example" {
 		t.Fatalf("invalid conversation %v != %v", err, target)
 	}
 	err = errors.New(err.Error())
@@ -103,29 +101,29 @@ func TestIs(t *testing.T) {
 }
 
 func TestRegisterCode(t *testing.T) {
-	// Test case 1: Register a new error code with a given Id
+	// Test case 1: Register a new error code with a given ID
 	code := int32(424)                   // Define a new error code
-	id := "response.status.custom_error" // Define a new error Id
+	id := "response.status.custom_error" // Define a new error ID
 	RegisterCode(code, id)
 	if got, want := ids[code], id; got != want {
 		t.Errorf("RegisterCode(%d, %s) = %s; want %s", code, id, got, want)
 	}
 
-	// Test case 2: Overwrite an existing error code with a new Id
+	// Test case 2: Overwrite an existing error code with a new ID
 	existingCode := int32(http.StatusBadRequest)
-	existingId := ids[existingCode]
-	newId := "response.status.bad_request_custom" // Define a new error Id
-	RegisterCode(existingCode, newId)
-	if got, want := ids[existingCode], newId; got != want {
-		t.Errorf("RegisterCode(%d, %s) overwrote existing code %d; got %s, want %s", existingCode, newId, existingCode, got, want)
+	existingID := ids[existingCode]
+	newID := "response.status.bad_request_custom" // Define a new error ID
+	RegisterCode(existingCode, newID)
+	if got, want := ids[existingCode], newID; got != want {
+		t.Errorf("RegisterCode(%d, %s) overwrote existing code %d; got %s, want %s", existingCode, newID, existingCode, got, want)
 	}
-	// Restore the original Id for the sake of other tests
-	ids[existingCode] = existingId
+	// Restore the original ID for the sake of other tests
+	ids[existingCode] = existingID
 }
 
 func TestError_Error(t *testing.T) {
 	err := &Error{
-		Id:     "response.status.bad_request",
+		ID:     "response.status.bad_request",
 		Code:   http.StatusBadRequest,
 		Detail: "Bad request",
 	}
@@ -137,7 +135,7 @@ func TestError_Error(t *testing.T) {
 
 func TestError_Status(t *testing.T) {
 	err := &Error{
-		Id:     "response.status.bad_request",
+		ID:     "response.status.bad_request",
 		Code:   http.StatusBadRequest,
 		Detail: "Bad request",
 	}
@@ -155,7 +153,7 @@ func TestError_Is(t *testing.T) {
 	}{
 		{
 			err: &Error{
-				Id:     "response.status.bad_request",
+				ID:     "response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "Bad request",
 			},
@@ -166,7 +164,7 @@ func TestError_Is(t *testing.T) {
 		},
 		{
 			err: &Error{
-				Id:     "response.status.bad_request",
+				ID:     "response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "Bad request",
 			},
@@ -197,7 +195,7 @@ func TestParse(t *testing.T) {
 		{
 			err: `{"id":"response.status.bad_request","code":400,"detail":"Bad request"}`,
 			want: &Error{
-				Id:     "response.status.bad_request",
+				ID:     "response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "Bad request",
 			},
@@ -205,7 +203,7 @@ func TestParse(t *testing.T) {
 		{
 			err: `{"id":"response.status.unauthorized","code":401,"detail":"Unauthorized"}`,
 			want: &Error{
-				Id:     "response.status.unauthorized",
+				ID:     "response.status.unauthorized",
 				Code:   http.StatusUnauthorized,
 				Detail: "Unauthorized",
 			},
@@ -222,8 +220,8 @@ func TestParse(t *testing.T) {
 		if gotDetail := got.Detail; gotDetail != c.want.Detail {
 			t.Errorf("Parse(%q).Detail = %q; want %q", c.err, gotDetail, c.want.Detail)
 		}
-		if gotId := got.Id; gotId != c.want.Id {
-			t.Errorf("Parse(%q).Id = %q; want %q", c.err, gotId, c.want.Id)
+		if gotID := got.ID; gotID != c.want.ID {
+			t.Errorf("Parse(%q).ID = %q; want %q", c.err, gotID, c.want.ID)
 		}
 		if gotCode := got.Code; gotCode != c.want.Code {
 			t.Errorf("Parse(%q).Code = %d; want %d", c.err, gotCode, c.want.Code)
@@ -239,12 +237,12 @@ func TestFromError(t *testing.T) {
 	}{
 		{
 			err: &Error{
-				Id:     "response.status.bad_request",
+				ID:     "response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "Bad request",
 			},
 			want: &Error{
-				Id:     "response.status.bad_request",
+				ID:     "response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "Bad request",
 			},
@@ -272,7 +270,6 @@ func TestFromError(t *testing.T) {
 		got := FromError(c.err)
 		if c.wantOK && !errors.Is(got, c.want) {
 			t.Errorf("FromError(%v) = %v; want %v, %v", c.err, got, c.want, c.wantOK)
-			return
 		}
 		if got == nil {
 			continue
@@ -280,8 +277,8 @@ func TestFromError(t *testing.T) {
 		if gotDetail := got.Detail; c.wantOK && gotDetail != c.want.Detail {
 			t.Errorf("FromError(%v).Detail = %q; want %q", c.err, gotDetail, c.want.Detail)
 		}
-		if gotId := got.Id; c.wantOK && gotId != c.want.Id {
-			t.Errorf("FromError(%v).Id = %q; want %q", c.err, gotId, c.want.Id)
+		if gotID := got.ID; c.wantOK && gotID != c.want.ID {
+			t.Errorf("FromError(%v).ID = %q; want %q", c.err, gotID, c.want.ID)
 		}
 		if gotCode := got.Code; c.wantOK && gotCode != c.want.Code {
 			t.Errorf("FromError(%v).Code = %d; want %d", c.err, gotCode, c.want.Code)
@@ -304,12 +301,12 @@ func TestBadRequest(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
+				id:     "testID",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				ID:     "testID",
 				Code:   http.StatusBadRequest,
 				Detail: "test format test obj",
 			},
@@ -322,7 +319,7 @@ func TestBadRequest(t *testing.T) {
 				obj:    []any{},
 			},
 			want: &Error{
-				Id:     BadRequestID,
+				ID:     BadRequestID,
 				Code:   http.StatusBadRequest,
 				Detail: "",
 			},
@@ -351,12 +348,12 @@ func TestUnauthorized(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
+				id:     "testID",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				ID:     "testID",
 				Code:   http.StatusUnauthorized,
 				Detail: "test format test obj",
 			},
@@ -369,7 +366,7 @@ func TestUnauthorized(t *testing.T) {
 				obj:    []any{},
 			},
 			want: &Error{
-				Id:     UnauthorizedID,
+				ID:     UnauthorizedID,
 				Code:   http.StatusUnauthorized,
 				Detail: "",
 			},
@@ -398,12 +395,12 @@ func TestForbidden(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
+				id:     "testID",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				ID:     "testID",
 				Code:   http.StatusForbidden,
 				Detail: "test format test obj",
 			},
@@ -416,7 +413,7 @@ func TestForbidden(t *testing.T) {
 				obj:    []any{},
 			},
 			want: &Error{
-				Id:     ForbiddenID,
+				ID:     ForbiddenID,
 				Code:   http.StatusForbidden,
 				Detail: "",
 			},
@@ -443,8 +440,8 @@ func TestNotFound(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if notFoundErr.Id != NotFoundID {
-		t.Errorf("Expected error Id %s, but got %s", NotFoundID, notFoundErr.Id)
+	if notFoundErr.ID != NotFoundID {
+		t.Errorf("Expected error ID %s, but got %s", NotFoundID, notFoundErr.ID)
 	}
 
 	if notFoundErr.Code != http.StatusNotFound {
@@ -468,8 +465,8 @@ func TestMethodNotAllowed(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if methodNotAllowedErr.Id != MethodNotAllowedID {
-		t.Errorf("Expected error Id %s, but got %s", MethodNotAllowedID, methodNotAllowedErr.Id)
+	if methodNotAllowedErr.ID != MethodNotAllowedID {
+		t.Errorf("Expected error ID %s, but got %s", MethodNotAllowedID, methodNotAllowedErr.ID)
 	}
 
 	if methodNotAllowedErr.Code != http.StatusMethodNotAllowed {
@@ -493,8 +490,8 @@ func TestTooManyRequests(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if tooManyRequestsErr.Id != TooManyRequestsID {
-		t.Errorf("Expected error Id %s, but got %s", TooManyRequestsID, tooManyRequestsErr.Id)
+	if tooManyRequestsErr.ID != TooManyRequestsID {
+		t.Errorf("Expected error ID %s, but got %s", TooManyRequestsID, tooManyRequestsErr.ID)
 	}
 
 	if tooManyRequestsErr.Code != http.StatusTooManyRequests {
@@ -518,8 +515,8 @@ func TestTimeout(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if timeoutErr.Id != RequestTimeoutID {
-		t.Errorf("Expected error Id %s, but got %s", RequestTimeoutID, timeoutErr.Id)
+	if timeoutErr.ID != RequestTimeoutID {
+		t.Errorf("Expected error ID %s, but got %s", RequestTimeoutID, timeoutErr.ID)
 	}
 
 	if timeoutErr.Code != http.StatusRequestTimeout {
@@ -543,8 +540,8 @@ func TestConflict(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if conflictErr.Id != ConflictID {
-		t.Errorf("Expected error Id %s, but got %s", ConflictID, conflictErr.Id)
+	if conflictErr.ID != ConflictID {
+		t.Errorf("Expected error ID %s, but got %s", ConflictID, conflictErr.ID)
 	}
 
 	if conflictErr.Code != http.StatusConflict {
@@ -568,8 +565,8 @@ func TestRequestEntityTooLarge(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if requestEntityTooLargeErr.Id != RequestEntityTooLargeID {
-		t.Errorf("Expected error Id %s, but got %s", RequestEntityTooLargeID, requestEntityTooLargeErr.Id)
+	if requestEntityTooLargeErr.ID != RequestEntityTooLargeID {
+		t.Errorf("Expected error ID %s, but got %s", RequestEntityTooLargeID, requestEntityTooLargeErr.ID)
 	}
 
 	if requestEntityTooLargeErr.Code != http.StatusRequestEntityTooLarge {
@@ -593,8 +590,8 @@ func TestInternalServerError(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if internalServerErrorErr.Id != InternalServerErrorID {
-		t.Errorf("Expected error Id %s, but got %s", InternalServerErrorID, internalServerErrorErr.Id)
+	if internalServerErrorErr.ID != InternalServerErrorID {
+		t.Errorf("Expected error ID %s, but got %s", InternalServerErrorID, internalServerErrorErr.ID)
 	}
 
 	if internalServerErrorErr.Code != http.StatusInternalServerError {
@@ -618,8 +615,8 @@ func TestNew(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if newErr.Id != "custom_id" {
-		t.Errorf("Expected error Id %s, but got %s", "custom_id", newErr.Id)
+	if newErr.ID != "custom_id" {
+		t.Errorf("Expected error ID %s, but got %s", "custom_id", newErr.ID)
 	}
 
 	if newErr.Code != 500 {
@@ -631,28 +628,28 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNewFormat(t *testing.T) {
+func TestNewf(t *testing.T) {
 	err := NewFormat("custom_id", 500, "Custom error with %s", "data")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
 
-	var newErr *Error
-	ok := errors.As(err, &newErr)
+	var newfErr *Error
+	ok := errors.As(err, &newfErr)
 	if !ok {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if newErr.Id != "custom_id" {
-		t.Errorf("Expected error Id %s, but got %s", "custom_id", newErr.Id)
+	if newfErr.ID != "custom_id" {
+		t.Errorf("Expected error ID %s, but got %s", "custom_id", newfErr.ID)
 	}
 
-	if newErr.Code != 500 {
-		t.Errorf("Expected error code %d, but got %d", 500, newErr.Code)
+	if newfErr.Code != 500 {
+		t.Errorf("Expected error code %d, but got %d", 500, newfErr.Code)
 	}
 
-	if newErr.Detail != "Custom error with data" {
-		t.Errorf("Expected error detail %s, but got %s", "Custom error with data", newErr.Detail)
+	if newfErr.Detail != "Custom error with data" {
+		t.Errorf("Expected error detail %s, but got %s", "Custom error with data", newfErr.Detail)
 	}
 }
 
@@ -668,8 +665,8 @@ func TestCode(t *testing.T) {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if codeErr.Id != NotFoundID {
-		t.Errorf("Expected error Id %s, but got %s", NotFoundID, codeErr.Id)
+	if codeErr.ID != NotFoundID {
+		t.Errorf("Expected error ID %s, but got %s", NotFoundID, codeErr.ID)
 	}
 
 	if codeErr.Code != 404 {

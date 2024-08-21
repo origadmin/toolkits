@@ -1,6 +1,6 @@
-// Package rpc provides a way to return detailed information
+// Package rpcerr provides a way to return detailed information
 // for an RPC request error. The error is normally JSON encoded.
-package rpc
+package rpcerr
 
 import (
 	"encoding/json"

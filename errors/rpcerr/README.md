@@ -26,4 +26,7 @@ from https://github.com/protocolbuffers/protobuf/releases
 
 ```bash
 > protoc -I. --go_out=paths=source_relative:. rpc.proto
+> protoc -I. --go_out=paths=source_relative:. --go-http_out=paths=source_relative:. rpc.proto
+> protoc -I. --go_out=paths=source_relative:. --go-errors_out=paths=source_relative:. rpc.proto
+> protoc -I. --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. rpc.proto
 ```
