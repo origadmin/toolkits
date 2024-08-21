@@ -7,7 +7,7 @@ replace github.com/origadmin/toolkits => ../
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/bytedance/sonic v1.12.1
-	github.com/goexts/ggb v0.0.6
+	github.com/goexts/ggb v0.0.7
 	github.com/json-iterator/go v1.1.12
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
