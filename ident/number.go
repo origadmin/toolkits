@@ -1,6 +1,7 @@
 package ident
 
 import (
+	"math/rand/v2"
 	"strconv"
 	"sync/atomic"
 )
@@ -10,7 +11,8 @@ type ident struct {
 	size  int
 }
 
-var StartNumber int64 = 1
+// StartNumber is the start number of the ident.
+var StartNumber = int64(rand.Int32()) << 32
 
 // Name returns the name of the object identifier.
 //
