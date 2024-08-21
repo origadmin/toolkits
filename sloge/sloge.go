@@ -29,10 +29,6 @@ const (
 	TintFormat
 )
 
-type tintOption struct {
-	Tint *tint.Options
-}
-
 // Option custom setup config
 type Option struct {
 	Files            []io.Writer
@@ -44,8 +40,21 @@ type Option struct {
 	AddSource        bool
 	LumberjackConfig *lumberjack.Logger
 	NoColor          bool
-	*tintOption
 }
+
+var (
+	defaultOption = &Option{
+		Files:            []io.Writer{os.Stdout},
+		LogFormat:        TextFormat,
+		TimeLayout:       DefaultTimeLayout,
+		DisableConsole:   false,
+		Level:            slog.LevelDebug,
+		ReplaceAttr:      nil,
+		AddSource:        true,
+		LumberjackConfig: nil,
+		NoColor:          false,
+	}
+)
 
 // WithFile write log to some File
 func WithFile(file string) settings.Setting[Option] {
@@ -93,18 +102,7 @@ func WithDisableConsole() settings.Setting[Option] {
 
 // New create a new slog.Logger
 func New(ss ...settings.Setting[Option]) *slog.Logger {
-	opt := settings.Apply(&Option{
-		Files:            []io.Writer{os.Stdout},
-		LogFormat:        TextFormat,
-		TimeLayout:       DefaultTimeLayout,
-		DisableConsole:   false,
-		Level:            slog.LevelDebug,
-		ReplaceAttr:      nil,
-		AddSource:        true,
-		LumberjackConfig: nil,
-		NoColor:          false,
-		tintOption:       nil,
-	}, ss)
+	opt := settings.Apply(defaultOption, ss)
 
 	if opt.DisableConsole {
 		opt.Files = nil
