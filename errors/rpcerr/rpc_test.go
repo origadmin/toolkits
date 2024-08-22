@@ -9,15 +9,15 @@ import (
 )
 
 func TestEqual(t *testing.T) {
-	err1 := NotFound("id1", "msg1")
-	err2 := NotFound("id2", "msg2")
+	err1 := NotFound("msg1")
+	err2 := NotFound("msg2")
 
 	if !Equal(err1, err2) {
 		t.Fatal("errors must be equal")
 	}
 
-	err1 = NotFound("id1", "msg1")
-	err2 = InternalServerError("id2", "msg2")
+	err1 = NotFound("msg1")
+	err2 = InternalServerError("msg2")
 
 	if Equal(err1, err2) {
 		t.Fatal("errors must be not equal")
@@ -41,9 +41,7 @@ func TestErrors(t *testing.T) {
 
 	for _, e := range testData {
 		ne := New(e.Id, e.Code, e.Detail)
-		if ne == nil {
-			t.Fatalf("Expected error got nil %v", ne)
-		}
+
 		if e.Error() != ne.Error() {
 			t.Fatalf("Expected %s got %s", e.Error(), ne.Error())
 		}
@@ -69,13 +67,13 @@ func TestErrors(t *testing.T) {
 }
 
 func TestAs(t *testing.T) {
-	err := NotFound("errors.rpc.test", "%s", "example")
+	err := NotFound("%s", "example")
 	var target *Error
 	match := errors.As(err, &target)
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
 	}
-	if target.Id != "errors.rpc.test" || target.Code != 404 || target.Detail != "example" {
+	if target.Id != "http.response.status.not_found" || target.Code != 404 || target.Detail != "example" {
 		t.Fatalf("invalid conversation %v != %v", err, target)
 	}
 	err = errors.New(err.Error())
@@ -87,15 +85,15 @@ func TestAs(t *testing.T) {
 }
 
 func TestIs(t *testing.T) {
-	var err = NotFound("errors.rpc.test", "%s", "example")
-	var target = NotFound("errors.rpc.test", "%s", "example")
+	var err = NotFound("%s", "example")
+	var target = NotFound("%s", "example")
 	match := errors.Is(err, target)
 	if !match {
 		t.Fatalf("%v should convert to String", err)
 	}
 
 	err = errors.New(err.Error())
-	target = NotFound("errors.rpc.test", "%s", "example")
+	target = NotFound("%s", "example")
 	match = errors.Is(err, target)
 	if match {
 		t.Fatalf("%v should not equal to String", err)
@@ -258,7 +256,7 @@ func TestFromError(t *testing.T) {
 			wantOK: true,
 		},
 		{
-			err:    NotFound("errors.rpc.test", "%s", "example"),
+			err:    NotFound("%s", "example"),
 			want:   nil,
 			wantOK: false,
 		},
@@ -272,7 +270,6 @@ func TestFromError(t *testing.T) {
 		got := FromError(c.err)
 		if c.wantOK && !errors.Is(got, c.want) {
 			t.Errorf("FromError(%v) = %v; want %v, %v", c.err, got, c.want, c.wantOK)
-			return
 		}
 		if got == nil {
 			continue
@@ -292,7 +289,6 @@ func TestFromError(t *testing.T) {
 
 func TestBadRequest(t *testing.T) {
 	type args struct {
-		id     string
 		format string
 		obj    []any
 	}
@@ -304,12 +300,11 @@ func TestBadRequest(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				Id:     "http.response.status.bad_request",
 				Code:   http.StatusBadRequest,
 				Detail: "test format test obj",
 			},
@@ -317,7 +312,6 @@ func TestBadRequest(t *testing.T) {
 		{
 			name: "Test with empty id and format",
 			args: args{
-				id:     "",
 				format: "",
 				obj:    []any{},
 			},
@@ -330,7 +324,7 @@ func TestBadRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := BadRequest(tt.args.id, tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
+			if got := BadRequest(tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("BadRequest() = %v, want %v", got, tt.want)
 			}
 		})
@@ -339,7 +333,6 @@ func TestBadRequest(t *testing.T) {
 
 func TestUnauthorized(t *testing.T) {
 	type args struct {
-		id     string
 		format string
 		obj    []any
 	}
@@ -351,12 +344,11 @@ func TestUnauthorized(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				Id:     "http.response.status.unauthorized",
 				Code:   http.StatusUnauthorized,
 				Detail: "test format test obj",
 			},
@@ -364,7 +356,6 @@ func TestUnauthorized(t *testing.T) {
 		{
 			name: "Test with empty id and format",
 			args: args{
-				id:     "",
 				format: "",
 				obj:    []any{},
 			},
@@ -377,7 +368,7 @@ func TestUnauthorized(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Unauthorized(tt.args.id, tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
+			if got := Unauthorized(tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Unauthorized() = %v, want %v", got, tt.want)
 			}
 		})
@@ -386,7 +377,6 @@ func TestUnauthorized(t *testing.T) {
 
 func TestForbidden(t *testing.T) {
 	type args struct {
-		id     string
 		format string
 		obj    []any
 	}
@@ -398,12 +388,11 @@ func TestForbidden(t *testing.T) {
 		{
 			name: "Test with non-empty id and format",
 			args: args{
-				id:     "testId",
 				format: "test format %s",
 				obj:    []any{"test obj"},
 			},
 			want: &Error{
-				Id:     "testId",
+				Id:     "http.response.status.forbidden",
 				Code:   http.StatusForbidden,
 				Detail: "test format test obj",
 			},
@@ -411,7 +400,6 @@ func TestForbidden(t *testing.T) {
 		{
 			name: "Test with empty id and format",
 			args: args{
-				id:     "",
 				format: "",
 				obj:    []any{},
 			},
@@ -424,7 +412,7 @@ func TestForbidden(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Forbidden(tt.args.id, tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
+			if got := Forbidden(tt.args.format, tt.args.obj...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Forbidden() = %v, want %v", got, tt.want)
 			}
 		})
@@ -432,7 +420,7 @@ func TestForbidden(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	err := NotFound("", "Resource not found")
+	err := NotFound("Resource not found")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -457,7 +445,7 @@ func TestNotFound(t *testing.T) {
 }
 
 func TestMethodNotAllowed(t *testing.T) {
-	err := MethodNotAllowed("", "Method not allowed")
+	err := MethodNotAllowed("Method not allowed")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -482,7 +470,7 @@ func TestMethodNotAllowed(t *testing.T) {
 }
 
 func TestTooManyRequests(t *testing.T) {
-	err := TooManyRequests("", "Too many requests")
+	err := TooManyRequests("Too many requests")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -507,7 +495,7 @@ func TestTooManyRequests(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	err := Timeout("", "Request timeout")
+	err := Timeout("Request timeout")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -532,7 +520,7 @@ func TestTimeout(t *testing.T) {
 }
 
 func TestConflict(t *testing.T) {
-	err := Conflict("", "Resource conflict")
+	err := Conflict("Resource conflict")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -557,7 +545,7 @@ func TestConflict(t *testing.T) {
 }
 
 func TestRequestEntityTooLarge(t *testing.T) {
-	err := RequestEntityTooLarge("", "Request entity too large")
+	err := RequestEntityTooLarge("Request entity too large")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -582,7 +570,7 @@ func TestRequestEntityTooLarge(t *testing.T) {
 }
 
 func TestInternalServerError(t *testing.T) {
-	err := InternalServerError("", "Internal server error")
+	err := InternalServerError("Internal server error")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
@@ -631,28 +619,28 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNewFormat(t *testing.T) {
+func TestNewf(t *testing.T) {
 	err := NewFormat("custom_id", 500, "Custom error with %s", "data")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
 
-	var newErr *Error
-	ok := errors.As(err, &newErr)
+	var newfErr *Error
+	ok := errors.As(err, &newfErr)
 	if !ok {
 		t.Errorf("Expected type *Error, but got %T", err)
 	}
 
-	if newErr.Id != "custom_id" {
-		t.Errorf("Expected error Id %s, but got %s", "custom_id", newErr.Id)
+	if newfErr.Id != "custom_id" {
+		t.Errorf("Expected error Id %s, but got %s", "custom_id", newfErr.Id)
 	}
 
-	if newErr.Code != 500 {
-		t.Errorf("Expected error code %d, but got %d", 500, newErr.Code)
+	if newfErr.Code != 500 {
+		t.Errorf("Expected error code %d, but got %d", 500, newfErr.Code)
 	}
 
-	if newErr.Detail != "Custom error with data" {
-		t.Errorf("Expected error detail %s, but got %s", "Custom error with data", newErr.Detail)
+	if newfErr.Detail != "Custom error with data" {
+		t.Errorf("Expected error detail %s, but got %s", "Custom error with data", newfErr.Detail)
 	}
 }
 
