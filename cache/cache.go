@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/origadmin/toolkits/setting"
+	"github.com/goexts/ggb/settings"
 )
 
 // DefaultDelimiter is the default delimiter used in cache keys.
@@ -111,13 +111,22 @@ type ObjectNSCache interface {
 
 // Option specifies configuration options for the cache.
 type Option struct {
-	// Delimiter is the separator used in cache key generation.
-	Delimiter string
+	// Joint is the separator used in cache key generation.
+	Concat func(ns, key string) string
 }
 
-// WithDelimiter sets the delimiter option.
-func WithDelimiter(delimiter string) setting.Setting[Option] {
+// WithConcat sets the delimiter option.
+func WithConcat(concat func(ns, key string) string) settings.Setting[Option] {
 	return func(o *Option) {
-		o.Delimiter = delimiter
+		o.Concat = concat
+	}
+}
+
+// DefaultOption returns the default option.
+func DefaultOption() Option {
+	return Option{
+		Concat: func(ns, key string) string {
+			return ns + DefaultDelimiter + key
+		},
 	}
 }
