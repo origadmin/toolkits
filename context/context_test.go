@@ -7,6 +7,7 @@ import (
 
 // unused check
 var (
+	_ = WithContext
 	_ = TODO
 	_ = WithDeadlineCause
 	_ = WithCancelCause
@@ -24,18 +25,15 @@ var (
 	_ = FromCreatedBy
 	_ = NewLogger
 	_ = FromLogger
-	_ = Alias
 	_ = Background
-	_ = NewTraceID
+	_ = NewTrace
 	_ = FromTrans
-	_ = FromTraceID
+	_ = FromTrace
 	_ = NewTrans
-	_ = NewUserID
-	_ = FromUserID
-	_ = NewUserToken
-	_ = FromUserToken
-	_ = NewIsRootUser
-	_ = FromIsRootUser
+	_ = NewID
+	_ = FromID
+	_ = NewToken
+	_ = FromToken
 	_ = NewUserCache
 	_ = FromUserCache
 	_ = NewTag
@@ -51,7 +49,7 @@ func TestCreatesNewContextWithTraceID(t *testing.T) {
 	// Arrr! Let's create a new context and see if it has a trace ID!
 	ctx := Background()
 	traceID := "trace-123"
-	newCtx := NewTraceID(ctx, traceID)
+	newCtx := NewTrace(ctx, traceID)
 
 	if newCtx == ctx {
 		t.Error("Shiver me timbers! The context should be new!")
@@ -63,9 +61,9 @@ func TestUsesProvidedTraceIDCorrectly(t *testing.T) {
 	// Ahoy! Let's check if the trace ID is used correctly!
 	ctx := Background()
 	traceID := "trace-456"
-	newCtx := NewTraceID(ctx, traceID)
+	newCtx := NewTrace(ctx, traceID)
 
-	if newCtx.Value(traceIDCtx{}) != traceID {
+	if newCtx.Value(traceCtx{}) != traceID {
 		t.Error("Blimey! The trace ID wasn't set correctly!")
 	}
 }
@@ -75,11 +73,11 @@ func TestReturnsContextWithTraceID(t *testing.T) {
 	// Yo-ho-ho! Let's see if the context includes the trace ID!
 	ctx := Background()
 	traceID := "trace-789"
-	newCtx := NewTraceID(ctx, traceID)
-	newCtx = NewTraceID(ctx, "trace-788")
-	newCtx = NewTraceID(ctx, "trace-788")
-	newCtx = NewTraceID(ctx, traceID)
-	if FromTraceID(newCtx) != traceID {
+	newCtx := NewTrace(ctx, traceID)
+	newCtx = NewTrace(ctx, "trace-788")
+	newCtx = NewTrace(ctx, "trace-788")
+	newCtx = NewTrace(ctx, traceID)
+	if FromTrace(newCtx) != traceID {
 		t.Error("Arrr! The context doesn't include the trace ID!")
 	}
 }
@@ -89,9 +87,9 @@ func TestManagesEmptyStringTraceID(t *testing.T) {
 	// Ahoy matey! Let's see how it handles an empty string trace ID!
 	ctx := Background()
 	traceID := ""
-	newCtx := NewTraceID(ctx, traceID)
+	newCtx := NewTrace(ctx, traceID)
 
-	if newCtx.Value(traceIDCtx{}) != traceID {
+	if newCtx.Value(traceCtx{}) != traceID {
 		t.Error("Blimey! The empty string trace ID wasn't set correctly!")
 	}
 }
@@ -101,9 +99,9 @@ func TestDealsWithExtremelyLongTraceID(t *testing.T) {
 	// Yo-ho-ho! Let's see how it handles an extremely long trace ID!
 	ctx := Background()
 	traceID := string(make([]byte, 10000))
-	newCtx := NewTraceID(ctx, traceID)
+	newCtx := NewTrace(ctx, traceID)
 
-	if newCtx.Value(traceIDCtx{}) != traceID {
+	if newCtx.Value(traceCtx{}) != traceID {
 		t.Error("Arrr! The extremely long trace ID wasn't set correctly!")
 	}
 }
@@ -113,17 +111,17 @@ func TestHandlesSpecialCharactersInTraceID(t *testing.T) {
 	// Avast ye! Let's see how it handles special characters in the trace ID!
 	ctx := Background()
 	traceID := "!@#$%^&*()_+"
-	newCtx := NewTraceID(ctx, traceID)
+	newCtx := NewTrace(ctx, traceID)
 	newCtx = NewTrans(newCtx, "123")
-	newCtx = NewUserID(newCtx, "123")
-	newCtx = NewUserToken(newCtx, "NewUserToken")
+	newCtx = NewID(newCtx, "123")
+	newCtx = NewToken(newCtx, "NewToken")
 	newCtx = NewUserCache(newCtx, "NewUserCache")
 	newCtx = NewRowLock(newCtx)
 	newCtx = WithValue(newCtx, "456", "789")
 	newCtx = WithMapValue(newCtx, "456", "789")
 	newCtx = WithMapValue(newCtx, "ggb", "ggb")
-	t.Log(FromTraceID(newCtx))
-	if FromTraceID(newCtx) != traceID {
+	t.Log(FromTrace(newCtx))
+	if FromTrace(newCtx) != traceID {
 		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
 	} else {
 
@@ -140,13 +138,13 @@ func TestHandlesSpecialCharactersInTraceID(t *testing.T) {
 		t.Log(v)
 	}
 
-	if v := FromUserID(newCtx); v == "" {
+	if v := FromID(newCtx); v == "" {
 		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
 	} else {
 		t.Log(v)
 	}
 
-	if v := FromUserToken(newCtx); v == "" {
+	if v := FromToken(newCtx); v == "" {
 		t.Error("Blimey! The special characters in the trace ID weren't set correctly!")
 	} else {
 		t.Log(v)

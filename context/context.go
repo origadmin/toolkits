@@ -4,46 +4,63 @@
 package context
 
 import (
-	"context"
-	"log/slog"
 	"reflect"
 )
 
 // WithContext returns a new context with the provided context.Context value.
-func WithContext(ctx context.Context) Context {
+func WithContext(ctx Context) Context {
 	if ctx == nil {
 		return Background()
 	}
 	return ctx
 }
 
-type traceIDCtx struct{}
+type traceCtx struct{}
 
-// NewTraceID returns a new context with the provided traceID value.
+// NewTrace returns a new context with the provided trace value.
 //
-// It takes a context and a traceID string as parameters and returns a context.
-func NewTraceID(ctx Context, traceID string) Context {
-	return WithValue(ctx, traceIDCtx{}, traceID)
+// It takes a context and a trace string as parameters and returns a context.
+func NewTrace(ctx Context, trace string) Context {
+	return WithValue(ctx, traceCtx{}, trace)
 }
 
-// FromTraceID returns the trace ID from the context.
+// FromTrace returns the trace id from the context.
 //
 // It takes a Context as a parameter and returns a string.
-func FromTraceID(ctx Context) string {
-	if v := Value(ctx, traceIDCtx{}); v != nil {
-		return v.(string)
+func FromTrace(ctx Context) string {
+	if v, ok := Value(ctx, traceCtx{}).(string); ok {
+		return v
 	}
 	return ""
 }
 
-type transCtx struct{}
+type dbCtx struct{}
 
-// NewTrans creates a new context with the provided dbx client value.
-func NewTrans(ctx Context, db any) Context {
-	return WithValue(ctx, transCtx{}, db)
+// NewDB creates a new context with the provided db client value.
+//
+// It takes a context and a db client as parameters and returns a context.
+func NewDB(ctx Context, db any) Context {
+	return WithValue(ctx, dbCtx{}, db)
 }
 
-// FromTrans retrieves a dbx client from the context.
+// FromDB retrieves a db client from the context.
+//
+// It takes a Context as a parameter and returns a db client.
+func FromDB(ctx Context) (any, bool) {
+	if v := ctx.Value(dbCtx{}); v != nil {
+		return v, true
+	}
+	return nil, false
+}
+
+type transCtx struct{}
+
+// NewTrans creates a new context with the provided tx client value.
+func NewTrans(ctx Context, tx any) Context {
+	return WithValue(ctx, transCtx{}, tx)
+}
+
+// FromTrans retrieves a tx client from the context.
 func FromTrans(ctx Context) (any, bool) {
 	if v := ctx.Value(transCtx{}); v != nil {
 		return v, true
@@ -62,65 +79,46 @@ func NewRowLock(ctx Context) Context {
 //
 // It takes a Context as a parameter and returns a boolean.
 func FromRowLock(ctx Context) bool {
-	v := ctx.Value(rowLockCtx{})
-	return v != nil && v.(bool)
+	v, ok := ctx.Value(rowLockCtx{}).(bool)
+	return ok && v
 }
 
-type userIDCtx struct{}
+type idCtx struct{}
 
-// NewUserID returns a new context with the provided userID value.
+// NewID returns a new context with the provided userID value.
 //
 // It takes a context and a userID string as parameters and returns a context.
-func NewUserID(ctx Context, userID string) Context {
-	return WithValue(ctx, userIDCtx{}, userID)
+func NewID(ctx Context, id string) Context {
+	return WithValue(ctx, idCtx{}, id)
 }
 
-// FromUserID returns the user ID from the context.
+// FromID returns the user ID from the context.
 //
 // It takes a Context as a parameter and returns a string.
-func FromUserID(ctx Context) string {
-	v := ctx.Value(userIDCtx{})
-	if v != nil {
-		return v.(string)
+func FromID(ctx Context) string {
+	if v, ok := ctx.Value(idCtx{}).(string); ok {
+		return v
 	}
 	return ""
 }
 
-type userTokenCtx struct{}
+type tokenCtx struct{}
 
-// NewUserToken returns a new context with the provided userToken value.
+// NewToken returns a new context with the provided userToken value.
 //
 // It takes a context and a userToken string as parameters and returns a context.
-func NewUserToken(ctx Context, userToken string) Context {
-	return WithValue(ctx, userTokenCtx{}, userToken)
+func NewToken(ctx Context, token string) Context {
+	return WithValue(ctx, tokenCtx{}, token)
 }
 
-// FromUserToken returns the user token from the context.
+// FromToken returns the user token from the context.
 //
 // It takes a Context as a parameter and returns a string.
-func FromUserToken(ctx Context) string {
-	v := ctx.Value(userTokenCtx{})
-	if v != nil {
-		return v.(string)
+func FromToken(ctx Context) string {
+	if v, ok := ctx.Value(tokenCtx{}).(string); ok {
+		return v
 	}
 	return ""
-}
-
-type isRootUserCtx struct{}
-
-// NewIsRootUser returns a new context with the provided isRootUser value.
-//
-// It takes a Context as a parameter and returns a context.
-func NewIsRootUser(ctx Context) Context {
-	return WithValue(ctx, isRootUserCtx{}, true)
-}
-
-// FromIsRootUser returns the isRootUser from the context.
-//
-// It takes a Context as a parameter and returns a boolean.
-func FromIsRootUser(ctx Context) bool {
-	v := ctx.Value(isRootUserCtx{})
-	return v != nil && v.(bool)
 }
 
 type userCacheCtx struct{}
@@ -136,8 +134,7 @@ func NewUserCache(ctx Context, userCache any) Context {
 //
 // It takes a Context as a parameter and returns a userCache value.
 func FromUserCache(ctx Context) (any, bool) {
-	v := ctx.Value(userCacheCtx{})
-	if v != nil {
+	if v := ctx.Value(userCacheCtx{}); v != nil {
 		return v, true
 	}
 	return nil, false
@@ -157,53 +154,12 @@ func NewCreatedBy(ctx Context, by string) Context {
 // It takes a Context as a parameter and returns a string.
 func FromCreatedBy(ctx Context) string {
 	// Attempt to retrieve the creator information from the context.
-	v := ctx.Value(createdByCtx{})
-	if v != nil {
+	if v, ok := ctx.Value(createdByCtx{}).(string); ok {
 		// If found, return the creator information.
-		return v.(string)
+		return v
 	}
 	// If not found, return an empty string.
 	return ""
-}
-
-type dbCtx struct{}
-
-// NewDB creates a new context with the provided db client value.
-//
-// It takes a context and a db client as parameters and returns a context.
-func NewDB(ctx Context, db any) Context {
-	return WithValue(ctx, dbCtx{}, db)
-}
-
-// FromDB retrieves a db client from the context.
-//
-// It takes a Context as a parameter and returns a db client.
-func FromDB(ctx Context) (any, bool) {
-	v := ctx.Value(dbCtx{})
-	if v != nil {
-		return v, true
-	}
-	return nil, false
-}
-
-type loggerCtx struct{}
-
-// NewLogger creates a new context with the provided logger value.
-//
-// It takes a Context and a logger as parameters and returns a context.
-func NewLogger(ctx Context, logger *slog.Logger) Context {
-	return WithValue(ctx, loggerCtx{}, logger)
-}
-
-// FromLogger retrieves a logger from the context.
-//
-// It takes a Context as a parameter and returns a logger.
-func FromLogger(ctx Context) (*slog.Logger, bool) {
-	v := ctx.Value(loggerCtx{})
-	if v != nil {
-		return v.(*slog.Logger), true
-	}
-	return nil, false
 }
 
 type tagCtx struct{}
@@ -219,11 +175,8 @@ func NewTag(ctx Context, tag string) Context {
 //
 // It takes a Context as a parameter and returns a string.
 func FromTag(ctx Context) string {
-	v := ctx.Value(tagCtx{})
-	if v != nil {
-		if s, ok := v.(string); ok {
-			return s
-		}
+	if v, ok := ctx.Value(tagCtx{}).(string); ok {
+		return v
 	}
 	return ""
 }
@@ -241,11 +194,8 @@ func NewStack(ctx Context, stack string) Context {
 //
 // It takes a Context as a parameter and returns a string.
 func FromStack(ctx Context) string {
-	v := ctx.Value(stackCtx{})
-	if v != nil {
-		if s, ok := v.(string); ok {
-			return s
-		}
+	if v, ok := ctx.Value(stackCtx{}).(string); ok {
+		return v
 	}
 	return ""
 }
@@ -306,24 +256,3 @@ func FromMapContext(parent Context) map[any]any {
 func Value(ctx Context, key any) any {
 	return ctx.Value(key)
 }
-
-//
-// // Parent retrieves the parent context.
-// func Parent(ptr Context) Context {
-// 	if ptr == nil {
-// 		return nil
-// 	}
-// 	kind := reflect.TypeOf(ptr).Kind()
-// 	v := reflect.ValueOf(ptr)
-// 	if kind == reflect.Ptr {
-// 		v = v.Elem()
-// 	}
-// 	var field reflect.Value
-// 	for i := 0; i < v.NumField(); i++ {
-// 		field = v.Field(i)
-// 		if field.Type().Name() == "Context" {
-// 			return field.Interface().(Context)
-// 		}
-// 	}
-// 	return nil
-// }
