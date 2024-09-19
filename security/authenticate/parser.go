@@ -88,13 +88,13 @@ type SessionDecoder struct {
 // Decode implements the AuthDecoder interface.
 func (sd *SessionDecoder) Decode(req *http.Request) (string, bool) {
 	// Gets the session ID from the request
-	sessionID, err := req.Cookie(sd.SessionIDKey)
-	if err != nil || sessionID == nil {
+	cookie, err := req.Cookie(sd.SessionIDKey)
+	if err != nil || cookie == nil {
 		return "", false
 	}
 
 	// Obtain authentication information based on the session ID
-	session, ok := sd.getSession(sessionID.Value)
+	session, ok := sd.getSession(cookie.Value)
 	if !ok {
 		return "", false
 	}
