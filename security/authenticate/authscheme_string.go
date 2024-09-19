@@ -14,19 +14,21 @@ func _() {
 	_ = x[AuthSchemeDigest-3]
 	_ = x[AuthSchemeHOBA-4]
 	_ = x[AuthSchemeMutual-5]
-	_ = x[AuthSchemeSCRAMSHA1-6]
-	_ = x[AuthSchemeSCRAMSHA256-7]
-	_ = x[AuthSchemeAWS4HMAC256-8]
-	_ = x[AuthSchemeNegotiate-9]
-	_ = x[AuthSchemeNTLM-10]
-	_ = x[AuthSchemeOAuth-11]
-	_ = x[AuthSchemeVapid-12]
-	_ = x[AuthSchemeUnknown-13]
+	_ = x[AuthSchemeNegotiate-6]
+	_ = x[AuthSchemeVapid-7]
+	_ = x[AuthSchemeSCRAM-8]
+	_ = x[AuthSchemeAWS4HMAC256-9]
+	_ = x[AuthSchemeDPoP-10]
+	_ = x[AuthSchemeGNAP-11]
+	_ = x[AuthSchemePrivate-12]
+	_ = x[AuthSchemeOAuth-13]
+	_ = x[AuthSchemeUnknown-14]
+	_ = x[authSchemeMax-15]
 }
 
-const _AuthScheme_name = "AnonymousBasicBearerDigestHOBAMutualSCRAMSHA1SCRAMSHA256AWS4HMAC256NegotiateNTLMOAuthVapidUnknown"
+const _AuthScheme_name = "AnonymousBasicBearerDigestHOBAMutualNegotiateVapidSCRAMAWS4HMAC256DPoPGNAPPrivateOAuthUnknownauthSchemeMax"
 
-var _AuthScheme_index = [...]uint8{0, 9, 14, 20, 26, 30, 36, 45, 56, 67, 76, 80, 85, 90, 97}
+var _AuthScheme_index = [...]uint8{0, 9, 14, 20, 26, 30, 36, 45, 50, 55, 66, 70, 74, 81, 86, 93, 106}
 
 func (i AuthScheme) String() string {
 	if i < 0 || i >= AuthScheme(len(_AuthScheme_index)-1) {

@@ -13,6 +13,8 @@ type Authenticate struct {
 	Scheme AuthScheme
 	// Credentials are the credentials associated with the authorization.
 	Credentials string
+	// Other contains other information about the authorization.
+	Other []string
 }
 
 // Encode encodes the Authenticate struct into a string.
@@ -49,16 +51,20 @@ func ParseAuth(auth string) (*Authenticate, bool) {
 	}
 
 	tokens := strings.Split(auth, " ")
-	if len(tokens) == 1 {
+	switch len(tokens) {
+	case 0:
+		return &Authenticate{Scheme: AuthSchemeUnknown, Credentials: auth}, false
+	case 1:
 		return &Authenticate{Scheme: AuthSchemeAnonymous, Credentials: tokens[0]}, true
-	}
+	default:
 
-	for scheme := AuthScheme(0); scheme < AuthSchemeUnknown; scheme++ {
-		if strings.EqualFold(tokens[0], scheme.String()) {
-			return &Authenticate{Scheme: scheme, Credentials: tokens[1]}, true
+	}
+	for scheme := AuthSchemeBasic; scheme < authSchemeMax; scheme++ {
+		if scheme.Equal(tokens[0]) {
+			return &Authenticate{Scheme: scheme, Credentials: tokens[1], Other: tokens}, true
 		}
 	}
-	return &Authenticate{Scheme: AuthSchemeUnknown, Credentials: auth}, false
+	return &Authenticate{Scheme: AuthSchemeUnknown, Credentials: tokens[1], Other: tokens}, true
 }
 
 // BasicAuthUserPass base64 encodes userid and password and returns the encoded string.:

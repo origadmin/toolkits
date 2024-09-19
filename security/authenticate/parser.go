@@ -1,7 +1,10 @@
 package authenticate
 
 import (
+	"context"
 	"net/http"
+
+	"github.com/origadmin/toolkits/storage/cache"
 )
 
 type AuthDecoder interface {
@@ -74,4 +77,38 @@ func (cd *CookieDecoder) Decode(req *http.Request) (string, bool) {
 		return cookies.Value, true
 	}
 	return "", false
+}
+
+// SessionDecoder decodes the session information.
+type SessionDecoder struct {
+	SessionIDKey   string
+	SessionStorage cache.Cache
+}
+
+// Decode implements the AuthDecoder interface.
+func (sd *SessionDecoder) Decode(req *http.Request) (string, bool) {
+	// Gets the session ID from the request
+	sessionID, err := req.Cookie(sd.SessionIDKey)
+	if err != nil || sessionID == nil {
+		return "", false
+	}
+
+	// Obtain authentication information based on the session ID
+	session, ok := sd.getSession(sessionID.Value)
+	if !ok {
+		return "", false
+	}
+
+	return session, true
+}
+
+func (sd *SessionDecoder) getSession(id string) (string, bool) {
+	if sd.SessionStorage == nil {
+		return "", false
+	}
+	session, err := sd.SessionStorage.Get(context.Background(), id)
+	if err != nil {
+		return "", false
+	}
+	return session, true
 }
