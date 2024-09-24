@@ -3,6 +3,7 @@ package authenticate
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/origadmin/toolkits/storage/cache"
 )
@@ -12,7 +13,11 @@ type AuthDecoder interface {
 }
 
 type RequestParser interface {
-	Parse(req *http.Request) (*Authenticate, bool)
+	Parse(req *http.Request) (Authenticator, bool)
+}
+
+type ResponseWriter interface {
+	Write(http.ResponseWriter, Authenticator) error
 }
 
 // RequestParser is used to parse authentication information from different parts of an HTTP request.
@@ -27,7 +32,7 @@ func NewRequestParser(decodes ...AuthDecoder) RequestParser {
 }
 
 // Parse parses the authentication information from the provided HTTP request.
-func (rp *requestParser) Parse(req *http.Request) (*Authenticate, bool) {
+func (rp *requestParser) Parse(req *http.Request) (Authenticator, bool) {
 	for i := range rp.Decodes {
 		if auth, ok := rp.Decodes[i].Decode(req); ok {
 			return ParseAuth(auth)
@@ -93,22 +98,100 @@ func (sd *SessionDecoder) Decode(req *http.Request) (string, bool) {
 		return "", false
 	}
 
-	// Obtain authentication information based on the session ID
-	session, ok := sd.getSession(cookie.Value)
-	if !ok {
-		return "", false
-	}
-
-	return session, true
+	return sd.getSession(cookie.Value)
 }
 
 func (sd *SessionDecoder) getSession(id string) (string, bool) {
 	if sd.SessionStorage == nil {
 		return "", false
 	}
+	// Obtain authentication information based on the session ID
 	session, err := sd.SessionStorage.Get(context.Background(), id)
 	if err != nil {
 		return "", false
 	}
 	return session, true
+}
+
+const defaultMaxMemory = int64(32 << 20)
+
+type FormDecoder struct {
+	Key       string
+	MaxMemory int64
+}
+
+// Decode implements the AuthDecoder interface.
+func (fd *FormDecoder) Decode(req *http.Request) (string, bool) {
+	if req.PostForm != nil {
+		maxMemory := defaultMaxMemory
+		if fd.MaxMemory > 0 {
+			maxMemory = fd.MaxMemory
+		}
+		err := req.ParseMultipartForm(maxMemory)
+		if err != nil {
+			return "", false
+		}
+	}
+	value := req.PostForm.Get(fd.Key)
+	if value == "" {
+		return "", false
+	}
+
+	return value, true
+}
+
+type ParamDecoder struct {
+	Key string
+}
+
+// Decode implements the AuthDecoder interface.
+func (pd *ParamDecoder) Decode(req *http.Request) (string, bool) {
+	value := req.PathValue(pd.Key)
+	if value == "" {
+		return "", false
+	}
+
+	return value, true
+}
+
+// ParseRequest parses the Authorization header from the provided HTTP request.
+// If the header is empty, it returns nil and false.
+func ParseRequest(req *http.Request) (Authenticator, bool) {
+	return NewRequestParser(&AuthorizationDecoder{
+		Key: "Authorization",
+	}).Parse(req)
+}
+
+// ParseWWWRequest parses the WWW-authenticate header from the provided HTTP request.
+// If the header is empty, it returns nil and false.
+func ParseWWWRequest(req *http.Request) (Authenticator, bool) {
+	return NewRequestParser(&AuthorizationDecoder{
+		Key: "WWW-authenticate",
+	}).Parse(req)
+}
+
+// ParseAuth parses the authorization and returns an authenticate struct with the type and credentials extracted.
+// If the header is empty, it returns TypeUnknown with the provided auth string and false.
+// If the header contains only one token, it returns TypeAnonymous with the token as credentials and true.
+// For headers with multiple tokens, it checks the type (basic, bearer, digest) and returns the corresponding to authenticate struct with the credentials and true.
+// If the type is not recognized, it returns TypeUnknown with the original auth string and false.
+func ParseAuth(auth string) (Authenticator, bool) {
+	if len(auth) == 0 {
+		return &httpAuthenticate{scheme: AuthSchemeUnknown, credentials: auth}, false
+	}
+
+	tokens := strings.Split(auth, " ")
+	switch len(tokens) {
+	case 0:
+		return &httpAuthenticate{scheme: AuthSchemeUnknown, credentials: auth}, false
+	case 1:
+		return &httpAuthenticate{scheme: AuthSchemeAnonymous, credentials: tokens[0]}, true
+	default:
+	}
+	for scheme := AuthSchemeBasic; scheme < authSchemeMax; scheme++ {
+		if scheme.Equal(tokens[0]) {
+			return &httpAuthenticate{scheme: scheme, credentials: tokens[1], extra: tokens}, true
+		}
+	}
+	return &httpAuthenticate{scheme: AuthSchemeUnknown, credentials: tokens[1], extra: tokens}, true
 }
