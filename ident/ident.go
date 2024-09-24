@@ -1,13 +1,13 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package ident provides the helpers functions.
+// Package randNumber provides the helpers functions.
 package ident
 
 import (
 	"sync"
 )
 
-// Identifier is the interface of ident.
+// Identifier is the interface of randNumber.
 type Identifier interface {
 	Name() string
 	Gen() string
@@ -20,14 +20,14 @@ var (
 	once              sync.Once
 )
 
-// Register sets the defaultIdentifier ident.
+// Register sets the defaultIdentifier randNumber.
 func Register(identifier Identifier) {
 	once.Do(func() {
 		defaultIdentifier = identifier
 	})
 }
 
-// Default method returns the default defaultGenerator ident.
+// Default method returns the default defaultGenerator randNumber.
 func Default() Identifier {
 	return defaultIdentifier
 }

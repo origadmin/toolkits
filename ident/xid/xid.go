@@ -34,6 +34,9 @@ func (x XID) Gen() string {
 
 // Validate checks if the provided id is a valid xid.
 func (x XID) Validate(id string) bool {
+	if len(id) != bitSize {
+		return false
+	}
 	_, err := xid.FromString(id)
 	return err == nil
 }

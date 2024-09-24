@@ -11,20 +11,19 @@ import (
 	"github.com/origadmin/toolkits/ident"
 )
 
-// nodeNumber range from 0 to 1023 is used for generating unique node ID.
+// nodeNumber range from 0 to 1023 is used for generating unique generator ID.
 var (
-	nodeNumber = rand.Int64N(1023)
-	bitSize    = 0 // bitSize is used to store the length of generated ID.
+	bitSize = 0 // bitSize is used to store the length of generated ID.
 )
 
-// Snowflake represents a Snowflake generator with a unique node.
+// Snowflake represents a Snowflake generator with a unique generator.
 type Snowflake struct {
-	node *snowflake.Node
+	generator *snowflake.Node
 }
 
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
-	s := New()
+	s := New(Settings{})
 	bitSize = len(s.Gen())
 	ident.Register(s)
 }
@@ -36,11 +35,14 @@ func (s Snowflake) Name() string {
 
 // Gen generates a new Snowflake ID as a string.
 func (s Snowflake) Gen() string {
-	return s.node.Generate().String()
+	return s.generator.Generate().String()
 }
 
 // Validate checks if the provided ID is a valid Snowflake ID.
 func (s Snowflake) Validate(id string) bool {
+	if len(id) != bitSize {
+		return false
+	}
 	_, err := snowflake.ParseString(id)
 	return err == nil
 }
@@ -50,13 +52,20 @@ func (s Snowflake) Size() int {
 	return bitSize
 }
 
-// New creates a new Snowflake generator with a unique node.
-func New() *Snowflake {
-	node, err := snowflake.NewNode(nodeNumber)
+type Settings struct {
+	Node int64
+}
+
+// New creates a new Snowflake generator with a unique generator.
+func New(s Settings) *Snowflake {
+	if s.Node < 0 || s.Node > 1023 {
+		s.Node = rand.Int64N(1023)
+	}
+	generator, err := snowflake.NewNode(s.Node)
 	if err != nil {
 		panic(err)
 	}
 	return &Snowflake{
-		node: node,
+		generator: generator,
 	}
 }

@@ -35,6 +35,9 @@ func (U ULID) Gen() string {
 // Validate checks if the given ID is a valid ULID.
 // It implements the ident.Identifier interface.
 func (U ULID) Validate(id string) bool {
+	if len(id) != bitSize {
+		return false
+	}
 	_, err := ulid.ParseStrict(id)
 	return err == nil
 }
