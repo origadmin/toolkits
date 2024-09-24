@@ -162,12 +162,10 @@ func ParseRequest(req *http.Request) (Authenticator, bool) {
 	}).Parse(req)
 }
 
-// ParseWWWRequest parses the WWW-authenticate header from the provided HTTP request.
-// If the header is empty, it returns nil and false.
-func ParseWWWRequest(req *http.Request) (Authenticator, bool) {
-	return NewRequestParser(&AuthorizationDecoder{
-		Key: "WWW-authenticate",
-	}).Parse(req)
+// WriteResponse writes the WWW-Authenticate header to the provided HTTP response.
+func WriteResponse(resp http.ResponseWriter, auth Authenticator) {
+	// TODO: implement WWW-Authenticate header
+	resp.Header().Set("WWW-Authenticate", "")
 }
 
 // ParseAuth parses the authorization and returns an authenticate struct with the type and credentials extracted.
