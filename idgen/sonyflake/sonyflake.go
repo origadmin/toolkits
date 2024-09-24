@@ -5,7 +5,7 @@ import (
 
 	"github.com/sony/sonyflake"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New(Settings{})
-	ident.Register(s)
+	idgen.Register(s)
 }
 
 type Sonyflake struct {

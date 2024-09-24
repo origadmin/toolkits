@@ -6,7 +6,7 @@ package uuid
 import (
 	"github.com/google/uuid"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 // UUID represents a UUID generator
@@ -18,7 +18,7 @@ var (
 
 // init registers UUID as an identifier
 func init() {
-	ident.Register(New())
+	idgen.Register(New())
 }
 
 // Name returns the name of the UUID generator

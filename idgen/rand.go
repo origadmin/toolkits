@@ -1,4 +1,4 @@
-package ident
+package idgen
 
 import (
 	"math/rand/v2"

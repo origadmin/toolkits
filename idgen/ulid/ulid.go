@@ -6,7 +6,7 @@ package ulid
 import (
 	"github.com/oklog/ulid/v2"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 // ULID is a struct that implements the ident.Identifier interface.
@@ -17,7 +17,7 @@ var bitSize = len(ulid.Make().String())
 
 // init registers the ULID implementation with ident.
 func init() {
-	ident.Register(New())
+	idgen.Register(New())
 }
 
 // Name returns the name of the ULID implementation.

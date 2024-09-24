@@ -3,7 +3,7 @@ package shortid
 import (
 	"github.com/segmentio/ksuid"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New()
-	ident.Register(s)
+	idgen.Register(s)
 }
 
 type KSUID struct {

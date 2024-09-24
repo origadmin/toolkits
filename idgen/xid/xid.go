@@ -6,7 +6,7 @@ package xid
 import (
 	"github.com/rs/xid"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 // XID represents a unique identifier generator.
@@ -19,7 +19,7 @@ var (
 
 // init registers the XID identifier with the ident package.
 func init() {
-	ident.Register(New())
+	idgen.Register(New())
 }
 
 // Name returns the name of the identifier.

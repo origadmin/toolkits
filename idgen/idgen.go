@@ -1,7 +1,7 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package randNumber provides the helpers functions.
-package ident
+// Package idgen provides the helpers functions.
+package idgen
 
 import (
 	"sync"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 // nodeNumber range from 0 to 1023 is used for generating unique generator ID.
@@ -25,7 +25,7 @@ type Snowflake struct {
 func init() {
 	s := New(Settings{})
 	bitSize = len(s.Gen())
-	ident.Register(s)
+	idgen.Register(s)
 }
 
 // Name returns the name of the generator.

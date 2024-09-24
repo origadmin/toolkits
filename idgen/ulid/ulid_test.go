@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/ident"
+	"github.com/origadmin/toolkits/idgen"
 )
 
 func TestULIDGen(t *testing.T) {
@@ -35,29 +35,29 @@ func TestULIDSize(t *testing.T) {
 }
 
 func TestRegister(t *testing.T) {
-	if ident.Default() == nil {
+	if idgen.Default() == nil {
 		t.Errorf("Expected default identifier to be set, but it was not")
 	}
 	// Check that the default identifier has been updated
-	if ident.Default().Name() != "ulid" {
+	if idgen.Default().Name() != "ulid" {
 		t.Errorf("Expected default identifier to be updated, but it was not")
 	}
 }
 
 func TestGenID(t *testing.T) {
 	// Generate an ID
-	generatedID := ident.GenID()
+	generatedID := idgen.GenID()
 
 	// Check that the generated ID is valid
-	if !ident.Validate(generatedID) {
+	if !idgen.Validate(generatedID) {
 		t.Errorf("Generated ID is not valid")
 	}
 }
 
 func TestGenSize(t *testing.T) {
 	// Check that the size of the generated ID is correct
-	if ident.Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, ident.Size())
+	if idgen.Size() != bitSize {
+		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, idgen.Size())
 	}
 }
 
@@ -69,12 +69,12 @@ func TestValidate(t *testing.T) {
 	generatedID := generator.Gen()
 
 	// Check that the generated ID is valid
-	if !ident.Validate(generatedID) {
+	if !idgen.Validate(generatedID) {
 		t.Errorf("Generated ID is not valid")
 	}
 
 	// Check that an invalid ID is not valid
-	if ident.Validate("invalid") {
+	if idgen.Validate("invalid") {
 		t.Errorf("Invalid ID is valid")
 	}
 }
