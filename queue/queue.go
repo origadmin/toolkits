@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Iterator 接口定义
+// Iterator interface
 type Iterator[E any] interface {
 	// Next advances the iterator and returns true if there is a next element
 	Next() bool
@@ -13,6 +13,7 @@ type Iterator[E any] interface {
 	Value() E
 }
 
+// Queue interface
 type Queue[E any] interface {
 	// Offer adds an element to the queue if possible, returning true on success
 	Offer(E) bool
@@ -21,16 +22,20 @@ type Queue[E any] interface {
 	// Peek retrieves but does not remove the head of the queue, or returns false if empty
 	Peek() (E, bool)
 	// Size returns the number of elements in the queue
-	Size() int
+	Size() int64
 	// IsEmpty returns true if the queue contains no elements
 	IsEmpty() bool
 	// Clear removes all elements from the queue
 	Clear()
-
-	// ToSlice returns a slice containing all of the elements in the queue
+	// ToSlice returns a slice containing all the elements in the queue
 	ToSlice() []E
 	// Iterator returns an Iterator over the elements in this queue
 	Iterator() Iterator[E]
+}
+
+// QueueProvider interface
+type QueueProvider[E any] interface {
+	Queue(name string) Queue[E] // Get a queue by name
 }
 
 // Message represent a message
@@ -51,7 +56,7 @@ type DeliverMessage interface {
 	Nack(ctx context.Context) error
 }
 
-// MessageQueue 是一个消息队列接口，扩展了基本的 Queue 接口
+// MessageQueue is a message Queue interface that extends the basic queue interface
 type MessageQueue interface {
 	// Publish a message to the queue
 	Publish(ctx context.Context, payload string) (string, error)
@@ -61,7 +66,7 @@ type MessageQueue interface {
 	Size() int64
 }
 
-// MessageQueueProvider 提供按 subject 获取 MessageQueue 的功能
+// MessageQueueProvider provides the ability to get MessageQueue by subject
 type MessageQueueProvider interface {
 	// MessageQueue obtain the corresponding MessageQueue based on subject
 	MessageQueue(subject string) (MessageQueue, error)

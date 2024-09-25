@@ -41,12 +41,13 @@ func TestOfferHandlesConcurrentCalls(t *testing.T) {
 		wg.Add(1)
 		go func(val int) {
 			defer wg.Done()
-			queue.Offer(val)
+			for !queue.Offer(val) {
+			}
 		}(i)
 	}
 	wg.Wait()
 	if queue.Size() != 100 {
-		t.Error("Yo ho ho! Concurrent calls to Offer caused data corruption!")
+		t.Errorf("Yo ho ho! Concurrent calls to Offer caused data corruption! size:%d ", queue.Size())
 	}
 }
 

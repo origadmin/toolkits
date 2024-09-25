@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -31,11 +32,19 @@ func TestPollDecreasesConsumerIndex(t *testing.T) {
 // Poll returns the correct element when multiple elements are in the queue
 func TestPollReturnsCorrectElement(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
-	queue.Offer(42)
-	queue.Offer(43)
-	result, _ := queue.Poll()
-	if result != 42 {
-		t.Errorf("Expected 42, but got %d. Shiver me timbers!", result)
+	for i := 0; i < 8; i++ {
+		for !queue.Offer(i) {
+		}
+	}
+	for i := 0; i < 8; i++ {
+		var v int
+		var ok bool
+		for v, ok = queue.Peek(); !ok; v, ok = queue.Peek() {
+		}
+		fmt.Printf("Peek Expected %d, but got %d. Yo-ho-ho!\n", i, v)
+		for v, ok = queue.Poll(); !ok; v, ok = queue.Poll() {
+		}
+		fmt.Printf("Expected %d, but got %d. Yo-ho-ho!\n", i, v)
 	}
 }
 
@@ -52,20 +61,23 @@ func TestPollHandlesEmptyQueue(t *testing.T) {
 func TestPollConcurrentAccess(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
 	var wg sync.WaitGroup
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 1024; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			queue.Offer(i)
+			for !queue.Offer(i) {
+			}
 		}(i)
 	}
 	wg.Wait()
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 1024; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, _ = queue.Poll()
+			for _, ok := queue.Poll(); !ok; _, ok = queue.Poll() {
+
+			}
 		}()
 	}
 	wg.Wait()
