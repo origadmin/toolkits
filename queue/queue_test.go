@@ -13,7 +13,7 @@ func BenchmarkQueue(b *testing.B) {
 		name string
 		q    Queue[int]
 	}{
-		// {"LockFreeQueue", NewLockFreeQueue[int]()},
+		{"LockFreeQueue", NewLockFreeQueue[int]()},
 		{"MutexQueue", NewMutexQueue[int]()},
 	}
 

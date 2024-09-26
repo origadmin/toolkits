@@ -32,20 +32,31 @@ func TestPollDecreasesConsumerIndex(t *testing.T) {
 // Poll returns the correct element when multiple elements are in the queue
 func TestPollReturnsCorrectElement(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
-	for i := 0; i < 8; i++ {
-		for !queue.Offer(i) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 1024; i++ {
+			for !queue.Offer(i) {
+			}
 		}
-	}
-	for i := 0; i < 8; i++ {
-		var v int
-		var ok bool
-		for v, ok = queue.Peek(); !ok; v, ok = queue.Peek() {
+	}()
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 1024; i++ {
+			var v int
+			var ok bool
+			for v, ok = queue.Peek(); !ok; v, ok = queue.Peek() {
+			}
+			fmt.Printf("Peek Expected %d, but got %d. Yo-ho-ho!\n", i, v)
+			for v, ok = queue.Poll(); !ok; v, ok = queue.Poll() {
+			}
+			fmt.Printf("Expected %d, but got %d. Yo-ho-ho!\n", i, v)
 		}
-		fmt.Printf("Peek Expected %d, but got %d. Yo-ho-ho!\n", i, v)
-		for v, ok = queue.Poll(); !ok; v, ok = queue.Poll() {
-		}
-		fmt.Printf("Expected %d, but got %d. Yo-ho-ho!\n", i, v)
-	}
+	}()
+
+	wg.Wait()
+	fmt.Println("All done!")
 }
 
 // Poll handles the case when the queue is empty and returns immediately
