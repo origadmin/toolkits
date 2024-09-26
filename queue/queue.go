@@ -35,7 +35,10 @@ type Queue[E any] interface {
 
 // Provider interface
 type Provider[E any] interface {
-	Queue(name string) Queue[E] // Get a queue by name
+	Queue(topic string) Queue[E] // Get a queue by topic
+	Publish(ctx context.Context, topic string, payload E) error
+	Subscribe(ctx context.Context, topic string, handler func(E)) error
+	Close() error
 }
 
 // Message represent a message
@@ -77,7 +80,7 @@ type MessageQueueProvider interface {
 	// RequestReply send a request and wait for a response
 	RequestReply(ctx context.Context, topic string, payload string) (*Message, error)
 	// QueueSubscribe create a queue subscription
-	QueueSubscribe(ctx context.Context, subject string, handler func(DeliverMessage)) (Subscription, error)
+	QueueSubscribe(ctx context.Context, topic string, handler func(DeliverMessage)) (Subscription, error)
 	// Close closes all MessageQueue connections
 	Close() error
 }
