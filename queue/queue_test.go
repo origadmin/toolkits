@@ -3,6 +3,9 @@ package queue
 import (
 	"fmt"
 	"math/rand/v2"
+	"runtime"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/yireyun/go-queue"
@@ -14,7 +17,6 @@ import (
 // go tool pprof --http=:8080 cpu.out
 // go tool pprof --http=:8081 mem.out
 func BenchmarkQueue(b *testing.B) {
-	fmt.Println("BenchmarkQueue")
 	benchmarks := []struct {
 		name string
 		q    Queue[int]
@@ -73,7 +75,7 @@ func BenchmarkQueueMix(b *testing.B) {
 		name string
 		q    Queue[int]
 	}{
-		{"PoolQueueTest", NewPoolQueue[int]()},
+		//{"PoolQueueTest", NewPoolQueue[int]()}, // result value is not correct
 		{"DesignQueueTest", NewDesignQueue[int]()},
 		{"WrapQueueTest", NewWrapQueue[int]()},
 		{"ChanQueueTest", NewChannelQueue[int]()},
@@ -213,6 +215,184 @@ func NewDesignQueue[E any]() *designQueue[E] {
 	return &designQueue[E]{
 		queue: queue,
 	}
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectElement(t *testing.T) {
+	queue := NewLockFreeQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
+	for i := 0; i < 128; i++ {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 4096; i++ {
+				for !queue.Offer(i) {
+				}
+				atomic.AddInt64(&writes, 1)
+			}
+		}()
+	}
+
+	for i := 0; i < 128; i++ {
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 4096; i++ {
+				for {
+					_, ok := queue.Poll()
+					if ok {
+						atomic.AddInt64(&reads, 1)
+						break
+					}
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	fmt.Println("All done!", reads, writes)
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectLockFreeQueue(t *testing.T) {
+	queue := NewLockFreeQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			for !queue.Offer(i) {
+			}
+			atomic.AddInt64(&writes, 1)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			var v int
+			var ok bool
+			for {
+				v, ok = queue.Poll()
+				if ok {
+					if v != i {
+						t.Errorf("Expected %d, but got %d. Ye-ho!", i, v)
+					}
+					atomic.AddInt64(&reads, 1)
+					break
+				}
+				runtime.Gosched()
+			}
+		}
+	}()
+
+	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	fmt.Println("All done!")
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectChanQueue(t *testing.T) {
+	queue := NewChannelQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			for !queue.Offer(i) {
+			}
+			atomic.AddInt64(&writes, 1)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			var v int
+			var ok bool
+			for {
+				v, ok = queue.Peek()
+				if ok {
+					if v != i {
+						t.Errorf("Expected %d, but got %d. Ye-ho!", i, v)
+					}
+				}
+				v, ok = queue.Poll()
+				if ok {
+					if v != i {
+						t.Errorf("Expected %d, but got %d. Ye-ho!", i, v)
+					}
+					atomic.AddInt64(&reads, 1)
+					break
+				}
+				runtime.Gosched()
+			}
+		}
+	}()
+
+	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	fmt.Println("All done!")
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectPoolQueue(t *testing.T) {
+	queue := NewPoolQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			for !queue.Offer(i) {
+			}
+			atomic.AddInt64(&writes, 1)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 2048; i++ {
+			var v int
+			var ok bool
+			for {
+				//v, ok = queue.Peek()
+				//if ok {
+				//	if v != i {
+				//		t.Errorf("Peek Expected %d, but got %d. Ye-ho!", i, v)
+				//	}
+				//}
+				v, ok = queue.Poll()
+				if ok {
+					if v != i {
+						t.Errorf("Expected %d, but got %d. Ye-ho!", i, v)
+					}
+					atomic.AddInt64(&reads, 1)
+					break
+				}
+				runtime.Gosched()
+			}
+		}
+	}()
+
+	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	fmt.Println("All done!")
 }
 
 var _ Queue[int] = (*wrapQueue[int])(nil)

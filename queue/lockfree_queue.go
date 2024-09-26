@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	segmentSize = 1 << 16 // The size of each segment, here set to 1024
+	segmentSize = 1 << 8 // The size of each segment, here set to 1024
 	segmentMask = segmentSize - 1
 )
 
@@ -76,9 +76,11 @@ func (q *LockFreeQueue[E]) Poll() (E, bool) {
 	var zero E
 	consumer := q.getConsumer()
 	producer := q.getProducer()
-	if consumer-producer < 1 {
-		return zero, false // Queue empty
+	caps := producer - consumer
+	if caps < 1 {
+		return zero, false // queue empty
 	}
+
 	headSeg := q.getHeadSegment()
 	index := consumer % segmentSize
 	e := headSeg.get(index) // Get data first
@@ -99,7 +101,8 @@ func (q *LockFreeQueue[E]) Peek() (E, bool) {
 	var zero E
 	consumer := q.getConsumer()
 	producer := q.getProducer()
-	if consumer >= producer {
+	index := producer - consumer
+	if index < 1 {
 		return zero, false // queue empty
 	}
 
@@ -113,9 +116,9 @@ func (q *LockFreeQueue[E]) Peek() (E, bool) {
 func (q *LockFreeQueue[E]) Size() int64 {
 	producer := q.getProducer()
 	consumer := q.getConsumer()
-	index := producer - consumer
-	if index > 0 {
-		return index
+	caps := producer - consumer
+	if caps > 0 {
+		return caps
 	}
 	// If producer < consumer, a reset occurred during the read
 	// Try reading again

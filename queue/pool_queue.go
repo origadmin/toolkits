@@ -2,44 +2,74 @@ package queue
 
 import (
 	"sync"
+	"sync/atomic"
 )
 
+type element[E any] struct {
+	data E
+}
+
 type PoolQueue[E any] struct {
-	pool *sync.Pool
+	private atomic.Pointer[element[E]]
+	size    int64
+	pool    *sync.Pool
 }
 
 func (p *PoolQueue[E]) Offer(e E) bool {
-	p.pool.Put(e)
+	p.pool.Put(&element[E]{
+		data: e,
+	})
+	atomic.AddInt64(&p.size, 1)
 	return true
 }
 
 func (p *PoolQueue[E]) Poll() (E, bool) {
-	v := p.pool.Get()
-	if v == nil {
+	v := p.private.Load()
+	if v != nil {
+		p.private.CompareAndSwap(v, nil)
+		atomic.AddInt64(&p.size, -1)
+		return v.data, true
+	}
+	pv := p.pool.Get()
+	if pv == nil {
 		var zero E
 		return zero, false
 	}
-	return v.(E), true
+	p.private.CompareAndSwap(v, nil)
+	atomic.AddInt64(&p.size, -1)
+	return pv.(*element[E]).data, true
 }
 
 func (p *PoolQueue[E]) Peek() (E, bool) {
-	//TODO implement me
-	panic("implement me")
+	v := p.private.Load()
+	if v != nil {
+		return v.data, true
+	}
+	pv := p.pool.Get()
+	if pv == nil {
+		var zero E
+		return zero, false
+	}
+	pvv := pv.(*element[E])
+	p.private.CompareAndSwap(v, pvv)
+	return pv.(*element[E]).data, true
 }
 
 func (p *PoolQueue[E]) Size() int64 {
-	//TODO implement me
-	panic("implement me")
+	return atomic.LoadInt64(&p.size)
 }
 
 func (p *PoolQueue[E]) IsEmpty() bool {
-	//TODO implement me
-	panic("implement me")
+	return p.Size() == 0
 }
 
 func (p *PoolQueue[E]) Clear() {
-	//TODO implement me
-	panic("implement me")
+	p.pool = &sync.Pool{
+		New: func() any {
+			return nil
+		},
+	}
+	return
 }
 
 func (p *PoolQueue[E]) ToSlice() []E {
