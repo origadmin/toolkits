@@ -113,8 +113,9 @@ func (q *LockFreeQueue[E]) Peek() (E, bool) {
 func (q *LockFreeQueue[E]) Size() int64 {
 	producer := q.getProducer()
 	consumer := q.getConsumer()
-	if producer > consumer {
-		return producer - consumer
+	index := producer - consumer
+	if index > 0 {
+		return index
 	}
 	// If producer < consumer, a reset occurred during the read
 	// Try reading again

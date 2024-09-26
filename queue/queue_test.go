@@ -73,9 +73,10 @@ func BenchmarkQueueMix(b *testing.B) {
 		name string
 		q    Queue[int]
 	}{
-		{"DesignQueue", NewDesignQueue[int]()},
-		{"WrapQueue", NewWrapQueue[int]()},
-		{"ChanQueue", NewChannelQueue[int]()},
+		{"PoolQueueTest", NewPoolQueue[int]()},
+		{"DesignQueueTest", NewDesignQueue[int]()},
+		{"WrapQueueTest", NewWrapQueue[int]()},
+		{"ChanQueueTest", NewChannelQueue[int]()},
 		{"LockFreeQueue", NewLockFreeQueue[int]()},
 		{"MutexQueue", NewMutexQueue[int]()},
 	}
