@@ -33,29 +33,81 @@ func TestPollDecreasesConsumerIndex(t *testing.T) {
 func TestPollReturnsCorrectElement(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
 	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
+	for i := 0; i < 128; i++ {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 4096; i++ {
+				for !queue.Offer(i) {
+				}
+				atomic.AddInt64(&writes, 1)
+			}
+		}()
+	}
+
+	for i := 0; i < 128; i++ {
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 4096; i++ {
+				for {
+					_, ok := queue.Poll()
+					if ok {
+						atomic.AddInt64(&reads, 1)
+						break
+					}
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	fmt.Println("All done!", reads, writes)
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectElement2(t *testing.T) {
+	queue := NewLockFreeQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+	reads := int64(0)
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 1024; i++ {
 			for !queue.Offer(i) {
 			}
+			atomic.AddInt64(&writes, 1)
 		}
 	}()
+
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 1024; i++ {
 			var v int
 			var ok bool
-			for v, ok = queue.Peek(); !ok; v, ok = queue.Peek() {
+			for {
+				v, ok = queue.Poll()
+				if ok {
+					if v != i {
+						t.Errorf("Expected %d, but got %d. Ye-ho!", i, v)
+					}
+					atomic.AddInt64(&reads, 1)
+					break
+				}
+				fmt.Println("polling...")
 			}
-			fmt.Printf("Peek Expected %d, but got %d. Yo-ho-ho!\n", i, v)
-			for v, ok = queue.Poll(); !ok; v, ok = queue.Poll() {
-			}
-			fmt.Printf("Expected %d, but got %d. Yo-ho-ho!\n", i, v)
 		}
 	}()
 
 	wg.Wait()
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
 	fmt.Println("All done!")
 }
 

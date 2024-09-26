@@ -20,7 +20,7 @@ func TestOfferUpdatesProducerIndex(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
 	queue.Offer(42)
 	if atomic.LoadInt64(&queue.producer) != 1 {
-		t.Error("Shiver me timbers! Producer index not updated correctly!")
+		t.Error("Shiver me timbers! getProducer index not updated correctly!")
 	}
 }
 

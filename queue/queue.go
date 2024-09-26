@@ -33,8 +33,8 @@ type Queue[E any] interface {
 	Iterator() Iterator[E]
 }
 
-// QueueProvider interface
-type QueueProvider[E any] interface {
+// Provider interface
+type Provider[E any] interface {
 	Queue(name string) Queue[E] // Get a queue by name
 }
 
