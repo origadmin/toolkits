@@ -76,7 +76,7 @@ func (q *LockFreeQueue[E]) Poll() (E, bool) {
 	var zero E
 	consumer := q.getConsumer()
 	producer := q.getProducer()
-	if consumer >= producer {
+	if consumer-producer < 1 {
 		return zero, false // Queue empty
 	}
 	headSeg := q.getHeadSegment()

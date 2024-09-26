@@ -18,17 +18,21 @@ func NewMutexQueue[E any]() *MutexQueue[E] {
 }
 
 func (q *MutexQueue[E]) Offer(e E) bool {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	q.items = append(q.items, e)
-	return true
+	if q.mu.TryLock() {
+		defer q.mu.Unlock()
+		q.items = append(q.items, e)
+		return true
+	}
+	return false
 }
 
 func (q *MutexQueue[E]) Poll() (E, bool) {
-	q.mu.Lock()
+	var zero E
+	if !q.mu.TryLock() {
+		return zero, false
+	}
 	defer q.mu.Unlock()
 	if len(q.items) == 0 {
-		var zero E
 		return zero, false
 	}
 	e := q.items[0]
@@ -37,10 +41,12 @@ func (q *MutexQueue[E]) Poll() (E, bool) {
 }
 
 func (q *MutexQueue[E]) Peek() (E, bool) {
-	q.mu.Lock()
+	var zero E
+	if !q.mu.TryLock() {
+		return zero, false
+	}
 	defer q.mu.Unlock()
 	if len(q.items) == 0 {
-		var zero E
 		return zero, false
 	}
 	return q.items[0], true
