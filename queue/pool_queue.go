@@ -26,7 +26,7 @@ func (p *PoolQueue[E]) Offer(e E) bool {
 func (p *PoolQueue[E]) Poll() (E, bool) {
 	v := p.private.Load()
 	if v != nil {
-		p.private.CompareAndSwap(v, nil)
+		p.private.Store(nil)
 		atomic.AddInt64(&p.size, -1)
 		return v.data, true
 	}
@@ -35,7 +35,7 @@ func (p *PoolQueue[E]) Poll() (E, bool) {
 		var zero E
 		return zero, false
 	}
-	p.private.CompareAndSwap(v, nil)
+	p.private.Store(nil)
 	atomic.AddInt64(&p.size, -1)
 	return pv.(*element[E]).data, true
 }
@@ -51,7 +51,7 @@ func (p *PoolQueue[E]) Peek() (E, bool) {
 		return zero, false
 	}
 	pvv := pv.(*element[E])
-	p.private.CompareAndSwap(v, pvv)
+	p.private.Store(pvv)
 	return pv.(*element[E]).data, true
 }
 

@@ -10,11 +10,11 @@ type SegmentPool[E any] struct {
 	pool *sync.Pool
 }
 
-func (s *SegmentPool[E]) Get() *segment[E] {
+func (s *SegmentPool[E]) getSegment() *segment[E] {
 	return s.pool.Get().(*segment[E])
 }
 
-func (s *SegmentPool[E]) Put(seg *segment[E]) {
+func (s *SegmentPool[E]) putSegment(seg *segment[E]) {
 	seg.reset()
 	s.pool.Put(seg)
 }

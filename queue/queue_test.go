@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/yireyun/go-queue"
 	"golang.design/x/lockfree"
@@ -23,7 +24,7 @@ func BenchmarkQueue(b *testing.B) {
 	}{
 		{"LockFreeQueue", NewLockFreeQueue[int]()},
 		{"MutexQueue", NewMutexQueue[int]()},
-		{"WrapQueue", NewWrapQueue[int]()},
+		{"WrapQueue", NewYireyunQueue[int]()},
 	}
 
 	for _, bm := range benchmarks {
@@ -77,7 +78,7 @@ func BenchmarkQueueMix(b *testing.B) {
 	}{
 		//{"PoolQueueTest", NewPoolQueue[int]()}, // result value is not correct
 		{"DesignQueueTest", NewDesignQueue[int]()},
-		{"WrapQueueTest", NewWrapQueue[int]()},
+		//{"YireyunQueueTest", NewYireyunQueue[int]()}, // too slow removed
 		{"ChanQueueTest", NewChannelQueue[int]()},
 		{"LockFreeQueue", NewLockFreeQueue[int]()},
 		{"MutexQueue", NewMutexQueue[int]()},
@@ -107,19 +108,20 @@ func BenchmarkQueueMix(b *testing.B) {
 }
 
 func fastrand() uint32 {
+	time.Sleep(1)
 	return rand.Uint32()
 }
 
-type wrapQueue[E any] struct {
+type yireyunQueue[E any] struct {
 	q *queue.EsQueue
 }
 
-func (w *wrapQueue[E]) Offer(e E) bool {
+func (w *yireyunQueue[E]) Offer(e E) bool {
 	ok, _ := w.q.Put(e)
 	return ok
 }
 
-func (w *wrapQueue[E]) Poll() (E, bool) {
+func (w *yireyunQueue[E]) Poll() (E, bool) {
 	var zero E
 	val, ok, _ := w.q.Get()
 	if !ok {
@@ -128,36 +130,36 @@ func (w *wrapQueue[E]) Poll() (E, bool) {
 	return val.(E), ok
 }
 
-func (w *wrapQueue[E]) Peek() (E, bool) {
+func (w *yireyunQueue[E]) Peek() (E, bool) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (w *wrapQueue[E]) Size() int64 {
+func (w *yireyunQueue[E]) Size() int64 {
 	return int64(w.q.Capaciity())
 }
 
-func (w *wrapQueue[E]) IsEmpty() bool {
+func (w *yireyunQueue[E]) IsEmpty() bool {
 	return w.Size() == 0
 }
 
-func (w *wrapQueue[E]) Clear() {
+func (w *yireyunQueue[E]) Clear() {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (w *wrapQueue[E]) ToSlice() []E {
+func (w *yireyunQueue[E]) ToSlice() []E {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (w *wrapQueue[E]) Iterator() Iterator[E] {
+func (w *yireyunQueue[E]) Iterator() Iterator[E] {
 	//TODO implement me
 	panic("implement me")
 }
 
-func NewWrapQueue[E any]() *wrapQueue[E] {
-	return &wrapQueue[E]{
+func NewYireyunQueue[E any]() *yireyunQueue[E] {
+	return &yireyunQueue[E]{
 		q: queue.NewQueue(segmentSize),
 	}
 }
@@ -395,5 +397,5 @@ func TestPollReturnsCorrectPoolQueue(t *testing.T) {
 	fmt.Println("All done!")
 }
 
-var _ Queue[int] = (*wrapQueue[int])(nil)
+var _ Queue[int] = (*yireyunQueue[int])(nil)
 var _ Queue[int] = (*designQueue[int])(nil)

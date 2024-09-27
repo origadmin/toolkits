@@ -99,6 +99,7 @@ ok      github.com/origadmin/toolkits/queue     69.761s
 ```shell
 go test -v -race -benchmem -run=^$ -bench ^BenchmarkQueue$ -benchtime=30s -cpuprofile=cpu.out -memprofile=mem.out -parallel=32 github.com/origadmin/toolkits/queue
 go test -v -race -benchmem -cpu="8" -run=^$ -bench ^BenchmarkQueueMix$ -benchtime=30s -cpuprofile=cpu -memprofile=mem github.com/origadmin/toolkits/queue
+go test -v -race -benchmem -cpu="8" -run=^$ -count=5 -bench ^BenchmarkQueueMix$ -benchtime=15s -cpuprofile=cpu -memprofile=mem github.com/origadmin/toolkits/queue
 
 go tool pprof --http=:8080 cpu.out
 go tool pprof --http=:8081 mem.out

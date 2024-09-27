@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	segmentSize = 1 << 8 // The size of each segment, here set to 1024
+	segmentSize = 1 << 16 // The size of each segment, here set to 1024
 	segmentMask = segmentSize - 1
 )
 
@@ -17,16 +17,11 @@ type LockFreeQueue[E any] struct {
 	tail        unsafe.Pointer
 	producer    int64
 	consumer    int64
+	size        int64 // Keep size as a local variable
 }
 
 // NewLockFreeQueue Create a new LockFreeQueue
 func NewLockFreeQueue[E any]() *LockFreeQueue[E] {
-	//queue := &LockFreeQueue[E]{
-	//	segmentPool: newSegmentPool[E](),
-	//}
-	//seg := queue.getSegment()
-	//queue.head = unsafe.Pointer(seg)
-	//queue.tail = unsafe.Pointer(seg)
 	return NewLockFreeQueueWithPool(&SegmentPool[E]{})
 }
 
@@ -36,11 +31,12 @@ func NewLockFreeQueueWithPool[E any](pool *SegmentPool[E]) *LockFreeQueue[E] {
 		panic("NewLockFreeQueueWithPool: pool cannot be nil")
 	}
 	pool.NewPool()
-	seg := pool.Get()
+	seg := pool.getSegment()
 	return &LockFreeQueue[E]{
 		segmentPool: pool,
 		head:        unsafe.Pointer(seg),
 		tail:        unsafe.Pointer(seg),
+		size:        0,
 	}
 }
 
@@ -48,14 +44,17 @@ func NewLockFreeQueueWithPool[E any](pool *SegmentPool[E]) *LockFreeQueue[E] {
 func (q *LockFreeQueue[E]) Offer(e E) bool {
 	producer := q.getProducer()
 	tailSeg := q.getTailSegment()
-	index := producer % segmentSize
-	if index == segmentMask {
+	position := producer % segmentSize
+	// If position to the end, create next for next offer
+	if position == segmentMask {
 		// The current segment is full. Try adding a new segment
 		if tailSeg.nextSegment() == nil {
-			newSeg := q.getSegment()
+			newSeg := q.newSegment()
 			if tailSeg.storeNext(newSeg) {
-				q.updateTailSegment(tailSeg, newSeg)
+				// update tail pointer to new segment for next offer
+				q.storeTailSegment(newSeg)
 			} else {
+				// next will alway nil for create,otherwise return
 				q.freeSegment(newSeg)
 				return false
 			}
@@ -63,9 +62,11 @@ func (q *LockFreeQueue[E]) Offer(e E) bool {
 			return false
 		}
 	}
-
-	if q.updateProducer(producer, producer+1) {
-		tailSeg.set(index, e)
+	// lock current segment insert position
+	if q.moveProducer(producer) {
+		tailSeg.set(position, e)
+		// update cursor for consumer
+		q.incrementSize()
 		return true
 	}
 	return false
@@ -75,22 +76,22 @@ func (q *LockFreeQueue[E]) Offer(e E) bool {
 func (q *LockFreeQueue[E]) Poll() (E, bool) {
 	var zero E
 	consumer := q.getConsumer()
-	producer := q.getProducer()
-	caps := producer - consumer
-	if caps < 1 {
+	if q.Size() < 1 {
 		return zero, false // queue empty
 	}
-
+	// Secure reads with atomic operations
 	headSeg := q.getHeadSegment()
-	index := consumer % segmentSize
-	e := headSeg.get(index) // Get data first
-	if q.updateConsumer(consumer, consumer+1) {
-		if index == segmentMask {
+	position := consumer % segmentSize
+	// lock current segment index
+	if q.moveConsumer(consumer) {
+		q.decrementSize() // Decrement size
+		if position == segmentMask {
 			// The current segment has been consumed, move to the next segment
 			if next := headSeg.nextSegment(); next != nil {
-				q.updateHeadSegment(headSeg, next)
+				q.storeHeadSegment(next)
 			}
 		}
+		e := headSeg.get(position) // Get data first
 		return e, true
 	}
 	return zero, false
@@ -100,29 +101,28 @@ func (q *LockFreeQueue[E]) Poll() (E, bool) {
 func (q *LockFreeQueue[E]) Peek() (E, bool) {
 	var zero E
 	consumer := q.getConsumer()
-	producer := q.getProducer()
-	index := producer - consumer
-	if index < 1 {
+	if q.Size() < 1 {
 		return zero, false // queue empty
 	}
-
+	position := consumer % segmentSize
 	headSeg := q.getHeadSegment()
 	// Secure reads with atomic operations
-	e := headSeg.get(consumer % segmentSize)
+	e := headSeg.get(position)
 	return e, true
 }
 
 // Size returns the number of elements in the queue
 func (q *LockFreeQueue[E]) Size() int64 {
-	producer := q.getProducer()
-	consumer := q.getConsumer()
-	caps := producer - consumer
-	if caps > 0 {
-		return caps
-	}
-	// If producer < consumer, a reset occurred during the read
-	// Try reading again
-	return 0
+	return atomic.LoadInt64(&q.size)
+	//cursor := q.getCursor()
+	//consumer := q.getConsumer()
+	//capacity := cursor - consumer
+	//if capacity > 0 {
+	//	return capacity
+	//}
+	//// If cursor < consumer, a reset occurred during the read
+	//// Try reading again
+	//return 0
 }
 
 // IsEmpty returns true if the queue is empty
@@ -134,16 +134,16 @@ func (q *LockFreeQueue[E]) IsEmpty() bool {
 func (q *LockFreeQueue[E]) Clear() {
 	// 1. Saves the status of the current queue
 	head := q.getHeadSegment()
-	tail := q.getHeadSegment()
+	tail := q.getTailSegment()
 
 	// 2. Create a new empty queue or reuse the old one
-	seg := q.getSegment()
+	seg := q.newSegment()
 
 	// 3. Updates the status of the queue atomically
 	if q.updateHeadSegment(head, seg) && q.updateTailSegment(tail, seg) {
 		atomic.StoreInt64(&q.producer, 0)
 		atomic.StoreInt64(&q.consumer, 0)
-
+		atomic.StoreInt64(&q.size, 0)
 		// 4. Release old queue resources
 		q.releaseSegment(head, tail)
 	} else {
@@ -154,7 +154,8 @@ func (q *LockFreeQueue[E]) Clear() {
 
 // ToSlice returns a slice representation of the queue
 func (q *LockFreeQueue[E]) ToSlice() []E {
-	result := make([]E, 0, q.Size())
+	size := q.Size()
+	result := make([]E, 0, size)
 	iter := q.Iterator()
 	for iter.Next() {
 		result = append(result, iter.Value())
@@ -172,12 +173,12 @@ func (q *LockFreeQueue[E]) Iterator() Iterator[E] {
 	}
 }
 
-func (q *LockFreeQueue[E]) getSegment() *segment[E] {
-	return q.segmentPool.Get()
+func (q *LockFreeQueue[E]) newSegment() *segment[E] {
+	return q.segmentPool.getSegment()
 }
 
 func (q *LockFreeQueue[E]) freeSegment(seg *segment[E]) {
-	q.segmentPool.Put(seg)
+	q.segmentPool.putSegment(seg)
 }
 
 // releaseSegment recursively releases all segments of the old queue
@@ -192,12 +193,20 @@ func (q *LockFreeQueue[E]) releaseSegment(head, tail *segment[E]) {
 	q.freeSegment(head)
 }
 
-func (q *LockFreeQueue[E]) updateProducer(producer int64, value int64) bool {
-	return atomic.CompareAndSwapInt64(&q.producer, producer, value)
+func (q *LockFreeQueue[E]) moveProducer(producer int64) bool {
+	return atomic.CompareAndSwapInt64(&q.producer, producer, producer+1)
 }
 
-func (q *LockFreeQueue[E]) updateConsumer(consumer int64, value int64) bool {
-	return atomic.CompareAndSwapInt64(&q.consumer, consumer, value)
+func (q *LockFreeQueue[E]) addProducer(delta int64) int64 {
+	return atomic.AddInt64(&q.producer, delta)
+}
+
+func (q *LockFreeQueue[E]) moveConsumer(consumer int64) bool {
+	return atomic.CompareAndSwapInt64(&q.consumer, consumer, consumer+1)
+}
+
+func (q *LockFreeQueue[E]) addConsumer(delta int64) int64 {
+	return atomic.AddInt64(&q.consumer, delta)
 }
 
 func (q *LockFreeQueue[E]) getProducer() int64 {
@@ -208,24 +217,29 @@ func (q *LockFreeQueue[E]) getConsumer() int64 {
 	return atomic.LoadInt64(&q.consumer)
 }
 
-//func (q *LockFreeQueue[E]) tryTailSegment() *segment[E] {
-//	producer := q.getProducer()
-//	tailSeg := q.getTailSegment()
-//	if producer%segmentSize == segmentMask {
-//		// The current segment is full. Try adding a new segment
-//		if next := tailSeg.nextSegment(); next == nil {
-//			newSeg := q.getSegment()
-//			if tailSeg.storeNext(newSeg) {
-//				q.updateTailSegment(tailSeg, newSeg)
-//			} else {
-//				q.freeSegment(newSeg)
-//			}
-//		} else {
-//			q.updateTailSegment(tailSeg, next)
-//		}
-//	}
-//	return tailSeg
-//}
+func (q *LockFreeQueue[E]) incrementSize() int64 {
+	return atomic.AddInt64(&q.size, 1)
+}
+
+func (q *LockFreeQueue[E]) decrementSize() int64 {
+	return atomic.AddInt64(&q.size, -1)
+}
+
+func (q *LockFreeQueue[E]) tryTailSegment(tailSeg *segment[E], producer int64) {
+	if producer%segmentSize == segmentMask {
+		// The current segment is full. Try adding a new segment
+		if next := tailSeg.nextSegment(); next == nil {
+			newSeg := q.newSegment()
+			if tailSeg.storeNext(newSeg) {
+				q.storeTailSegment(newSeg)
+			} else {
+				q.freeSegment(newSeg)
+			}
+		} else {
+			// next will alway nil for create,otherwise return
+		}
+	}
+}
 
 func (q *LockFreeQueue[E]) getTailSegment() *segment[E] {
 	return (*segment[E])(atomic.LoadPointer(&q.tail))
@@ -233,6 +247,9 @@ func (q *LockFreeQueue[E]) getTailSegment() *segment[E] {
 
 func (q *LockFreeQueue[E]) updateTailSegment(old, new *segment[E]) bool {
 	return atomic.CompareAndSwapPointer(&q.tail, unsafe.Pointer(old), unsafe.Pointer(new))
+}
+func (q *LockFreeQueue[E]) storeTailSegment(new *segment[E]) {
+	atomic.StorePointer(&q.tail, unsafe.Pointer(new))
 }
 
 func (q *LockFreeQueue[E]) getHeadSegment() *segment[E] {
@@ -243,33 +260,9 @@ func (q *LockFreeQueue[E]) updateHeadSegment(old, new *segment[E]) bool {
 	return atomic.CompareAndSwapPointer(&q.head, unsafe.Pointer(old), unsafe.Pointer(new))
 }
 
-// Added the tryResetHeadCounters method
-//func (q *LockFreeQueue[E]) tryResetHeadCounters() {
-//	for {
-//		producer := atomic.LoadInt64(&q.producer)
-//		consumer := atomic.LoadInt64(&q.consumer)
-//		// Checks whether the current segment is fully consumed
-//		if consumer%segmentSize == segmentMask {
-//			// Try to reset the consumer and producer
-//			newConsumer := int64(0)
-//			newProducer := producer - consumer
-//			if atomic.CompareAndSwapInt64(&q.consumer, consumer, newConsumer) {
-//				if !atomic.CompareAndSwapInt64(&q.producer, producer, newProducer) {
-//					// If the consumer update fails, the producer is rolled back
-//					atomic.StoreInt64(&q.producer, producer)
-//				} else {
-//					return
-//				}
-//			} else {
-//				// If the consumer update fails, the producer is rolled back
-//				atomic.StoreInt64(&q.producer, producer)
-//			}
-//		} else {
-//			atomic.AddInt64(&q.consumer, 1)
-//			return
-//		}
-//	}
-//}
+func (q *LockFreeQueue[E]) storeHeadSegment(new *segment[E]) {
+	atomic.StorePointer(&q.head, unsafe.Pointer(new))
+}
 
 // lockFreeQueueIterator is an iterator implementation of LockFreeQueue
 type lockFreeQueueIterator[E any] struct {
