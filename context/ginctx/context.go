@@ -12,8 +12,8 @@ import (
 type ginContext struct{}
 
 // WithContext returns a new context with the provided context.Context value.
-func WithContext(ctx context.Context, ginCtx *gin.Context) context.Context {
-	return context.WithValue(ctx, ginContext{}, ginCtx)
+func WithContext(ginCtx *gin.Context) context.Context {
+	return context.WithValue(ginCtx.Request.Context(), ginContext{}, ginCtx)
 }
 
 // FromContext returns the gin.Context from the context.
