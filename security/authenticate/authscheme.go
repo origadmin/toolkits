@@ -50,7 +50,7 @@ const (
 
 // Lower returns the lowercase string representation of the Type.
 func (t AuthScheme) Lower() string {
-	return strings.ToLower(string(t))
+	return strings.ToLower(t.String())
 }
 
 func (t AuthScheme) Equal(other string) bool {

@@ -73,7 +73,7 @@ jobs:
 
       - name: Create release
         if: ${{ !steps.determine_next_version.outputs.HEAD_TAG }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.0.8
         with:
           tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
           name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
