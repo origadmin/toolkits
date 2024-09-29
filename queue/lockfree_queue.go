@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	segmentSize = 1 << 8 // The cursor of each segment, here set to 1024
+	segmentSize = 1 << 1 // The cursor of each segment, here set to 1024
 	segmentMask = segmentSize - 1
 )
 
@@ -94,13 +94,12 @@ func (q *LockFreeQueue[E]) Peek() (E, bool) {
 	}
 
 	consumer := q.getConsumer()
-	position := consumer % segmentSize
 	headSeg := q.getHeadSegment()
 	if headSeg == nil {
 		return zero, false
 	}
 	// Secure reads with atomic operations
-	e := headSeg.get(position)
+	e := headSeg.get(consumer % segmentSize)
 	return e, true
 }
 
@@ -225,13 +224,9 @@ func (q *LockFreeQueue[E]) decrementCursor() int64 {
 
 func (q *LockFreeQueue[E]) tryHeadSegment() *segment[E] {
 	consumer := q.getConsumer()
-	cursor := q.getCursor()
 	headSeg := q.getHeadSegment()
-	if cursor-consumer < segmentMask {
+	if consumer%segmentSize < segmentMask {
 		return headSeg
-	}
-	if consumer > cursor {
-		return nil
 	}
 
 	// The current segment has been consumed, move to the next segment
@@ -249,7 +244,6 @@ func (q *LockFreeQueue[E]) tryTailSegment() *segment[E] {
 	producer := q.getProducer()
 	tailSeg := q.getTailSegment()
 	if producer%segmentSize < segmentMask {
-
 		// try to create nSeg segment
 		if nSeg := tailSeg.nextSegment(); nSeg == nil {
 			nSeg := q.newSegment()
