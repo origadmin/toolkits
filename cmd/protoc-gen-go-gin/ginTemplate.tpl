@@ -2,7 +2,7 @@
 {{$svrName :=.ServiceName}}
 
 {{- range.MethodSets}}
-	const Operation{{$svrType}}{{.OriginalName}} = "/{{$svrName}}/{{.OriginalName}}"
+	const {{$svrType}}_{{.OriginalName}}_OperationName = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
 type {{.ServiceType}}GINServer interface {
@@ -40,7 +40,7 @@ func Register{{.ServiceType}}GINServer(engine *gin.Engine, srv {{.ServiceType}}G
 		return
 		}
   {{- end}}
-	http.SetOperation(ctx, Operation{{$svrType}}{{.OriginalName}})
+	http.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
 	ctx = ginctx.WithContext(ctx)
 	reply, err := srv.{{.Name}}(ctx, &in)
 	if err != nil {
@@ -70,9 +70,9 @@ return &{{.ServiceType}}GINClientImpl{client}
 {{range.MethodSets}}
 	func (c *{{$svrType}}GINClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	pattern := "{{.Path}}"
+	pattern := "{{.ClientPath}}"
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
-	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
+	opts = append(opts, http.Operation({{$svrType}}_{{.OriginalName}}_OperationName))
 	opts = append(opts, http.PathTemplate(pattern))
   {{if.HasBody -}}
 		err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)

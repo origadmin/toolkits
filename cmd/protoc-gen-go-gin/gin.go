@@ -219,7 +219,8 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Request:      g.QualifiedGoIdent(m.Input.GoIdent),
 		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
 		Comment:      comment,
-		Path:         path,
+		Path:         transformPath(path),
+		ClientPath:   path,
 		Method:       method,
 		HasVars:      len(vars) > 0,
 	}
@@ -243,11 +244,21 @@ func buildPathVars(path string) (res map[string]*string) {
 	return
 }
 
+func transformPath(path string) string {
+	paths := strings.Split(path, "/")
+	for i, p := range paths {
+		if len(p) > 0 && (p[0] == '{' && p[len(p)-1] == '}' || p[0] == ':') {
+			paths[i] = ":" + p[1:len(p)-1]
+		}
+	}
+	return strings.Join(paths, "/")
+}
+
 func replacePath(name string, value string, path string) string {
 	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s\b[\s]*)=?([^{}]*)}`, name))
 	idx := pattern.FindStringIndex(path)
 	if len(idx) > 0 {
-		path = fmt.Sprintf("%s%s:%s%s",
+		path = fmt.Sprintf("%s{%s:%s}%s",
 			path[:idx[0]], // The start of the match
 			name,
 			strings.ReplaceAll(value, "*", ".*"),
