@@ -60,7 +60,7 @@ func TestPollConcurrentAccess(t *testing.T) {
 	wg.Wait()
 
 	if queue.Size() != 0 {
-		t.Errorf("Expected size 0 after concurrent access, but got %d. Avast ye!", queue.Size())
+		t.Errorf("Expected cursor 0 after concurrent access, but got %d. Avast ye!", queue.Size())
 	}
 }
 

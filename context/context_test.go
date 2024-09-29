@@ -23,8 +23,6 @@ var (
 	_ = FromRowLock
 	_ = NewCreatedBy
 	_ = FromCreatedBy
-	_ = NewLogger
-	_ = FromLogger
 	_ = Background
 	_ = NewTrace
 	_ = FromTrans

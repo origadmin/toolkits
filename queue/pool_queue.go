@@ -5,10 +5,6 @@ import (
 	"sync/atomic"
 )
 
-type element[E any] struct {
-	data E
-}
-
 type PoolQueue[E any] struct {
 	private atomic.Pointer[element[E]]
 	size    int64

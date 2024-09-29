@@ -321,7 +321,7 @@ func TestPollReturnsCorrectElement(t *testing.T) {
 	}
 
 	fmt.Println("All done!", poolMax, reads, writes, queue.Size())
-	fmt.Println("size:", len(ti))
+	fmt.Println("cursor:", len(ti))
 	fmt.Println("Duplicates: ", duplicates)
 	fmt.Println("Missings: ", missings)
 }
@@ -380,7 +380,7 @@ func TestPollReturnsCorrectOffer(t *testing.T) {
 Loop:
 	for seg != nil {
 		for idx, v := range seg.buffer {
-			if v == 0 {
+			if v.data == 0 {
 				indexes = append(indexes, idx)
 				_ = idx
 				break
@@ -389,10 +389,10 @@ Loop:
 				break Loop
 			}
 			consumer++
-			if _, ok := ti[v]; !ok {
-				missings = append(missings, v)
+			if _, ok := ti[v.data]; !ok {
+				missings = append(missings, v.data)
 			} else {
-				delete(ti, v)
+				delete(ti, v.data)
 			}
 		}
 		if seg.nextSegment() == nil {
