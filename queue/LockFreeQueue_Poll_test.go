@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -31,8 +32,8 @@ func TestPollDecreasesConsumerIndex(t *testing.T) {
 // Poll handles the case when the queue is empty and returns immediately
 func TestPollHandlesEmptyQueue(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
-	result, _ := queue.Poll()
-	if result != 0 {
+	result, ok := queue.Poll()
+	if ok || result != 0 {
 		t.Errorf("Expected 0 for empty queue, but got %d. Walk the plank!", result)
 	}
 }
@@ -42,24 +43,20 @@ func TestPollConcurrentAccess(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
 	var wg sync.WaitGroup
 	for i := 0; i < 1024; i++ {
-		wg.Add(1)
+		wg.Add(2)
 		go func(i int) {
 			defer wg.Done()
 			for !queue.Offer(i) {
 			}
 		}(i)
-	}
-	wg.Wait()
-
-	for i := 0; i < 1024; i++ {
-		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for _, ok := queue.Poll(); !ok; _, ok = queue.Poll() {
-
+				runtime.Gosched()
 			}
 		}()
 	}
+
 	wg.Wait()
 
 	if queue.Size() != 0 {

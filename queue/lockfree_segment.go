@@ -15,7 +15,6 @@ func (s *SegmentPool[E]) getSegment() *segment[E] {
 }
 
 func (s *SegmentPool[E]) putSegment(seg *segment[E]) {
-	seg.reset()
 	s.pool.Put(seg)
 }
 
@@ -33,21 +32,54 @@ func (s *SegmentPool[E]) NewPool() {
 }
 
 type segment[E any] struct {
+	cursor int64
 	buffer []E
 	next   unsafe.Pointer
 }
 
 func (s *segment[E]) reset() {
-	clear(s.buffer)
+	s.cursor = 0
+	s.buffer = make([]E, segmentSize)
 	s.next = nil
 }
 
-func (s *segment[E]) get(index int64) E {
-	return s.buffer[index]
+func (s *segment[E]) hasSpace() bool {
+	return atomic.LoadInt64(&s.cursor) < segmentSize
 }
 
-func (s *segment[E]) set(index int64, e E) {
-	s.buffer[index] = e
+func (s *segment[E]) get(cursor int64) E {
+	return s.buffer[cursor]
+}
+
+func (s *segment[E]) set(cursor int64, e E) {
+	s.buffer[cursor] = e
+}
+
+func (s *segment[E]) trySegmentNext(pool *SegmentPool[E]) *segment[E] {
+	if s.hasSpace() {
+		return s
+	}
+	if nSeg := s.nextSegment(); nSeg != nil {
+		return nSeg
+	}
+	nSeg := pool.getSegment()
+	if s.storeNext(nSeg) {
+		return nSeg
+	}
+	pool.putSegment(nSeg)
+	return nil
+}
+
+func (s *segment[E]) newNextSegment(pool *SegmentPool[E]) *segment[E] {
+	if s.nextSegment() != nil {
+		return nil
+	}
+	seg := pool.getSegment()
+	if s.storeNext(seg) {
+		return seg
+	}
+	pool.putSegment(seg)
+	return nil
 }
 
 func (s *segment[E]) nextSegment() *segment[E] {

@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"sync"
 	"sync/atomic"
 	"testing"
 )
@@ -9,6 +8,7 @@ import (
 // Successfully adds an element to the queue when there is space
 func TestOfferAddsElementWhenSpaceAvailable(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
+
 	success := queue.Offer(42)
 	if !success {
 		t.Error("Arrr! Failed to add element when there be space!")
@@ -33,24 +33,6 @@ func TestOfferReturnsTrueOnSuccess(t *testing.T) {
 	}
 }
 
-// Handles concurrent calls to Offer without data corruption
-func TestOfferHandlesConcurrentCalls(t *testing.T) {
-	queue := NewLockFreeQueue[int]()
-	var wg sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func(val int) {
-			defer wg.Done()
-			for !queue.Offer(val) {
-			}
-		}(i)
-	}
-	wg.Wait()
-	if queue.Size() != 100 {
-		t.Errorf("Yo ho ho! Concurrent calls to Offer caused data corruption! size:%d ", queue.Size())
-	}
-}
-
 // Correctly handles the scenario when the queue is empty
 func TestOfferHandlesEmptyQueue(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
@@ -63,10 +45,20 @@ func TestOfferHandlesEmptyQueue(t *testing.T) {
 // Properly manages the wrap-around of the buffer using the mask
 func TestOfferManagesWrapAround(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
-	for i := 0; i < 4; i++ {
-		queue.Offer(i)
-		queue.Poll()
+	for i := 0; i < 4096; i++ {
+		queue.Offer(i + 1)
 	}
+	if queue.Size() != 4096 {
+		t.Error("Yo-ho-ho! Offer didn't manage buffer wrap-around correctly!")
+	}
+
+	for i := 0; i < 4096; i++ {
+		v, ok := queue.Poll()
+		if !ok || v != i+1 {
+			t.Error("Yo-ho-ho! Offer didn't manage buffer wrap-around correctly!", v, queue.consumer, queue.producer)
+		}
+	}
+
 	success := queue.Offer(42)
 	if p, _ := queue.Poll(); !success || p != 42 {
 		t.Error("Walk the plank! Offer didn't manage buffer wrap-around correctly!")

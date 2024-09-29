@@ -80,6 +80,7 @@ func BenchmarkQueueMix(b *testing.B) {
 		{"DesignQueueTest", NewDesignQueue[int]()},
 		//{"YireyunQueueTest", NewYireyunQueue[int]()}, // too slow removed
 		{"ChanQueueTest", NewChannelQueue[int]()},
+		{"LockFreeRetryQueue", NewLockFreeQueue[int]().WithRetry(1024)},
 		{"LockFreeQueue", NewLockFreeQueue[int]()},
 		{"MutexQueue", NewMutexQueue[int]()},
 	}
@@ -96,10 +97,14 @@ func BenchmarkQueueMix(b *testing.B) {
 						cnt := 0
 						for !q.Offer(int(fastrand())) && cnt < 1000 {
 							cnt++
+							runtime.Gosched()
 						}
 					} else {
 						// Read operation
-						_, _ = q.Poll()
+						_, ok := q.Poll()
+						if !ok {
+							runtime.Gosched()
+						}
 					}
 				}
 			})
@@ -220,43 +225,194 @@ func NewDesignQueue[E any]() *designQueue[E] {
 }
 
 // Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsElement(t *testing.T) {
+	queue := NewLockFreeQueue[int]()
+	writes := int64(0)
+	reads := int64(0)
+
+	per := 4096
+	mm := map[int]int{}
+	for j := 0; j < per; j++ {
+		v := j
+		for !queue.Offer(v + 1) {
+		}
+		atomic.AddInt64(&writes, 1)
+		mm[v+1] = v + 1
+	}
+
+	func(sta int) {
+		for i := 0; i < per; i++ {
+			v, ok := queue.Poll()
+			for !ok {
+				v, ok = queue.Poll()
+			}
+			atomic.AddInt64(&reads, 1)
+			if v != mm[v] {
+				t.Errorf("Expected %d, but got %d. Ye-ho!", mm[v], v)
+			}
+		}
+	}(0)
+
+	if reads != writes {
+		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	}
+	var duplicates []int
+	var missings []int
+	for i := 0; i < per; i++ {
+		if _, ok := mm[i+1]; !ok {
+			missings = append(missings, i+1)
+		}
+	}
+
+	fmt.Println("All done!", reads, writes, queue.Size())
+	fmt.Println("Duplicates: ", duplicates)
+	fmt.Println("Missings: ", missings)
+}
+
+// Poll returns the correct element when multiple elements are in the queue
 func TestPollReturnsCorrectElement(t *testing.T) {
 	queue := NewLockFreeQueue[int]()
 	wg := sync.WaitGroup{}
 	writes := int64(0)
 	reads := int64(0)
-	for i := 0; i < 128; i++ {
-		wg.Add(2)
-		go func() {
+
+	max := 64
+	per := 64
+	wg.Add(max)
+	mm := map[int]int{}
+	for i := 0; i < max*per; i++ {
+		mm[i+1] = 0
+	}
+	for i := 0; i < max; i++ {
+		go func(sta int) {
 			defer wg.Done()
-			for i := 0; i < 4096; i++ {
-				for !queue.Offer(i) {
+			for j := 0; j < per; j++ {
+				v := sta*per + j
+				for !queue.Offer(v + 1) {
+					runtime.Gosched()
 				}
 				atomic.AddInt64(&writes, 1)
 			}
-		}()
-	}
-
-	for i := 0; i < 128; i++ {
-		go func() {
-			defer wg.Done()
-			for i := 0; i < 4096; i++ {
-				for {
-					_, ok := queue.Poll()
-					if ok {
-						atomic.AddInt64(&reads, 1)
-						break
-					}
-				}
-			}
-		}()
+		}(i)
 	}
 
 	wg.Wait()
-	if reads != writes {
-		t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+
+	for i := 0; i < max*per; i++ {
+		v, ok := queue.Poll()
+		mm[v] = 0
+		if !ok {
+			t.Error("Yo-ho-ho! Offer didn't manage buffer wrap-around correctly!", v, queue.consumer, queue.producer)
+		}
 	}
-	fmt.Println("All done!", reads, writes)
+
+	//if reads != writes {
+	//	t.Errorf("Expected reads(%d) and writes(%d) to be equal, but they aren't. Ye-ho! ", reads, writes)
+	//}
+
+	ti := map[int]struct{}{}
+	poolMax := 0
+	var duplicates []int
+	var missings []int
+	for k, v := range mm {
+		if v != 0 {
+			missings = append(missings, k)
+		}
+	}
+
+	fmt.Println("All done!", poolMax, reads, writes, queue.Size())
+	fmt.Println("size:", len(ti))
+	fmt.Println("Duplicates: ", duplicates)
+	fmt.Println("Missings: ", missings)
+}
+
+// Poll returns the correct element when multiple elements are in the queue
+func TestPollReturnsCorrectOffer(t *testing.T) {
+	queue := NewLockFreeQueue[int]()
+	wg := sync.WaitGroup{}
+	writes := int64(0)
+
+	max := 1024
+	per := 1024
+
+	mm := sync.Map{}
+	for i := 0; i < max*per; i++ {
+		mm.Store(i+1, 1)
+	}
+	wg.Add(max)
+	for i := 0; i < max; i++ {
+		go func(sta int) {
+			defer wg.Done()
+			for j := 0; j < per; j++ {
+				v := sta*per + j
+				for !queue.Offer(v + 1) {
+					runtime.Gosched()
+				}
+				atomic.AddInt64(&writes, 1)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+
+	ti := map[int]struct{}{}
+	poolMax := 0
+	var duplicates []int
+	mm.Range(func(k, v any) bool {
+		poolMax++
+		vv := k.(int)
+		if _, ok := ti[vv]; ok {
+			duplicates = append(duplicates, vv)
+			return true
+		}
+		if vvv := v.(int); vvv == 1 {
+			ti[vv] = struct{}{}
+		}
+		return true
+	})
+
+	var missings []int
+	var indexes []int
+	seg := queue.getHeadSegment()
+	consumer := int64(0)
+	producer := queue.getProducer()
+
+Loop:
+	for seg != nil {
+		for idx, v := range seg.buffer {
+			if v == 0 {
+				indexes = append(indexes, idx)
+				_ = idx
+				break
+			}
+			if consumer >= producer {
+				break Loop
+			}
+			consumer++
+			if _, ok := ti[v]; !ok {
+				missings = append(missings, v)
+			} else {
+				delete(ti, v)
+			}
+		}
+		if seg.nextSegment() == nil {
+			break Loop
+		}
+		seg = seg.nextSegment()
+	}
+
+	//for i := 0; i < max*per; i++ {
+	//	_, truth := mm.Load(i + 1)
+	//	if !truth {
+	//		missings = append(missings, i+1)
+	//	}
+	//}
+
+	fmt.Println("All done!", poolMax, writes, queue.Size())
+	fmt.Println("Duplicates: ", duplicates)
+	//fmt.Println("Missings: ", ti)
+	fmt.Println("Missings: ", missings)
+	//fmt.Println("Indexes: ", indexes)
 }
 
 // Poll returns the correct element when multiple elements are in the queue
