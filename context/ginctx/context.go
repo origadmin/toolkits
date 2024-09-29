@@ -1,10 +1,11 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package context provides the context functions
-package context
+// Package ginctx provides the context functions
+package ginctx
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/origadmin/toolkits/context"
 )
 
