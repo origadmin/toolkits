@@ -210,7 +210,10 @@ func New(ss ...Setting) *slog.Logger {
 	}
 
 	defaultLogger = slog.New(handler)
-	slog.SetDefault(defaultLogger)
+	if opt.UseDefault {
+		slog.SetDefault(defaultLogger)
+	}
+
 	return defaultLogger
 }
 
