@@ -8,6 +8,7 @@ require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20240918015945-e1f5dc42b1e5
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/goexts/ggb v0.0.7
+	github.com/golang-cz/devslog v0.0.11
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/consul/api v1.29.4
 	github.com/hashicorp/go-multierror v1.1.1
