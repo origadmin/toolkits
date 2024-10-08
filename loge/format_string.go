@@ -11,11 +11,12 @@ func _() {
 	_ = x[FormatJSON-0]
 	_ = x[FormatText-1]
 	_ = x[FormatTint-2]
+	_ = x[FormatDev-3]
 }
 
-const _Format_name = "JSONTextTint"
+const _Format_name = "JSONTextTintDev"
 
-var _Format_index = [...]uint8{0, 4, 8, 12}
+var _Format_index = [...]uint8{0, 4, 8, 12, 15}
 
 func (i Format) String() string {
 	if i < 0 || i >= Format(len(_Format_index)-1) {

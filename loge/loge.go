@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/goexts/ggb/settings"
+	"github.com/golang-cz/devslog"
 	"github.com/lmittmann/tint"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -51,6 +52,37 @@ type (
 		// using gzip. The default is not to perform compression.
 		Compress bool `json:"compress" yaml:"compress" toml:"compress"`
 	}
+	DevConfig = struct {
+		// Max number of printed elements in slice.
+		MaxSlice uint `json:"maxslice" yaml:"maxslice" toml:"maxslice"`
+
+		// If the attributes should be sorted by keys
+		SortKeys bool `json:"sortkeys" yaml:"sortkeys" toml:"sortkeys"`
+
+		// Add blank line after each log
+		NewLine bool `json:"newline" yaml:"newline" toml:"newline"`
+
+		// Indent \n in strings
+		Indent bool `json:"indent" yaml:"indent" toml:"indent"`
+
+		// Set color for Debug level, default: devslog.Blue
+		DebugColor devslog.Color `json:"debugcolor" yaml:"debugcolor" toml:"debugcolor"`
+
+		// Set color for Info level, default: devslog.Green
+		InfoColor devslog.Color `json:"infocolor" yaml:"infocolor" toml:"infocolor"`
+
+		// Set color for Warn level, default: devslog.Yellow
+		WarnColor devslog.Color `json:"warncolor" yaml:"warncolor" toml:"warncolor"`
+
+		// Set color for Error level, default: devslog.Red
+		ErrorColor devslog.Color `json:"errorcolor" yaml:"errorcolor" toml:"errorcolor"`
+
+		// Max stack trace frames when unwrapping errors
+		MaxTrace uint `json:"maxtrace" yaml:"maxtrace" toml:"maxtrace"`
+
+		// Use method String() for formatting value
+		Formatter bool `json:"formatter" yaml:"formatter" toml:"formatter"`
+	}
 )
 
 const (
@@ -71,6 +103,8 @@ const (
 	FormatText
 	// FormatTint tint format
 	FormatTint
+	// FormatDev dev format
+	FormatDev
 )
 
 // New create a new slog.Logger
@@ -146,6 +180,26 @@ func New(ss ...Setting) *slog.Logger {
 			ReplaceAttr: opt.ReplaceAttr,
 			TimeFormat:  opt.TimeLayout,
 			NoColor:     opt.NoColor,
+		})
+	case FormatDev:
+		handler = devslog.NewHandler(output, &devslog.Options{
+			HandlerOptions: &HandlerOptions{
+				Level:       opt.Level,
+				ReplaceAttr: opt.ReplaceAttr,
+				AddSource:   opt.AddSource,
+			},
+			MaxSlicePrintSize:  opt.DevConfig.MaxSlice,
+			SortKeys:           opt.DevConfig.SortKeys,
+			TimeFormat:         opt.TimeLayout,
+			NewLineAfterLog:    opt.DevConfig.NewLine,
+			StringIndentation:  opt.DevConfig.Indent,
+			DebugColor:         opt.DevConfig.DebugColor,
+			InfoColor:          opt.DevConfig.InfoColor,
+			WarnColor:          opt.DevConfig.WarnColor,
+			ErrorColor:         opt.DevConfig.ErrorColor,
+			MaxErrorStackTrace: opt.DevConfig.MaxTrace,
+			StringerFormatter:  opt.DevConfig.Formatter,
+			NoColor:            opt.NoColor,
 		})
 	default:
 		handler = slog.NewTextHandler(output, &HandlerOptions{

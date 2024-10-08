@@ -17,6 +17,7 @@ type Option struct {
 	ReplaceAttr      func(groups []string, attr Attr) Attr
 	AddSource        bool
 	LumberjackConfig *LumberjackConfig
+	DevConfig        *DevConfig
 	NoColor          bool
 	UseDefault       bool
 }
@@ -106,5 +107,12 @@ func WithNoColor() Setting {
 func WithUseDefault() Setting {
 	return func(opt *Option) {
 		opt.UseDefault = true
+	}
+}
+
+// WithDevConfig set dev config
+func WithDevConfig(config *DevConfig) Setting {
+	return func(opt *Option) {
+		opt.DevConfig = config
 	}
 }
