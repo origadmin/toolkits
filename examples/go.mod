@@ -4,7 +4,6 @@ go 1.23.1
 
 replace (
 	github.com/origadmin/toolkits => ../
-	github.com/origadmin/toolkits/context/ginctx => ../context/ginctx
 	github.com/origadmin/toolkits/runtime/kratos => ../runtime/kratos
 )
 
@@ -12,7 +11,6 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/context/ginctx v0.0.0-00010101000000-000000000000
 	github.com/origadmin/toolkits/runtime/kratos v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240924160255-9d4c2d233b61
