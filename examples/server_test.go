@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -14,10 +15,8 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/context/ginctx"
-	transgin "github.com/origadmin/toolkits/runtime/kratos/transport/gin"
-
 	"github.com/origadmin/toolkits/examples/helloworld"
+	gins "github.com/origadmin/toolkits/runtime/kratos/transport/gins"
 )
 
 var _ helloworld.GreeterHTTPServer = &helloServer{}
@@ -30,7 +29,7 @@ type helloServer struct {
 func (h helloServer) SayHello(ctx context.Context, request *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
 	var out helloworld.HelloReply
 	out.Message = strconv.FormatInt(int64(rand.Intn(100)), 10)
-	c, ok := ginctx.FromContext(ctx)
+	c, ok := gins.FromContext(ctx)
 	if ok {
 		log.Info("Request:", c.FullPath())
 		return h.cli.SayHello(ctx, request)
@@ -40,8 +39,8 @@ func (h helloServer) SayHello(ctx context.Context, request *helloworld.HelloRequ
 }
 
 func TestServer(t *testing.T) {
-	hsrv := transgin.NewServer(
-		transgin.Address(":8000"),
+	hsrv := gins.NewServer(
+		gins.Address(":8000"),
 	)
 	gsrv := transgrpc.NewServer(
 		transgrpc.Address(":9000"),
@@ -56,7 +55,7 @@ func TestServer(t *testing.T) {
 			func(handler middleware.Handler) middleware.Handler {
 				log.Info("Middleware Call")
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
-					c, ok := ginctx.FromContext(ctx)
+					c, ok := gins.FromContext(ctx)
 					if ok {
 						log.Info("Gin trigger middleware", c.FullPath(), " args ", c.Params)
 					}
@@ -70,9 +69,9 @@ func TestServer(t *testing.T) {
 	}
 
 	helloworld.RegisterGreeterServer(gsrv, s)
-	helloworld.RegisterGreeterGINServer(hsrv.Engine, s)
-	hsrv.Use(transgin.Recovery(log.DefaultLogger, true))
-	hsrv.Use(transgin.Logger(log.DefaultLogger))
+	helloworld.RegisterGreeterGINServer(hsrv, s)
+	hsrv.Use(gins.Recovery(log.DefaultLogger, true))
+	hsrv.Use(gins.Logger(log.DefaultLogger))
 
 	hsrv.GET("/login/*param", func(c *gin.Context) {
 		if len(c.Params.ByName("param")) > 1 {
