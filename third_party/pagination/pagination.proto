@@ -21,6 +21,17 @@ message QueryParam {
   repeated string values = 1;
 }
 
+message PagingData {
+  // Total number of records
+  int32 total = 1;
+  // Current page
+  int32 current = 2;
+  // The number of lines per page
+  int32 page_size = 3;
+  // Response data
+  google.protobuf.Any data = 4;
+}
+
 // Paging general request
 message PagingRequest {
   // Current page
@@ -43,7 +54,7 @@ message PagingRequest {
 message PagingResponse {
   bool success = 1;
   int32 total = 2;
+  PagingData data = 3;
   errors.rpcerr.Error error = 4;
-  google.protobuf.Any data = 3;
   google.protobuf.Any extra = 5;
 }
