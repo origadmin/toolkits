@@ -25,17 +25,17 @@ func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}G
 	return func(ctx *gin.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
-		if err := ctx.ShouldBind(&in{{.Body}}); err != nil {
+	  if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
 		ctx.Error(err)
 		return
 		}
   {{- end}}
-	if err := ctx.BindQuery(&in); err != nil {
+	if err := gins.BindQuery(ctx,&in); err != nil {
 	ctx.Error(err)
 	return
 	}
   {{- if.HasVars}}
-		if err := ctx.BindUri(&in); err != nil {
+	  if err := gins.BindURI(ctx,&in); err != nil {
 		ctx.Error(err)
 		return
 		}

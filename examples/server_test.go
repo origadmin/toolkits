@@ -34,7 +34,7 @@ func (h helloServer) SayHello(ctx context.Context, request *helloworld.HelloRequ
 		log.Info("Request:", c.FullPath())
 		return h.cli.SayHello(ctx, request)
 	}
-	log.Info("Request RPC:", "hello", request.Name, " give ", out.Message)
+	log.Info("Request RPC:", "hello ", request.Name, " give ", out.Message)
 	return &out, nil
 }
 
@@ -59,6 +59,7 @@ func TestServer(t *testing.T) {
 					if ok {
 						log.Info("Gin trigger middleware", c.FullPath(), " args ", c.Params)
 					}
+
 					return handler(ctx, req)
 				}
 			},
