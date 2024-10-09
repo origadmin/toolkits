@@ -44,8 +44,8 @@ type dummyMetrics struct{}
 type Metrics interface {
 	Enabled() bool // Enabled returns whether metrics is enabled
 	Disable()
-	Observe(ctx context.Context, reporter Report)
-	Log(ctx context.Context, handler, method, code string, sendBytes, recvBytes, latency int64)
+	Observe(ctx context.Context, data MetricData)
+	Log(ctx context.Context, handler, method string, code int, sendBytes, recvBytes int64, latency float64)
 }
 
 const (
