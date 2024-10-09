@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package errors;
+package errors.rpcerr;
 
-option go_package = "github.com/origadmin/toolkits/errors/rpcerr;rpcerr";
+option go_package = "github.com/origadmin/toolkits/third_party/errors/rpcerr;rpcerr";
 option java_multiple_files = true;
 option java_package = "com.github.origadmin.errors";
 option objc_class_prefix = "OrigAdminErrors";
