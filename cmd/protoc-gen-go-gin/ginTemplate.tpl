@@ -41,7 +41,7 @@ func Register{{.ServiceType}}GINServer(engine *gin.Engine, srv {{.ServiceType}}G
 		}
   {{- end}}
 	http.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
-	newCtx := ginctx.WithContext(ctx)
+	newCtx := gins.NewContext(ctx)
 	reply, err := srv.{{.Name}}(newCtx, &in)
 	if err != nil {
 	ctx.Error(err)
