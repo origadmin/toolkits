@@ -25,6 +25,7 @@ var (
 type (
 	Engine      = gin.Engine
 	HandlerFunc = gin.HandlerFunc
+	IRouter     = gin.IRouter
 	IRoutes     = gin.IRoutes
 	RouterGroup = gin.RouterGroup
 	RouteInfo   = gin.RouteInfo
