@@ -10,9 +10,10 @@ import (
 	"sync"
 )
 
-//go:generate protoc -I. --go_out=paths=source_relative:. rpc.proto
-
 // Define  constant IDs for various Error status codes
+//
+//go:generate protoc -I. --go_out=paths=source_relative:. rpc.proto
+//go:generate protoc -I. --openapiv2_out . --openapiv2_opt logtostderr=true rpc.proto
 const (
 	UnknownID               = "http.response.status.unknown"                  // ID for Unknown status
 	BadRequestID            = "http.response.status.bad_request"              // ID for Bad Request status
