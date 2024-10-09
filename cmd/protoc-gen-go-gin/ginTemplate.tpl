@@ -14,9 +14,9 @@ type {{.ServiceType}}GINServer interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINServer(engine *gin.Engine, srv {{.ServiceType}}GINServer) {
+func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}GINServer) {
 {{- range.Methods}}
-	engine.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv))
+	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv))
 {{- end}}
 }
 
