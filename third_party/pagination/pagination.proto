@@ -1,10 +1,11 @@
 syntax = "proto3";
 package pagination;
 
-option go_package = "toolkits/pagination;pagination";
+option go_package = "github.com/origadmin/toolkits/pagination;pagination";
 
 import "google/protobuf/any.proto";
-import "errors/rpcerr/rpc.proto";
+import "google/protobuf/struct.proto";
+import "errors/rpcerr/rpcerr.proto";
 
 // Paging sort
 enum SortOrder {
@@ -16,24 +17,16 @@ enum SortOrder {
   DESCENDING = 2;
 }
 
-// Query parameters
-message QueryParam {
-  repeated string values = 1;
-}
 
-message PagingData {
-  // Total number of records
-  int32 total = 1;
-  // Current page
-  int32 current = 2;
-  // The number of lines per page
-  int32 page_size = 3;
-  // Response data
-  google.protobuf.Any data = 4;
-}
+
 
 // Paging general request
 message PagingRequest {
+  // Query parameters
+  message QueryParam {
+    repeated string values = 1;
+  }
+
   // Current page
   optional int32 current = 1;
 
@@ -41,7 +34,7 @@ message PagingRequest {
   optional int32 page_size = 2;
 
   // Query parameter
-  map<string, QueryParam> query = 3;
+  map<string, google.protobuf.ListValue> query = 3;
 
   // Sort
   map<string, SortOrder> order_by = 4;
@@ -52,6 +45,17 @@ message PagingRequest {
 
 // Paging general result
 message PagingResponse {
+  message PagingData {
+    // Total number of records
+    int32 total = 1;
+    // Current page
+    int32 current = 2;
+    // The number of lines per page
+    int32 page_size = 3;
+    // Response data
+    google.protobuf.Any data = 4;
+  }
+
   bool success = 1;
   int32 total = 2;
   PagingData data = 3;
