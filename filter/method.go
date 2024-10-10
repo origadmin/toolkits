@@ -27,6 +27,8 @@ const (
 
 func MethodIndex(method string) MethodType {
 	switch strings.ToUpper(method) {
+	//case "*":
+	//	return MethodAny
 	case http.MethodGet:
 		return MethodGet
 	case http.MethodPut:

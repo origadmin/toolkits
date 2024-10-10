@@ -69,10 +69,10 @@ func contains(roots []*Link, path string) bool {
 
 func containsString(roots []string, path string) bool {
 	pathLen := len(path)
+	if strings.HasSuffix(path, "/") {
+		path += "/"
+	}
 	for _, rule := range roots {
-		if strings.HasSuffix(path, "/") {
-			path += "/"
-		}
 		if rs := len(rule); pathLen >= rs && path[:rs] == rule {
 			slog.Info("containsString", "path", path, "rule", rule, "equal", path[:rs] == rule)
 			return true
@@ -139,7 +139,6 @@ func (f *filter) Denied(method string, path string) bool {
 func (f *filter) buildRoot(tree []*Link, path string) []*Link {
 	path = strings.TrimPrefix(path, "/")
 	if path == "" {
-		slog.Info("buildRoot", "path", path)
 		return tree
 	}
 	paths := strings.Split(path, "/")
@@ -148,7 +147,6 @@ func (f *filter) buildRoot(tree []*Link, path string) []*Link {
 
 func (f *filter) buildTree(tree []*Link, paths []string) []*Link {
 	if len(paths) == 0 {
-		// slog.Info("skip buildTree", "paths", paths)
 		return tree
 	}
 	var cur *Link
@@ -227,6 +225,9 @@ func showTree(prefix string, list []*Link) {
 }
 
 func parsePath(path string, delimiter string) ([]string, string) {
+	if path == "" || delimiter == "" {
+		return nil, ""
+	}
 	ss := strings.Split(path, delimiter)
 	var (
 		methods []string
@@ -236,12 +237,15 @@ func parsePath(path string, delimiter string) ([]string, string) {
 		methods = append(methods, "*")
 		path = ss[0]
 	case 2:
+		if ss[0] == "" {
+			ss[0] = "*"
+		}
 		if strings.Contains(ss[0], ",") {
 			methods = strings.Split(ss[0], ",")
 		} else {
 			methods = append(methods, ss[0])
 		}
-		path = ss[1]
+		path = strings.TrimPrefix(ss[1], "/")
 	default:
 		return nil, ""
 	}
@@ -306,7 +310,6 @@ func (s stringFilter) Allowed(method, path string) bool {
 
 	if roots := s.allows[idx]; len(roots) > 0 {
 		if containsString(roots, path) {
-			// slog.Info("Deny Check on Contains Method", "method", method, "path", path)
 			return true
 		}
 	}
