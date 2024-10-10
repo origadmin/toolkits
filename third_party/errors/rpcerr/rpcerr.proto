@@ -4,8 +4,8 @@ package errors.rpcerr;
 
 option go_package = "github.com/origadmin/toolkits/errors/rpcerr;rpcerr";
 option java_multiple_files = true;
-option java_package = "com.github.origadmin.errors";
-option objc_class_prefix = "OrigAdminErrors";
+option java_package = "com.github.origadmin.errors.rpcerr";
+option objc_class_prefix = "OrigAdminErrorsRpcerr";
 
 message Error {
   string id = 1;
