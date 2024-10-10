@@ -8,6 +8,8 @@
 
 version: 2
 
+project_name: protoc-gen-go-gin
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -23,6 +25,7 @@ builds:
       - -trimpath
     ldflags: -s -w -X main.builtBy=OrigAdmin -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
     #    main: ./main.go
+    binary: protoc-gen-go-gin
     goos:
       - darwin
       - windows
@@ -74,7 +77,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-
 snapshot:
   name_template: nightly_{{ .ShortCommit }}
 
@@ -103,6 +105,9 @@ release:
   github:
     owner: OrigAdmin
     name: protoc-gen-go-gin
+  prerelease: auto
+  draft: false
+  make_latest: true
   header: |
     # Changelog
     

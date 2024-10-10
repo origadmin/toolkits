@@ -1,13 +1,13 @@
 module github.com/origadmin/toolkits
 
-go 1.22.5
+go 1.23.1
 
 require (
 	github.com/coocood/freecache v1.2.4
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20240918015945-e1f5dc42b1e5
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20240918015945-e1f5dc42b1e5
 	github.com/go-kratos/kratos/v2 v2.8.0
-	github.com/goexts/ggb v0.0.7
+	github.com/goexts/ggb v0.0.8
 	github.com/golang-cz/devslog v0.0.11
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/consul/api v1.29.4
@@ -56,7 +56,7 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.16 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
+	golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
