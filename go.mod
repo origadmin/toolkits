@@ -19,10 +19,8 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/yireyun/go-queue v0.0.0-20220725040158-a4dd64810e1e
 	go.etcd.io/etcd/client/v3 v3.5.16
-	go.uber.org/zap v1.17.0
 	golang.design/x/lockfree v0.0.1
 	golang.org/x/crypto v0.27.0
-	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
@@ -56,6 +54,7 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.16 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
@@ -63,5 +62,6 @@ require (
 	google.golang.org/genproto v0.0.0-20231212172506-995d672761c0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 // indirect
+	google.golang.org/grpc v1.61.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
