@@ -19,20 +19,24 @@ type Filter interface {
 }
 
 type filter struct {
-	delimiter string
-	skipAllow bool
-	allows    [MethodTypeMax][]*Link
-	skipDeny  bool
-	denies    [MethodTypeMax][]*Link
-	treeList  []Link
+	delimiter    string
+	skipAllow    bool
+	allows       [MethodTypeMax][]*Link
+	skipDeny     bool
+	denies       [MethodTypeMax][]*Link
+	treeList     []Link
+	skipAnyCheck bool
 }
 
 type Setting = settings.Setting[Option]
 
 type Option struct {
-	Delimiter string
-	Allows    []string
-	Denies    []string
+	Delimiter    string
+	SkipDeny     bool
+	SkipAllow    bool
+	SkipAnyCheck bool
+	Allows       []string
+	Denies       []string
 }
 
 func WithDelimiter(delimiter string) Setting {
@@ -50,6 +54,24 @@ func WithAllows(allows ...string) Setting {
 func WithDenies(denies ...string) Setting {
 	return func(o *Option) {
 		o.Denies = denies
+	}
+}
+
+func SkipAnyCheck() Setting {
+	return func(o *Option) {
+		o.SkipAnyCheck = true
+	}
+}
+
+func DisableAllow() Setting {
+	return func(o *Option) {
+		o.SkipAllow = true
+	}
+}
+
+func DisableDeny() Setting {
+	return func(o *Option) {
+		o.SkipDeny = true
 	}
 }
 
@@ -93,13 +115,17 @@ func (f *filter) Allowed(method, path string) bool {
 	}
 	idx := MethodIndex(method)
 
+	if f.skipAnyCheck && idx == MethodAny {
+		return false
+	}
+
 	if roots := f.allows[idx]; len(roots) > 0 {
 		if contains(roots, path) {
 			return true
 		}
 	}
 
-	if idx == MethodAny {
+	if f.skipAnyCheck || idx == MethodAny {
 		return false
 	}
 
@@ -116,14 +142,16 @@ func (f *filter) Denied(method string, path string) bool {
 		return false
 	}
 	idx := MethodIndex(method)
-
+	if f.skipAnyCheck && idx == MethodAny {
+		return false
+	}
 	if roots := f.denies[idx]; len(roots) > 0 {
 		if contains(roots, path) {
 			return true
 		}
 	}
 
-	if idx == MethodAny {
+	if f.skipAnyCheck || idx == MethodAny {
 		return false
 	}
 
@@ -176,16 +204,20 @@ func hasNext(paths []string) bool {
 
 func NewFilter(ss ...Setting) Filter {
 	o := settings.Apply(&Option{
-		Delimiter: DefaultDelimiter,
+		Delimiter:    DefaultDelimiter,
+		SkipAnyCheck: false,
+		SkipDeny:     false,
+		SkipAllow:    false,
 	}, ss)
 
 	f := &filter{
-		delimiter: o.Delimiter,
-		treeList:  make([]Link, 0),
-		skipAllow: true,
-		allows:    [MethodTypeMax][]*Link{},
-		skipDeny:  true,
-		denies:    [MethodTypeMax][]*Link{},
+		delimiter:    o.Delimiter,
+		skipAnyCheck: o.SkipAnyCheck,
+		treeList:     make([]Link, 0),
+		skipAllow:    o.SkipAllow,
+		allows:       [MethodTypeMax][]*Link{},
+		skipDeny:     o.SkipDeny,
+		denies:       [MethodTypeMax][]*Link{},
 	}
 
 	for _, s := range o.Allows {
@@ -319,11 +351,13 @@ func (s stringFilter) Allowed(method, path string) bool {
 
 func NewStringFilter(ss ...Setting) Filter {
 	opt := settings.Apply(&Option{
-		Delimiter: DefaultDelimiter,
+		Delimiter:    DefaultDelimiter,
+		SkipAnyCheck: false,
+		SkipDeny:     false,
+		SkipAllow:    false,
 	}, ss)
 
 	f := &stringFilter{
-		// opt:       opt,
 		skipAllow: true,
 		allows:    [MethodTypeMax][]string{},
 		skipDeny:  true,

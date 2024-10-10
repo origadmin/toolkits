@@ -112,7 +112,7 @@ func TestEmptyStringInputsAllowed(t *testing.T) {
 	allowed := filter.Allowed("*", "/home")
 	denied := filter.Denied("*", "/home")
 	if !allowed {
-		t.Error("Blimey! The filter should allow *:/home!", allowed)
+		t.Error("Blimey! The filter should allow *:/home!", !allowed)
 	}
 	if denied {
 		t.Error("Blimey! The filter should not deny *:/home!", denied)
