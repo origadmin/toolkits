@@ -1,10 +1,6 @@
 package loge
 
-import (
-	"github.com/goexts/ggb/settings"
-)
-
-type Setting = settings.Setting[Option]
+type Setting = func(*Option)
 
 // Option custom setup config
 type Option struct {
