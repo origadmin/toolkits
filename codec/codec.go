@@ -4,6 +4,7 @@
 package codec
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/BurntSushi/toml"
@@ -14,6 +15,20 @@ import (
 )
 
 type Type int
+
+func (s Type) Marshal(v interface{}) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	err := s.NewEncoder(buf).Encode(v)
+	return buf.Bytes(), err
+}
+
+func (s Type) Unmarshal(data []byte, v interface{}) error {
+	return s.NewDecoder(bytes.NewReader(data)).Decode(v)
+}
+
+func (s Type) Name() string {
+	return s.String()
+}
 
 const (
 	JSON Type = iota
