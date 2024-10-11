@@ -1,6 +1,6 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package filter for Toolkits
+// Package linkFilter for Toolkits
 package filter
 
 import (
@@ -27,8 +27,6 @@ const (
 
 func MethodIndex(method string) MethodType {
 	switch strings.ToUpper(method) {
-	//case "*":
-	//	return MethodAny
 	case http.MethodGet:
 		return MethodGet
 	case http.MethodPut:
