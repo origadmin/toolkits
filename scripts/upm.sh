@@ -8,7 +8,7 @@ MODULE_NAME=$1
 check_go_mod_and_act() {
     local dir="$1"
     local go_mod_name="go.mod"
-    local updated=1  # Assume not updated by default
+    local updated=1 # Assume not updated by default
 
     # Change to the directory
     cd "$dir" || return 1
@@ -46,20 +46,19 @@ git_commit_changes() {
     # Construct the commit message, including the module name
     # the module name must be the directory name without the beginning './'
     # otherwise, the commit message will be incorrect
-    module_name=$(echo "$dir" | sed "s/^.\///")  # Drop the beginning './'
-
+    module_name=$(echo "$dir" | sed "s/^.\///") # Drop the beginning './'
 
     echo "Checking update ${module_name}/(go.mod|go.sum)"
     if git status --porcelain | grep -q -E "^[ ]?(M)[ ]? ${module_name}/(go\.mod|go\.sum)$"; then
-      # Add go.mod and go.sum to the Git staging area
-      git add go.mod go.sum
+        # Add go.mod and go.sum to the Git staging area
+        git add go.mod go.sum
 
-      commit_message="feat($module_name): Update go.mod and go.sum for ${module_name}"
-      echo "Committing changes in [$module_name] with message: $commit_message"
-      # Commit the changes
-      git commit -m "$commit_message"
+        commit_message="feat($module_name): Update go.mod and go.sum for ${module_name}"
+        echo "Committing changes in [$module_name] with message: $commit_message"
+        # Commit the changes
+        git commit -m "$commit_message"
     else
-      echo "No changes to commit in [$module_name]"
+        echo "No changes to commit in [$module_name]"
     fi
 
     # Return to the original working directory

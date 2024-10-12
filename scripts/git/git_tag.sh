@@ -1,27 +1,28 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 source "$(pwd)"/scripts/git/git_cmd.sh
 
 function_checks() {
-     # Check if git_latest_commit_hash is defined
-     if ! declare -f git_latest_commit_hash > /dev/null; then
-         echo "Error: git_latest_commit_hash function is not defined"
-         exit 1
-     fi
+    # Check if get_current_commit_hash is defined
+    if ! declare -f get_current_commit_hash >/dev/null; then
+        echo "Error: get_current_commit_hash function is not defined"
+        exit 1
+    fi
 
-     if ! declare -f git_latest_tag > /dev/null; then
-         echo "Error: git_latest_tag function is not defined"
-         exit 1
-     fi
+    if ! declare -f get_latest_tag >/dev/null; then
+        echo "Error: get_latest_tag function is not defined"
+        exit 1
+    fi
 
-     if ! declare -f git_tags_matching_pattern > /dev/null; then
-         echo "Error: git_tags_matching_pattern function is not defined"
-         exit 1
-     fi
+    if ! declare -f get_matching_tags >/dev/null; then
+        echo "Error: get_matching_tags function is not defined"
+        exit 1
+    fi
 }
 
 # Function to get the next version tag based on existing tags
-get_next_version_tag() {
+get_next_module_version() {
     function_checks
 
     local module_name=$1
@@ -29,16 +30,16 @@ get_next_version_tag() {
     # Determine the pattern based on whether module_name is provided
     local pattern="v*"
     if [ "$module_name" != "." ]; then
-      pattern="${module_name}/v*"
+        pattern="${module_name}/v*"
     fi
 
     # Get all tags that match the pattern
     local tags=""
-    tags=$(git_tags_matching_pattern "$pattern")
+    tags=$(get_matching_tags "$pattern")
 
     # Get the latest tag
     local latest_tag=""
-    latest_tag=$(git_latest_tag "$tags")
+    latest_tag=$(get_latest_tag "$tags")
 
     local next_tag
     if [[ -z "$latest_tag" ]]; then
@@ -46,8 +47,8 @@ get_next_version_tag() {
         next_tag="v0.0.1"
     else
         # Correctly extract the version part from the tag
-        local version_part=${latest_tag##"$module_name/"} # Changed to use ## instead of #
-        IFS='.' read -r -a version_array <<< "${version_part#v}" # Also remove leading 'v'
+        local version_part=${latest_tag##"$module_name/"}       # Changed to use ## instead of #
+        IFS='.' read -r -a version_array <<<"${version_part#v}" # Also remove leading 'v'
         local major=${version_array[0]}
         local minor=${version_array[1]}
         local patch=${version_array[2]}
@@ -63,7 +64,6 @@ get_next_version_tag() {
     echo "$next_tag"
 }
 
-
 # Function to find the latest tag matching the module name
 get_head_version_tag() {
     function_checks
@@ -73,36 +73,36 @@ get_head_version_tag() {
 
     # Get the current commit hash
     local commit_hash
-    commit_hash=$(git_latest_commit_hash)
+    commit_hash=$(get_current_commit_hash)
 
-   # Determine the pattern based on whether module_name is provided
-#    local pattern="v*"
-#    if [ "$module_name" != "." ]; then
-#      pattern="${module_name}/v*"
-#    fi
+    # Determine the pattern based on whether module_name is provided
+    #    local pattern="v*"
+    #    if [ "$module_name" != "." ]; then
+    #      pattern="${module_name}/v*"
+    #    fi
 
     # Get all tags that match the pattern
-#    local tags=""
-#    tags=$(git_tags_matching_pattern "$pattern")
+    #    local tags=""
+    #    tags=$(get_matching_tags "$pattern")
 
     # Get the latest tag
-#    local latest_tag=""
-#    latest_tag=$(git_latest_tag "$tags")
-#
-#    # If the latest tag is newer than the current commit, update latest_tag
-#    if [ -z "$latest_tag" ]; then
-#      latest_tag="$commit_hash"
-#    fi
+    #    local latest_tag=""
+    #    latest_tag=$(get_latest_tag "$tags")
+    #
+    #    # If the latest tag is newer than the current commit, update latest_tag
+    #    if [ -z "$latest_tag" ]; then
+    #      latest_tag="$commit_hash"
+    #    fi
     # Get all tags that point to the current commit
-    tags_on_commit=$(git_tags_on_commit_hash "$commit_hash")
+    tags_on_commit=$(get_tags_for_commit "$commit_hash")
 
     if [ "$module_name" == "." ]; then
-      # Convert the tag list into an array
-        IFS=$'\n' read -d '' -r -a tags_array <<< "$tags_on_commit"
+        # Convert the tag list into an array
+        IFS=$'\n' read -d '' -r -a tags_array <<<"$tags_on_commit"
 
         # Iterate over all tags, looking for tags that match the module name
         for tag in "${tags_array[@]}"; do
-            if [[ "$tag" == "$module_name"* ]]; then
+            if [[ "$tag" == "v"* ]]; then
                 # If it's the first matching tag or newer than the existing tag, update latest_tag
                 if [[ -z "$latest_tag" ]] || [[ "$tag" > "$latest_tag" ]]; then
                     latest_tag=$tag
@@ -112,11 +112,11 @@ get_head_version_tag() {
     # If a module name is provided, filter out matching tags
     elif [ -n "$module_name" ]; then
         # Convert the tag list into an array
-        IFS=$'\n' read -d '' -r -a tags_array <<< "$tags_on_commit"
+        IFS=$'\n' read -d '' -r -a tags_array <<<"$tags_on_commit"
 
         # Iterate over all tags, looking for tags that match the module name
         for tag in "${tags_array[@]}"; do
-            if [[ "$tag" == "$module_name"* ]]; then
+            if [[ "$tag" == "$module_name/v"* ]]; then
                 # If it's the first matching tag or newer than the existing tag, update latest_tag
                 if [[ -z "$latest_tag" ]] || [[ "$tag" > "$latest_tag" ]]; then
                     latest_tag=$tag
@@ -133,29 +133,29 @@ get_head_version_tag() {
                     latest_tag=$tag
                 fi
             fi
-        done <<< "$tags_on_commit"
+        done <<<"$tags_on_commit"
     fi
 
     # Output the latest tag
     echo "$latest_tag"
 }
 
-get_latest_version_tag() {
-  local module_name=$1
+get_latest_module_tag() {
+    local module_name=$1
 
-  # Determine the pattern based on whether module_name is provided
-  local pattern="v*"
-  if [ "$module_name" != "." ]; then
-    pattern="${module_name}/v*"
-  fi
+    # Determine the pattern based on whether module_name is provided
+    local pattern="v*"
+    if [ "$module_name" != "." ]; then
+        pattern="${module_name}/v*"
+    fi
 
-  local tags=""
-  tags=$(git_tags_matching_pattern "$pattern")
+    local tags=""
+    tags=$(get_matching_tags "$pattern")
 
-  # Get the latest tag
-  local latest_tag=""
-  latest_tag=$(git_latest_tag "$tags")
-  echo "$latest_tag"
+    # Get the latest tag
+    local latest_tag=""
+    latest_tag=$(get_latest_tag "$tags")
+    echo "$latest_tag"
 }
 
 # Call the function with the module name
