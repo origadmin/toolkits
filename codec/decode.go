@@ -63,10 +63,10 @@ func DecodeYAMLFile(name string, obj any) error {
 	return yaml.NewDecoder(f).Decode(obj)
 }
 
-// DecodeFile Decodes the given file
-func DecodeFile(name string, obj any) error {
-	ext := filepath.Ext(name)
-	if ext == "" || !isSupported(ext) {
+// DecodeFromFile Decodes the given file
+func DecodeFromFile(name string, obj any) error {
+	dec := TypeFromExt(filepath.Ext(name))
+	if !dec.IsSupported() {
 		return ErrUnsupportedDecodeType
 	}
 

@@ -54,10 +54,10 @@ func EncodeTOMLFile(name string, obj any) error {
 	return toml.NewEncoder(f).Encode(obj)
 }
 
-// EncodeFile Encodes the given file
-func EncodeFile(name string, obj any) error {
-	ext := filepath.Ext(name)
-	if ext == "" || !isSupported(ext) {
+// EncodeToFile Encodes the given file
+func EncodeToFile(name string, obj any) error {
+	typo := TypeFromExt(filepath.Ext(name))
+	if !typo.IsSupported() {
 		return ErrUnsupportedEncodeType
 	}
 	switch filepath.Ext(name) {

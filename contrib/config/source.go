@@ -1,11 +1,13 @@
-package codec
+package config
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
+
+	"github.com/origadmin/toolkits/codec"
+	"github.com/origadmin/toolkits/errors"
 )
 
 type source struct {
@@ -41,10 +43,10 @@ func SourceDecoder(src *config.KeyValue, target map[string]interface{}) error {
 		}
 		return nil
 	}
-	if codec := SupportTypeFromString(src.Format); codec != UNKNOWN {
+	if codec := codec.TypeFromString(src.Format); codec.IsSupported() {
 		return codec.Unmarshal(src.Value, &target)
 	}
-	return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
+	return errors.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 }
 
 var _ config.Source = (*source)(nil)
