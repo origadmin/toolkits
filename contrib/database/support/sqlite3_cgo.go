@@ -2,9 +2,11 @@
 
 //go:build sqlite3 && cgo
 
-// Package database is the database client wrapper
-package database
+// Package support is the database client wrapper
+package support
 
 import (
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type SQLite3Cgo struct{}
