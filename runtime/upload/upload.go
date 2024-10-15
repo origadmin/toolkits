@@ -28,7 +28,10 @@ type uploader struct {
 func FileUpload(req *http.Request, path, name string) (fs.FileInfo, error) {
 	// replace path to os path
 	path = filepath.FromSlash(path)
-
+	abspath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
 	src, header, err := req.FormFile("file")
 	if err != nil {
 		return nil, err
@@ -45,12 +48,12 @@ func FileUpload(req *http.Request, path, name string) (fs.FileInfo, error) {
 		name += filepath.Ext(header.Filename)
 	}
 
-	dst, err := os.OpenFile(filepath.Join(path, name), os.O_RDONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+	dst, err := os.OpenFile(filepath.Join(abspath, name), os.O_RDONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return nil, err
 	}
 	defer dst.Close()
-	copied, err := io.ContextCopy(req.Context(), dst, src)
+	copied, err := io.CopyContext(req.Context(), dst, src)
 	if err != nil {
 		return nil, err
 	}

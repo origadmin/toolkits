@@ -83,8 +83,8 @@ type (
 	FileInfo        = fs.FileInfo
 )
 
-// ContextCopy copy data from src to dst until EOF or error, returning the number of bytes copied.
-func ContextCopy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
+// CopyContext copy data from src to dst until EOF or error, returning the number of bytes copied.
+func CopyContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 	var (
 		err   error
 		n     int
@@ -132,7 +132,11 @@ func DeleteFile(path string) error {
 	if path == "" {
 		return ErrFileName
 	}
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+	abspath, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(abspath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	return nil
