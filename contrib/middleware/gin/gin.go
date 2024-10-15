@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/origadmin/toolkits/errors/http"
+	"github.com/origadmin/toolkits/errors/httperr"
 )
 
 // BasicAuthHandler returns an HTTP handler function
@@ -17,7 +17,7 @@ func BasicAuthHandler(userid, passwd string, next func(ctx *gin.Context)) gin.Ha
 		username, pwd, ok := ctx.Request.BasicAuth()
 
 		if !ok || !(username == userid && pwd == passwd) {
-			_ = ctx.AbortWithError(stdhttp.StatusUnauthorized, http.Unauthorized("", "Unauthorized"))
+			_ = ctx.AbortWithError(stdhttp.StatusUnauthorized, httperr.Unauthorized("", "Unauthorized"))
 			return
 		}
 

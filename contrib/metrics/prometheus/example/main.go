@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/origadmin/toolkits/context"
-	"github.com/origadmin/toolkits/registry/metrics/prometheus"
-	"github.com/origadmin/toolkits/registry/middleware/std"
+	"github.com/origadmin/toolkits/contrib/metrics/prometheus"
+	"github.com/origadmin/toolkits/contrib/middleware/std"
 	"github.com/origadmin/toolkits/runtime/service/metrics"
 )
 

@@ -335,7 +335,7 @@ func (obj *Prometheus) RequestsInFlight(module, state string, value float64) {
 // Parameters:
 // - conf (*Config): the config for the metrics.
 func WithPrometheus(conf *Config) *Prometheus {
-	conf.setup()
+	conf.Setup()
 
 	// Create Prometheus metrics with given config.
 	m := &Prometheus{

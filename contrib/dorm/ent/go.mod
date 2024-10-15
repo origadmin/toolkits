@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/registry/orm/ent
+module github.com/origadmin/toolkits/contrib/orm/ent
 
 go 1.22.5
 

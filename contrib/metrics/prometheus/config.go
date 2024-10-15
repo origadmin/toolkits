@@ -33,7 +33,7 @@ type Config struct {
 	HandlerFunc     http.HandlerFunc
 }
 
-func (c *Config) setup() {
+func (c *Config) Setup() {
 	if c.Application == "" {
 		c.Application = defaultApplication
 	}

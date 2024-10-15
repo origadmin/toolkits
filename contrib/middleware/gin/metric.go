@@ -35,13 +35,12 @@ func (obj *MetricAdapter) Middleware(metrics metrics.Metrics) gin.HandlerFunc {
 }
 
 // Reporter is the Gin MetricAdapter function that logs Handler requests and their details.
-func (obj *MetricAdapter) Reporter(ctx *gin.Context, start time.Time, requestBytes int64) metrics.Reporter {
+func (obj *MetricAdapter) Reporter(ctx *gin.Context, start time.Time, requestBytes int64) metrics.MetricData {
 	// reporter := obj.reporterPool.Get().(*reporter)
 	// defer func() {
 	// 	obj.reporterPool.Put(reporter)
 	// }()
-	return &reporter{
-		ctx:       ctx.Request.Context(),
+	return metrics.MetricData{
 		handler:   obj.Handler(ctx),
 		method:    obj.Method(ctx),
 		code:      obj.Code(ctx),

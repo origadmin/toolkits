@@ -54,5 +54,5 @@ func (g reporter) Succeed() bool {
 
 // TraceID returns the trace ID of the request
 func (g reporter) TraceID() string {
-	return context.FromTraceID(g.ctx)
+	return context.FromTrace(g.ctx)
 }
