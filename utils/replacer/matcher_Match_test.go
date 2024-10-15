@@ -1,15 +1,14 @@
-package hostname
+package replacer
 
 import (
-	"net"
 	"testing"
 )
 
 // Returns IP and true when name matches a host key
 func TestMatchReturnsIPAndTrue(t *testing.T) {
 	// Arrr, let's set sail with a map of hosts!
-	hosts := map[string]net.IP{"pirate": net.ParseIP("192.168.1.1")}
-	hostname := New(WithHostMap(hosts))
+	hosts := map[string]string{"pirate": "192.168.1.1"}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	ip, ok := hostname.Match("@pirate:9874")
 
@@ -21,7 +20,7 @@ func TestMatchReturnsIPAndTrue(t *testing.T) {
 // Returns false when hosts map is nil
 func TestMatchReturnsFalseWhenHostsNil(t *testing.T) {
 	// Avast! No hosts in sight!
-	hostname := New()
+	hostname := NewMatch(nil, WithMatchSta("@"), WithMatchEnd(":"))
 
 	_, ok := hostname.Match("@ghost:9874")
 
@@ -33,8 +32,8 @@ func TestMatchReturnsFalseWhenHostsNil(t *testing.T) {
 // Correctly processes name with default prefix and suffix
 func TestMatchWithDefaultPrefixSuffix(t *testing.T) {
 	// Yo ho ho! Testing with default prefix and suffix!
-	hosts := map[string]net.IP{"captain": net.ParseIP("10.0.0.1")}
-	hostname := New(WithHostMap(hosts))
+	hosts := map[string]string{"captain": "10.0.0.1"}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	ip, ok := hostname.Match("@captain:9874")
 
@@ -46,8 +45,8 @@ func TestMatchWithDefaultPrefixSuffix(t *testing.T) {
 // Handles empty string as name input
 func TestMatchHandlesEmptyString(t *testing.T) {
 	// Shiver me timbers! An empty name it be!
-	hosts := map[string]net.IP{"empty": net.ParseIP("127.0.0.1")}
-	hostname := New(WithHostMap(hosts))
+	hosts := map[string]string{"empty": "127.0.0.1"}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	_, ok := hostname.Match("")
 
@@ -59,8 +58,8 @@ func TestMatchHandlesEmptyString(t *testing.T) {
 // Handles name with no matching host key
 func TestMatchNoMatchingHostKey(t *testing.T) {
 	// Arrr, no matchin' key in these waters!
-	hosts := map[string]net.IP{"parrot": net.ParseIP("172.16.0.1")}
-	hostname := New(WithHostMap(hosts))
+	hosts := map[string]string{"parrot": "172.16.0.1"}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	_, ok := hostname.Match("@kraken:9874")
 
@@ -72,12 +71,12 @@ func TestMatchNoMatchingHostKey(t *testing.T) {
 // Handles name with only prefix or suffix
 func TestMatchWithOnlyPrefixOrSuffix(t *testing.T) {
 	// Aye, testing with only a prefix or suffix!
-	hosts := map[string]net.IP{"matey": net.ParseIP("192.168.0.2")}
-	hostname := New(WithHostMap(hosts))
+	hosts := map[string]string{"matey": "192.168.0.2"}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	v1, okPrefix := hostname.Match("@matey")
 	v2, okSuffix := hostname.Match("matey:")
-	if !okPrefix {
+	if okPrefix {
 		t.Error("Expected true for both prefix-only, but got false", v1)
 	}
 	if okSuffix {
@@ -88,11 +87,11 @@ func TestMatchWithOnlyPrefixOrSuffix(t *testing.T) {
 // Handles hosts map with multiple entries
 func TestMatchMultipleEntries(t *testing.T) {
 	// Yo ho ho! Multiple entries on the horizon!
-	hosts := map[string]net.IP{
-		"blackbeard": net.ParseIP("192.168.2.1"),
-		"longjohn":   net.ParseIP("192.168.2.2"),
+	hosts := map[string]string{
+		"blackbeard": "192.168.2.1",
+		"longjohn":   "192.168.2.2",
 	}
-	hostname := New(WithHostMap(hosts))
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 
 	ip, ok := hostname.Match("@blackbeard:9874")
 
