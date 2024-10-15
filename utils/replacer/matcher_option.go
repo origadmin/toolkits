@@ -6,25 +6,25 @@ import (
 	"strings"
 )
 
-type MatchSetting = func(*matcher)
+type MatchSetting = func(*Match)
 
 // WithMatchSta returns a new Matcher instance with replacer start keyword.
 func WithMatchSta(sta string) MatchSetting {
-	return func(r *matcher) {
+	return func(r *Match) {
 		r.sta = sta
 	}
 }
 
 // WithMatchEnd returns a new Matcher instance with replacer end keyword.
 func WithMatchEnd(end string) MatchSetting {
-	return func(r *matcher) {
+	return func(r *Match) {
 		r.end = end
 	}
 }
 
 // WithMatchFold returns a new Matcher instance with case-insensitive matching.
 func WithMatchFold(fold bool) MatchSetting {
-	return func(r *matcher) {
+	return func(r *Match) {
 		r.fold = fold
 	}
 }
@@ -41,7 +41,7 @@ func WithMatchHosts(list []string, sep string) MatchSetting {
 			hosts[nameip[0]] = nameip[1]
 		}
 	}
-	return func(h *matcher) {
+	return func(h *Match) {
 		if h.replacement == nil {
 			h.replacement = hosts
 			return
@@ -52,7 +52,7 @@ func WithMatchHosts(list []string, sep string) MatchSetting {
 
 // WithMatchHostMap Parse the name and return the corresponding IP address
 func WithMatchHostMap(hosts map[string]string) MatchSetting {
-	return func(h *matcher) {
+	return func(h *Match) {
 		if h.replacement == nil {
 			h.replacement = hosts
 			return

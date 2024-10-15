@@ -30,9 +30,9 @@ func TestReturnsOriginalNameIfNoMatchFound(t *testing.T) {
 	}
 }
 
-// Handles valid host map with correct IP replacement
+// Handles valid host map with correct IP Replacement
 func TestHandlesValidHostMapWithCorrectIPReplacement(t *testing.T) {
-	// Shiver me timbers! Let's see if the map handles the IP replacement correctly!
+	// Shiver me timbers! Let's see if the map handles the IP Replacement correctly!
 	hosts := map[string]string{"pirate": "192.168.1.1"}
 	h := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
 	name := "@pirate:"

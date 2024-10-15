@@ -11,7 +11,7 @@ type Matcher interface {
 	Match(content string) (string, bool)
 	Replace(content string) string
 }
-type matcher struct {
+type Match struct {
 	offset      int
 	sta         string
 	end         string
@@ -19,7 +19,7 @@ type matcher struct {
 	replacement map[string]string
 }
 
-func (m matcher) Match(content string) (string, bool) {
+func (m Match) Match(content string) (string, bool) {
 	cursor := 0
 	for {
 		// Find the next occurrence of `${`
@@ -37,7 +37,7 @@ func (m matcher) Match(content string) (string, bool) {
 		}
 		// Extract the variable name
 		varName := content[cursor+sta+m.offset : cursor+sta+end]
-		// Check for replacement in the map (case-insensitive)
+		// Check for Replacement in the map (case-insensitive)
 		for key, value := range m.replacement {
 			if defaultMatchFunc(varName, key, m.fold) {
 				return value, true
@@ -50,7 +50,7 @@ func (m matcher) Match(content string) (string, bool) {
 	return "", false
 }
 
-func (m matcher) Replace(content string) string {
+func (m Match) Replace(content string) string {
 	cursor := 0
 	var sb strings.Builder
 
@@ -75,7 +75,7 @@ func (m matcher) Replace(content string) string {
 		}
 		// Extract the variable name
 		varName := content[cursor+sta+m.offset : cursor+sta+end]
-		// Check for replacement in the map (case-insensitive)
+		// Check for Replacement in the map (case-insensitive)
 		found := false
 		for key, value := range m.replacement {
 			if value != "" && defaultMatchFunc(varName, key, m.fold) {
@@ -95,9 +95,9 @@ func (m matcher) Replace(content string) string {
 	return sb.String()
 }
 
-// NewMatch creates a new matcher with the provided replacements.
-func NewMatch(replacements map[string]string, ss ...MatchSetting) Matcher {
-	m := settings.Apply(&matcher{
+// NewMatch creates a new Match with the provided replacements.
+func NewMatch(replacements map[string]string, ss ...MatchSetting) *Match {
+	m := settings.Apply(&Match{
 		replacement: replacements,
 		sta:         DefaultMatchStartKeyword,
 		end:         DefaultMatchEndKeyword,

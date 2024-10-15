@@ -79,7 +79,7 @@ func TestNoPatternsInFile(t *testing.T) {
 	}
 }
 
-// Manages patterns with no corresponding replacement in the map
+// Manages patterns with no corresponding Replacement in the map
 func TestNoReplacementForPattern(t *testing.T) {
 	// Arrr! No treasure for this pattern!
 	filePath := "testfile.txt"

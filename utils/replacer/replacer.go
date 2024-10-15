@@ -1,6 +1,6 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package replacer provides a string replacement mechanism with custom replace functions and keywords.
+// Package replacer provides a string Replacement mechanism with custom Replacement functions and keywords.
 package replacer
 
 import (
@@ -26,13 +26,22 @@ type ReplaceFunc func(src, key, value string, fold bool) (string, bool)
 
 // Replacer interface defines methods for setting keywords and performing replacements.
 type Replacer interface {
-	Matcher(replacements map[string]string) Matcher
 	Replace(content []byte, replacements map[string]string) []byte // Replaces substrings based on provided key-value pairs.
 	ReplaceString(content string, replacements map[string]string) string
 }
 
-// replace struct implements the Replacer interface, storing replace hooks and the current keyword.
-type replace struct {
+// Replace replaces substrings within the provided content byte slice using the provided key-value pairs.
+func Replace(content []byte, replacements map[string]string) []byte {
+	return _globalReplacer.Replace(content, replacements)
+}
+
+// ReplaceString replaces substrings within the provided content string using the provided key-value pairs.
+func ReplaceString(content string, replacements map[string]string) string {
+	return _globalReplacer.ReplaceString(content, replacements)
+}
+
+// Replacement struct implements the Replacer interface, storing Replacement hooks and the current keyword.
+type Replacement struct {
 	offset int
 	sta    string
 	end    string
@@ -40,23 +49,18 @@ type replace struct {
 	fold   bool
 }
 
-func (r replace) Matcher(replacements map[string]string) Matcher {
-	return &matcher{
-		sta:         r.sta,
-		end:         r.end,
-		fold:        r.fold,
-		replacement: replacements,
-	}
+func (r Replacement) ToMatch(replacements map[string]string) Matcher {
+	return NewMatch(replacements, WithMatchSta(r.sta), WithMatchEnd(r.end), WithMatchFold(r.fold))
 }
 
 // ReplaceString replaces substrings within the provided content string using the provided key-value pairs.
-func (r replace) ReplaceString(content string, replacements map[string]string) string {
+func (r Replacement) ReplaceString(content string, replacements map[string]string) string {
 	return string(r.Replace([]byte(content), replacements))
 }
 
-// Replace within the replacement struct iterates through the values map, applying custom hooks and
+// Replace within the Replacement struct iterates through the values map, applying custom hooks and
 // replacing placeholders found in the source string.
-func (r replace) Replace(content []byte, replacements map[string]string) []byte {
+func (r Replacement) Replace(content []byte, replacements map[string]string) []byte {
 	// Create a buffer to hold the modified content
 	var result bytes.Buffer
 	contentStr := string(content)
@@ -86,7 +90,7 @@ func (r replace) Replace(content []byte, replacements map[string]string) []byte 
 		// Extract the variable name
 		varName := contentStr[cursor+sta+r.offset : cursor+sta+end]
 
-		// Check for replacement in the map (case-insensitive)
+		// Check for Replacement in the map (case-insensitive)
 		found := false
 		for key, value := range replacements {
 			newValue, ok := r.hook(varName, key, value, r.fold)
@@ -97,7 +101,7 @@ func (r replace) Replace(content []byte, replacements map[string]string) []byte 
 			}
 		}
 
-		// If no replacement was found, write the original pattern
+		// If no Replacement was found, write the original pattern
 		if !found {
 			result.WriteString(r.sta + varName + r.end)
 		}
@@ -125,8 +129,8 @@ func defaultReplacer(src, key, value string, fold bool) (string, bool) {
 }
 
 // New returns a new Replacer instance with default settings.
-func New(ss ...Setting) Replacer {
-	r := settings.Apply(&replace{
+func New(ss ...Setting) *Replacement {
+	r := settings.Apply(&Replacement{
 		sta:  DefaultStartKeyword,
 		end:  DefaultEndKeyword,
 		hook: defaultReplacer,
@@ -136,8 +140,8 @@ func New(ss ...Setting) Replacer {
 	return r
 }
 
-func NewHost(ss ...Setting) Replacer {
-	r := settings.Apply(&replace{
+func NewHost(ss ...Setting) *Replacement {
+	r := settings.Apply(&Replacement{
 		sta:  DefaultHostStartKeyword,
 		end:  DefaultEndKeyword,
 		hook: defaultReplacer,
