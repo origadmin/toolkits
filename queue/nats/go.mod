@@ -1,11 +1,11 @@
 module github.com/origadmin/toolkits/queue/nats
 
-go 1.22.5
+go 1.23.1
 
 replace github.com/origadmin/toolkits => ../../
 
 require (
-	github.com/goexts/ggb v0.0.7
+	github.com/goexts/ggb v0.0.9
 	github.com/nats-io/nats.go v1.37.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 )

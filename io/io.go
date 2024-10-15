@@ -27,7 +27,7 @@ const (
 	ErrFileRead       = errors.String("file read error")
 	ErrFileWrite      = errors.String("file write error")
 	ErrFileNotExist   = errors.String("file not exist")
-	ErrFileName       = errors.String("file Name is empty")
+	ErrFileName       = errors.String("file Path is empty")
 	ErrSizeNotMatch   = errors.String("file Size not match")
 )
 
@@ -45,7 +45,6 @@ var (
 	StdCopy        = io.Copy
 	StdCopyBuffer  = io.CopyBuffer
 	StdCopyN       = io.CopyN
-	StdCopyNBuffer = CopyNBuffer
 	StdLimitReader = io.LimitReader
 	StdReadAll     = io.ReadAll
 	StdReadFull    = io.ReadFull
@@ -137,17 +136,4 @@ func DeleteFile(path string) error {
 		return err
 	}
 	return nil
-}
-
-// CopyNBuffer copies n bytes from src to dst.
-func CopyNBuffer(dst Writer, src Reader, n int64, buf []byte) (written int64, err error) {
-	written, err = io.CopyBuffer(dst, io.LimitReader(src, n), buf)
-	if written == n {
-		return n, nil
-	}
-	if written < n && err == nil {
-		// src stopped early; must have been EOF.
-		err = EOF
-	}
-	return
 }
