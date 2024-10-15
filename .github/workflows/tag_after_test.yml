@@ -48,10 +48,9 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
-          chmod +x ./scripts/git/next_tag.sh
-          chmod +x ./scripts/git/head_tag.sh
-          HEAD_TAG=$(./scripts/git/head_tag.sh)
-          NEXT_TAG=$(./scripts/git/next_tag.sh)          
+          chmod +x ./scripts/git/git_tag.sh
+          HEAD_TAG=$(./scripts/git/git_tag.sh get_head_version_tag)
+          NEXT_TAG=$(./scripts/git/git_tag.sh get_next_module_version)          
           echo "HEAD_TAG=$HEAD_TAG" >> $GITHUB_OUTPUT
           echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
 
