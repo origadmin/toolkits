@@ -48,7 +48,7 @@ jobs:
       - name: Determine next version
         id: determine_next_version
         run: |
-          chmod +x ./scripts/git/git_tag.sh
+          chmod +x ./scripts/git/release.sh
           HEAD_TAG=$(./scripts/git/release.sh get_head_version_tag .)
           NEXT_TAG=$(./scripts/git/release.sh get_next_module_version .)   
           echo "HEAD_TAG=$HEAD_TAG"
