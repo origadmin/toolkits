@@ -51,12 +51,6 @@ func (s security) GenerateToken(ctx context.Context, subject string) (Token, err
 }
 
 func (s security) DestroyToken(ctx context.Context, tokenStr string) error {
-	//claims, err := s.serialize.Parse(tokenStr)
-	//if err != nil {
-	//	return err
-	//}
-	//expire := time.UnixMilli(claims.ExpiresIn).Local()
-	//return s.storage.Set(ctx, tokenStr, time.Until(expire))
 	return s.storage.Delete(ctx, tokenStr)
 }
 
@@ -93,7 +87,7 @@ func (s security) ParseToken(ctx context.Context, tokenStr string) (Token, error
 	return s.serialize.Parse(tokenStr)
 }
 
-type Setting = settings.Setting[security]
+type Setting = func(s *security)
 
 func WithStorage(store TokenStorage) Setting {
 	return func(s *security) {

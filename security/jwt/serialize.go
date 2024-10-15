@@ -44,7 +44,7 @@ func (c *Claims) GetAudience() (jwt.ClaimStrings, error) {
 	return c.Audience, nil
 }
 
-type SerializeSetting = settings.Setting[Serialize]
+type SerializeSetting = func(*Serialize)
 
 type Serialize struct {
 	Parser    *jwt.Parser

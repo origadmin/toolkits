@@ -29,7 +29,7 @@ type TokenStorage interface {
 	Close(ctx context.Context) error
 }
 
-type StorageSetting = settings.Setting[StorageOption]
+type StorageSetting = func(*StorageOption)
 
 // StorageOption contains options for the JWT datacache
 type StorageOption struct {
