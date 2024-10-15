@@ -4,6 +4,9 @@ import (
 	"strings"
 
 	"github.com/goexts/ggb/settings"
+
+	"github.com/origadmin/toolkits/codec"
+	"github.com/origadmin/toolkits/errors"
 )
 
 // Matcher interface defines methods for matching and replacing strings.
@@ -105,4 +108,14 @@ func NewMatch(replacements map[string]string, ss ...MatchSetting) *Match {
 
 	m.offset = len(m.sta)
 	return m
+}
+
+// NewMatchFile creates a new Match with the provided replacements from a JSON file.
+func NewMatchFile(path string, ss ...MatchSetting) (*Match, error) {
+	var replacements map[string]string
+	err := codec.DecodeJSONFile(path, &replacements)
+	if err != nil {
+		return nil, errors.Wrap(err, "NewMatchFile")
+	}
+	return NewMatch(replacements, ss...), nil
 }

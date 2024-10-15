@@ -140,6 +140,7 @@ func New(ss ...Setting) *Replacement {
 	return r
 }
 
+// NewHost returns a new Replacer instance with default host settings.
 func NewHost(ss ...Setting) *Replacement {
 	r := settings.Apply(&Replacement{
 		sta:  DefaultHostStartKeyword,
@@ -149,7 +150,6 @@ func NewHost(ss ...Setting) *Replacement {
 
 	r.offset = len(r.sta)
 	return r
-
 }
 
 var _globalReplacer = New(WithFold())

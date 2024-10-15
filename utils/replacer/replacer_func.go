@@ -19,6 +19,9 @@ func FileReplacer(path string, replacements map[string]string) ([]byte, error) {
 
 // ObjectReplacer replaces occurrences of ${name} with values from the map
 func ObjectReplacer(v any, replacements map[string]string) error {
+	if v == nil {
+		return nil
+	}
 	marshal, err := json.Marshal(v)
 	if err != nil {
 		return err
