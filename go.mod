@@ -17,9 +17,7 @@ require (
 	github.com/origadmin/toolkits/ident v0.0.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
-	github.com/yireyun/go-queue v0.0.0-20220725040158-a4dd64810e1e
 	go.etcd.io/etcd/client/v3 v3.5.16
-	golang.design/x/lockfree v0.0.1
 	golang.org/x/crypto v0.27.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -28,7 +26,6 @@ require (
 require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/changkun/lockfree v0.0.1 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
