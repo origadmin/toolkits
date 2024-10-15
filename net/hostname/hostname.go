@@ -27,17 +27,17 @@ type Hostname struct {
 	useCustomSuffix bool
 }
 
-type Option = settings.Setting[Hostname]
+type Setting = func(*Hostname)
 
 // UseCustomPrefix Customize the prefix
-func UseCustomPrefix(prefix string) Option {
+func UseCustomPrefix(prefix string) Setting {
 	return func(h *Hostname) {
 		h.prefix = prefix
 	}
 }
 
 // UseCustomSuffix Customize the suffix
-func UseCustomSuffix(suffix string) Option {
+func UseCustomSuffix(suffix string) Setting {
 	return func(h *Hostname) {
 		h.useCustomSuffix = true
 		h.suffix = suffix
@@ -45,7 +45,7 @@ func UseCustomSuffix(suffix string) Option {
 }
 
 // WithHostMap Parse the name and return the corresponding IP address
-func WithHostMap(hosts map[string]net.IP) Option {
+func WithHostMap(hosts map[string]net.IP) Setting {
 	return func(h *Hostname) {
 		if h.hosts == nil {
 			h.hosts = make(map[string]net.IP)
@@ -55,7 +55,7 @@ func WithHostMap(hosts map[string]net.IP) Option {
 }
 
 // WithHosts Parse the name and return the corresponding IP address
-func WithHosts(list []string, sep string) Option {
+func WithHosts(list []string, sep string) Setting {
 	hosts := make(map[string]net.IP)
 	for i := range list {
 		nameip := strings.Split(list[i], sep)
@@ -76,7 +76,7 @@ func WithHosts(list []string, sep string) Option {
 }
 
 // New Create a new instance of HostnameReplacer
-func New(opts ...Option) *Hostname {
+func New(opts ...Setting) *Hostname {
 	return settings.Apply(&Hostname{
 		prefix: defaultMatchPrefix,
 		suffix: defaultMatchSuffix,

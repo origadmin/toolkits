@@ -1,16 +1,15 @@
-package inet
+package net
 
 import (
 	"math"
-	"net"
 )
 
-func ParseIP(ip net.IP) int64 {
+func ParseIP(ip IP) int64 {
 	var (
 		one   byte
 		intip int64
 	)
-	if v4 := ip.To4(); len(v4) == net.IPv4len {
+	if v4 := ip.To4(); len(v4) == IPv4len {
 		ip = v4
 	}
 	for _, one = range ip {
@@ -19,7 +18,7 @@ func ParseIP(ip net.IP) int64 {
 	return intip
 }
 
-func ToIP(ip int64) net.IP {
+func ToIP(ip int64) IP {
 	if ip > math.MaxUint32 {
 		var ips []byte
 		for i := 0; i < 8; i++ {
@@ -28,5 +27,5 @@ func ToIP(ip int64) net.IP {
 		}
 		return ips
 	}
-	return net.IPv4(byte(ip>>24&0xff), byte(ip>>16&0xff), byte(ip>>8&0xff), byte(ip&0xff))
+	return IPv4(byte(ip>>24&0xff), byte(ip>>16&0xff), byte(ip>>8&0xff), byte(ip&0xff))
 }

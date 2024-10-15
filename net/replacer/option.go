@@ -3,12 +3,8 @@
 // Package replacer provides a string replacement mechanism with custom replace functions and keywords.
 package replacer
 
-import (
-	"github.com/goexts/ggb/settings"
-)
-
 // Setting is the setting of replacer.
-type Setting = settings.Setting[replace]
+type Setting = func(*replace)
 
 // WithHooks returns a new Replacer instance with the specified hooks.
 func WithHooks(hooks map[string]ReplaceFunc) Setting {

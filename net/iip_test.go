@@ -1,4 +1,4 @@
-package inet
+package net
 
 import (
 	"net"
