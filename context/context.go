@@ -34,6 +34,25 @@ func FromTrace(ctx Context) string {
 	return ""
 }
 
+type spanCtx struct{}
+
+// NewSpan creates a new context with the provided span value.
+//
+// It takes a context and a span string as parameters and returns a context.
+func NewSpan(ctx Context, span string) Context {
+	return WithValue(ctx, spanCtx{}, span)
+}
+
+// FromSpan returns the span id from the context.
+//
+// It takes a Context as a parameter and returns a string.
+func FromSpan(ctx Context) string {
+	if v, ok := ctx.Value(spanCtx{}).(string); ok {
+		return v
+	}
+	return ""
+}
+
 type dbCtx struct{}
 
 // NewDB creates a new context with the provided db client value.
