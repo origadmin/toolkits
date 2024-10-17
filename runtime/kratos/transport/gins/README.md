@@ -1,19 +1,19 @@
 # GIN
 
-## 什么是GIN?
+What is GIN?
 
-Gin 是使用 Go/golang 语言实现的 HTTP Web 框架。接口简洁，性能极高。
+Gin is an HTTP Web framework implemented in the Go/golang language. Simple interface, high performance.
 
-Gin 特性
+Gin characteristic
 
-- **快速**：路由不使用反射，基于Radix树，内存占用少。
-- **中间件**：HTTP请求，可先经过一系列中间件处理，例如：Logger，Authorization，GZIP等。这个特性和 NodeJs 的 Koa 框架很像。中间件机制也极大地提高了框架的可扩展性。
-- **异常处理**：服务始终可用，不会宕机。Gin 可以捕获 panic，并恢复。而且有极为便利的机制处理HTTP请求过程中发生的错误。
-- **JSON**：Gin可以解析并验证请求的JSON。这个特性对Restful API的开发尤其有用。
-- **路由分组**：例如将需要授权和不需要授权的API分组，不同版本的API分组。而且分组可嵌套，且性能不受影响。
-- **渲染内置**：原生支持JSON，XML和HTML的渲染。
+- ** Fast ** : Routing does not use reflection, is based on Radix tree, and has low memory footprint.
+- ** Middleware ** : HTTP requests can be processed by a series of middleware, such as Logger, Authorization, and GZIP. This feature is similar to the Koa framework for NodeJs. The middleware mechanism also greatly improves the extensibility of the framework.
+- ** Exception Handling ** : The service is always available without downtime. Gin can capture panic and recover. And there are very convenient mechanisms for handling errors that occur during HTTP requests.
+- **JSON** : Gin can parse and validate the requested JSON. This feature is especially useful for Restful API development.
+- ** Routing Group ** : For example, group apis that require authorization and those that do not require authorization. Group apis of different versions. And the groups can be nested, and performance is not affected.
+- ** Rendering built-in ** : Native support for JSON, XML and HTML rendering.
 
-## 参考资料
+## Reference materials
 
 - [GIN - Github](https://github.com/gin-gonic/gin)
 - [Gin - Website](https://gin-gonic.com/)

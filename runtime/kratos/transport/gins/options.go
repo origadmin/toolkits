@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 type ServerOption func(*Server)
@@ -27,7 +26,7 @@ func Address(addr string) ServerOption {
 	}
 }
 
-func ErrorEncoder(en transhttp.EncodeErrorFunc) ServerOption {
+func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 	return func(s *Server) {
 		s.ene = en
 	}
@@ -87,14 +86,14 @@ func Filter(filters ...gin.HandlerFunc) ServerOption {
 }
 
 // RequestDecoder with request decoder.
-func RequestDecoder(dec transhttp.DecodeRequestFunc) ServerOption {
+func RequestDecoder(dec DecodeRequestFunc) ServerOption {
 	return func(o *Server) {
 		o.dec = dec
 	}
 }
 
 // ResponseEncoder with response encoder.
-func ResponseEncoder(en transhttp.EncodeResponseFunc) ServerOption {
+func ResponseEncoder(en EncodeResponseFunc) ServerOption {
 	return func(o *Server) {
 		o.enc = en
 	}

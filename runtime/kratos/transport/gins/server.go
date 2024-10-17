@@ -14,7 +14,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 var (
@@ -48,9 +47,9 @@ type Server struct {
 
 	filters    []HandlerFunc
 	middleware HandlerFunc
-	dec        transhttp.DecodeRequestFunc
-	enc        transhttp.EncodeResponseFunc
-	ene        transhttp.EncodeErrorFunc
+	dec        DecodeRequestFunc
+	enc        EncodeResponseFunc
+	ene        EncodeErrorFunc
 	endpoint   *url.URL
 }
 
@@ -148,9 +147,9 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		addr:    ":0",
 		timeout: 1 * time.Second,
-		dec:     transhttp.DefaultRequestDecoder,
-		enc:     transhttp.DefaultResponseEncoder,
-		ene:     transhttp.DefaultErrorEncoder,
+		dec:     DefaultRequestDecoder,
+		enc:     DefaultResponseEncoder,
+		ene:     DefaultErrorEncoder,
 	}
 
 	srv.init(opts...)
