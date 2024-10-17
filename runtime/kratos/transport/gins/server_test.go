@@ -345,7 +345,7 @@ func TestTimeout(t *testing.T) {
 
 func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
-	v := func(*http.Request, interface{}) error { return nil }
+	v := func(*gin.Context, interface{}) error { return nil }
 	RequestDecoder(v)(o)
 	if o.dec == nil {
 		t.Errorf("expected nil got %v", o.dec)
@@ -354,7 +354,7 @@ func TestRequestDecoder(t *testing.T) {
 
 func TestResponseEncoder(t *testing.T) {
 	o := &Server{}
-	v := func(http.ResponseWriter, *http.Request, interface{}) error { return nil }
+	v := func(*gin.Context, interface{}) error { return nil }
 	ResponseEncoder(v)(o)
 	if o.enc == nil {
 		t.Errorf("expected nil got %v", o.enc)
@@ -363,7 +363,7 @@ func TestResponseEncoder(t *testing.T) {
 
 func TestErrorEncoder(t *testing.T) {
 	o := &Server{}
-	v := func(http.ResponseWriter, *http.Request, error) {}
+	v := func(*gin.Context, error) {}
 	ErrorEncoder(v)(o)
 	if o.ene == nil {
 		t.Errorf("expected nil got %v", o.ene)
