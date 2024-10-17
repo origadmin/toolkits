@@ -1,4 +1,4 @@
-package gin
+package gins
 
 import (
 	"errors"
@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors/httperr"
@@ -109,7 +108,7 @@ func Middlewares(m ...middleware.Middleware) gin.HandlerFunc {
 		next = chain(next)
 		ctx := NewContext(c)
 		c.Request = c.Request.WithContext(ctx)
-		transhttp.SetOperation(ctx, c.FullPath())
+		SetOperation(ctx, c.FullPath())
 		_, _ = next(c.Request.Context(), c.Request)
 	}
 }

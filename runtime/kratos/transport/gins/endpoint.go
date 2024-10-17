@@ -1,4 +1,4 @@
-package gin
+package gins
 
 import (
 	"net/url"
