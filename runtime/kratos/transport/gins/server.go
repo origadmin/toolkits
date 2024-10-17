@@ -219,7 +219,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 
-	log.Infof("[GIN] server listening on: %s", s.lis.Addr().String())
+	log.Infof("[GINS] server listening on: %s", s.lis.Addr().String())
 	var err error
 	if s.tlsConf != nil {
 		err = s.server.ServeTLS(s.lis, "", "")
@@ -234,7 +234,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	log.Info("[GIN] server stopping")
+	log.Info("[GINS] server stopping")
 	return s.server.Shutdown(ctx)
 }
 

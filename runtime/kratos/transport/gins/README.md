@@ -1,6 +1,6 @@
-# GIN
+# GINS
 
-What is GIN?
+What is GINS?
 
 Gin is an HTTP Web framework implemented in the Go/golang language. Simple interface, high performance.
 
