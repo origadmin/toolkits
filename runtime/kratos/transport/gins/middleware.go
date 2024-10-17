@@ -28,7 +28,6 @@ func Logger(logger log.Logger) gin.HandlerFunc {
 
 		cost := time.Since(start)
 		_ = logger.Log(log.LevelInfo,
-			"path", path,
 			"status", c.Writer.Status(),
 			"method", c.Request.Method,
 			"path", path,
