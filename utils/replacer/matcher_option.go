@@ -60,3 +60,10 @@ func WithMatchHostMap(hosts map[string]string) MatchSetting {
 		maps.Copy(h.replacement, hosts)
 	}
 }
+
+// WithMatchSeparator returns a new Matcher instance with replacer separator
+func WithMatchSeparator(sep string) MatchSetting {
+	return func(h *Match) {
+		h.sep = sep
+	}
+}

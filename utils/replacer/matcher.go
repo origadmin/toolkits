@@ -6,6 +6,7 @@ import (
 	"github.com/goexts/ggb/settings"
 
 	"github.com/origadmin/toolkits/codec"
+
 	"github.com/origadmin/toolkits/errors"
 )
 
@@ -18,6 +19,7 @@ type Match struct {
 	offset      int
 	sta         string
 	end         string
+	sep         string
 	fold        bool
 	replacement map[string]string
 }
@@ -40,12 +42,18 @@ func (m Match) Match(content string) (string, bool) {
 		}
 		// Extract the variable name
 		varName := content[cursor+sta+m.offset : cursor+sta+end]
+		vars := strings.Split(varName, m.sep)
+		srcKey := varName
+		if len(vars) > 0 {
+			srcKey = vars[0]
+		}
 		// Check for Replacement in the map (case-insensitive)
 		for key, value := range m.replacement {
-			if defaultMatchFunc(varName, key, m.fold) {
+			if defaultMatchFunc(srcKey, key, m.fold) {
 				return value, true
 			}
 		}
+
 		// Update the cursor position for the next iteration
 		cursor = cursor + sta + end + 1
 	}
@@ -79,17 +87,27 @@ func (m Match) Replace(content string) string {
 		// Extract the variable name
 		varName := content[cursor+sta+m.offset : cursor+sta+end]
 		// Check for Replacement in the map (case-insensitive)
+		vars := strings.Split(varName, m.sep)
+		srcKey := varName
+		if len(vars) > 0 {
+			srcKey = vars[0]
+		}
 		found := false
 		for key, value := range m.replacement {
-			if value != "" && defaultMatchFunc(varName, key, m.fold) {
+			if value != "" && defaultMatchFunc(srcKey, key, m.fold) {
 				sb.WriteString(value)
 				found = true
 				break
 			}
 		}
-
 		if !found {
-			sb.WriteString(m.sta + varName + m.end)
+			srcValue := varName
+			if len(vars) > 1 {
+				srcValue = vars[1]
+				sb.WriteString(srcValue)
+			} else {
+				sb.WriteString(m.sta + srcValue + m.end)
+			}
 		}
 		// Update the cursor position for the next iteration
 		cursor = cursor + sta + end + 1
@@ -104,6 +122,7 @@ func NewMatch(replacements map[string]string, ss ...MatchSetting) *Match {
 		replacement: replacements,
 		sta:         DefaultMatchStartKeyword,
 		end:         DefaultMatchEndKeyword,
+		sep:         DefaultMatchSeparatorKeyword,
 	}, ss)
 
 	m.offset = len(m.sta)

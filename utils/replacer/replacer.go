@@ -12,13 +12,14 @@ import (
 
 const (
 	// DefaultStartKeyword defines the default keyword.
-	DefaultStartKeyword      = "${"
-	DefaultHostStartKeyword  = "@{"
-	DefaultMatchStartKeyword = "@"
-
-	DefaultEndKeyword      = "}"
-	DefaultHostEndKeyword  = ":"
-	DefaultMatchEndKeyword = DefaultHostEndKeyword
+	DefaultStartKeyword          = "${"
+	DefaultHostStartKeyword      = "@{"
+	DefaultMatchStartKeyword     = "@"
+	DefaultMatchSeparatorKeyword = "="
+	DefaultEndKeyword            = "}"
+	DefaultHostEndKeyword        = ":"
+	DefaultSeparatorKeyword      = ":"
+	DefaultMatchEndKeyword       = DefaultHostEndKeyword
 )
 
 // ReplaceFunc is a function type that accepts a string and returns a replaced string.
@@ -45,6 +46,7 @@ type Replacement struct {
 	offset int
 	sta    string
 	end    string
+	sep    string
 	hook   ReplaceFunc
 	fold   bool
 }
@@ -89,11 +91,15 @@ func (r Replacement) Replace(content []byte, replacements map[string]string) []b
 
 		// Extract the variable name
 		varName := contentStr[cursor+sta+r.offset : cursor+sta+end]
-
+		vars := strings.Split(varName, r.sep)
+		srcKey := varName
+		if len(vars) > 0 {
+			srcKey = vars[0]
+		}
 		// Check for Replacement in the map (case-insensitive)
 		found := false
 		for key, value := range replacements {
-			newValue, ok := r.hook(varName, key, value, r.fold)
+			newValue, ok := r.hook(srcKey, key, value, r.fold)
 			if ok {
 				result.WriteString(newValue)
 				found = true
@@ -103,7 +109,14 @@ func (r Replacement) Replace(content []byte, replacements map[string]string) []b
 
 		// If no Replacement was found, write the original pattern
 		if !found {
-			result.WriteString(r.sta + varName + r.end)
+			srcValue := varName
+			if len(vars) > 1 {
+				srcValue = vars[1]
+				result.WriteString(srcValue)
+			} else {
+				result.WriteString(r.sta + srcValue + r.end)
+			}
+
 		}
 
 		// Update the cursor position for the next iteration
@@ -133,6 +146,7 @@ func New(ss ...Setting) *Replacement {
 	r := settings.Apply(&Replacement{
 		sta:  DefaultStartKeyword,
 		end:  DefaultEndKeyword,
+		sep:  DefaultSeparatorKeyword,
 		hook: defaultReplacer,
 	}, ss)
 
@@ -145,6 +159,7 @@ func NewHost(ss ...Setting) *Replacement {
 	r := settings.Apply(&Replacement{
 		sta:  DefaultHostStartKeyword,
 		end:  DefaultEndKeyword,
+		sep:  DefaultSeparatorKeyword,
 		hook: defaultReplacer,
 	}, ss)
 

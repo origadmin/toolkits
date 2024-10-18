@@ -42,6 +42,19 @@ func TestMatchWithDefaultPrefixSuffix(t *testing.T) {
 	}
 }
 
+// Correctly processes name with default prefix and suffix
+func TestMatchWithDefault(t *testing.T) {
+	// Yo ho ho! Testing with default prefix and suffix!
+	hosts := map[string]string{}
+	hostname := NewMatch(nil, WithMatchHostMap(hosts), WithMatchSta("@"), WithMatchEnd(":"))
+
+	ip, ok := hostname.Match("@captain::9874")
+
+	if ok {
+		t.Errorf("Expected IP '10.0.0.1' and true, got %s and %v", ip, ok)
+	}
+}
+
 // Handles empty string as name input
 func TestMatchHandlesEmptyString(t *testing.T) {
 	// Shiver me timbers! An empty name it be!

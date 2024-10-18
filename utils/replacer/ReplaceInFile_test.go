@@ -116,6 +116,26 @@ func TestPatternWithoutClosingBrace(t *testing.T) {
 	}
 }
 
+// Deals with patterns that have no closing brace
+func TestWithDefaultValue(t *testing.T) {
+	// Blimey! A pattern adrift without a closing brace!
+	filePath := "testfile.txt"
+	content := "Ahoy, ${name:Pirate}"
+	expected := "Ahoy, Pirate"
+	os.WriteFile(filePath, []byte(content), 0644)
+	replacements := map[string]string{}
+
+	result, err := FileReplacer(filePath, replacements)
+	if err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+
+	if string(result) != expected {
+		t.Errorf("Expected %s, but got %s", content, result)
+	}
+	t.Logf("Result: %s", result)
+}
+
 // Processes empty files without errors
 func TestEmptyFile(t *testing.T) {
 	// Aye! An empty sea of bytes!
