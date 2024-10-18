@@ -10,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/idgen"
 	"github.com/origadmin/toolkits/security"
 )
 
@@ -74,7 +75,7 @@ func (s Serialize) Generate(subject string, expires ...time.Duration) security.T
 		Expiry:       expiresAt,
 		ExpiresIn:    int64(expired),
 		Claims: &security.Claims{
-			ID:        ident.GenID(),
+			ID:        idgen.GenID(),
 			Subject:   subject,
 			Issuer:    s.Domain,
 			IssuedAt:  now.Unix(),

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Claims 定义了 Token 的基本声明
+// Claims defines basic Token claims
 type Claims struct {
 	ID        string                 `json:"jti,omitempty"`
 	Issuer    string                 `json:"iss,omitempty"`
