@@ -15,6 +15,7 @@ require (
 	github.com/lmittmann/tint v1.0.5
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/origadmin/toolkits/codec v0.0.15
+	github.com/origadmin/toolkits/idgen v0.0.8
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	go.etcd.io/etcd/client/v3 v3.5.16
