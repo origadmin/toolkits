@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/goexts/ggb/settings"
-
 	"github.com/origadmin/toolkits/codec"
 
 	"github.com/origadmin/toolkits/errors"
@@ -49,15 +48,12 @@ func (m Match) Match(content string) (string, bool) {
 			break
 		}
 		// Extract the variable name
-		varName := content[cursor+sta+m.offset : cursor+sta+end]
-		vars := strings.Split(varName, m.sep)
-		srcKey := varName
-		if len(vars) > 0 {
-			srcKey = vars[0]
-		}
+		args := content[cursor+sta+m.offset : cursor+sta+end]
+		vars := strings.SplitN(args, m.sep, 2)
+		skey := vars[0]
 		// Check for Replacement in the map (case-insensitive)
 		for key, value := range m.replacement {
-			if defaultMatchFunc(srcKey, key, m.fold) {
+			if defaultMatchFunc(skey, key, m.fold) {
 				return value, true
 			}
 		}
@@ -93,28 +89,25 @@ func (m Match) Replace(content string) string {
 			break
 		}
 		// Extract the variable name
-		varName := content[cursor+sta+m.offset : cursor+sta+end]
+		args := content[cursor+sta+m.offset : cursor+sta+end]
 		// Check for Replacement in the map (case-insensitive)
-		vars := strings.Split(varName, m.sep)
-		srcKey := varName
-		if len(vars) > 0 {
-			srcKey = vars[0]
-		}
+		vars := strings.SplitN(args, m.sep, 2)
+		skey := vars[0]
 		found := false
 		for key, value := range m.replacement {
-			if value != "" && defaultMatchFunc(srcKey, key, m.fold) {
+			if value != "" && defaultMatchFunc(skey, key, m.fold) {
 				sb.WriteString(value)
 				found = true
 				break
 			}
 		}
 		if !found {
-			srcValue := varName
+			sval := args
 			if len(vars) > 1 {
-				srcValue = vars[1]
-				sb.WriteString(srcValue)
+				sval = vars[1]
+				sb.WriteString(sval)
 			} else {
-				sb.WriteString(m.sta + srcValue + m.end)
+				sb.WriteString(m.sta + sval + m.end)
 			}
 		}
 		// Update the cursor position for the next iteration
@@ -149,29 +142,29 @@ func (m Match) ReplaceBytes(content []byte) []byte {
 			break
 		}
 		// Extract the variable name
-		varName := content[cursor+sta+len(m.sta) : cursor+sta+end]
+		args := content[cursor+sta+len(m.sta) : cursor+sta+end]
 		// Check for Replacement in the map (case-insensitive)
-		vars := bytes.Split(varName, []byte(m.sep))
-		srcKey := varName
+		vars := bytes.Split(args, []byte(m.sep))
+		skey := args
 		if len(vars) > 0 {
-			srcKey = vars[0]
+			skey = vars[0]
 		}
 		found := false
 		for key, value := range m.replacement {
-			if value != "" && defaultMatchFunc(string(srcKey), key, m.fold) {
+			if value != "" && defaultMatchFunc(string(skey), key, m.fold) {
 				bb.WriteString(value)
 				found = true
 				break
 			}
 		}
 		if !found {
-			srcValue := varName
+			sval := args
 			if len(vars) > 1 {
-				srcValue = vars[1]
-				bb.Write(srcValue)
+				sval = vars[1]
+				bb.Write(sval)
 			} else {
 				bb.Write([]byte(m.sta))
-				bb.Write(srcValue)
+				bb.Write(sval)
 				bb.Write([]byte(m.end))
 			}
 		}
@@ -186,9 +179,9 @@ func (m Match) ReplaceBytes(content []byte) []byte {
 func NewMatch(replacements map[string]string, ss ...MatchSetting) *Match {
 	m := settings.Apply(&Match{
 		replacement: replacements,
-		sta:         DefaultMatchStartKeyword,
-		end:         DefaultMatchEndKeyword,
-		sep:         DefaultMatchSeparatorKeyword,
+		sta:         defaultMatchStartKeyword,
+		end:         defaultMatchEndKeyword,
+		sep:         defaultMatchSeparatorKeyword,
 	}, ss)
 
 	m.offset = len(m.sta)
@@ -203,4 +196,8 @@ func NewMatchFile(path string, ss ...MatchSetting) (*Match, error) {
 		return nil, errors.Wrap(err, "NewMatchFile")
 	}
 	return NewMatch(replacements, ss...), nil
+}
+
+func defaultMatchFunc(src, key string, fold bool) bool {
+	return fold && strings.EqualFold(key, src) || key == src
 }

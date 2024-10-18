@@ -36,9 +36,9 @@ func WithKeyword(keyword string) Setting {
 }
 
 // WithFold returns a new Replacer instance with string case folding.
-func WithFold() Setting {
+func WithFold(fold bool) Setting {
 	return func(o *Replacement) {
-		o.fold = true
+		o.fold = fold
 	}
 }
 

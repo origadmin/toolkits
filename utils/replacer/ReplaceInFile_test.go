@@ -9,11 +9,11 @@ import (
 func TestReplaceAllPatterns(t *testing.T) {
 	// Arrr, let's set sail with some replacements!
 	filePath := "testfile.txt"
-	content := "Hello, ${name}! Welcome to ${place}."
+	content := "Hello, @{name}! Welcome to @{place}."
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"Name": "Captain", "Place": "the ship"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -32,7 +32,7 @@ func TestNoPatternsFound(t *testing.T) {
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"name": "Captain"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -46,11 +46,11 @@ func TestNoPatternsFound(t *testing.T) {
 func TestCaseInsensitiveReplacements(t *testing.T) {
 	// Yarrr! Case be no match for us!
 	filePath := "testfile.txt"
-	content := "Ahoy, ${Name}!"
+	content := "Ahoy, @{Name}!"
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"name": "Matey"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -69,7 +69,7 @@ func TestNoPatternsInFile(t *testing.T) {
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"name": "Pirate"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -83,16 +83,16 @@ func TestNoPatternsInFile(t *testing.T) {
 func TestNoReplacementForPattern(t *testing.T) {
 	// Arrr! No treasure for this pattern!
 	filePath := "testfile.txt"
-	content := "Ahoy, ${unknown}!"
+	content := "Ahoy, @{unknown}!"
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"name": "Pirate"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
 
-	expected := "Ahoy, ${unknown}!"
+	expected := "Ahoy, @{unknown}!"
 	if string(result) != expected {
 		t.Errorf("Expected %s, but got %s", expected, result)
 	}
@@ -102,11 +102,11 @@ func TestNoReplacementForPattern(t *testing.T) {
 func TestPatternWithoutClosingBrace(t *testing.T) {
 	// Blimey! A pattern adrift without a closing brace!
 	filePath := "testfile.txt"
-	content := "Ahoy, ${name"
+	content := "Ahoy, @{name"
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{"name": "Pirate"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -120,18 +120,18 @@ func TestPatternWithoutClosingBrace(t *testing.T) {
 func TestWithDefaultValue(t *testing.T) {
 	// Blimey! A pattern adrift without a closing brace!
 	filePath := "testfile.txt"
-	content := "Ahoy, ${name:Pirate}"
+	content := "Ahoy, @{name=Pirate}"
 	expected := "Ahoy, Pirate"
 	os.WriteFile(filePath, []byte(content), 0644)
 	replacements := map[string]string{}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
 
 	if string(result) != expected {
-		t.Errorf("Expected %s, but got %s", content, result)
+		t.Errorf("Expected %s, but got %s", expected, result)
 	}
 	t.Logf("Result: %s", result)
 }
@@ -143,7 +143,7 @@ func TestEmptyFile(t *testing.T) {
 	os.WriteFile(filePath, []byte(""), 0644)
 	replacements := map[string]string{"name": "Pirate"}
 
-	result, err := FileReplacer(filePath, replacements)
+	result, err := ReplaceFileContent(filePath, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}

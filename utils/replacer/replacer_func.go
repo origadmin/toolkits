@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-// FileReplacer opens a file, replaces occurrences of ${name} with values from the map, and returns the result as []byte.
-func FileReplacer(path string, replacements map[string]string) ([]byte, error) {
+// ReplaceFileContent opens a file, replaces occurrences of ${name} with values from the map, and returns the result as []byte.
+func ReplaceFileContent(path string, replacements map[string]string) ([]byte, error) {
 	// Read the file content
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -17,8 +17,8 @@ func FileReplacer(path string, replacements map[string]string) ([]byte, error) {
 	return bytes, nil
 }
 
-// FileMatchReplacer replaces occurrences of ${name} with values from the map
-func FileMatchReplacer(path string, m Matcher) ([]byte, error) {
+// ReplaceFileContentWithMatcher replaces occurrences of ${name} with values from the map
+func ReplaceFileContentWithMatcher(path string, m Matcher) ([]byte, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -27,8 +27,8 @@ func FileMatchReplacer(path string, m Matcher) ([]byte, error) {
 	return []byte(replaced), nil
 }
 
-// ObjectReplacer replaces occurrences of ${name} with values from the map
-func ObjectReplacer(v any, replacements map[string]string) error {
+// ReplaceObjectContent replaces occurrences of ${name} with values from the map
+func ReplaceObjectContent(v any, replacements map[string]string) error {
 	if v == nil {
 		return nil
 	}
@@ -40,8 +40,8 @@ func ObjectReplacer(v any, replacements map[string]string) error {
 	return json.Unmarshal(bytes, v)
 }
 
-// ObjectMatchReplacer replaces occurrences of ${name} with values from the map
-func ObjectMatchReplacer(v any, m Matcher) error {
+// ReplaceObjectContentWithMatcher replaces occurrences of ${name} with values from the map
+func ReplaceObjectContentWithMatcher(v any, m Matcher) error {
 	if v == nil {
 		return nil
 	}

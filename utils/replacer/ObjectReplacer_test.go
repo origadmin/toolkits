@@ -10,10 +10,10 @@ func TestReplacePlaceholdersInJSON(t *testing.T) {
 	type TreasureMap struct {
 		Location string `json:"location"`
 	}
-	mapData := TreasureMap{Location: "${location}"}
+	mapData := TreasureMap{Location: "@{location}"}
 	replacements := map[string]string{"location": "Isla de Muerta"}
 
-	err := ObjectReplacer(&mapData, replacements)
+	err := ReplaceObjectContent(&mapData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -32,7 +32,7 @@ func TestJSONMarshalingUnmarshaling(t *testing.T) {
 	logData := ShipLog{Captain: "Jack Sparrow"}
 	replacements := map[string]string{}
 
-	err := ObjectReplacer(&logData, replacements)
+	err := ReplaceObjectContent(&logData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -48,10 +48,10 @@ func TestDefaultReplacementSettings(t *testing.T) {
 	type Compass struct {
 		Direction string `json:"direction"`
 	}
-	compassData := Compass{Direction: "${direction}"}
+	compassData := Compass{Direction: "@{direction}"}
 	replacements := map[string]string{"direction": "North"}
 
-	err := ObjectReplacer(&compassData, replacements)
+	err := ReplaceObjectContent(&compassData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -70,7 +70,7 @@ func TestEmptyReplacementMap(t *testing.T) {
 	treasureData := Treasure{Gold: "1000 doubloons"}
 	replacements := map[string]string{}
 
-	err := ObjectReplacer(&treasureData, replacements)
+	err := ReplaceObjectContent(&treasureData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -89,7 +89,7 @@ func TestNoPlaceholdersInJSON(t *testing.T) {
 	mapData := Map{Island: "Tortuga"}
 	replacements := map[string]string{"location": "Isla de Muerta"}
 
-	err := ObjectReplacer(&mapData, replacements)
+	err := ReplaceObjectContent(&mapData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -114,10 +114,10 @@ func TestDeeplyNestedStructures(t *testing.T) {
 	crewData := Crew{
 		Captain: struct {
 			Name string `json:"name"`
-		}(struct{ Name string }{Name: "${captain_name}"}),
+		}(struct{ Name string }{Name: "@{captain_name}"}),
 		FirstMate: struct {
 			Name string `json:"name"`
-		}(struct{ Name string }{Name: "${first_mate_name}"}),
+		}(struct{ Name string }{Name: "@{first_mate_name}"}),
 	}
 
 	replacements := map[string]string{
@@ -125,7 +125,7 @@ func TestDeeplyNestedStructures(t *testing.T) {
 		"first_mate_name": "Long John Silver",
 	}
 
-	err := ObjectReplacer(&crewData, replacements)
+	err := ReplaceObjectContent(&crewData, replacements)
 	if err != nil {
 		t.Fatalf("Expected no error, but got %v", err)
 	}
@@ -142,7 +142,7 @@ func TestInvalidJSONInput(t *testing.T) {
 
 	replacements := map[string]string{"key": "value"}
 
-	err := ObjectReplacer(&invalidJSON, replacements)
+	err := ReplaceObjectContent(&invalidJSON, replacements)
 
 	if err != nil {
 		t.Fatalf("Expected an error for invalid JSON input, but got %v", err)

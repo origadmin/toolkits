@@ -10,15 +10,17 @@ import (
 )
 
 const (
-	// DefaultStartKeyword defines the default keyword.
-	DefaultStartKeyword          = "${"
-	DefaultHostStartKeyword      = "@{"
-	DefaultMatchStartKeyword     = "@"
-	DefaultMatchSeparatorKeyword = "="
-	DefaultEndKeyword            = "}"
-	DefaultHostEndKeyword        = ":"
-	DefaultSeparatorKeyword      = ":"
-	DefaultMatchEndKeyword       = DefaultHostEndKeyword
+	defaultStartKeyword     = "${"
+	defaultEndKeyword       = "}"
+	defaultSeparatorKeyword = ":"
+
+	defaultHostStartKeyword     = "@{"
+	defaultHostEndKeyword       = "}"
+	defaultHostSeparatorKeyword = "="
+
+	defaultMatchStartKeyword     = "@"
+	defaultMatchEndKeyword       = ":"
+	defaultMatchSeparatorKeyword = "="
 )
 
 // ReplaceFunc is a function type that accepts a string and returns a replaced string.
@@ -71,10 +73,6 @@ func (r Replacement) Replace(content []byte, replacements map[string]string) []b
 	return m.ReplaceBytes(content)
 }
 
-func defaultMatchFunc(src, key string, fold bool) bool {
-	return fold && strings.EqualFold(key, src) || key == src
-}
-
 func defaultReplacer(src, key, value string, fold bool) (string, bool) {
 	switch {
 	case fold && value != "" && strings.EqualFold(key, src):
@@ -89,9 +87,9 @@ func defaultReplacer(src, key, value string, fold bool) (string, bool) {
 // New returns a new Replacer instance with default settings.
 func New(ss ...Setting) *Replacement {
 	r := settings.Apply(&Replacement{
-		sta:  DefaultStartKeyword,
-		end:  DefaultEndKeyword,
-		sep:  DefaultSeparatorKeyword,
+		sta:  defaultStartKeyword,
+		end:  defaultEndKeyword,
+		sep:  defaultSeparatorKeyword,
 		hook: defaultReplacer,
 	}, ss)
 
@@ -102,9 +100,10 @@ func New(ss ...Setting) *Replacement {
 // NewHost returns a new Replacer instance with default host settings.
 func NewHost(ss ...Setting) *Replacement {
 	r := settings.Apply(&Replacement{
-		sta:  DefaultHostStartKeyword,
-		end:  DefaultEndKeyword,
-		sep:  DefaultSeparatorKeyword,
+		fold: true,
+		sta:  defaultHostStartKeyword,
+		end:  defaultHostEndKeyword,
+		sep:  defaultHostSeparatorKeyword,
 		hook: defaultReplacer,
 	}, ss)
 
@@ -112,4 +111,6 @@ func NewHost(ss ...Setting) *Replacement {
 	return r
 }
 
-var _globalReplacer = New(WithFold())
+var (
+	_globalReplacer = NewHost()
+)
