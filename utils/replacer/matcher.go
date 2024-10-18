@@ -2,6 +2,7 @@ package replacer
 
 import (
 	"bytes"
+	"maps"
 	"strings"
 
 	"github.com/goexts/ggb/settings"
@@ -16,6 +17,7 @@ type Matcher interface {
 	Match(content string) (string, bool)
 	Replace(content string) string
 	ReplaceBytes(content []byte) []byte
+	Replacement() map[string]string
 }
 type Match struct {
 	offset      int
@@ -24,6 +26,10 @@ type Match struct {
 	sep         string
 	fold        bool
 	replacement map[string]string
+}
+
+func (m Match) Replacement() map[string]string {
+	return maps.Clone(m.replacement)
 }
 
 func (m Match) Match(content string) (string, bool) {
