@@ -4,7 +4,6 @@
 package replacer
 
 import (
-	"bytes"
 	"strings"
 
 	"github.com/goexts/ggb/settings"
@@ -52,7 +51,12 @@ type Replacement struct {
 }
 
 func (r Replacement) ToMatch(replacements map[string]string) Matcher {
-	return NewMatch(replacements, WithMatchSta(r.sta), WithMatchEnd(r.end), WithMatchFold(r.fold))
+	return NewMatch(
+		replacements,
+		WithMatchSta(r.sta),
+		WithMatchEnd(r.end),
+		WithMatchFold(r.fold),
+		WithMatchSeparator(r.sep))
 }
 
 // ReplaceString replaces substrings within the provided content string using the provided key-value pairs.
@@ -63,67 +67,8 @@ func (r Replacement) ReplaceString(content string, replacements map[string]strin
 // Replace within the Replacement struct iterates through the values map, applying custom hooks and
 // replacing placeholders found in the source string.
 func (r Replacement) Replace(content []byte, replacements map[string]string) []byte {
-	// Create a buffer to hold the modified content
-	var result bytes.Buffer
-	contentStr := string(content)
-
-	// Iterate through the content to find ${name} patterns
-	cursor := 0
-	for {
-		// Find the next occurrence of `${`
-		sta := strings.Index(contentStr[cursor:], r.sta)
-		if sta == -1 {
-			// No more occurrences, write the remaining content and break
-			result.WriteString(contentStr[cursor:])
-			break
-		}
-
-		// Write the content before the found pattern
-		result.WriteString(contentStr[cursor : cursor+sta])
-
-		// Find the closing `}`
-		end := strings.Index(contentStr[cursor+sta:], r.end)
-		if end == -1 {
-			// No closing brace found, write the remaining content and break
-			result.WriteString(contentStr[cursor+sta:])
-			break
-		}
-
-		// Extract the variable name
-		varName := contentStr[cursor+sta+r.offset : cursor+sta+end]
-		vars := strings.Split(varName, r.sep)
-		srcKey := varName
-		if len(vars) > 0 {
-			srcKey = vars[0]
-		}
-		// Check for Replacement in the map (case-insensitive)
-		found := false
-		for key, value := range replacements {
-			newValue, ok := r.hook(srcKey, key, value, r.fold)
-			if ok {
-				result.WriteString(newValue)
-				found = true
-				break
-			}
-		}
-
-		// If no Replacement was found, write the original pattern
-		if !found {
-			srcValue := varName
-			if len(vars) > 1 {
-				srcValue = vars[1]
-				result.WriteString(srcValue)
-			} else {
-				result.WriteString(r.sta + srcValue + r.end)
-			}
-
-		}
-
-		// Update the cursor position for the next iteration
-		cursor = cursor + sta + end + 1
-	}
-
-	return result.Bytes()
+	m := r.ToMatch(replacements)
+	return m.ReplaceBytes(content)
 }
 
 func defaultMatchFunc(src, key string, fold bool) bool {

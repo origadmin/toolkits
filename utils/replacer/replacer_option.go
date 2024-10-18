@@ -41,3 +41,10 @@ func WithFold() Setting {
 		o.fold = true
 	}
 }
+
+// WithSeparator returns a new Replacer instance with the specified separator.
+func WithSeparator(sep string) Setting {
+	return func(o *Replacement) {
+		o.sep = sep
+	}
+}
