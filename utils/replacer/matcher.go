@@ -198,7 +198,7 @@ func NewMatch(replacements map[string]string, ss ...MatchSetting) *Match {
 // NewMatchFile creates a new Match with the provided replacements from a JSON file.
 func NewMatchFile(path string, ss ...MatchSetting) (*Match, error) {
 	var replacements map[string]string
-	err := codec.DecodeJSONFile(path, &replacements)
+	err := codec.DecodeFromFile(path, &replacements)
 	if err != nil {
 		return nil, errors.Wrap(err, "NewMatchFile")
 	}
