@@ -118,3 +118,16 @@ func TestMatchMultipleEntries(t *testing.T) {
 		t.Errorf("Expected IP '192.168.2.2' and true, got %s and %v", ip, ok)
 	}
 }
+
+func TestMatchHost(t *testing.T) {
+	//hosts := map[string]string{
+	//	"blackbeard": "192.168.2.1",
+	//	"longjohn":   "192.168.2.2",
+	//}
+	hostname := New(nil)
+
+	ip := hostname.ReplaceString("${consul_address:127.0.0.1:8500}", nil)
+	if ip != "127.0.0.1:8500" {
+		t.Errorf("Expected IP '127.0.0.1:8500' and true, got %s", ip)
+	}
+}

@@ -15,6 +15,7 @@ func TestReplaceNameWithIPWhenPrefixAndSuffixMatch(t *testing.T) {
 	if result != expected {
 		t.Errorf("Expected %s, but got %s", expected, result)
 	}
+
 }
 
 // Returns original name if no match is found
