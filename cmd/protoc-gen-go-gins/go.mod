@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/cmd/protoc-gen-go-gin
+module github.com/origadmin/toolkits/cmd/protoc-gen-go-gins
 
 go 1.23
 
