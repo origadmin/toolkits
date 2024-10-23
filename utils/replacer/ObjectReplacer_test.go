@@ -97,6 +97,7 @@ func TestNoPlaceholdersInJSON(t *testing.T) {
 	if mapData.Island != "Tortuga" {
 		t.Errorf("Expected island to be 'Tortuga', but got %s", mapData.Island)
 	}
+
 }
 
 // Processes objects with deeply nested structures

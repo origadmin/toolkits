@@ -8,8 +8,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-type jsonBinding struct {
-}
+type jsonBinding struct{}
 
 var bind = new(jsonBinding)
 

@@ -91,8 +91,7 @@ func (m Match) Replace(content string) string {
 		// Extract the variable name
 		args := content[cursor+sta+m.offset : cursor+sta+end]
 		// Check for Replacement in the map (case-insensitive)
-		vars := strings.SplitN(args, m.sep, 2)
-		skey := vars[0]
+		skey, sval, ok := strings.Cut(args, m.sep)
 		found := false
 		for key, value := range m.replacement {
 			if value != "" && defaultMatchFunc(skey, key, m.fold) {
@@ -102,12 +101,10 @@ func (m Match) Replace(content string) string {
 			}
 		}
 		if !found {
-			sval := args
-			if len(vars) > 1 {
-				sval = vars[1]
+			if ok {
 				sb.WriteString(sval)
 			} else {
-				sb.WriteString(m.sta + sval + m.end)
+				sb.WriteString(m.sta + skey + m.end)
 			}
 		}
 		// Update the cursor position for the next iteration
@@ -144,11 +141,7 @@ func (m Match) ReplaceBytes(content []byte) []byte {
 		// Extract the variable name
 		args := content[cursor+sta+len(m.sta) : cursor+sta+end]
 		// Check for Replacement in the map (case-insensitive)
-		vars := bytes.Split(args, []byte(m.sep))
-		skey := args
-		if len(vars) > 0 {
-			skey = vars[0]
-		}
+		skey, sval, ok := bytes.Cut(args, []byte(m.sep))
 		found := false
 		for key, value := range m.replacement {
 			if value != "" && defaultMatchFunc(string(skey), key, m.fold) {
@@ -158,13 +151,11 @@ func (m Match) ReplaceBytes(content []byte) []byte {
 			}
 		}
 		if !found {
-			sval := args
-			if len(vars) > 1 {
-				sval = vars[1]
+			if ok {
 				bb.Write(sval)
 			} else {
 				bb.Write([]byte(m.sta))
-				bb.Write(sval)
+				bb.Write(skey)
 				bb.Write([]byte(m.end))
 			}
 		}

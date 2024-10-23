@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/examples/helloworld"
-	gins "github.com/origadmin/toolkits/runtime/kratos/transport/gins"
+	"github.com/origadmin/toolkits/runtime/kratos/transport/gins"
 )
 
 var _ helloworld.GreeterHTTPServer = &helloServer{}

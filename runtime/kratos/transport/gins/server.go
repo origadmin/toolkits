@@ -196,13 +196,14 @@ func (s *Server) filter() HandlerFunc {
 			pathTemplate: pathTemplate,
 			reqHeader:    headerCarrier(c.Request.Header),
 			replyHeader:  headerCarrier(c.Writer.Header()),
-			request:      c.Request,
-			response:     c.Writer,
+			ginCtx:       c,
+			//request:      c.Request,
+			//response:     c.Writer,
 		}
 		if s.endpoint != nil {
 			tr.endpoint = s.endpoint.String()
 		}
-		tr.request = c.Request.WithContext(transport.NewServerContext(ctx, tr))
+		tr.ginCtx.Request = c.Request.WithContext(transport.NewServerContext(ctx, tr))
 		c.Next()
 	}
 }

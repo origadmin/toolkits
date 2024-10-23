@@ -25,7 +25,7 @@ func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}G
 	return func(ctx *gin.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
-	  if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
+		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
 		ctx.Error(err)
 		return
 		}
@@ -35,12 +35,12 @@ func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}G
 	return
 	}
   {{- if.HasVars}}
-	  if err := gins.BindURI(ctx,&in); err != nil {
+		if err := gins.BindURI(ctx,&in); err != nil {
 		ctx.Error(err)
 		return
 		}
   {{- end}}
-	http.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
+	gins.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
 	newCtx := gins.NewContext(ctx)
 	reply, err := srv.{{.Name}}(newCtx, &in)
 	if err != nil {
@@ -55,25 +55,25 @@ func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}G
 
 type {{.ServiceType}}GINClient interface {
 {{- range.MethodSets}}
-    {{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http.CallOption) (rsp *{{.Reply}}, err error)
+    {{.Name}}(ctx context.Context, req *{{.Request}}, opts ...gins.CallOption) (rsp *{{.Reply}}, err error)
 {{- end}}
 }
 
 type {{.ServiceType}}GINClientImpl struct{
-cc *http.Client
+cc *gins.Client
 }
 
-func New{{.ServiceType}}GINClient (client *http.Client) {{.ServiceType}}GINClient {
+func New{{.ServiceType}}GINClient (client *gins.Client) {{.ServiceType}}GINClient {
 return &{{.ServiceType}}GINClientImpl{client}
 }
 
 {{range.MethodSets}}
-	func (c *{{$svrType}}GINClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
+	func (c *{{$svrType}}GINClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.ClientPath}}"
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
-	opts = append(opts, http.Operation({{$svrType}}_{{.OriginalName}}_OperationName))
-	opts = append(opts, http.PathTemplate(pattern))
+	opts = append(opts, gins.Operation({{$svrType}}_{{.OriginalName}}_OperationName))
+	opts = append(opts, gins.PathTemplate(pattern))
   {{if.HasBody -}}
 		err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
   {{else -}}

@@ -8,7 +8,7 @@
 
 version: 2
 
-project_name: protoc-gen-go-gin
+project_name: protoc-gen-go-gins
 
 before:
   hooks:
@@ -25,7 +25,7 @@ builds:
       - -trimpath
     ldflags: -s -w -X main.builtBy=OrigAdmin -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
     #    main: ./main.go
-    binary: protoc-gen-go-gin
+    binary: protoc-gen-go-gins
     goos:
       - darwin
       - windows
@@ -78,7 +78,7 @@ archives:
       - goos: windows
         format: zip
 snapshot:
-  name_template: nightly_{{ .ShortCommit }}
+  version_template: nightly_{{ .ShortCommit }}
 
 checksum:
   name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
@@ -104,7 +104,7 @@ changelog:
 release:
   github:
     owner: OrigAdmin
-    name: protoc-gen-go-gin
+    name: protoc-gen-go-gins
   prerelease: auto
   draft: false
   make_latest: true
