@@ -1,6 +1,6 @@
 module github.com/origadmin/toolkits
 
-go 1.23.1
+go 1.23
 
 require (
 	github.com/coocood/freecache v1.2.4
