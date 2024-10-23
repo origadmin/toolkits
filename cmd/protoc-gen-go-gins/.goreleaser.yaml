@@ -24,9 +24,8 @@ builds:
     flags:
       - -trimpath
     ldflags: -s -w -X main.builtBy=OrigAdmin -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
-
-    binary: protoc-gen-go-gins
     dir: ./cmd/protoc-gen-go-gins
+    binary: protoc-gen-go-gins
     #    main: ./main.go
     goos:
       - darwin
