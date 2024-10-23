@@ -105,7 +105,7 @@ changelog:
 release:
   github:
     owner: OrigAdmin
-    name: protoc-gen-go-gins
+    name: toolkits/cmd/protoc-gen-go-gins
   prerelease: auto
   draft: false
   make_latest: true
