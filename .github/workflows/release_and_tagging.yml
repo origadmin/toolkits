@@ -91,6 +91,21 @@ jobs:
       #          draft: false
       #          prerelease: false
 
+  release:
+    needs: [ test ]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         if: success() && startsWith(github.ref, 'refs/tags/')
@@ -103,8 +118,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload assets
-        uses: actions/upload-artifact@v4.4.3
-        with:
-          name: protoc-gen-go-gins
-          path: ./cmd/protoc-gen-go-gins/dist/*
+#      - name: Upload assets
+#        uses: actions/upload-artifact@v4.4.3
+#        with:
+#          name: protoc-gen-go-gins
+#          path: ./cmd/protoc-gen-go-gins/dist/*
