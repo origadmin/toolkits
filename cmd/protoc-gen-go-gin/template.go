@@ -7,8 +7,8 @@ import (
 	"text/template"
 )
 
-//go:embed ginTemplate.tpl
-var ginTemplate string
+//go:embed ginsTemplate.tpl
+var ginsTemplate string
 
 type serviceDesc struct {
 	ServiceType string // Greeter
@@ -42,7 +42,7 @@ func (s *serviceDesc) execute() string {
 		s.MethodSets[m.Name] = m
 	}
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New("gin").Parse(strings.TrimSpace(ginTemplate))
+	tmpl, err := template.New("gins").Parse(strings.TrimSpace(ginsTemplate))
 	if err != nil {
 		panic(err)
 	}
