@@ -7,6 +7,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
@@ -35,7 +36,7 @@ func TestTransport_Operation(t *testing.T) {
 
 func TestTransport_Request(t *testing.T) {
 	v := &http.Request{}
-	o := &Transport{request: v}
+	o := &Transport{ginCtx: &gin.Context{Request: v}}
 	if !reflect.DeepEqual(v, o.Request()) {
 		t.Errorf("expect %v, got %v", v, o.Request())
 	}

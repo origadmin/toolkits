@@ -4,30 +4,25 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/transport"
+	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 const (
 	KindGin transport.Kind = "gin"
 )
 
-var _ Transporter = &Transport{}
-
 // Transporter is http Transporter
-type Transporter interface {
-	transport.Transporter
-	Request() *http.Request
-	PathTemplate() string
-}
+type Transporter = transhttp.Transporter
 
 // Transport is an HTTP transport.
 type Transport struct {
+	ginCtx       *gin.Context
 	endpoint     string
 	operation    string
 	reqHeader    headerCarrier
 	replyHeader  headerCarrier
-	request      *http.Request
-	response     http.ResponseWriter
 	pathTemplate string
 }
 
@@ -48,7 +43,7 @@ func (tr *Transport) Operation() string {
 
 // Request returns the HTTP request.
 func (tr *Transport) Request() *http.Request {
-	return tr.request
+	return tr.ginCtx.Request
 }
 
 // RequestHeader returns the request header.
