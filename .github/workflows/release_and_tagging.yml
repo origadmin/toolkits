@@ -118,8 +118,7 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean
-          workdir: cmd/protoc-gen-go-gins
+          args: release --clean -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
