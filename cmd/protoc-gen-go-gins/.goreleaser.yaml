@@ -24,8 +24,9 @@ builds:
     flags:
       - -trimpath
     ldflags: -s -w -X main.builtBy=OrigAdmin -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
-    #    main: ./main.go
+    dir: ./cmd/protoc-gen-go-gins
     binary: protoc-gen-go-gins
+    #    main: ./main.go
     goos:
       - darwin
       - windows
@@ -108,7 +109,8 @@ release:
   prerelease: auto
   draft: false
   make_latest: true
+
   header: |
     # Changelog
     
-    ## [{{ .Tag }}](https://github.com/OrigAdmin/origen/compare/{{ .PreviousTag }}...{{ .Tag }}) ({{ .Date }})
+    ## [{{ .Tag }}](https://github.com/OrigAdmin/toolkits/compare/{{ .PreviousTag }}...{{ .Tag }}) ({{ .Date }})
