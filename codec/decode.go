@@ -95,3 +95,11 @@ func Decode(rd io.Reader, obj any, ext string) error {
 		return ErrUnsupportedDecodeType
 	}
 }
+
+type tomlDecoder struct {
+	dec *toml.Decoder
+}
+
+func (t tomlDecoder) Decode(obj any) error {
+	return ggb.OrNil(t.dec.Decode(obj))
+}

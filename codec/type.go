@@ -2,6 +2,7 @@ package codec
 
 import (
 	"bytes"
+	"encoding/xml"
 
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
@@ -13,10 +14,11 @@ import (
 type Type int
 
 const (
-	JSON    Type = iota // json
-	YAML                // yaml
-	TOML                // toml
-	UNKNOWN             // unknown
+	JSON Type = iota // json
+	YAML             // yaml
+	TOML             // toml
+	XML
+	UNKNOWN // unknown
 )
 
 func (s Type) Marshal(v interface{}) ([]byte, error) {
@@ -39,6 +41,8 @@ func (s Type) NewDecoder(r io.Reader) Decoder {
 		return &tomlDecoder{
 			dec: toml.NewDecoder(r),
 		}
+	case XML:
+		return xml.NewDecoder(r)
 	default:
 		return nil
 	}
@@ -52,6 +56,8 @@ func (s Type) NewEncoder(w io.Writer) Encoder {
 		return yaml.NewEncoder(w)
 	case TOML:
 		return toml.NewEncoder(w)
+	case XML:
+		return xml.NewEncoder(w)
 	default:
 		return nil
 	}
@@ -73,6 +79,8 @@ func (s Type) Exts() []string {
 		return []string{".yaml", ".yml"}
 	case TOML:
 		return []string{".toml"}
+	case XML:
+		return []string{".xml"}
 	default:
 		return []string{}
 	}
@@ -87,6 +95,8 @@ func TypeFromString(s string) Type {
 		return YAML
 	case "toml":
 		return TOML
+	case "xml":
+		return XML
 	default:
 		return UNKNOWN
 	}
@@ -94,9 +104,6 @@ func TypeFromString(s string) Type {
 
 // TypeFromExt returns the codec type from the file extension.
 func TypeFromExt(ext string) Type {
-	if ext == "" {
-		return UNKNOWN
-	}
 	switch ext {
 	case ".json":
 		return JSON
@@ -104,6 +111,8 @@ func TypeFromExt(ext string) Type {
 		return YAML
 	case ".toml":
 		return TOML
+	case ".xml":
+		return XML
 	default:
 		return UNKNOWN
 	}

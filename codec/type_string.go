@@ -11,12 +11,13 @@ func _() {
 	_ = x[JSON-0]
 	_ = x[YAML-1]
 	_ = x[TOML-2]
-	_ = x[UNKNOWN-3]
+	_ = x[XML-3]
+	_ = x[UNKNOWN-4]
 }
 
-const _Type_name = "JSONYAMLTOMLUNKNOWN"
+const _Type_name = "JSONYAMLTOMLXMLUNKNOWN"
 
-var _Type_index = [...]uint8{0, 4, 8, 12, 19}
+var _Type_index = [...]uint8{0, 4, 8, 12, 15, 22}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

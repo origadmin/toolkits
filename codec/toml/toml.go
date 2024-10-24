@@ -18,7 +18,10 @@ var (
 	DecodeTOML = toml.Decode
 )
 
-type Value = toml.Primitive
+type (
+	Value   = toml.Primitive
+	Decoder = toml.Decoder
+)
 
 func marshal(v any) ([]byte, error) {
 	buf := new(bytes.Buffer)
