@@ -7,6 +7,7 @@ import (
 	"bytes"
 
 	"github.com/BurntSushi/toml"
+	"github.com/go-kratos/kratos/v2/encoding"
 )
 
 var (
@@ -16,6 +17,8 @@ var (
 	NewEncoder = toml.NewEncoder
 	DecodeFile = toml.DecodeFile
 	DecodeTOML = toml.Decode
+	Codec      = codec{}
+	Name       = "toml"
 )
 
 type (
@@ -57,4 +60,22 @@ func Decode(data string, v any) error {
 		return err
 	}
 	return nil
+}
+
+type codec struct{}
+
+func (c codec) Marshal(v interface{}) ([]byte, error) {
+	return toml.Marshal(v)
+}
+
+func (c codec) Unmarshal(data []byte, v interface{}) error {
+	return toml.Unmarshal(data, v)
+}
+
+func (c codec) Name() string {
+	return Name
+}
+
+func init() {
+	encoding.RegisterCodec(Codec)
 }
