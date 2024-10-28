@@ -13,7 +13,7 @@ func TestTomlDecode(t *testing.T) {
 		} `toml:"middlewares"`
 	}
 
-	md, err := decodeTOML(`
+	md, err := DecodeTOML(`
 	middlewares = [
   		{name = "ratelimit", options = {max = 10, period = 10}},
 	]

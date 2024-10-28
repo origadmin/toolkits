@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"github.com/BurntSushi/toml"
-	"github.com/go-kratos/kratos/v2/encoding"
 	ggb "github.com/goexts/ggb"
 )
 
@@ -18,7 +17,7 @@ var (
 	newDecoderTOML = toml.NewDecoder
 	NewEncoder     = toml.NewEncoder
 	DecodeFile     = toml.DecodeFile
-	decodeTOML     = toml.Decode
+	DecodeTOML     = toml.Decode
 )
 
 type (
@@ -65,15 +64,6 @@ func MustToString(v any) string {
 	return string(data)
 }
 
-// Decode decodes the given JSON string into v
-func Decode(data string, v any) error {
-	_, err := decodeTOML(data, v)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func init() {
-	encoding.RegisterCodec(Codec)
-}
+//func init() {
+//	encoding.RegisterCodec(Codec)
+//}

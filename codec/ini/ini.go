@@ -71,3 +71,26 @@ func Marshal(v any) ([]byte, error) {
 	}
 	return buf.Bytes(), err
 }
+
+// MarshalToString returns json string, and ignores error
+func MarshalToString(v any) string {
+	b, err := Marshal(v)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+// MustToString returns json string, or panic
+func MustToString(v any) string {
+	data, err := Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
+
+// Decode decodes the given JSON string into v
+func Decode(data string, v any) error {
+	return Unmarshal([]byte(data), v)
+}
