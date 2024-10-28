@@ -4,10 +4,12 @@
 package codec
 
 import (
+	"encoding/xml"
 	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/origadmin/toolkits/codec/ini"
 	"github.com/origadmin/toolkits/errors"
 
 	"github.com/origadmin/toolkits/codec/json"
@@ -54,6 +56,26 @@ func EncodeTOMLFile(name string, obj any) error {
 	return toml.NewEncoder(f).Encode(obj)
 }
 
+// EncodeXMLFile Encodes the given XML file
+func EncodeXMLFile(name string, obj any) error {
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return xml.NewEncoder(f).Encode(obj)
+}
+
+// EncodeINIFile Encodes the given INI file
+func EncodeINIFile(name string, obj any) error {
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return ini.NewEncoder(f).Encode(obj)
+}
+
 // EncodeToFile Encodes the given file
 func EncodeToFile(name string, obj any) error {
 	typo := TypeFromExt(filepath.Ext(name))
@@ -67,11 +89,16 @@ func EncodeToFile(name string, obj any) error {
 		return EncodeYAMLFile(name, obj)
 	case ".toml":
 		return EncodeTOMLFile(name, obj)
+	case ".xml":
+		return EncodeXMLFile(name, obj)
+	case ".ini":
+		return EncodeINIFile(name, obj)
 	default:
 		return ErrUnsupportedEncodeType
 	}
 }
 
+// Encode Encodes the given object with ext name
 func Encode(w io.Writer, obj any, st Type) error {
 	switch st {
 	case JSON:
@@ -80,6 +107,10 @@ func Encode(w io.Writer, obj any, st Type) error {
 		return yaml.NewEncoder(w).Encode(obj)
 	case TOML:
 		return toml.NewEncoder(w).Encode(obj)
+	case XML:
+		return xml.NewEncoder(w).Encode(obj)
+	case INI:
+		return ini.NewEncoder(w).Encode(obj)
 	default:
 		return ErrUnsupportedEncodeType
 	}

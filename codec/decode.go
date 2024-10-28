@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/origadmin/toolkits/codec/ini"
+	"github.com/origadmin/toolkits/codec/xml"
 	"github.com/origadmin/toolkits/errors"
-
-	ggb "github.com/goexts/ggb"
 
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
@@ -45,7 +45,7 @@ func DecodeTOMLFile(name string, obj any) error {
 	}
 	defer f.Close()
 
-	_, err = toml.NewDecoder(f).Decode(obj)
+	err = toml.NewDecoder(f).Decode(obj)
 	if err != nil {
 		return err
 	}
@@ -63,6 +63,26 @@ func DecodeYAMLFile(name string, obj any) error {
 	return yaml.NewDecoder(f).Decode(obj)
 }
 
+// DecodeXMLFile Decodes the given XML file
+func DecodeXMLFile(name string, obj any) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return xml.NewDecoder(f).Decode(obj)
+}
+
+// DecodeINIFile Decodes the given INI file
+func DecodeINIFile(name string, obj any) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return ini.NewDecoder(f).Decode(obj)
+}
+
 // DecodeFromFile Decodes the given file
 func DecodeFromFile(name string, obj any) error {
 	dec := TypeFromExt(filepath.Ext(name))
@@ -77,6 +97,10 @@ func DecodeFromFile(name string, obj any) error {
 		return DecodeYAMLFile(name, obj)
 	case ".toml":
 		return DecodeTOMLFile(name, obj)
+	case ".xml":
+		return DecodeXMLFile(name, obj)
+	case ".ini":
+		return DecodeINIFile(name, obj)
 	default:
 		return ErrUnsupportedDecodeType
 	}
@@ -90,16 +114,10 @@ func Decode(rd io.Reader, obj any, ext string) error {
 	case ".yaml", ".yml":
 		return yaml.NewDecoder(rd).Decode(obj)
 	case ".toml":
-		return ggb.OrNil(toml.NewDecoder(rd).Decode(obj))
+		return toml.NewDecoder(rd).Decode(obj)
+	case ".ini":
+		return ini.NewDecoder(rd).Decode(obj)
 	default:
 		return ErrUnsupportedDecodeType
 	}
-}
-
-type tomlDecoder struct {
-	dec *toml.Decoder
-}
-
-func (t tomlDecoder) Decode(obj any) error {
-	return ggb.OrNil(t.dec.Decode(obj))
 }

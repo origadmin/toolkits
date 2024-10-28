@@ -1,11 +1,10 @@
 package codec
 
 import (
-	"bytes"
-	"encoding/xml"
-
+	"github.com/origadmin/toolkits/codec/ini"
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
+	"github.com/origadmin/toolkits/codec/xml"
 	"github.com/origadmin/toolkits/codec/yaml"
 	"github.com/origadmin/toolkits/io"
 )
@@ -18,17 +17,37 @@ const (
 	YAML             // yaml
 	TOML             // toml
 	XML
+	INI
 	UNKNOWN // unknown
+	TypeMax = UNKNOWN
+)
+
+var (
+	codecs = [TypeMax]Codec{
+		JSON: json.Codec,
+		YAML: yaml.Codec,
+		TOML: toml.Codec,
+		XML:  xml.Codec,
+		INI:  ini.Codec,
+	}
 )
 
 func (s Type) Marshal(v interface{}) ([]byte, error) {
-	buf := &bytes.Buffer{}
-	err := s.NewEncoder(buf).Encode(v)
-	return buf.Bytes(), err
+	if s >= UNKNOWN {
+		return nil, ErrUnsupportedEncodeType
+	}
+	return codecs[s].Marshal(v)
+	//buf := &bytes.Buffer{}
+	//err := s.NewEncoder(buf).Encode(v)
+	//return buf.Bytes(), err
 }
 
 func (s Type) Unmarshal(data []byte, v interface{}) error {
-	return s.NewDecoder(bytes.NewReader(data)).Decode(v)
+	if s >= UNKNOWN {
+		return ErrUnsupportedDecodeType
+	}
+	return codecs[s].Unmarshal(data, v)
+	//return s.NewDecoder(bytes.NewReader(data)).Decode(v)
 }
 
 func (s Type) NewDecoder(r io.Reader) Decoder {
@@ -38,11 +57,11 @@ func (s Type) NewDecoder(r io.Reader) Decoder {
 	case YAML:
 		return yaml.NewDecoder(r)
 	case TOML:
-		return &tomlDecoder{
-			dec: toml.NewDecoder(r),
-		}
+		return toml.NewDecoder(r)
 	case XML:
 		return xml.NewDecoder(r)
+	case INI:
+		return ini.NewDecoder(r)
 	default:
 		return nil
 	}
@@ -58,13 +77,19 @@ func (s Type) NewEncoder(w io.Writer) Encoder {
 		return toml.NewEncoder(w)
 	case XML:
 		return xml.NewEncoder(w)
+	case INI:
+		return ini.NewEncoder(w)
 	default:
 		return nil
 	}
 }
 
 func (s Type) Name() string {
-	return s.String()
+	if s == UNKNOWN {
+		return "unknown"
+	}
+	return codecs[s].Name()
+	//return s.String()
 }
 
 func (s Type) IsSupported() bool {
@@ -81,6 +106,8 @@ func (s Type) Exts() []string {
 		return []string{".toml"}
 	case XML:
 		return []string{".xml"}
+	case INI:
+		return []string{".ini"}
 	default:
 		return []string{}
 	}
@@ -97,6 +124,8 @@ func TypeFromString(s string) Type {
 		return TOML
 	case "xml":
 		return XML
+	case "ini":
+		return INI
 	default:
 		return UNKNOWN
 	}
@@ -113,6 +142,8 @@ func TypeFromExt(ext string) Type {
 		return TOML
 	case ".xml":
 		return XML
+	case ".ini":
+		return INI
 	default:
 		return UNKNOWN
 	}

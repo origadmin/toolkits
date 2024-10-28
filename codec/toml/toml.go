@@ -5,26 +5,38 @@ package toml
 
 import (
 	"bytes"
+	"io"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-kratos/kratos/v2/encoding"
+	ggb "github.com/goexts/ggb"
 )
 
 var (
-	Marshal    = marshal
-	Unmarshal  = toml.Unmarshal
-	NewDecoder = toml.NewDecoder
-	NewEncoder = toml.NewEncoder
-	DecodeFile = toml.DecodeFile
-	DecodeTOML = toml.Decode
-	Codec      = codec{}
-	Name       = "toml"
+	Marshal        = marshal
+	Unmarshal      = toml.Unmarshal
+	newDecoderTOML = toml.NewDecoder
+	NewEncoder     = toml.NewEncoder
+	DecodeFile     = toml.DecodeFile
+	decodeTOML     = toml.Decode
 )
 
 type (
-	Value   = toml.Primitive
-	Decoder = toml.Decoder
+	Value       = toml.Primitive
+	DecoderTOML = toml.Decoder
 )
+
+type Decoder struct {
+	dec *toml.Decoder
+}
+
+func (t Decoder) Decode(obj any) error {
+	return ggb.OrNil(t.dec.Decode(obj))
+}
+
+func NewDecoder(ior io.Reader) *Decoder {
+	return &Decoder{dec: toml.NewDecoder(ior)}
+}
 
 func marshal(v any) ([]byte, error) {
 	buf := new(bytes.Buffer)
@@ -55,25 +67,11 @@ func MustToString(v any) string {
 
 // Decode decodes the given JSON string into v
 func Decode(data string, v any) error {
-	_, err := DecodeTOML(data, v)
+	_, err := decodeTOML(data, v)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-type codec struct{}
-
-func (c codec) Marshal(v interface{}) ([]byte, error) {
-	return toml.Marshal(v)
-}
-
-func (c codec) Unmarshal(data []byte, v interface{}) error {
-	return toml.Unmarshal(data, v)
-}
-
-func (c codec) Name() string {
-	return Name
 }
 
 func init() {
