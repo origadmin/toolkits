@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package toolkits.runtime.config;
+
+option go_package = "github.com/origadmin/toolkits/config;config";
+
+import "validate/validate.proto";
+
+// Consul
+message Consul {
+  string address = 1 [json_name = "address"];
+  string scheme = 2 [json_name = "scheme"];
+  string token = 3 [json_name = "token"];
+  //  bool heart_beat = 4 [json_name = "heart_beat"];
+  //  bool health_check = 5 [json_name = "health_check"];
+  //  string datacenter = 6 [json_name = "datacenter"];
+  //  string tag = 7 [json_name = "tag"];
+  //  string health_check_interval = 8 [json_name = "health_check_interval"];
+  //  string health_check_timeout = 9[json_name = "health_check_timeout"];
+}
+
+// Registration discovery center
+message DiscoveryConfig {
+  string type = 1 [(validate.rules).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
+  string name = 2 [json_name = "name"];  // Name
+  optional Consul consul = 3 [json_name = "consul"];  // Consul
+}
