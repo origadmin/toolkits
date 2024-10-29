@@ -224,7 +224,7 @@ func TestParse(t *testing.T) {
 			t.Errorf("Parse(%q).Id = %q; want %q", c.err, gotId, c.want.Id)
 		}
 		if gotCode := got.Code; gotCode != c.want.Code {
-			t.Errorf("Parse(%q).Code = %d; want %d", c.err, gotCode, c.want.Code)
+			t.Errorf("Parse(%q).NewCode = %d; want %d", c.err, gotCode, c.want.Code)
 		}
 	}
 }
@@ -281,7 +281,7 @@ func TestFromError(t *testing.T) {
 			t.Errorf("FromError(%v).Id = %q; want %q", c.err, gotId, c.want.Id)
 		}
 		if gotCode := got.Code; c.wantOK && gotCode != c.want.Code {
-			t.Errorf("FromError(%v).Code = %d; want %d", c.err, gotCode, c.want.Code)
+			t.Errorf("FromError(%v).NewCode = %d; want %d", c.err, gotCode, c.want.Code)
 		}
 
 	}
@@ -645,7 +645,7 @@ func TestNewf(t *testing.T) {
 }
 
 func TestCode(t *testing.T) {
-	err := Code(404, "Resource not found")
+	err := NewCode(404, "Resource not found")
 	if err == nil {
 		t.Error("Expected an error, but got nil")
 	}
