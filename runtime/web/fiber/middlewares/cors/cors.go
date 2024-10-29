@@ -33,9 +33,9 @@ func WithCors(cfg *middlewares.CorsConfig) fiber.Handler {
 		}
 	}
 
-	allOrigins := corsMatchAll
+	allOrigins := allOrigins
 	if len(cfg.AllowOrigins) > 0 && cfg.AllowOrigins[0] != corsMatchAll {
-		allOrigins = strings.Join(cfg.AllowOrigins, ",")
+		allOrigins = nil
 	}
 
 	//if allOrigins && cfg.AllowCredentials {
@@ -43,12 +43,16 @@ func WithCors(cfg *middlewares.CorsConfig) fiber.Handler {
 	//}
 
 	return cors.New(cors.Config{
-		AllowOriginsFunc: nil,
-		AllowOrigins:     allOrigins,
+		AllowOriginsFunc: allOrigins,
+		AllowOrigins:     strings.Join(cfg.AllowOrigins, ","),
 		AllowMethods:     strings.Join(cfg.AllowMethods, ","),
 		AllowHeaders:     strings.Join(cfg.AllowHeaders, ","),
 		ExposeHeaders:    strings.Join(cfg.ExposeHeaders, ","),
 		AllowCredentials: cfg.AllowCredentials,
 		MaxAge:           int(cfg.MaxAge.GetSeconds()),
 	})
+}
+
+func allOrigins(origin string) bool {
+	return true
 }
