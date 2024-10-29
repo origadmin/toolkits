@@ -62,6 +62,8 @@ func (m *Consul) validate(all bool) error {
 
 	// no validation rules for Token
 
+	// no validation rules for Path
+
 	if len(errors) > 0 {
 		return ConsulMultiError(errors)
 	}
