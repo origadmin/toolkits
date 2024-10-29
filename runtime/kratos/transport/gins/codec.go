@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
@@ -31,16 +30,16 @@ type ResponseWriter = http.ResponseWriter
 type Flusher = http.Flusher
 
 // DecodeRequestFunc is decode request func.
-type DecodeRequestFunc func(*gin.Context, interface{}) error
+type DecodeRequestFunc func(*Context, interface{}) error
 
 // EncodeResponseFunc is encode response func.
-type EncodeResponseFunc func(*gin.Context, interface{}) error
+type EncodeResponseFunc func(*Context, interface{}) error
 
 // EncodeErrorFunc is encode error func.
-type EncodeErrorFunc func(*gin.Context, error)
+type EncodeErrorFunc func(*Context, error)
 
 // DefaultRequestVars decodes the request vars to object.
-func DefaultRequestVars(c *gin.Context, v interface{}) error {
+func DefaultRequestVars(c *Context, v interface{}) error {
 	raws := mux.Vars(c.Request)
 	vars := make(url.Values, len(raws))
 	for k, v := range raws {
@@ -50,12 +49,12 @@ func DefaultRequestVars(c *gin.Context, v interface{}) error {
 }
 
 // DefaultRequestQuery decodes the request vars to object.
-func DefaultRequestQuery(c *gin.Context, v interface{}) error {
+func DefaultRequestQuery(c *Context, v interface{}) error {
 	return binding.BindQuery(c.Request.URL.Query(), v)
 }
 
 // DefaultRequestDecoder decodes the request body to object.
-func DefaultRequestDecoder(c *gin.Context, v interface{}) error {
+func DefaultRequestDecoder(c *Context, v interface{}) error {
 	r := c.Request
 	codec, ok := CodecForRequest(c, "Content-Type")
 	if !ok {
@@ -79,7 +78,7 @@ func DefaultRequestDecoder(c *gin.Context, v interface{}) error {
 }
 
 // DefaultResponseEncoder encodes the object to the HTTP response.
-func DefaultResponseEncoder(c *gin.Context, v interface{}) error {
+func DefaultResponseEncoder(c *Context, v interface{}) error {
 	if v == nil {
 		return nil
 	}
@@ -104,7 +103,7 @@ func DefaultResponseEncoder(c *gin.Context, v interface{}) error {
 }
 
 // DefaultErrorEncoder encodes the error to the HTTP response.
-func DefaultErrorEncoder(c *gin.Context, err error) {
+func DefaultErrorEncoder(c *Context, err error) {
 	se := errors.FromError(err)
 	codec, _ := CodecForRequest(c, "Accept")
 	body, err := codec.Marshal(se)
@@ -119,7 +118,7 @@ func DefaultErrorEncoder(c *gin.Context, err error) {
 }
 
 // CodecForRequest get encoding.Codec via http.Request
-func CodecForRequest(c *gin.Context, name string) (encoding.Codec, bool) {
+func CodecForRequest(c *Context, name string) (encoding.Codec, bool) {
 	r := c.Request
 	for _, accept := range r.Header[name] {
 		codec := encoding.GetCodec(CodecName(accept))

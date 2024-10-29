@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
 
@@ -37,12 +36,12 @@ func (u jsonBinding) BindBody(body []byte, obj any) error {
 }
 
 // Bind is bind json body to target.
-func Bind(ctx *gin.Context, obj any) error {
+func Bind(ctx *Context, obj any) error {
 	return bind.Bind(ctx.Request, obj)
 }
 
 // BindURI bind form parameters to target.
-func BindURI(ctx *gin.Context, target interface{}) error {
+func BindURI(ctx *Context, target interface{}) error {
 	m := make(map[string][]string, len(ctx.Params))
 	for _, v := range ctx.Params {
 		m[v.Key] = []string{v.Value}
@@ -51,12 +50,12 @@ func BindURI(ctx *gin.Context, target interface{}) error {
 }
 
 // BindQuery bind query parameters to target.
-func BindQuery(ctx *gin.Context, target interface{}) error {
+func BindQuery(ctx *Context, target interface{}) error {
 	return bind.BindQuery(ctx.Request, target)
 }
 
 // BindBody bind json body to target.
-func BindBody(ctx *gin.Context, obj any) error {
+func BindBody(ctx *Context, obj any) error {
 	body, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
 		return err

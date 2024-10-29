@@ -10,7 +10,7 @@ type ExecFunc func(context.Context) error
 // Trans is a transaction wrapper
 type Trans interface {
 	Tx(ctx context.Context, fn func(tx Tx) error) error
-	ExecTx(ctx context.Context, fn ExecFunc) error
+	TxExec(ctx context.Context, fn ExecFunc) error
 }
 
 type Tx interface {

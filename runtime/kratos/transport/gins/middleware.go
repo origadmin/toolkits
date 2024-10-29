@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 
@@ -19,8 +18,8 @@ import (
 )
 
 // Logger receives the gin framework default log
-func Logger(logger log.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Logger(logger log.Logger) HandlerFunc {
+	return func(c *Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
@@ -34,15 +33,15 @@ func Logger(logger log.Logger) gin.HandlerFunc {
 			"query", query,
 			"ip", c.ClientIP(),
 			"user-agent", c.Request.UserAgent(),
-			"errors", c.Errors.ByType(gin.ErrorTypePrivate).String(),
+			"errors", c.Errors.ByType(ErrorTypePrivate).String(),
 			"cost", cost,
 		)
 	}
 }
 
 // Recovery recover any panic that may occur in the project
-func Recovery(logger log.Logger, stack bool) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Recovery(logger log.Logger, stack bool) HandlerFunc {
+	return func(c *Context) {
 		defer func() {
 			if err, ok := recover().(error); ok {
 				// Check for a broken connection, as it is not really a
@@ -93,9 +92,9 @@ func Recovery(logger log.Logger, stack bool) gin.HandlerFunc {
 }
 
 // Middlewares return middlewares wrapper
-func Middlewares(m ...middleware.Middleware) gin.HandlerFunc {
+func Middlewares(m ...middleware.Middleware) HandlerFunc {
 	chain := middleware.Chain(m...)
-	return func(c *gin.Context) {
+	return func(c *Context) {
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			c.Next()
 			var err error

@@ -21,7 +21,12 @@ var (
 	_ transport.Endpointer = (*Server)(nil)
 )
 
+const (
+	ErrorTypePrivate = gin.ErrorTypePrivate
+)
+
 type (
+	Context     = gin.Context
 	Engine      = gin.Engine
 	HandlerFunc = gin.HandlerFunc
 	IRouter     = gin.IRouter
@@ -32,6 +37,10 @@ type (
 	// WalkRouteFunc is the type of the function called for each route visited by Walk.
 	WalkRouteFunc func(RouteInfo) error
 )
+
+func New(fns ...gin.OptionFunc) *Engine {
+	return gin.New(fns...)
+}
 
 type Server struct {
 	engine *Engine

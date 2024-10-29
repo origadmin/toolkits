@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 )
@@ -35,7 +34,7 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 func StrictSlash(strictSlash bool) ServerOption {
 	return func(s *Server) {
 		if s.engine == nil {
-			s.engine = gin.New()
+			s.engine = New()
 		}
 		s.engine.RedirectTrailingSlash = strictSlash
 	}
@@ -79,7 +78,7 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 }
 
 // Filter with HTTP middleware option.
-func Filter(filters ...gin.HandlerFunc) ServerOption {
+func Filter(filters ...HandlerFunc) ServerOption {
 	return func(o *Server) {
 		o.filters = filters
 	}
@@ -113,13 +112,13 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
-func NotFoundHandler(handlers ...gin.HandlerFunc) ServerOption {
+func NotFoundHandler(handlers ...HandlerFunc) ServerOption {
 	return func(s *Server) {
 		s.engine.NoRoute(handlers...)
 	}
 }
 
-func MethodNotAllowedHandler(handlers ...gin.HandlerFunc) ServerOption {
+func MethodNotAllowedHandler(handlers ...HandlerFunc) ServerOption {
 	return func(s *Server) {
 		s.engine.NoMethod(handlers...)
 	}

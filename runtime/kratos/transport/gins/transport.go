@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/transport"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -18,7 +17,7 @@ type Transporter = transhttp.Transporter
 
 // Transport is an HTTP transport.
 type Transport struct {
-	ginCtx       *gin.Context
+	ginCtx       *Context
 	endpoint     string
 	operation    string
 	reqHeader    headerCarrier

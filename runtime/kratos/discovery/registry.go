@@ -1,8 +1,7 @@
-package registry
+package discovery
 
 import (
-	"sync"
-
+	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
@@ -10,11 +9,6 @@ type Registry interface {
 	NewClient(conf Config) (registry.Discovery, error)
 	NewServer(conf Config) (registry.Registrar, error)
 }
-
-var (
-	registryMap   = make(map[string]Registry)
-	registryMutex sync.Mutex
-)
 
 func Register(s string, r Registry) {
 	registryMutex.Lock()
@@ -43,4 +37,9 @@ func BuildRegistrar(config Config) (registry.Registrar, error) {
 		return nil, ErrNotFound
 	}
 	return r.NewServer(config)
+}
+
+func BuildConfig(config Config) *config.Source {
+
+	return config.New(config.Consul, config.ETCD)
 }
