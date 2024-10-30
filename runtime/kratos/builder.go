@@ -9,15 +9,6 @@ import (
 	"github.com/origadmin/toolkits/runtime/config"
 )
 
-var (
-	once  = &sync.Once{}
-	build = &builder{}
-)
-
-func init() {
-	build.init()
-}
-
 type ConfigBuilder func(*config.SourceConfig, ...config.Option) (config.Config, error)
 
 type RegistryBuilder interface {
@@ -29,6 +20,17 @@ type builder struct {
 	mutex      sync.RWMutex
 	configs    map[string]ConfigBuilder
 	registries map[string]RegistryBuilder
+}
+
+var (
+	once  = &sync.Once{}
+	build = &builder{}
+)
+
+var ErrNotFound = errors.String("not found")
+
+func init() {
+	build.init()
 }
 
 func (b *builder) init() {
@@ -43,8 +45,6 @@ func RegistryConfig(name string, configBuilder ConfigBuilder) {
 	defer build.mutex.Unlock()
 	build.configs[name] = configBuilder
 }
-
-var ErrNotFound = errors.String("not found")
 
 func NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
 	build.mutex.RLock()

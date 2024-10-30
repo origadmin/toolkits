@@ -11,7 +11,7 @@ replace (
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-kratos/kratos/v2 v2.8.1
+	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/origadmin/toolkits/runtime/kratos v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241015192408-796eee8c2d53
