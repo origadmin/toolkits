@@ -15,3 +15,12 @@ func DefaultBootstrap() Bootstrap {
 		Daemon:     false,
 	}
 }
+
+func NewBootstrap(dir, path string) Bootstrap {
+	return Bootstrap{
+		WorkDir:    dir,
+		ConfigPath: path,
+		Env:        "dev",
+		Daemon:     false,
+	}
+}

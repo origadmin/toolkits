@@ -7,8 +7,6 @@ option go_package = "github.com/origadmin/toolkits/config;config";
 import "google/protobuf/duration.proto";
 import "validate/validate.proto";
 
-
-
 // Registration registry center
 message RegistryConfig {
   // Consul

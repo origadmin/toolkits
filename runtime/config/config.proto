@@ -34,4 +34,8 @@ message SourceConfig {
   optional File file = 3 [json_name = "file"];
   optional Consul consul = 4 [json_name = "consul"];  // Consul
   optional ETCD etcd = 5 [json_name = "etcd"];  // ETCD
+
+  repeated string formats = 6 [json_name = "formats"];
+  repeated string env_prefixes = 8 [json_name = "env_prefixes"];
+  map<string, string> env_args = 7 [json_name = "env_args"];
 }
