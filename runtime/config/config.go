@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
 )
 
 type (
@@ -50,14 +49,6 @@ func WithMergeFunc(merge Merge) Option {
 	return config.WithMergeFunc(merge)
 }
 
-func LoadConfig(path string) Config {
-	return config.New(
-		config.WithSource(
-			file.NewSource(path),
-		),
-	)
-}
-
 func DefaultConsulConfig() *SourceConfig {
 	return &SourceConfig{
 		Type: Consul.String(),
@@ -68,11 +59,11 @@ func DefaultConsulConfig() *SourceConfig {
 	}
 }
 
-func DefaultFileConfig() *SourceConfig {
+func NewFileConfig(path string) *SourceConfig {
 	return &SourceConfig{
 		Type: File.String(),
 		File: &SourceConfig_File{
-			Path: "./config.toml",
+			Path: path,
 		},
 	}
 }
