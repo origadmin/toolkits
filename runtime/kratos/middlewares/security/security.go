@@ -4,7 +4,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/origadmin/toolkits/context"
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/origadmin/toolkits/runtime/middlewares"
 )
 
 func Middleware(config *middlewares.SecurityConfig) (middleware.Middleware, error) {

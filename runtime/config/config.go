@@ -14,6 +14,22 @@ type (
 	Merge    = config.Merge
 )
 
+type Type string
+
+func (t Type) String() string {
+	return string(t)
+}
+
+const (
+	File   Type = "file"
+	Consul Type = "consul"
+	ETCD   Type = "etcd"
+	//Nacos  Type = "nacos"
+	// Apollo Type = "apollo"
+	// Kubernetes Type = "kubernetes"
+	// Polaris Type = "polaris"
+)
+
 func New(opts ...Option) Config {
 	return config.New(opts...)
 }
@@ -44,10 +60,19 @@ func LoadConfig(path string) Config {
 
 func DefaultConsulConfig() *SourceConfig {
 	return &SourceConfig{
-		Type: "consul",
+		Type: Consul.String(),
 		Consul: &SourceConfig_Consul{
 			Address: "127.0.0.1:8500",
 			Scheme:  "http",
+		},
+	}
+}
+
+func DefaultFileConfig() *SourceConfig {
+	return &SourceConfig{
+		Type: File.String(),
+		File: &SourceConfig_File{
+			Path: "./config.toml",
 		},
 	}
 }

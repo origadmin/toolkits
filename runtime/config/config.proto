@@ -10,6 +10,9 @@ import "validate/validate.proto";
 
 // Registration source center
 message SourceConfig {
+  message File {
+    string path = 1 [json_name = "path"];
+  }
   // Consul
   message Consul {
     string address = 1 [json_name = "address"];
@@ -28,6 +31,7 @@ message SourceConfig {
   }
   string type = 1 [(validate.rules).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
   string name = 2 [json_name = "name"];  // Name
-  optional Consul consul = 3 [json_name = "consul"];  // Consul
-  optional ETCD etcd = 4 [json_name = "etcd"];  // ETCD
+  optional File file = 3 [json_name = "file"];
+  optional Consul consul = 4 [json_name = "consul"];  // Consul
+  optional ETCD etcd = 5 [json_name = "etcd"];  // ETCD
 }
