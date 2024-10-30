@@ -23,7 +23,11 @@ message SourceConfig {
     //  string health_check_interval = 8 [json_name = "health_check_interval"];
     //  string health_check_timeout = 9[json_name = "health_check_timeout"];
   }
+  message ETCD {
+    repeated string endpoints = 1 [json_name = "endpoints"];
+  }
   string type = 1 [(validate.rules).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
   string name = 2 [json_name = "name"];  // Name
   optional Consul consul = 3 [json_name = "consul"];  // Consul
+  optional ETCD etcd = 4 [json_name = "etcd"];  // ETCD
 }
