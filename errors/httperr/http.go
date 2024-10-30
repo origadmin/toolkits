@@ -67,11 +67,15 @@ type Error struct {
 	ID     string `json:"id,omitempty"`
 	Code   int32  `json:"code,omitempty"`
 	Detail string `json:"detail,omitempty"`
+	//Cause  error  `json:"-"`
 }
 
 // Error returns the JSON representation of the error
 func (obj *Error) Error() string {
 	v, _ := json.Marshal(obj)
+	//if obj.Cause != nil {
+	//	return fmt.Sprintf(`message:"%s" cause:"%s"`, string(v), obj.Cause)
+	//}
 	return string(v)
 }
 
@@ -186,8 +190,8 @@ func NewFormat(id string, code int32, format string, args ...any) error {
 	}
 }
 
-// Code generates an error for a given code
-func Code(code int32, detail string) error {
+// NewCode generates an error for a given code
+func NewCode(code int32, detail string) error {
 	return &Error{
 		ID:     lookupID(UnknownID, code),
 		Code:   code,
@@ -195,8 +199,8 @@ func Code(code int32, detail string) error {
 	}
 }
 
-// CodeFormat generates an error for a given code
-func CodeFormat(code int32, format string, args ...any) error {
+// NewCodeFormat generates an error for a given code
+func NewCodeFormat(code int32, format string, args ...any) error {
 	return &Error{
 		ID:     lookupID(UnknownID, code),
 		Code:   code,
@@ -204,7 +208,25 @@ func CodeFormat(code int32, format string, args ...any) error {
 	}
 }
 
-// Equal tries to compare errors, which are equal if they have the same Code
+// Code returns the code of an error
+func Code(err error) int {
+	e := FromError(err)
+	if e == nil {
+		return http.StatusInternalServerError
+	}
+	return int(e.Code)
+}
+
+// Cause returns the underlying cause of an error
+//func Cause(err error) error {
+//	e := FromError(err)
+//	if e == nil {
+//		return nil
+//	}
+//	return e.Cause
+//}
+
+// Equal tries to compare errors, which are equal if they have the same NewCode
 func Equal(err1 error, err2 error) bool {
 	if err1 == nil {
 		return err2 == nil

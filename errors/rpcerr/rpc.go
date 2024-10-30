@@ -185,8 +185,8 @@ func NewFormat(id string, code int32, format string, args ...any) error {
 	}
 }
 
-// Code generates an error for a given code
-func Code(code int32, detail string) error {
+// NewCode generates an error for a given code
+func NewCode(code int32, detail string) error {
 	return &Error{
 		Id:     lookupID(UnknownID, code),
 		Code:   code,
@@ -194,14 +194,32 @@ func Code(code int32, detail string) error {
 	}
 }
 
-// CodeFormat generates an error for a given code
-func CodeFormat(code int32, format string, args ...any) error {
+// NewCodeFormat generates an error for a given code
+func NewCodeFormat(code int32, format string, args ...any) error {
 	return &Error{
 		Id:     lookupID(UnknownID, code),
 		Code:   code,
 		Detail: fmt.Sprintf(format, args...),
 	}
 }
+
+// Code returns the code of an error
+func Code(err error) int {
+	e := FromError(err)
+	if e == nil {
+		return http.StatusInternalServerError
+	}
+	return int(e.Code)
+}
+
+// Cause returns the underlying cause of an error
+//func Cause(err error) error {
+//	e := FromError(err)
+//	if e == nil {
+//		return nil
+//	}
+//	return e.Cause
+//}
 
 func NewMultiError() *MultiError {
 	return &MultiError{
@@ -222,7 +240,7 @@ func (e *MultiError) Error() string {
 	return string(b)
 }
 
-// Equal tries to compare errors, which are equal if they have the same Code
+// Equal tries to compare errors, which are equal if they have the same NewCode
 func Equal(err1 error, err2 error) bool {
 	if err1 == nil {
 		return err2 == nil
