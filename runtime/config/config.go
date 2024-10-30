@@ -42,10 +42,10 @@ func LoadConfig(path string) Config {
 	)
 }
 
-func DefaultConsulConfig() *DiscoveryConfig {
-	return &DiscoveryConfig{
+func DefaultConsulConfig() *SourceConfig {
+	return &SourceConfig{
 		Type: "consul",
-		Consul: &Consul{
+		Consul: &SourceConfig_Consul{
 			Address: "127.0.0.1:8500",
 			Scheme:  "http",
 		},

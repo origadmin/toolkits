@@ -35,136 +35,30 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Consul with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on SourceConfig with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Consul) Validate() error {
+func (m *SourceConfig) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Consul with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in ConsulMultiError, or nil if none found.
-func (m *Consul) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Consul) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Address
-
-	// no validation rules for Scheme
-
-	// no validation rules for Token
-
-	// no validation rules for Path
-
-	if len(errors) > 0 {
-		return ConsulMultiError(errors)
-	}
-
-	return nil
-}
-
-// ConsulMultiError is an error wrapping multiple validation errors returned by
-// Consul.ValidateAll() if the designated constraints aren't met.
-type ConsulMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ConsulMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ConsulMultiError) AllErrors() []error { return m }
-
-// ConsulValidationError is the validation error returned by Consul.Validate if
-// the designated constraints aren't met.
-type ConsulValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ConsulValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ConsulValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ConsulValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ConsulValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ConsulValidationError) ErrorName() string { return "ConsulValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ConsulValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sConsul.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ConsulValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ConsulValidationError{}
-
-// Validate checks the field values on DiscoveryConfig with the rules defined
+// ValidateAll checks the field values on SourceConfig with the rules defined
 // in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *DiscoveryConfig) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DiscoveryConfig with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// DiscoveryConfigMultiError, or nil if none found.
-func (m *DiscoveryConfig) ValidateAll() error {
+// result is a list of violation errors wrapped in SourceConfigMultiError, or
+// nil if none found.
+func (m *SourceConfig) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *DiscoveryConfig) validate(all bool) error {
+func (m *SourceConfig) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if _, ok := _DiscoveryConfig_Type_InLookup[m.GetType()]; !ok {
-		err := DiscoveryConfigValidationError{
+	if _, ok := _SourceConfig_Type_InLookup[m.GetType()]; !ok {
+		err := SourceConfigValidationError{
 			field:  "Type",
 			reason: "value must be in list [none consul etcd nacos apollo kubernetes polaris]",
 		}
@@ -182,7 +76,7 @@ func (m *DiscoveryConfig) validate(all bool) error {
 			switch v := interface{}(m.GetConsul()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, DiscoveryConfigValidationError{
+					errors = append(errors, SourceConfigValidationError{
 						field:  "Consul",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -190,7 +84,7 @@ func (m *DiscoveryConfig) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, DiscoveryConfigValidationError{
+					errors = append(errors, SourceConfigValidationError{
 						field:  "Consul",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -199,7 +93,7 @@ func (m *DiscoveryConfig) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetConsul()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return DiscoveryConfigValidationError{
+				return SourceConfigValidationError{
 					field:  "Consul",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -210,19 +104,18 @@ func (m *DiscoveryConfig) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return DiscoveryConfigMultiError(errors)
+		return SourceConfigMultiError(errors)
 	}
 
 	return nil
 }
 
-// DiscoveryConfigMultiError is an error wrapping multiple validation errors
-// returned by DiscoveryConfig.ValidateAll() if the designated constraints
-// aren't met.
-type DiscoveryConfigMultiError []error
+// SourceConfigMultiError is an error wrapping multiple validation errors
+// returned by SourceConfig.ValidateAll() if the designated constraints aren't met.
+type SourceConfigMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m DiscoveryConfigMultiError) Error() string {
+func (m SourceConfigMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -231,11 +124,11 @@ func (m DiscoveryConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m DiscoveryConfigMultiError) AllErrors() []error { return m }
+func (m SourceConfigMultiError) AllErrors() []error { return m }
 
-// DiscoveryConfigValidationError is the validation error returned by
-// DiscoveryConfig.Validate if the designated constraints aren't met.
-type DiscoveryConfigValidationError struct {
+// SourceConfigValidationError is the validation error returned by
+// SourceConfig.Validate if the designated constraints aren't met.
+type SourceConfigValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -243,22 +136,22 @@ type DiscoveryConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e DiscoveryConfigValidationError) Field() string { return e.field }
+func (e SourceConfigValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DiscoveryConfigValidationError) Reason() string { return e.reason }
+func (e SourceConfigValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DiscoveryConfigValidationError) Cause() error { return e.cause }
+func (e SourceConfigValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DiscoveryConfigValidationError) Key() bool { return e.key }
+func (e SourceConfigValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DiscoveryConfigValidationError) ErrorName() string { return "DiscoveryConfigValidationError" }
+func (e SourceConfigValidationError) ErrorName() string { return "SourceConfigValidationError" }
 
 // Error satisfies the builtin error interface
-func (e DiscoveryConfigValidationError) Error() string {
+func (e SourceConfigValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -270,14 +163,14 @@ func (e DiscoveryConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sDiscoveryConfig.%s: %s%s",
+		"invalid %sSourceConfig.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DiscoveryConfigValidationError{}
+var _ error = SourceConfigValidationError{}
 
 var _ interface {
 	Field() string
@@ -285,9 +178,9 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DiscoveryConfigValidationError{}
+} = SourceConfigValidationError{}
 
-var _DiscoveryConfig_Type_InLookup = map[string]struct{}{
+var _SourceConfig_Type_InLookup = map[string]struct{}{
 	"none":       {},
 	"consul":     {},
 	"etcd":       {},
@@ -296,3 +189,113 @@ var _DiscoveryConfig_Type_InLookup = map[string]struct{}{
 	"kubernetes": {},
 	"polaris":    {},
 }
+
+// Validate checks the field values on SourceConfig_Consul with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SourceConfig_Consul) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SourceConfig_Consul with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SourceConfig_ConsulMultiError, or nil if none found.
+func (m *SourceConfig_Consul) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SourceConfig_Consul) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Address
+
+	// no validation rules for Scheme
+
+	// no validation rules for Token
+
+	// no validation rules for Path
+
+	if len(errors) > 0 {
+		return SourceConfig_ConsulMultiError(errors)
+	}
+
+	return nil
+}
+
+// SourceConfig_ConsulMultiError is an error wrapping multiple validation
+// errors returned by SourceConfig_Consul.ValidateAll() if the designated
+// constraints aren't met.
+type SourceConfig_ConsulMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SourceConfig_ConsulMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SourceConfig_ConsulMultiError) AllErrors() []error { return m }
+
+// SourceConfig_ConsulValidationError is the validation error returned by
+// SourceConfig_Consul.Validate if the designated constraints aren't met.
+type SourceConfig_ConsulValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SourceConfig_ConsulValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SourceConfig_ConsulValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SourceConfig_ConsulValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SourceConfig_ConsulValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SourceConfig_ConsulValidationError) ErrorName() string {
+	return "SourceConfig_ConsulValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SourceConfig_ConsulValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSourceConfig_Consul.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SourceConfig_ConsulValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SourceConfig_ConsulValidationError{}
