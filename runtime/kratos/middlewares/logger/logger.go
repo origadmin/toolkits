@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/origadmin/toolkits/runtime/middlewares"
 )
 
 func Middleware(config *middlewares.LoggerConfig, logger log.Logger) (middleware.Middleware, error) {
