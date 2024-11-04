@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package config.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/internal/config/v1;config";
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "validate/validate.proto";
 

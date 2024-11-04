@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package middlewares.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/internal/middlewares/v1;middlewares";
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "google/protobuf/duration.proto";
 
