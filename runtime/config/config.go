@@ -1,11 +1,25 @@
 package config
 
 import (
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
+
 	"github.com/origadmin/toolkits/runtime/internal/config/v1"
 	"github.com/origadmin/toolkits/runtime/internal/middlewares/v1"
 )
 
 type (
+	Config   = kratosconfig.Config
+	Decoder  = kratosconfig.Decoder
+	KeyValue = kratosconfig.KeyValue
+	Merge    = kratosconfig.Merge
+	Observer = kratosconfig.Observer
+	Option   = kratosconfig.Option
+	Reader   = kratosconfig.Reader
+	Resolver = kratosconfig.Resolver
+	Source   = kratosconfig.Source
+	Value    = kratosconfig.Value
+	Watcher  = kratosconfig.Watcher
+
 	RegistryConfig                       = config.RegistryConfig
 	RegistryConfig_Consul                = config.RegistryConfig_Consul
 	RegistryConfig_ConsulMultiError      = config.RegistryConfig_ConsulMultiError
@@ -50,3 +64,29 @@ type (
 	SecurityConfigMultiError           = middlewares.SecurityConfigMultiError
 	SecurityConfigValidationError      = middlewares.SecurityConfigValidationError
 )
+
+var (
+	ErrNotFound = kratosconfig.ErrNotFound
+)
+
+func New(opts ...kratosconfig.Option) kratosconfig.Config {
+	return kratosconfig.New(opts...)
+}
+
+func WithDecoder(d kratosconfig.Decoder) kratosconfig.Option {
+	return kratosconfig.WithDecoder(d)
+}
+
+func WithMergeFunc(m kratosconfig.Merge) kratosconfig.Option {
+	return kratosconfig.WithMergeFunc(m)
+}
+
+func WithResolveActualTypes(enableConvertToType bool) kratosconfig.Option {
+	return kratosconfig.WithResolveActualTypes(enableConvertToType)
+}
+func WithResolver(r kratosconfig.Resolver) kratosconfig.Option {
+	return kratosconfig.WithResolver(r)
+}
+func WithSource(s ...kratosconfig.Source) kratosconfig.Option {
+	return kratosconfig.WithSource(s...)
+}
