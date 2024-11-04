@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package middleware.cors.v1;
+package middlewares.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/middlewares";
+option go_package = "github.com/origadmin/toolkits/runtime/internal/middlewares/v1;middlewares";
 
 import "google/protobuf/duration.proto";
 
 // Cors middleware config.
 message CorsConfig {
-  bool enabled = 1;
+  bool enabled = 1 [json_name = "enabled"];
   // AllowCredentials indicates whether the request can include user credentials like
   // cookies, HTTP authentication or client side SSL certificates.
   bool allow_credentials = 2 [json_name = "allow_credentials"];

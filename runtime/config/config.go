@@ -1,69 +1,52 @@
 package config
 
 import (
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/origadmin/toolkits/runtime/internal/config/v1"
+	"github.com/origadmin/toolkits/runtime/internal/middlewares/v1"
 )
 
 type (
-	Config   = config.Config
-	Source   = config.Source
-	Option   = config.Option
-	Decoder  = config.Decoder
-	Resolver = config.Resolver
-	Merge    = config.Merge
+	RegistryConfig                       = config.RegistryConfig
+	RegistryConfig_Consul                = config.RegistryConfig_Consul
+	RegistryConfig_ConsulMultiError      = config.RegistryConfig_ConsulMultiError
+	RegistryConfig_ConsulValidationError = config.RegistryConfig_ConsulValidationError
+	RegistryConfig_ETCD                  = config.RegistryConfig_ETCD
+	RegistryConfig_ETCDMultiError        = config.RegistryConfig_ETCDMultiError
+	RegistryConfig_ETCDValidationError   = config.RegistryConfig_ETCDValidationError
+	RegistryConfigMultiError             = config.RegistryConfigMultiError
+	RegistryConfigValidationError        = config.RegistryConfigValidationError
+	SourceConfig                         = config.SourceConfig
+	SourceConfig_Consul                  = config.SourceConfig_Consul
+	SourceConfig_ConsulMultiError        = config.SourceConfig_ConsulMultiError
+	SourceConfig_ConsulValidationError   = config.SourceConfig_ConsulValidationError
+	SourceConfig_ETCD                    = config.SourceConfig_ETCD
+	SourceConfig_ETCDMultiError          = config.SourceConfig_ETCDMultiError
+	SourceConfig_ETCDValidationError     = config.SourceConfig_ETCDValidationError
+	SourceConfig_File                    = config.SourceConfig_File
+	SourceConfig_FileMultiError          = config.SourceConfig_FileMultiError
+	SourceConfig_FileValidationError     = config.SourceConfig_FileValidationError
+	SourceConfigMultiError               = config.SourceConfigMultiError
+	SourceConfigValidationError          = config.SourceConfigValidationError
+
+	AuthorizationConfig                = middlewares.AuthorizationConfig
+	AuthorizationConfigMultiError      = middlewares.AuthorizationConfigMultiError
+	AuthorizationConfigValidationError = middlewares.AuthorizationConfigValidationError
+	CasbinConfig                       = middlewares.CasbinConfig
+	CasbinConfigMultiError             = middlewares.CasbinConfigMultiError
+	CasbinConfigValidationError        = middlewares.CasbinConfigValidationError
+	CorsConfig                         = middlewares.CorsConfig
+	CorsConfigMultiError               = middlewares.CorsConfigMultiError
+	CorsConfigValidationError          = middlewares.CorsConfigValidationError
+	LoggerConfig                       = middlewares.LoggerConfig
+	LoggerConfigMultiError             = middlewares.LoggerConfigMultiError
+	LoggerConfigValidationError        = middlewares.LoggerConfigValidationError
+	MetricConfig                       = middlewares.MetricConfig
+	MetricConfigMultiError             = middlewares.MetricConfigMultiError
+	MetricConfigValidationError        = middlewares.MetricConfigValidationError
+	MiddlewareConfig                   = middlewares.MiddlewareConfig
+	MiddlewareConfigMultiError         = middlewares.MiddlewareConfigMultiError
+	MiddlewareConfigValidationError    = middlewares.MiddlewareConfigValidationError
+	SecurityConfig                     = middlewares.SecurityConfig
+	SecurityConfigMultiError           = middlewares.SecurityConfigMultiError
+	SecurityConfigValidationError      = middlewares.SecurityConfigValidationError
 )
-
-type Type string
-
-func (t Type) String() string {
-	return string(t)
-}
-
-const (
-	File   Type = "file"
-	Consul Type = "consul"
-	ETCD   Type = "etcd"
-	//Nacos  Type = "nacos"
-	// Apollo Type = "apollo"
-	// Kubernetes Type = "kubernetes"
-	// Polaris Type = "polaris"
-)
-
-func New(opts ...Option) Config {
-	return config.New(opts...)
-}
-
-func WithSource(sources ...Source) Option {
-	return config.WithSource(sources...)
-}
-
-func WithDecoder(decoder Decoder) Option {
-	return config.WithDecoder(decoder)
-}
-
-func WithResolver(resolver Resolver) Option {
-	return config.WithResolver(resolver)
-}
-
-func WithMergeFunc(merge Merge) Option {
-	return config.WithMergeFunc(merge)
-}
-
-func DefaultConsulConfig() *SourceConfig {
-	return &SourceConfig{
-		Type: Consul.String(),
-		Consul: &SourceConfig_Consul{
-			Address: "127.0.0.1:8500",
-			Scheme:  "http",
-		},
-	}
-}
-
-func NewFileConfig(path string) *SourceConfig {
-	return &SourceConfig{
-		Type: File.String(),
-		File: &SourceConfig_File{
-			Path: path,
-		},
-	}
-}

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package middleware.traces.v1;
+package middlewares.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/middlewares";
+option go_package = "github.com/origadmin/toolkits/runtime/internal/middlewares/v1;middlewares";
 
 import "google/protobuf/duration.proto";
 
@@ -18,14 +18,14 @@ message AuthorizationConfig {
 message CasbinConfig {
   bool enabled = 1 [json_name = "enabled"];
   repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
-  string policy_file = 3 [json_name = "policy_file"];
-  string model_file = 4 [json_name = "model_file"];
+  string policy_file = 3 [json_name = "policy_file"]; // Policy file
+  string model_file = 4 [json_name = "model_file"]; // Model file
 }
 
 // Security middleware config.
 message SecurityConfig {
-  repeated string allowed_method_paths = 2; // Direct release method paths
-  AuthorizationConfig authorization = 5; // AuthorizationConfig
-  CasbinConfig casbin = 6;
+  repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
+  AuthorizationConfig authorization = 5 [json_name = "authorization"]; // AuthorizationConfig
+  CasbinConfig casbin = 6 [json_name = "casbin"]; // CasbinConfig
 
 }

@@ -1,12 +1,10 @@
 syntax = "proto3";
 
-package toolkits.runtime.config;
+package config.v1;
 
-option go_package = "github.com/origadmin/toolkits/config;config";
+option go_package = "github.com/origadmin/toolkits/runtime/internal/config/v1;config";
 
 import "validate/validate.proto";
-
-
 
 // Registration source center
 message SourceConfig {
