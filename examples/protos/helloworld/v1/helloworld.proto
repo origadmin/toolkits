@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-package helloworld;
+package helloworld.v1;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/origadmin/toolkits/examples/helloworld/helloworld";
+option go_package = "github.com/origadmin/toolkits/examples/services/helloworld/v1;helloworld";
 
 // The greeting service definition.
-service Greeter {
+service GreeterService {
   // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply)  {
+  rpc SayHello (SayHelloRequest) returns (SayHelloResponse)  {
     option (google.api.http) = {
       get: "/helloworld/{name}",
       additional_bindings {
@@ -21,11 +21,11 @@ service Greeter {
 }
 
 // The request message containing the user's name.
-message HelloRequest {
+message SayHelloRequest {
   string name = 1;
 }
 
 // The response message containing the greetings
-message HelloReply {
+message SayHelloResponse {
   string message = 1;
 }

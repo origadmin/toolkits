@@ -1,73 +1,127 @@
-SHELL := /bin/bash
-BASEDIR = $(shell pwd)
-SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-VERSION := v1.0.0
-ENV := dev
-VersionDir = github.com/origadmin/toolkits/version
+GOHOSTOS:=$(shell go env GOHOSTOS)
+GOPATH:=$(shell go env GOPATH)
+VERSION=$(shell git describe --tags --always)
 
-# gitHash The current commit id is the same as the gitCommit result
-gitHash = $(shell git rev-parse HEAD)
-# gitBranch The current branch name
-gitBranch = $(shell git rev-parse --abbrev-ref HEAD)
-# gitTag The latest tag name
-gitTag = $(shell \
-			if [ "`git describe --tags --abbrev=0 2>/dev/null`" != "" ]; then \
-				git describe --tags --abbrev=0; \
-			else \
-				git log --pretty=format:'%h' -n 1; \
-			fi)
-# Same as the previous gitHash
-gitCommit = $(shell git log --pretty=format:'%H' -n 1)
-# gitTreeState The state of git tree, clean or dirty
-gitTreeState = $(shell if git status | grep -q 'clean'; then echo clean; else echo dirty; fi)
-# buildDate The time of build
-buildDate = $(shell TZ=Asia/Shanghai date +%FT%T%z)
-# buildDate = $(shell TZ=Asia/Shanghai date +%F\ %T%z | tr 'T' ' ')
-
-ifeq ($(ENV), dev)
-    BUILD_FLAGS = -race
+ifeq ($(GOHOSTOS), windows)
+	#the `find.exe` is different from `find` in bash/shell.
+	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
+	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
+	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
+	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
+	RUNTIME_PROTO_FILES=$(shell $(Git_Bash) -c "find runtime -name *.proto")
+	TOOLKITS_PROTO_FILES=$(shell $(Git_Bash) -c "find toolkits -name *.proto")
+	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
+else
+	RUNTIME_PROTO_FILES=$(shell find runtime -name *.proto)
+	TOOLKITS_PROTO_FILES=$(shell find toolkits -name *.proto)
+	API_PROTO_FILES=$(shell find api -name *.proto)
 endif
 
-ifeq ($(ENV), pro)
-    LDFLAGS = -w
-endif
+.PHONY: init
+# init env
+init:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
+	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/envoyproxy/protoc-gen-validate@latest
+	go install github.com/bufbuild/buf/cmd/buf@latest
+	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-lint@latest
+	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking@latest
 
+.PHONY: tools
+# generate tools proto or use ./toolkits/generate.go
+tools:
+	protoc --proto_path=./third_party \
+		--go_out=paths=source_relative:./toolkits \
+		--validate_out=lang=go,paths=source_relative:./toolkits \
+		$(TOOLKITS_PROTO_FILES)
 
-LDFLAGS += -X "${VersionDir}.gitTag=${gitTag}"
-LDFLAGS += -X "${VersionDir}.buildDate=${buildDate}"
-LDFLAGS += -X "${VersionDir}.gitCommit=${gitCommit}"
-LDFLAGS += -X "${VersionDir}.gitTreeState=${gitTreeState}"
-LDFLAGS += -X "${VersionDir}.gitBranch=${gitBranch}"
-LDFLAGS += -X "${VersionDir}.version=${VERSION}"
+.PHONY: runtime
+# generate internal proto or use ./internal/generate.go
+runtime:
+	protoc --proto_path=./runtime \
+		--proto_path=./third_party \
+		--go_out=paths=source_relative:./runtime \
+		--validate_out=lang=go:. \
+		$(RUNTIME_PROTO_FILES)
+
+.PHONY: api
+# generate api proto or use ./api/generate.go
+api:
+#	protoc --proto_path=./api \
+#	       --proto_path=./third_party \
+# 	       --go_out=paths=source_relative:./api \
+# 	       --go-http_out=paths=source_relative:./api \
+# 	       --go-grpc_out=paths=source_relative:./api \
+#	       --openapi_out=fq_schema_naming=true,default_response=false:. \
+#	       $(API_PROTO_FILES)
+	protoc --proto_path=./api \
+		--proto_path=./third_party \
+		--proto_path=./toolkits \
+		--go_out=./api \
+		--go-http_out=./api \
+		--go-grpc_out=./api \
+		--validate_out=lang=go:./api \
+		--openapi_out=fq_schema_naming=true,default_response=false:. \
+		$(API_PROTO_FILES)
+
+.PHONY: pre
+# pre
+pre:
+	goreleaser build --single-target --clean --snapshot
+
+.PHONY: build
+# build
+build:
+	mkdir -p dist/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./dist/ ./...
+
+.PHONY: release
+# release
+release:
+	goreleaser release --clean
+
+#.PHONY: server
+## server used generate a service at first
+#server:
+#	kratos proto server -t ./internal/mods/helloworld/service ./api/v1/protos/helloworld/greeter.proto
+#
+#.PHONY: client
+## client used when proto file is in the same directory
+#client:
+#	kratos proto client ./api
+
+.PHONY: generate
+# generate
+generate:
+	go generate ./...
+	go mod tidy
 
 .PHONY: all
-all: lint version
+# generate all
+all:
+	make tools;
+	make api;
+	make config;
+	make generate;
 
-.PHONY: version
-version:
-	go run -v -ldflags '$(LDFLAGS)' $(BUILD_FLAGS) -gcflags=all="-N -l" ./cmd/version
-
-.PHONY: lint
-lint:
-	go fmt ./...
-	go vet ./...
-	goimports -w .
-
- cover:
-	go test ./... -v -short -coverprofile .coverage.txt
-	go tool cover -func .coverage.txt
-
-# Example Delete all.sa,.sb,.sc,... extensions from a specified directory (including subdirectories).
-# Hidden files of.sz (beginning with. Followed by _ or.) Delete all
-.PHONY: clean
-clean:
-	rm -f east_money || true
-	find . -name "[._]*.s[a-w][a-z]" | xargs -i rm -f {} || true
-	rm -rf ./log || true
-
+# show help
 help:
-	@echo "make build   - compile the source code"
-	@echo "make clean   - remove binary file and vim swp files"
-	@echo "make lint    - run go tool 'fmt', 'vet', 'goimports', 'golangci-lint' "
+	@echo ''
+	@echo 'Usage:'
+	@echo ' make [target]'
+	@echo ''
+	@echo 'Targets:'
+	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
+	helpMessage = match(lastLine, /^# (.*)/); \
+		if (helpMessage) { \
+			helpCommand = substr($$1, 0, index($$1, ":")); \
+			helpMessage = substr(lastLine, RSTART + 2, RLENGTH); \
+			printf "\033[36m%-22s\033[0m %s\n", helpCommand,helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help

@@ -1,0 +1,35 @@
+version: v2
+
+inputs:
+  - directory: protos
+
+managed:
+  enabled: true
+#  override:
+#    - file_option: go_package_prefix
+#      value: github.com/origadmin/toolkits/runtime
+plugins:
+  - local: protoc-gen-go
+    out: services
+    opt: paths=source_relative
+  - local: protoc-gen-openapi
+    out: services
+  - local: protoc-gen-validate
+    out: services
+    opt:
+      - paths=source_relative
+      - lang=go
+  - local: protoc-gen-go-http
+    out: services
+    opt: paths=source_relative
+  - local: protoc-gen-go-errors
+    out: services
+    opt: paths=source_relative
+  - local: protoc-gen-go-grpc
+    out: services
+    opt: paths=source_relative
+  - local: protoc-gen-go-gins
+    out: services
+    opt: paths=source_relative
+
+clean: true
