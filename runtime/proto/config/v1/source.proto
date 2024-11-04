@@ -10,6 +10,7 @@ import "validate/validate.proto";
 message SourceConfig {
   message File {
     string path = 1 [json_name = "path"];
+    string format = 2 [json_name = "format"];
   }
   // Consul
   message Consul {

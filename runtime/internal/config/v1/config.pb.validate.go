@@ -282,6 +282,8 @@ func (m *SourceConfig_File) validate(all bool) error {
 
 	// no validation rules for Path
 
+	// no validation rules for Format
+
 	if len(errors) > 0 {
 		return SourceConfig_FileMultiError(errors)
 	}
