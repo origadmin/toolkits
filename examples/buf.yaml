@@ -2,7 +2,7 @@
 version: v2
 
 modules:
-  - path: protos
+  - path: proto
 
 lint:
   use:

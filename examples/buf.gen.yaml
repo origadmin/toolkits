@@ -1,8 +1,5 @@
 version: v2
 
-inputs:
-  - directory: protos
-
 managed:
   enabled: true
 #  override:
