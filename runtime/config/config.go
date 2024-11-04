@@ -4,7 +4,6 @@ import (
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 
 	"github.com/origadmin/toolkits/runtime/internal/config/v1"
-	"github.com/origadmin/toolkits/runtime/internal/middlewares/v1"
 )
 
 type (
@@ -31,27 +30,27 @@ type (
 	SourceConfigMultiError             = config.SourceConfigMultiError
 	SourceConfigValidationError        = config.SourceConfigValidationError
 
-	AuthorizationConfig                = middlewares.AuthorizationConfig
-	AuthorizationConfigMultiError      = middlewares.AuthorizationConfigMultiError
-	AuthorizationConfigValidationError = middlewares.AuthorizationConfigValidationError
-	CasbinConfig                       = middlewares.CasbinConfig
-	CasbinConfigMultiError             = middlewares.CasbinConfigMultiError
-	CasbinConfigValidationError        = middlewares.CasbinConfigValidationError
-	CorsConfig                         = middlewares.CorsConfig
-	CorsConfigMultiError               = middlewares.CorsConfigMultiError
-	CorsConfigValidationError          = middlewares.CorsConfigValidationError
-	LoggerConfig                       = middlewares.LoggerConfig
-	LoggerConfigMultiError             = middlewares.LoggerConfigMultiError
-	LoggerConfigValidationError        = middlewares.LoggerConfigValidationError
-	MetricConfig                       = middlewares.MetricConfig
-	MetricConfigMultiError             = middlewares.MetricConfigMultiError
-	MetricConfigValidationError        = middlewares.MetricConfigValidationError
-	MiddlewareConfig                   = middlewares.MiddlewareConfig
-	MiddlewareConfigMultiError         = middlewares.MiddlewareConfigMultiError
-	MiddlewareConfigValidationError    = middlewares.MiddlewareConfigValidationError
-	SecurityConfig                     = middlewares.SecurityConfig
-	SecurityConfigMultiError           = middlewares.SecurityConfigMultiError
-	SecurityConfigValidationError      = middlewares.SecurityConfigValidationError
+	AuthorizationConfig                = config.AuthorizationConfig
+	AuthorizationConfigMultiError      = config.AuthorizationConfigMultiError
+	AuthorizationConfigValidationError = config.AuthorizationConfigValidationError
+	CasbinConfig                       = config.CasbinConfig
+	CasbinConfigMultiError             = config.CasbinConfigMultiError
+	CasbinConfigValidationError        = config.CasbinConfigValidationError
+	CorsConfig                         = config.CorsConfig
+	CorsConfigMultiError               = config.CorsConfigMultiError
+	CorsConfigValidationError          = config.CorsConfigValidationError
+	LoggerConfig                       = config.LoggerConfig
+	LoggerConfigMultiError             = config.LoggerConfigMultiError
+	LoggerConfigValidationError        = config.LoggerConfigValidationError
+	MetricConfig                       = config.MetricConfig
+	MetricConfigMultiError             = config.MetricConfigMultiError
+	MetricConfigValidationError        = config.MetricConfigValidationError
+	MiddlewareConfig                   = config.MiddlewareConfig
+	MiddlewareConfigMultiError         = config.MiddlewareConfigMultiError
+	MiddlewareConfigValidationError    = config.MiddlewareConfigValidationError
+	SecurityConfig                     = config.SecurityConfig
+	SecurityConfigMultiError           = config.SecurityConfigMultiError
+	SecurityConfigValidationError      = config.SecurityConfigValidationError
 
 	Config   = kratosconfig.Config
 	Decoder  = kratosconfig.Decoder
