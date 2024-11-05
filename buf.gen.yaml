@@ -1,0 +1,20 @@
+version: v2
+
+managed:
+  enabled: true
+  #  override:
+  #    - file_option: go_package_prefix
+  #      value: github.com/origadmin/toolkits/runtime
+
+plugins:
+  - local: protoc-gen-go
+    out: .
+    opt: paths=source_relative
+  - local: protoc-gen-validate
+    out: .
+    opt:
+      - paths=source_relative
+      - lang=go
+#  - remote: buf.build/community/google-gnostic-openapi:v0.7.0
+#    out: services
+clean: false
