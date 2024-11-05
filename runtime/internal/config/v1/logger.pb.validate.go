@@ -59,6 +59,8 @@ func (m *LoggerConfig) validate(all bool) error {
 
 	// no validation rules for Name
 
+	// no validation rules for Level
+
 	if len(errors) > 0 {
 		return LoggerConfigMultiError(errors)
 	}
