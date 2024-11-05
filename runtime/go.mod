@@ -7,7 +7,7 @@ toolchain go1.23.2
 replace github.com/origadmin/toolkits => ../
 
 require (
-	github.com/envoyproxy/protoc-gen-validate v1.1.0
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.1-20240920164238-5a7b106cbb87.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/gorilla/mux v1.8.1

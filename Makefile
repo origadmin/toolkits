@@ -110,41 +110,29 @@ runtime:
 	--validate_out=lang=go,paths=source_relative:./runtime/internal \
 	$(RUNTIME_PROTO_FILES)
 
-.PHONY: api
-# generate api proto or use ./api/generate.go
-api:
-	protoc \
-	--proto_path=./api \
-	--proto_path=./third_party \
-	--proto_path=./toolkits \
-	--go_out=./api \
-	--go-http_out=./api \
-	--go-grpc_out=./api \
-	--validate_out=lang=go:./api \
-	--openapi_out=fq_schema_naming=true,default_response=false:. \
-	$(API_PROTO_FILES)
-#	protoc --proto_path=./api \
-#	       --proto_path=./third_party \
-# 	       --go_out=paths=source_relative:./api \
-# 	       --go-http_out=paths=source_relative:./api \
-# 	       --go-grpc_out=paths=source_relative:./api \
-#	       --openapi_out=fq_schema_naming=true,default_response=false:. \
-#	       $(API_PROTO_FILES)
+.PHONY: examples
+# generate examples proto or use ./examples/generate.go
+examples:
+	cd examples && protoc \
+	--proto_path=./proto \
+	--proto_path=../third_party \
+	--go_out=paths=source_relative:./services \
+	--go-gins_out=paths=source_relative:./services \
+	--go-grpc_out=paths=source_relative:./services \
+	--go-http_out=paths=source_relative:./services \
+	--go-errors_out=paths=source_relative:./services \
+	--openapi_out=paths=source_relative:./services \
+	proto/helloworld/v1/helloworld.proto
 
-.PHONY: prebuild
-# prebuild builds a binary file with current snapshot to dist
-prebuild:
-	goreleaser build --single-target --clean --snapshot
+.PHONY: build-gins
+# build protoc-gen-go-gins with current snapshot to dist
+build-gins:
+	goreleaser build --single-target --clean --snapshot -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
 
-.PHONY: build
-# build
-build:
-	mkdir -p dist/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./dist/ ./...
-
-.PHONY: release
+.PHONY: release-gins
 # release
 release:
-	goreleaser release --clean
+	goreleaser release --clean -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
 
 #.PHONY: server
 ## server used generate a service at first
