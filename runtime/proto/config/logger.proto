@@ -1,14 +1,13 @@
 syntax = "proto3";
 
-package middlewares.v1;
+package config;
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 //import "google/protobuf/duration.proto";
 
-// Logger middleware config.
+// logger config.
 message LoggerConfig {
-  bool enabled = 1 [json_name = "enabled"];
 
   string name = 2 [json_name = "name"];
 }

@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package middlewares.v1;
+package config;
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "google/protobuf/duration.proto";
 
 message AuthorizationConfig {
-  bool enabled = 1 [json_name = "enabled"];
+
   repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
   string signing_method = 3 [json_name = "signing_method"];
   string signing_key = 4 [json_name = "signing_key"];
@@ -16,7 +16,7 @@ message AuthorizationConfig {
 }
 
 message CasbinConfig {
-  bool enabled = 1 [json_name = "enabled"];
+
   repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
   string policy_file = 3 [json_name = "policy_file"]; // Policy file
   string model_file = 4 [json_name = "model_file"]; // Model file

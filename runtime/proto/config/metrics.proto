@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package middlewares.v1;
+package config;
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 //import "google/protobuf/duration.proto";
 
-// Metric middleware config.
+// metric config.
 message MetricConfig {
-  bool enabled = 1;
+
   repeated string includes = 2 [json_name = "includes"];
 
   string name = 3 [json_name = "name"];
