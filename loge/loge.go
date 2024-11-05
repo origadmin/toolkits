@@ -9,9 +9,6 @@ import (
 	"time"
 
 	"github.com/goexts/ggb/settings"
-	"github.com/golang-cz/devslog"
-	"github.com/lmittmann/tint"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
@@ -19,13 +16,25 @@ const (
 	DefaultTimeLayout = time.RFC3339
 )
 
+const (
+	LevelFatal = 12
+)
+
+//go:generate stringer -type=Format -trimprefix=Format
+type Format int
+
+const (
+	// FormatJSON json format
+	FormatJSON Format = iota
+	// FormatText text format
+	FormatText
+	// FormatTint tint format
+	FormatTint
+	// FormatDev dev format
+	FormatDev
+)
+
 type (
-	Handler          = slog.Handler
-	Level            = slog.Level
-	Attr             = slog.Attr
-	Leveler          = slog.Leveler
-	HandlerOptions   = slog.HandlerOptions
-	TintOptions      = tint.Options
 	LumberjackConfig = struct {
 		// MaxSize is the maximum size in megabytes of the log file before it gets
 		// rotated. It defaults to 100 megabytes.
@@ -52,6 +61,7 @@ type (
 		// using gzip. The default is not to perform compression.
 		Compress bool `json:"compress" yaml:"compress" toml:"compress"`
 	}
+
 	DevConfig = struct {
 		// Max number of printed elements in slice.
 		MaxSlice uint `json:"maxslice" yaml:"maxslice" toml:"maxslice"`
@@ -66,16 +76,16 @@ type (
 		Indent bool `json:"indent" yaml:"indent" toml:"indent"`
 
 		// Set color for Debug level, default: devslog.Blue
-		DebugColor devslog.Color `json:"debugcolor" yaml:"debugcolor" toml:"debugcolor"`
+		DebugColor Color `json:"debugcolor" yaml:"debugcolor" toml:"debugcolor"`
 
 		// Set color for Info level, default: devslog.Green
-		InfoColor devslog.Color `json:"infocolor" yaml:"infocolor" toml:"infocolor"`
+		InfoColor Color `json:"infocolor" yaml:"infocolor" toml:"infocolor"`
 
 		// Set color for Warn level, default: devslog.Yellow
-		WarnColor devslog.Color `json:"warncolor" yaml:"warncolor" toml:"warncolor"`
+		WarnColor Color `json:"warncolor" yaml:"warncolor" toml:"warncolor"`
 
 		// Set color for Error level, default: devslog.Red
-		ErrorColor devslog.Color `json:"errorcolor" yaml:"errorcolor" toml:"errorcolor"`
+		ErrorColor Color `json:"errorcolor" yaml:"errorcolor" toml:"errorcolor"`
 
 		// Max stack trace frames when unwrapping errors
 		MaxTrace uint `json:"maxtrace" yaml:"maxtrace" toml:"maxtrace"`
@@ -85,32 +95,11 @@ type (
 	}
 )
 
-const (
-	LevelDebug = slog.LevelDebug
-	LevelInfo  = slog.LevelInfo
-	LevelWarn  = slog.LevelWarn
-	LevelError = slog.LevelError
-	LevelFatal = 12
-)
-
-//go:generate stringer -type=Format -trimprefix=Format
-type Format int
-
-const (
-	// FormatJSON json format
-	FormatJSON Format = iota
-	// FormatText text format
-	FormatText
-	// FormatTint tint format
-	FormatTint
-	// FormatDev dev format
-	FormatDev
-)
-
 // New create a new slog.Logger
-func New(ss ...Setting) *slog.Logger {
+func New(ss ...Setting) *Logger {
 	opt := settings.Apply(defaultOption, ss)
-	defaultLogger := slog.Default()
+
+	defaultLogger := Default()
 	outputs := []io.Writer{os.Stderr}
 	if opt.DisableConsole {
 		outputs = nil
@@ -133,7 +122,7 @@ func New(ss ...Setting) *slog.Logger {
 		}
 
 		if opt.LumberjackConfig != nil {
-			outputs = append(outputs, &lumberjack.Logger{
+			outputs = append(outputs, &LumberjackLogger{
 				Filename:   filepath.Join(opt.OutputPath, opt.FileName),
 				MaxSize:    opt.LumberjackConfig.MaxSize,
 				MaxAge:     opt.LumberjackConfig.MaxAge,
@@ -161,20 +150,20 @@ func New(ss ...Setting) *slog.Logger {
 		output = io.Discard
 	}
 
-	var handler Handler = slog.NewTextHandler(output, &HandlerOptions{
+	var handler Handler = NewTextHandler(output, &HandlerOptions{
 		Level:       opt.Level,
 		ReplaceAttr: opt.ReplaceAttr,
 		AddSource:   opt.AddSource,
 	})
 	switch opt.Format {
 	case FormatJSON:
-		handler = slog.NewJSONHandler(output, &HandlerOptions{
+		handler = NewJSONHandler(output, &HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
 		})
 	case FormatTint:
-		handler = tint.NewHandler(output, &TintOptions{
+		handler = NewTintHandler(output, &TintOptions{
 			AddSource:   opt.AddSource,
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
@@ -182,7 +171,7 @@ func New(ss ...Setting) *slog.Logger {
 			NoColor:     opt.NoColor,
 		})
 	case FormatDev:
-		handler = devslog.NewHandler(output, &devslog.Options{
+		handler = NewDevslogHandler(output, &DevslogOptions{
 			HandlerOptions: &HandlerOptions{
 				Level:       opt.Level,
 				ReplaceAttr: opt.ReplaceAttr,
