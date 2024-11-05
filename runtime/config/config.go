@@ -3,7 +3,7 @@ package config
 import (
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 
-	"github.com/origadmin/toolkits/runtime/internal/config"
+	"github.com/origadmin/toolkits/runtime/internal/config/v1"
 )
 
 type (
@@ -16,12 +16,12 @@ type (
 	CorsConfig                                      = config.CorsConfig
 	CorsConfigMultiError                            = config.CorsConfigMultiError
 	CorsConfigValidationError                       = config.CorsConfigValidationError
-	Data                                            = config.Data
-	Data_Database                                   = config.Data_Database
-	Data_DatabaseMultiError                         = config.Data_DatabaseMultiError
-	Data_DatabaseValidationError                    = config.Data_DatabaseValidationError
-	DataMultiError                                  = config.DataMultiError
-	DataValidationError                             = config.DataValidationError
+	DataConfig                                      = config.DataConfig
+	DataConfig_Database                             = config.DataConfig_Database
+	DataConfig_DatabaseMultiError                   = config.DataConfig_DatabaseMultiError
+	DataConfig_DatabaseValidationError              = config.DataConfig_DatabaseValidationError
+	DataConfigMultiError                            = config.DataConfigMultiError
+	DataConfigValidationError                       = config.DataConfigValidationError
 	EntrySelectorConfig                             = config.EntrySelectorConfig
 	EntrySelectorConfigMultiError                   = config.EntrySelectorConfigMultiError
 	EntrySelectorConfigValidationError              = config.EntrySelectorConfigValidationError
@@ -151,16 +151,16 @@ type (
 )
 
 var (
-	File_config_cors_proto       = config.File_config_cors_proto
-	File_config_data_proto       = config.File_config_data_proto
-	File_config_logger_proto     = config.File_config_logger_proto
-	File_config_metrics_proto    = config.File_config_metrics_proto
-	File_config_middleware_proto = config.File_config_middleware_proto
-	File_config_registry_proto   = config.File_config_registry_proto
-	File_config_security_proto   = config.File_config_security_proto
-	File_config_service_proto    = config.File_config_service_proto
-	File_config_source_proto     = config.File_config_source_proto
-	File_config_tracer_proto     = config.File_config_tracer_proto
+	File_config_v1_cors_proto       = config.File_config_v1_cors_proto
+	File_config_v1_data_proto       = config.File_config_v1_data_proto
+	File_config_v1_logger_proto     = config.File_config_v1_logger_proto
+	File_config_v1_metrics_proto    = config.File_config_v1_metrics_proto
+	File_config_v1_middleware_proto = config.File_config_v1_middleware_proto
+	File_config_v1_registry_proto   = config.File_config_v1_registry_proto
+	File_config_v1_security_proto   = config.File_config_v1_security_proto
+	File_config_v1_service_proto    = config.File_config_v1_service_proto
+	File_config_v1_source_proto     = config.File_config_v1_source_proto
+	File_config_v1_tracer_proto     = config.File_config_v1_tracer_proto
 
 	ErrNotFound = kratosconfig.ErrNotFound
 )
