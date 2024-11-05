@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package config;
+package config.v1;
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "google/protobuf/duration.proto";
-import "config/cors.proto";
-import "config/metrics.proto";
-import "config/logger.proto";
-import "config/security.proto";
+import "config/v1/cors.proto";
+import "config/v1/metrics.proto";
+import "config/v1/logger.proto";
+import "config/v1/security.proto";
 
 message MiddlewareConfig {
 
