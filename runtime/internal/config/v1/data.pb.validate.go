@@ -35,21 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Data with the rules defined in the proto
-// definition for this message. If any rules are violated, the first error
-// encountered is returned, or nil if there are no violations.
-func (m *Data) Validate() error {
+// Validate checks the field values on DataConfig with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *DataConfig) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Data with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in DataMultiError, or nil if none found.
-func (m *Data) ValidateAll() error {
+// ValidateAll checks the field values on DataConfig with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in DataConfigMultiError, or
+// nil if none found.
+func (m *DataConfig) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Data) validate(all bool) error {
+func (m *DataConfig) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -57,18 +58,18 @@ func (m *Data) validate(all bool) error {
 	var errors []error
 
 	if len(errors) > 0 {
-		return DataMultiError(errors)
+		return DataConfigMultiError(errors)
 	}
 
 	return nil
 }
 
-// DataMultiError is an error wrapping multiple validation errors returned by
-// Data.ValidateAll() if the designated constraints aren't met.
-type DataMultiError []error
+// DataConfigMultiError is an error wrapping multiple validation errors
+// returned by DataConfig.ValidateAll() if the designated constraints aren't met.
+type DataConfigMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m DataMultiError) Error() string {
+func (m DataConfigMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -77,11 +78,11 @@ func (m DataMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m DataMultiError) AllErrors() []error { return m }
+func (m DataConfigMultiError) AllErrors() []error { return m }
 
-// DataValidationError is the validation error returned by Data.Validate if the
-// designated constraints aren't met.
-type DataValidationError struct {
+// DataConfigValidationError is the validation error returned by
+// DataConfig.Validate if the designated constraints aren't met.
+type DataConfigValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -89,22 +90,22 @@ type DataValidationError struct {
 }
 
 // Field function returns field value.
-func (e DataValidationError) Field() string { return e.field }
+func (e DataConfigValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DataValidationError) Reason() string { return e.reason }
+func (e DataConfigValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DataValidationError) Cause() error { return e.cause }
+func (e DataConfigValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DataValidationError) Key() bool { return e.key }
+func (e DataConfigValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DataValidationError) ErrorName() string { return "DataValidationError" }
+func (e DataConfigValidationError) ErrorName() string { return "DataConfigValidationError" }
 
 // Error satisfies the builtin error interface
-func (e DataValidationError) Error() string {
+func (e DataConfigValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -116,14 +117,14 @@ func (e DataValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sData.%s: %s%s",
+		"invalid %sDataConfig.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DataValidationError{}
+var _ error = DataConfigValidationError{}
 
 var _ interface {
 	Field() string
@@ -131,24 +132,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DataValidationError{}
+} = DataConfigValidationError{}
 
-// Validate checks the field values on Data_Database with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Data_Database) Validate() error {
+// Validate checks the field values on DataConfig_Database with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DataConfig_Database) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Data_Database with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in Data_DatabaseMultiError, or
-// nil if none found.
-func (m *Data_Database) ValidateAll() error {
+// ValidateAll checks the field values on DataConfig_Database with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DataConfig_DatabaseMultiError, or nil if none found.
+func (m *DataConfig_Database) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Data_Database) validate(all bool) error {
+func (m *DataConfig_Database) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -175,7 +176,7 @@ func (m *Data_Database) validate(all bool) error {
 		switch v := interface{}(m.GetConnectionMaxLifetime()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, Data_DatabaseValidationError{
+				errors = append(errors, DataConfig_DatabaseValidationError{
 					field:  "ConnectionMaxLifetime",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -183,7 +184,7 @@ func (m *Data_Database) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, Data_DatabaseValidationError{
+				errors = append(errors, DataConfig_DatabaseValidationError{
 					field:  "ConnectionMaxLifetime",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -192,7 +193,7 @@ func (m *Data_Database) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetConnectionMaxLifetime()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return Data_DatabaseValidationError{
+			return DataConfig_DatabaseValidationError{
 				field:  "ConnectionMaxLifetime",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -201,19 +202,19 @@ func (m *Data_Database) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return Data_DatabaseMultiError(errors)
+		return DataConfig_DatabaseMultiError(errors)
 	}
 
 	return nil
 }
 
-// Data_DatabaseMultiError is an error wrapping multiple validation errors
-// returned by Data_Database.ValidateAll() if the designated constraints
-// aren't met.
-type Data_DatabaseMultiError []error
+// DataConfig_DatabaseMultiError is an error wrapping multiple validation
+// errors returned by DataConfig_Database.ValidateAll() if the designated
+// constraints aren't met.
+type DataConfig_DatabaseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m Data_DatabaseMultiError) Error() string {
+func (m DataConfig_DatabaseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -222,11 +223,11 @@ func (m Data_DatabaseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m Data_DatabaseMultiError) AllErrors() []error { return m }
+func (m DataConfig_DatabaseMultiError) AllErrors() []error { return m }
 
-// Data_DatabaseValidationError is the validation error returned by
-// Data_Database.Validate if the designated constraints aren't met.
-type Data_DatabaseValidationError struct {
+// DataConfig_DatabaseValidationError is the validation error returned by
+// DataConfig_Database.Validate if the designated constraints aren't met.
+type DataConfig_DatabaseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -234,22 +235,24 @@ type Data_DatabaseValidationError struct {
 }
 
 // Field function returns field value.
-func (e Data_DatabaseValidationError) Field() string { return e.field }
+func (e DataConfig_DatabaseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e Data_DatabaseValidationError) Reason() string { return e.reason }
+func (e DataConfig_DatabaseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e Data_DatabaseValidationError) Cause() error { return e.cause }
+func (e DataConfig_DatabaseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e Data_DatabaseValidationError) Key() bool { return e.key }
+func (e DataConfig_DatabaseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e Data_DatabaseValidationError) ErrorName() string { return "Data_DatabaseValidationError" }
+func (e DataConfig_DatabaseValidationError) ErrorName() string {
+	return "DataConfig_DatabaseValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e Data_DatabaseValidationError) Error() string {
+func (e DataConfig_DatabaseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -261,14 +264,14 @@ func (e Data_DatabaseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sData_Database.%s: %s%s",
+		"invalid %sDataConfig_Database.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = Data_DatabaseValidationError{}
+var _ error = DataConfig_DatabaseValidationError{}
 
 var _ interface {
 	Field() string
@@ -276,4 +279,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = Data_DatabaseValidationError{}
+} = DataConfig_DatabaseValidationError{}

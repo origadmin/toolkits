@@ -6,7 +6,7 @@ option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "google/protobuf/duration.proto";
 
-message Data {
+message DataConfig {
   // Database
   message Database {
     bool debug = 1; // Debugging
