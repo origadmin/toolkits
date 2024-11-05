@@ -11,8 +11,6 @@ import (
 )
 
 // Define  constant IDs for various Error status codes
-//
-//go:generate protoc -I../../third_party --go_out=paths=source_relative:../../ ../../third_party/errors/rpcerr/rpcerr.proto
 const (
 	UnknownID               = "http.response.status.unknown"                  // ID for Unknown status
 	BadRequestID            = "http.response.status.bad_request"              // ID for Bad Request status

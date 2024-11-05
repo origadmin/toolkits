@@ -6,30 +6,40 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
+	logger "github.com/origadmin/slog-kratos"
 
-	"github.com/origadmin/toolkits/runtime/middlewares"
+	"github.com/origadmin/toolkits/loge"
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
-func Middleware(config *middlewares.LoggerConfig, logger log.Logger) (middleware.Middleware, error) {
-	if logger == nil {
-		// todo: init logger from config
-		logger = log.NewStdLogger(os.Stdout)
+func Middleware(cfg *config.LoggerConfig, l log.Logger) (middleware.Middleware, error) {
+	if cfg == nil && l == nil {
+		// todo: init l from config
+		l = log.NewStdLogger(os.Stdout)
+		return logging.Server(l), nil
 	}
-	//meter := otel.Meter(config.Name)
-	//var err error
-	//_metricRequests, err := metrics.DefaultRequestsCounter(meter, metrics.DefaultServerRequestsCounterName)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//_metricSeconds, err := metrics.DefaultSecondsHistogram(meter, metrics.DefaultServerSecondsHistogramName)
-	//if err != nil {
-	//	return nil, err
-	//}
-	// TODO: add metrics middleware
-	return logging.Server(logger), nil
+
+	nlog := loge.New(FromLoggerConfig(cfg))
+	l = logger.NewLogger(logger.WithLogger(nlog))
+	return logging.Server(l), nil
 }
 
-func NewLogger(config *middlewares.LoggerConfig) log.Logger {
+func NewLogger(cfg *config.LoggerConfig) log.Logger {
 	return log.NewStdLogger(os.Stdout)
+}
+
+func FromLoggerConfig(cfg *config.LoggerConfig) loge.Setting {
+	return func(option *loge.Option) {
+		//option.OutputPath = cfg.Path
+		//option.Format = cfg.Format
+		//option.TimeLayout = cfg.TimeLayout
+		//option.DisableConsole = cfg.DisableConsole
+		//option.Level = cfg.Level
+		//option.ReplaceAttr = cfg.ReplaceAttr
+		//option.AddSource = cfg.AddSource
+		//option.LumberjackConfig = cfg.Lumberjack
+		//option.DevConfig = cfg.Dev
+		//option.NoColor = cfg.NoColor
+		//option.UseDefault = cfg.UseDefault
+	}
 }

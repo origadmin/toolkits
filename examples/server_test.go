@@ -15,7 +15,8 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/examples/helloworld"
+	"github.com/origadmin/toolkits/examples/service/helloworld"
+
 	"github.com/origadmin/toolkits/runtime/kratos/transport/gins"
 )
 

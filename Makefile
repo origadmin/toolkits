@@ -1,73 +1,180 @@
-SHELL := /bin/bash
-BASEDIR = $(shell pwd)
-SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-VERSION := v1.0.0
-ENV := dev
-VersionDir = github.com/origadmin/toolkits/version
+GOHOSTOS:=$(shell go env GOHOSTOS)
+GOPATH:=$(shell go env GOPATH)
 
-# gitHash The current commit id is the same as the gitCommit result
-gitHash = $(shell git rev-parse HEAD)
-# gitBranch The current branch name
-gitBranch = $(shell git rev-parse --abbrev-ref HEAD)
-# gitTag The latest tag name
-gitTag = $(shell \
-			if [ "`git describe --tags --abbrev=0 2>/dev/null`" != "" ]; then \
-				git describe --tags --abbrev=0; \
-			else \
-				git log --pretty=format:'%h' -n 1; \
-			fi)
-# Same as the previous gitHash
-gitCommit = $(shell git log --pretty=format:'%H' -n 1)
-# gitTreeState The state of git tree, clean or dirty
-gitTreeState = $(shell if git status | grep -q 'clean'; then echo clean; else echo dirty; fi)
-# buildDate The time of build
-buildDate = $(shell TZ=Asia/Shanghai date +%FT%T%z)
-# buildDate = $(shell TZ=Asia/Shanghai date +%F\ %T%z | tr 'T' ' ')
+ENV=dev
+PROJECT_ORG=OrigAdmin
+THIRD_PARTY_PATH=third_party
+
+ifeq ($(GOHOSTOS), windows)
+	#the `find.exe` is different from `find` in bash/shell.
+	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
+	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
+	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
+	GIT_BASH=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell which git))))
+
+	VERSION=$(shell git describe --tags --always)
+	BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+	HEAD_TAG=$(shell git tag --points-at '${gitHash}')
+	# gitHash Current commit id, same as gitCommit result
+	gitHash = $(shell git rev-parse HEAD)
+
+	# Use PowerShell to find .proto files, convert to relative paths, and replace \ with /
+	RUNTIME_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse runtime/proto -Filter *.proto | Resolve-Path -Relative")
+	TOOLKITS_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse toolkits -Filter *.proto | Resolve-Path -Relative")
+	API_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse api -Filter *.proto | Resolve-Path -Relative")
+
+	# Replace \ with /
+	RUNTIME_PROTO_FILES := $(subst \,/, $(RUNTIME_PROTO_FILES))
+	TOOLKITS_PROTO_FILES := $(subst \,/, $(TOOLKITS_PROTO_FILES))
+	API_PROTO_FILES := $(subst \,/, $(API_PROTO_FILES))
+
+	BUILT_DATE = $(shell powershell -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK'")
+	TREE_STATE = $(shell powershell -Command "if ((git status) -match 'clean') { 'clean' } else { 'dirty' }")
+	TAG = $(shell powershell -Command "if ((git tag --points-at '${gitHash}') -match '^v') { '$(HEAD_TAG)' } else { '${gitHash}' }")
+	# buildDate = $(shell TZ=Asia/Shanghai date +%F\ %T%z | tr 'T' ' ')
+	# same as gitHash previously
+	COMMIT = $(shell git log --pretty=format:'%h' -n 1)
+else
+	VERSION=$(shell git describe --tags --always)
+	BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+	HEAD_TAG=$(shell git tag --points-at '${gitHash}')
+	# gitHash Current commit id, same as gitCommit result
+    gitHash = $(shell git rev-parse HEAD)
+
+	RUNTIME_PROTO_FILES=$(shell find runtime -name *.proto)
+	TOOLKITS_PROTO_FILES=$(shell find toolkits -name *.proto)
+	API_PROTO_FILES=$(shell find api -name *.proto)
+
+    BUILT_DATE = $(shell TZ=Asia/Shanghai date +%FT%T%z)
+    TREE_STATE = $(shell if git status | grep -q 'clean'; then echo clean; else echo dirty; fi)
+    TAG = $(shell if git tag --points-at "${gitHash}" | grep -q '^v'; then echo $(HEAD_TAG); else echo ${gitHash}; fi)
+	# buildDate = $(shell TZ=Asia/Shanghai date +%F\ %T%z | tr 'T' ' ')
+	# same as gitHash previously
+	COMMIT = $(shell git log --pretty=format:'%h' -n 1)
+endif
+
+BUILT_BY = $(PROJECT_ORG)
 
 ifeq ($(ENV), dev)
-    BUILD_FLAGS = -race
+#    BUILD_FLAGS = -race
 endif
 
-ifeq ($(ENV), pro)
-    LDFLAGS = -w
+ifeq ($(ENV), release)
+    LDFLAGS = -s -w
 endif
+MODULE_PATH=github.com/origadmin/toolkits/version
+LDFLAGS := -X $(MODULE_PATH).gitTag=$(TAG) \
+           -X $(MODULE_PATH).buildDate=$(BUILT_DATE) \
+           -X $(MODULE_PATH).gitCommit=$(COMMIT) \
+           -X $(MODULE_PATH).gitTreeState=$(TREE_STATE) \
+           -X $(MODULE_PATH).gitBranch=$(BRANCH) \
+           -X $(MODULE_PATH).version=$(VERSION)
 
+.PHONY: init
+# init env
+init:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
+	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/envoyproxy/protoc-gen-validate@latest
+	go install github.com/bufbuild/buf/cmd/buf@latest
+	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-lint@latest
+	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking@latest
 
-LDFLAGS += -X "${VersionDir}.gitTag=${gitTag}"
-LDFLAGS += -X "${VersionDir}.buildDate=${buildDate}"
-LDFLAGS += -X "${VersionDir}.gitCommit=${gitCommit}"
-LDFLAGS += -X "${VersionDir}.gitTreeState=${gitTreeState}"
-LDFLAGS += -X "${VersionDir}.gitBranch=${gitBranch}"
-LDFLAGS += -X "${VersionDir}.version=${VERSION}"
+	# errors/errors.proto
+	buf export buf.build/kratos/apis -o $(THIRD_PARTY_PATH)
+	# buf/validate/validate.proto
+	buf export buf.build/bufbuild/protovalidate -o $(THIRD_PARTY_PATH)
+	# google/api/*.proto
+	buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
+
+#.PHONY: toolkits
+## generate tools proto or use ./toolkits/generate.go
+#toolkits:
+#	protoc \
+#	--proto_path=./third_party \
+#	--go_out=paths=source_relative:./toolkits \
+#	--validate_out=lang=go,paths=source_relative:./toolkits \
+#	$(TOOLKITS_PROTO_FILES)
+
+.PHONY: runtime
+# generate internal proto or use ./internal/generate.go
+runtime:
+	protoc \
+	--proto_path=./runtime/proto \
+	--proto_path=./third_party \
+	--go_out=paths=source_relative:./runtime/internal \
+	--validate_out=lang=go,paths=source_relative:./runtime/internal \
+	$(RUNTIME_PROTO_FILES)
+
+.PHONY: examples
+# generate examples proto or use ./examples/generate.go
+examples:
+	cd examples && protoc \
+	--proto_path=./proto \
+	--proto_path=../third_party \
+	--go_out=paths=source_relative:./services \
+	--go-gins_out=paths=source_relative:./services \
+	--go-grpc_out=paths=source_relative:./services \
+	--go-http_out=paths=source_relative:./services \
+	--go-errors_out=paths=source_relative:./services \
+	--openapi_out=paths=source_relative:./services \
+	./proto/helloworld/v1/helloworld.proto
+
+.PHONY: build-gins
+# build protoc-gen-go-gins with current snapshot to dist
+build-gins:
+	goreleaser build --single-target --clean --snapshot -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
+
+.PHONY: release-gins
+# release
+release:
+	goreleaser release --clean -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
+
+#.PHONY: server
+## server used generate a service at first
+#server:
+#	kratos proto server -t ./internal/mods/helloworld/service ./api/v1/protos/helloworld/greeter.proto
+#
+#.PHONY: client
+## client used when proto file is in the same directory
+#client:
+#	kratos proto client ./api
+.PHONY: generate
+# run go generate to generate code
+generate:
+	go generate ./...
 
 .PHONY: all
-all: lint version
+# generate all
+all:
+	make init;
+	make runtime;
+	make generate;
 
 .PHONY: version
+# run version example
 version:
-	go run -v -ldflags '$(LDFLAGS)' $(BUILD_FLAGS) -gcflags=all="-N -l" ./cmd/version
+	go run -ldflags "$(LDFLAGS)" $(BUILD_FLAGS) -gcflags=all="-N -l" ./cmd/version/main.go
 
-.PHONY: lint
-lint:
-	go fmt ./...
-	go vet ./...
-	goimports -w .
-
- cover:
-	go test ./... -v -short -coverprofile .coverage.txt
-	go tool cover -func .coverage.txt
-
-# Example Delete all.sa,.sb,.sc,... extensions from a specified directory (including subdirectories).
-# Hidden files of.sz (beginning with. Followed by _ or.) Delete all
-.PHONY: clean
-clean:
-	rm -f east_money || true
-	find . -name "[._]*.s[a-w][a-z]" | xargs -i rm -f {} || true
-	rm -rf ./log || true
-
+# show help
 help:
-	@echo "make build   - compile the source code"
-	@echo "make clean   - remove binary file and vim swp files"
-	@echo "make lint    - run go tool 'fmt', 'vet', 'goimports', 'golangci-lint' "
+	@echo ''
+	@echo 'Usage:'
+	@echo ' make [target]'
+	@echo ''
+	@echo 'Targets:'
+	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
+	helpMessage = match(lastLine, /^# (.*)/); \
+		if (helpMessage) { \
+			helpCommand = substr($$1, 0, index($$1, ":")); \
+			helpMessage = substr(lastLine, RSTART + 2, RLENGTH); \
+			printf "\033[36m%-22s\033[0m %s\n", helpCommand,helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package config.v1;
+
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+
+//import "google/protobuf/duration.proto";
+
+// logger config.
+message LoggerConfig {
+
+  string name = 2 [json_name = "name"];
+
+  enum Level {
+    LEVEL_UNSPECIFIED = 0;
+    LEVEL_DEBUG = 1;
+    LEVEL_INFO = 2;
+    LEVEL_WARN = 3;
+    LEVEL_ERROR = 4;
+    LEVEL_FATAL = 5;
+  }
+
+  Level level = 3 [json_name = "level"];
+
+}
