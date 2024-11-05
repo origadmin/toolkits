@@ -7,10 +7,10 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 
-	"github.com/origadmin/toolkits/runtime/middlewares"
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
-func Middleware(config *middlewares.LoggerConfig, logger log.Logger) (middleware.Middleware, error) {
+func Middleware(cfg *config.LoggerConfig, logger log.Logger) (middleware.Middleware, error) {
 	if logger == nil {
 		// todo: init logger from config
 		logger = log.NewStdLogger(os.Stdout)
@@ -30,6 +30,6 @@ func Middleware(config *middlewares.LoggerConfig, logger log.Logger) (middleware
 	return logging.Server(logger), nil
 }
 
-func NewLogger(config *middlewares.LoggerConfig) log.Logger {
+func NewLogger(cfg *config.LoggerConfig) log.Logger {
 	return log.NewStdLogger(os.Stdout)
 }
