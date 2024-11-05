@@ -5,7 +5,7 @@ package config.v1;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 import "google/protobuf/duration.proto";
-import "validate/validate.proto";
+import "buf/validate/validate.proto";
 
 // Registration registry center
 message RegistryConfig {
@@ -26,7 +26,7 @@ message RegistryConfig {
   message ETCD {
     repeated string endpoints = 1 [json_name = "endpoints"];
   }
-  string type = 1 [(validate.rules).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
+  string type = 1 [(buf.validate.field).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
   string name = 2 [json_name = "name"];  // Name
   optional Consul consul = 3 [json_name = "consul"];  // Consul
   optional ETCD etcd = 4 [json_name = "etcd"];  // ETCD
