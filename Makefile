@@ -91,14 +91,14 @@ init:
 	# google/api/*.proto
 	buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
 
-.PHONY: toolkits
-# generate tools proto or use ./toolkits/generate.go
-toolkits:
-	protoc \
-	--proto_path=./third_party \
-	--go_out=paths=source_relative:./toolkits \
-	--validate_out=lang=go,paths=source_relative:./toolkits \
-	$(TOOLKITS_PROTO_FILES)
+#.PHONY: toolkits
+## generate tools proto or use ./toolkits/generate.go
+#toolkits:
+#	protoc \
+#	--proto_path=./third_party \
+#	--go_out=paths=source_relative:./toolkits \
+#	--validate_out=lang=go,paths=source_relative:./toolkits \
+#	$(TOOLKITS_PROTO_FILES)
 
 .PHONY: runtime
 # generate internal proto or use ./internal/generate.go
@@ -122,7 +122,7 @@ examples:
 	--go-http_out=paths=source_relative:./services \
 	--go-errors_out=paths=source_relative:./services \
 	--openapi_out=paths=source_relative:./services \
-	proto/helloworld/v1/helloworld.proto
+	./proto/helloworld/v1/helloworld.proto
 
 .PHONY: build-gins
 # build protoc-gen-go-gins with current snapshot to dist
@@ -143,19 +143,16 @@ release:
 ## client used when proto file is in the same directory
 #client:
 #	kratos proto client ./api
-
 .PHONY: generate
-# generate
+# run go generate to generate code
 generate:
 	go generate ./...
-	go mod tidy
 
 .PHONY: all
 # generate all
 all:
-	make tools;
-	make api;
-	make config;
+	make init;
+	make runtime;
 	make generate;
 
 .PHONY: version

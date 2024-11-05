@@ -6,7 +6,6 @@ import (
 	"github.com/origadmin/toolkits/version"
 )
 
-//go:generate go run -ldflags "-s -w -X github.com/origadmin/toolkits/version.builtBy=OrigAdmin -X github.com/origadmin/toolkits/version.version=v1.0.0" ./main.go
 func main() {
 	// Call the Get function to retrieve the build information
 	buildInfo := version.Get()
