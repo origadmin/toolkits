@@ -91,25 +91,6 @@ init:
 	# google/api/*.proto
 	buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
 
-#.PHONY: toolkits
-## generate tools proto or use ./toolkits/generate.go
-#toolkits:
-#	protoc \
-#	--proto_path=./third_party \
-#	--go_out=paths=source_relative:./toolkits \
-#	--validate_out=lang=go,paths=source_relative:./toolkits \
-#	$(TOOLKITS_PROTO_FILES)
-
-.PHONY: runtime
-# generate internal proto or use ./internal/generate.go
-runtime:
-	protoc \
-	--proto_path=./runtime/proto \
-	--proto_path=./third_party \
-	--go_out=paths=source_relative:./runtime/internal \
-	--validate_out=lang=go,paths=source_relative:./runtime/internal \
-	$(RUNTIME_PROTO_FILES)
-
 .PHONY: examples
 # generate examples proto or use ./examples/generate.go
 examples:
@@ -124,16 +105,6 @@ examples:
 	--openapi_out=paths=source_relative:./services \
 	./proto/helloworld/v1/helloworld.proto
 
-.PHONY: build-gins
-# build protoc-gen-go-gins with current snapshot to dist
-build-gins:
-	goreleaser build --single-target --clean --snapshot -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
-
-.PHONY: release-gins
-# release
-release:
-	goreleaser release --clean -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
-
 #.PHONY: server
 ## server used generate a service at first
 #server:
@@ -143,7 +114,17 @@ release:
 ## client used when proto file is in the same directory
 #client:
 #	kratos proto client ./api
-.PHONY: generate
+
+.PHONY: runtime
+# generate internal proto or use ./internal/generate.go
+runtime:
+	protoc \
+	--proto_path=./runtime/proto \
+	--proto_path=./third_party \
+	--go_out=paths=source_relative:./runtime/internal \
+	--validate_out=lang=go,paths=source_relative:./runtime/internal \
+	$(RUNTIME_PROTO_FILES)
+	.PHONY: generate
 # run go generate to generate code
 generate:
 	go generate ./...
@@ -159,6 +140,16 @@ all:
 # run version example
 version:
 	go run -ldflags "$(LDFLAGS)" $(BUILD_FLAGS) -gcflags=all="-N -l" ./cmd/version/main.go
+
+.PHONY: build-gins
+# build protoc-gen-go-gins with current snapshot to dist
+build-gins:
+	goreleaser build --single-target --clean --snapshot -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
+
+.PHONY: release-gins
+# release
+release:
+	goreleaser release --clean -f ./cmd/protoc-gen-go-gins/.goreleaser.yaml
 
 # show help
 help:

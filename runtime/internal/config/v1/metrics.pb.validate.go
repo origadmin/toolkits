@@ -59,6 +59,8 @@ func (m *MetricConfig) validate(all bool) error {
 
 	// no validation rules for Name
 
+	// no validation rules for Address
+
 	if len(errors) > 0 {
 		return MetricConfigMultiError(errors)
 	}

@@ -11,6 +11,7 @@ plugins:
     opt: paths=source_relative
   - local: protoc-gen-openapi
     out: services
+    opt: naming=proto,fq_schema_naming=true,default_response=false
   - local: protoc-gen-validate
     out: services
     opt:

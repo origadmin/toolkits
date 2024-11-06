@@ -2,21 +2,21 @@ syntax = "proto3";
 
 package config.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
-
 import "google/protobuf/duration.proto";
 
-message AuthorizationConfig {
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
+// Authorization middleware config
+message AuthorizationConfig {
   repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
-  string signing_method = 3 [json_name = "signing_method"];
-  string signing_key = 4 [json_name = "signing_key"];
-  string old_signing_key = 5 [json_name = "old_signing_key"];
+  string signing_method = 3 [json_name = "signing_method"]; // Signing method
+  string signing_key = 4 [json_name = "signing_key"]; // Signing key
+  string old_signing_key = 5 [json_name = "old_signing_key"]; // Old signing key
   google.protobuf.Duration expired_time = 6 [json_name = "expired_time"]; // Expired time
 }
 
+// Casbin middleware config
 message CasbinConfig {
-
   repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
   string policy_file = 3 [json_name = "policy_file"]; // Policy file
   string model_file = 4 [json_name = "model_file"]; // Model file

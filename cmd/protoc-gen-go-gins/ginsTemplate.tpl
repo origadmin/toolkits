@@ -5,7 +5,7 @@
 	const {{$svrType}}_{{.OriginalName}}_OperationName = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
-type {{.ServiceType}}GINServer interface {
+type {{.ServiceType}}GINSServer interface {
 {{- range.MethodSets}}
     {{- if ne .Comment ""}}
         {{.Comment}}
@@ -14,14 +14,14 @@ type {{.ServiceType}}GINServer interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}GINServer) {
+func Register{{.ServiceType}}GINSServer(router gin.IRouter, srv {{.ServiceType}}GINSServer) {
 {{- range.Methods}}
 	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv))
 {{- end}}
 }
 
 {{range.Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINServer) func(ctx *gin.Context) {
+	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINSServer) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
@@ -53,22 +53,22 @@ func Register{{.ServiceType}}GINServer(router gin.IRouter, srv {{.ServiceType}}G
 	}
 {{end}}
 
-type {{.ServiceType}}GINClient interface {
+type {{.ServiceType}}GINSClient interface {
 {{- range.MethodSets}}
     {{.Name}}(ctx context.Context, req *{{.Request}}, opts ...gins.CallOption) (rsp *{{.Reply}}, err error)
 {{- end}}
 }
 
-type {{.ServiceType}}GINClientImpl struct{
+type {{.ServiceType}}GINSClientImpl struct{
 cc *gins.Client
 }
 
-func New{{.ServiceType}}GINClient (client *gins.Client) {{.ServiceType}}GINClient {
-return &{{.ServiceType}}GINClientImpl{client}
+func New{{.ServiceType}}GINSClient (client *gins.Client) {{.ServiceType}}GINSClient {
+return &{{.ServiceType}}GINSClientImpl{client}
 }
 
 {{range.MethodSets}}
-	func (c *{{$svrType}}GINClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
+	func (c *{{$svrType}}GINSClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.ClientPath}}"
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
