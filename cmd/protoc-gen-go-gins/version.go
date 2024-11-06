@@ -1,4 +1,4 @@
 package main
 
-// release is the current protoc-gen-go-gins version.
-const release = "v1.0.0"
+// version is the current protoc-gen-go-gins version.
+var version = "v1.0.0"
