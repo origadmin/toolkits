@@ -4,8 +4,6 @@ package config.v1;
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
-//import "google/protobuf/duration.proto";
-
 // metric config.
 message MetricConfig {
 

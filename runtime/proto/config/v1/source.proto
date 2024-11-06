@@ -2,13 +2,12 @@ syntax = "proto3";
 
 package config.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
-
 import "buf/validate/validate.proto";
+
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 // Registration source center
 message SourceConfig {
-
   // File
   message File {
     string path = 1 [json_name = "path"];
@@ -27,6 +26,7 @@ message SourceConfig {
     //  string health_check_interval = 8 [json_name = "health_check_interval"];
     //  string health_check_timeout = 9[json_name = "health_check_timeout"];
   }
+  // ETCD
   message ETCD {
     repeated string endpoints = 1 [json_name = "endpoints"];
   }

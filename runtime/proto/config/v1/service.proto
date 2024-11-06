@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package config.v1;
 
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
-
 import "google/protobuf/duration.proto";
+
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 message EntrySelectorConfig {
   bool global = 2 [json_name = "global"];
@@ -59,18 +59,18 @@ message MessageConfig {
   message RocketMQ {
     string endpoint = 1 [json_name = "endpoint"];  // Peer network address
     string codec = 2 [json_name = "codec"];  // Codec: json,xml,yaml...
-    bool enable_trace = 3;
+    bool enable_trace = 3 [json_name = "enable_trace"];
 
-    repeated string name_servers = 4;
-    string name_server_domain = 5;
+    repeated string name_servers = 4 [json_name = "name_servers"];
+    string name_server_domain = 5 [json_name = "name_server_domain"];
 
-    string access_key = 6;
-    string secret_key = 7;
-    string security_token = 8;
+    string access_key = 6 [json_name = "access_key"];
+    string secret_key = 7 [json_name = "secret_key"];
+    string security_token = 8 [json_name = "security_token"];
 
-    string namespace = 9;
-    string instance_name = 10;
-    string group_name = 11;
+    string namespace = 9 [json_name = "namespace"];
+    string instance_name = 10 [json_name = "instance_name"];
+    string group_name = 11 [json_name = "group_name"];
   }
 
   string name = 2 [json_name = "name"];
