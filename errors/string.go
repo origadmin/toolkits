@@ -35,6 +35,13 @@ func (obj String) Is(err error) bool {
 }
 
 // ErrString creates a new error from a string
+//
+// Deprecated: use errors.NewString instead
 func ErrString(err string) String {
 	return String(err)
+}
+
+// NewString creates a new error from a string
+func NewString(message string) String {
+	return String(message)
 }
