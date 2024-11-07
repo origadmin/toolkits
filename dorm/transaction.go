@@ -5,12 +5,12 @@ import (
 )
 
 // ExecFunc is a function that can be executed within a transaction
-type ExecFunc func(context.Context) error
+type ExecFunc = func(context.Context) error
 
 // Trans is a transaction wrapper
 type Trans interface {
-	Tx(ctx context.Context, fn func(tx Tx) error) error
-	TxExec(ctx context.Context, fn ExecFunc) error
+	Tx(ctx context.Context, fn func(context.Context) error) error
+	InTx(ctx context.Context, fn func(tx Tx) error) error
 }
 
 type Tx interface {
