@@ -2,11 +2,22 @@
 version: v2
 
 modules:
-  - path: proto
+  - path: config/proto
     name: buf.build/origadmin/runtime
     lint:
       use:
         - STANDARD
+    breaking:
+      use:
+        - FILE
+  - path: database/ent/proto
+    name: buf.build/origadmin/entgen
+    lint:
+      use:
+        - STANDARD
+      except:
+        - PACKAGE_VERSION_SUFFIX
+        - PACKAGE_DIRECTORY_MATCH
     breaking:
       use:
         - FILE
