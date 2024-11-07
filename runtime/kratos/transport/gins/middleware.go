@@ -24,7 +24,13 @@ func Logger(logger log.Logger) HandlerFunc {
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
 		c.Next()
-
+		//"status":     c.Writer.Status(),
+		//	"method":     c.Request.Method,
+		//	"path":       path,
+		//	"ip":         c.ClientIP(),
+		//	"latency":    latency,
+		//	"user-agent": c.Request.UserAgent(),
+		//	"time":       end.Format(timeFormat),
 		cost := time.Since(start)
 		_ = logger.Log(log.LevelInfo,
 			"status", c.Writer.Status(),
