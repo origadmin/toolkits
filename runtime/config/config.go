@@ -3,7 +3,7 @@ package config
 import (
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 
-	"github.com/origadmin/toolkits/runtime/internal/config/v1"
+	config "github.com/origadmin/toolkits/runtime/internal/config/v1"
 )
 
 type (

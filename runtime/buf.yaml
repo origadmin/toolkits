@@ -2,7 +2,7 @@
 version: v2
 
 modules:
-  - path: config/proto
+  - path: proto
     name: buf.build/origadmin/runtime
     lint:
       use:
@@ -10,17 +10,17 @@ modules:
     breaking:
       use:
         - FILE
-  - path: database/ent/proto
-    name: buf.build/origadmin/entgen
-    lint:
-      use:
-        - STANDARD
-      except:
-        - PACKAGE_VERSION_SUFFIX
-        - PACKAGE_DIRECTORY_MATCH
-    breaking:
-      use:
-        - FILE
+#  - path: database/ent/proto
+#    name: buf.build/origadmin/entgen
+#    lint:
+#      use:
+#        - STANDARD
+#      except:
+#        - PACKAGE_VERSION_SUFFIX
+#        - PACKAGE_DIRECTORY_MATCH
+#    breaking:
+#      use:
+#        - FILE
 deps:
   #  - buf.build/envoyproxy/protoc-gen-validate
   - buf.build/bufbuild/protovalidate

@@ -6,6 +6,6 @@ option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
 // Trace config.
 message TraceConfig {
-  string name = 2 [json_name = "name"];
-  string endpoint = 3 [json_name = "endpoint"];
+    string name = 2 [json_name = "name"];
+    string endpoint = 3 [json_name = "endpoint"];
 }
