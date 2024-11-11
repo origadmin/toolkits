@@ -68,6 +68,7 @@ func NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
 	return build.NewRegistrar(cfg)
 }
 
+// New creates a new Builder.
 func New() Builder {
 	b := &builder{}
 	b.init()

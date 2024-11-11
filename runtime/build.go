@@ -20,6 +20,7 @@ type builder struct {
 	registryMux sync.RWMutex
 }
 
+// NewConfig creates a new Config object based on the given SourceConfig and options.
 func (b *builder) NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
 	b.configMux.RLock()
 	defer b.configMux.RUnlock()
@@ -30,6 +31,7 @@ func (b *builder) NewConfig(cfg *config.SourceConfig, opts ...config.Option) (co
 	return configBuilder.NewConfig(cfg, opts...)
 }
 
+// NewRegistrar creates a new Registrar object based on the given RegistryConfig.
 func (b *builder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
@@ -40,6 +42,7 @@ func (b *builder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, 
 	return registryBuilder.NewRegistrar(cfg)
 }
 
+// NewDiscovery creates a new Discovery object based on the given RegistryConfig.
 func (b *builder) NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
@@ -50,22 +53,26 @@ func (b *builder) NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, 
 	return registryBuilder.NewDiscovery(cfg)
 }
 
+// RegisterConfig registers a new ConfigBuilder with the given name.
 func (b *builder) RegisterConfig(name string, configBuilder ConfigBuilder) {
 	b.configMux.Lock()
 	defer b.configMux.Unlock()
 	build.configs[name] = configBuilder
 }
 
+// RegisterConfigFunc registers a new ConfigBuilder with the given name and function.
 func (b *builder) RegisterConfigFunc(name string, configBuilder ConfigBuildFunc) {
 	b.RegisterConfig(name, configBuilder)
 }
 
+// RegisterRegistry registers a new RegistryBuilder with the given name.
 func (b *builder) RegisterRegistry(name string, registryBuilder RegistryBuilder) {
 	b.registryMux.Lock()
 	defer b.registryMux.Unlock()
 	build.registries[name] = registryBuilder
 }
 
+// RegisterRegistryFunc registers a new RegistryBuilder with the given name and functions.
 func (b *builder) RegisterRegistryFunc(name string, registryBuilder RegistrarBuildFunc, discoveryBuilder DiscoveryBuildFunc) {
 	b.RegisterRegistry(name, &registryWrap{
 		RegistrarBuildFunc: registryBuilder,
