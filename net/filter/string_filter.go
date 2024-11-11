@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 )
 
 type stringFilter struct {

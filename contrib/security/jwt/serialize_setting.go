@@ -1,7 +1,9 @@
-// Copyright (c) 2024 KasaAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
-// Package token is a toolkit for authorization.
-package token
+// Package jwt provides functions for generating and validating JWT tokens.
+package jwt
 
 import (
 	"time"

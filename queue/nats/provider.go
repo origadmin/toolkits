@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 	"github.com/nats-io/nats.go"
 
 	"github.com/origadmin/toolkits/queue"

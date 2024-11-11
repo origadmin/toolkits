@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 
 	"github.com/origadmin/toolkits/storage/cache"
 	"github.com/origadmin/toolkits/storage/cache/memory"

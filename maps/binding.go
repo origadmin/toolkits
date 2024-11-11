@@ -3,7 +3,7 @@ package maps
 import (
 	"reflect"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 )
 
 // DefaultTag is the default tag for binding

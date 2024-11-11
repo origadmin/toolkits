@@ -6,7 +6,7 @@ package replacer
 import (
 	"strings"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 )
 
 const (
