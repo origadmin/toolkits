@@ -13,4 +13,5 @@ breaking:
     - FILE
 deps:
   - buf.build/googleapis/googleapis
+  - buf.build/origadmin/runtime
 #  - buf.build/envoyproxy/protoc-gen-validate

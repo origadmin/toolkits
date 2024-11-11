@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package helloworld.v1;
 
+import "config/v1/cors.proto";
 import "google/api/annotations.proto";
 
 option go_package = "github.com/origadmin/toolkits/examples/services/helloworld/v1;helloworld";
@@ -28,4 +29,8 @@ message SayHelloRequest {
 // The response message containing the greetings
 message SayHelloResponse {
   string message = 1;
+}
+
+message ExampleCors {
+  config.v1.CorsConfig cors = 1;
 }

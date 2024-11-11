@@ -18,7 +18,7 @@ import (
 const (
 	contextPackage = protogen.GoImportPath("context")
 	ginPackage     = protogen.GoImportPath("github.com/gin-gonic/gin")
-	ginsPackage    = protogen.GoImportPath("github.com/origadmin/toolkits/runtime/kratos/transport/gins")
+	ginsPackage    = protogen.GoImportPath("github.com/origadmin/toolkits/runtime/transport/gins")
 	bindingPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
 	//transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 )
