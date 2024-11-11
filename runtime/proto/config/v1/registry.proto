@@ -3,6 +3,7 @@ syntax = "proto3";
 package config.v1;
 
 import "buf/validate/validate.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
@@ -27,9 +28,14 @@ message RegistryConfig {
   message ETCD {
     repeated string endpoints = 1 [json_name = "endpoints"];
   }
+  message Custom {
+    google.protobuf.Any config = 1 [json_name = "config"];
+  }
 
   string type = 1 [(buf.validate.field).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
-  string name = 2 [json_name = "name"];  // Name
-  optional Consul consul = 3 [json_name = "consul"];  // Consul
-  optional ETCD etcd = 4 [json_name = "etcd"];  // ETCD
+  string service_name = 2 [json_name = "service_name"];  // ServiceName
+
+  optional Consul consul = 300 [json_name = "consul"];  // Consul
+  optional ETCD etcd = 400 [json_name = "etcd"];  // ETCD
+  optional Custom custom = 500 [json_name = "custom"]; // Custom
 }

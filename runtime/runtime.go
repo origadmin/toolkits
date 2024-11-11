@@ -48,6 +48,11 @@ func RegisterConfig(name string, configBuilder ConfigBuilder) {
 	build.RegisterConfig(name, configBuilder)
 }
 
+// RegisterConfigFunc registers a ConfigBuilder with the builder.
+func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
+	build.RegisterConfig(name, buildFunc)
+}
+
 // NewConfig creates a new Config using the registered ConfigBuilder.
 func NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
 	return build.NewConfig(cfg, opts...)
