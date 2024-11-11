@@ -4,6 +4,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
+// This is only alias type for registry
 type (
 	Watcher         = registry.Watcher
 	ServiceInstance = registry.ServiceInstance
