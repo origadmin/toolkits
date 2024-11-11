@@ -3,7 +3,7 @@ package filter
 import (
 	"strings"
 
-	"github.com/goexts/ggb/types"
+	"github.com/goexts/generic/types"
 )
 
 type Linker interface {

@@ -1,7 +1,9 @@
-// Copyright (c) 2024 KasaAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
-// Package security is a toolkit for security check and authorization
-package token
+// Package jwt provides functions for generating and validating JWT tokens.
+package jwt
 
 import (
 	"context"

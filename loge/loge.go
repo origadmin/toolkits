@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 )
 
 const (

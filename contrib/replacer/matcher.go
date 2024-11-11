@@ -5,9 +5,9 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/goexts/ggb/settings"
-	"github.com/origadmin/toolkits/codec"
+	"github.com/goexts/generic/settings"
 
+	"github.com/origadmin/toolkits/codec"
 	"github.com/origadmin/toolkits/errors"
 )
 

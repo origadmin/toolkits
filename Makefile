@@ -10,7 +10,7 @@ ifeq ($(GOHOSTOS), windows)
 	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
 	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
 	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
-	GIT_BASH=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell which git))))
+	#GIT_BASH=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell which git))))
 
 	VERSION=$(shell git describe --tags --always)
 	BRANCH = $(shell git rev-parse --abbrev-ref HEAD)

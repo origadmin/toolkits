@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/BurntSushi/toml"
-	ggb "github.com/goexts/ggb"
+	"github.com/goexts/generic"
 )
 
 var (
@@ -30,7 +30,7 @@ type Decoder struct {
 }
 
 func (t Decoder) Decode(obj any) error {
-	return ggb.OrNil(t.dec.Decode(obj))
+	return generic.OrNil(t.dec.Decode(obj))
 }
 
 func NewDecoder(ior io.Reader) *Decoder {

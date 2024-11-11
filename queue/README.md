@@ -1,39 +1,39 @@
 # Queue
 
 ```
-名称                                         次数(26550976)       平均时间(202.1 ns/op)     平均内存使用量 (7 B/op) 平均分配次数 (0 allocs/op)
+Name count (26550976) Average time (202.1 ns/op) Average memory usage (7 B/op) Average allocation count (0 allocs/op)
 BenchmarkQueue/LockFreeQueue/Offer-20           26550976               202.1 ns/op             7 B/op          0 allocs/op
 ```
 # BenchmarkQueue/LockFreeQueue/Offer-20
-- 名称：表示当前基准测试的名称。
-- BenchmarkQueue 是基准测试的顶级名称。
-- LockFreeQueue 表示使用的队列类型。
-- Offer 表示具体的测试操作（这里是入队操作）。
-- -20 表示运行时的 GOMAXPROCS 设置（即并行度）。
+- Name: indicates the name of the current benchmark.
+- BenchmarkQueue is the top-level name of the benchmark.
+- LockFreeQueue Indicates the queue type.
+- Offer indicates the specific test operation (in this case, the team operation).
+- -20 Indicates the GOMAXPROCS setting (parallelism) at run time.
 # 26550976
-- 次数：表示该基准测试运行了多少次。
-- 这个数字表示在给定时间内（默认为 1 秒），该测试能够执行的操作次数。
+- Count: Indicates how many times the benchmark has been run.
+This number represents the number of operations that the test can perform in a given time period (the default is 1 second).
 # 202.1 ns/op
-- 平均时间：表示每次操作的平均耗时。
-- ns 表示纳秒（1 纳秒 = 10^-9 秒）。
-- op 表示一次操作（operation）。
-- 因此，202.1 ns/op 表示每次入队操作的平均耗时为 202.1 纳秒。
+- Average time: indicates the average time spent on each operation.
+- ns stands for nanosecond (1 nanosecond = 10^-9 seconds).
+- op Indicates an operation.
+- Therefore, 202.1 ns/op means that the average time spent per queuing operation is 202.1 nanoseconds.
 # 7 B/op
-- 平均内存使用量：表示每次操作分配的平均字节数。
-- B 表示字节（byte）。
-- op 表示一次操作。
-- 因此，7 B/op 表示每次入队操作平均分配了 7 字节的内存。
+- Average memory usage: indicates the average number of bytes allocated per operation.
+- B Indicates byte.
+- op Indicates an operation.
+- Therefore, 7 B/op means that an average of 7 bytes of memory are allocated for each queuing operation.
 # 0 allocs/op
-- 平均分配次数：表示每次操作分配的内存次数。
-- allocs 表示分配次数。
-- op 表示一次操作。
-- 因此，0 allocs/op 表示每次入队操作没有进行任何内存分配。
-# 总结
-- 次数 (26550976)：表示该测试运行了多少次。
-- 平均时间 (202.1 ns/op)：表示每次入队操作的平均耗时。
-- 平均内存使用量 (7 B/op)：表示每次入队操作平均分配的字节数。
-- 平均分配次数 (0 allocs/op)：表示每次入队操作的内存分配次数。
-- 这些指标可以帮助你理解不同操作的性能表现，从而进一步优化代码。例如，如果发现某个操作的平均时间较长或内存使用较多，可以针对性地进行优化。
+- Average number of memory allocations: indicates the number of memory allocations per operation.
+- allocs Indicates the number of allocation times.
+- op Indicates an operation.
+- Therefore, 0 allocs/op means that no memory is allocated for each queueing operation.
+# Summary
+- Count (26550976) : Indicates how many times the test was run.
+- Average Time (202.1 ns/op) : indicates the average time spent on each queuing operation.
+- Average memory usage (7 B/op) : indicates the average number of bytes allocated for each queuing operation.
+- Average number of memory allocations (0 allocs/op) : indicates the number of memory allocations per queued operation.
+These metrics can help you understand the performance of different operations to further optimize your code. For example, if you find that the average time of an operation is long or the memory usage is high, you can optimize it accordingly.
 
 # Benchmarking
 ```

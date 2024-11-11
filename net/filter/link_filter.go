@@ -3,7 +3,7 @@ package filter
 import (
 	"net/http"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 )
 
 type linkFilter struct {

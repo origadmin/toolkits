@@ -1,13 +1,16 @@
-// Copyright (c) 2024 KasaAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
-// Package token is a toolkit for authorization.
-package token
+// Package jwt provides functions for generating and validating JWT tokens.
+package jwt
 
 import (
 	"time"
 
-	"github.com/goexts/ggb/settings"
+	"github.com/goexts/generic/settings"
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/origadmin/toolkits/idgen"
 
 	"github.com/origadmin/toolkits/errors"
