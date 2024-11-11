@@ -4,7 +4,10 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/origadmin/toolkits => ../
+replace (
+	github.com/origadmin/toolkits => ../
+	github.com/origadmin/toolkits/codec => ../codec
+)
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.1-20240920164238-5a7b106cbb87.1
