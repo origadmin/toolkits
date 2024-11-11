@@ -3,7 +3,7 @@ package config
 import (
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 
-	config "github.com/origadmin/toolkits/runtime/internal/config/v1"
+	"github.com/origadmin/toolkits/runtime/internal/config/v1"
 )
 
 type (
@@ -116,6 +116,9 @@ type (
 	SourceConfig_ETCD                               = config.SourceConfig_ETCD
 	SourceConfig_ETCDMultiError                     = config.SourceConfig_ETCDMultiError
 	SourceConfig_ETCDValidationError                = config.SourceConfig_ETCDValidationError
+	SourceConfig_Custom                             = config.SourceConfig_Custom
+	SourceConfig_CustomMultiError                   = config.SourceConfig_CustomMultiError
+	SourceConfig_CustomValidationError              = config.SourceConfig_CustomValidationError
 	SourceConfig_File                               = config.SourceConfig_File
 	SourceConfig_FileMultiError                     = config.SourceConfig_FileMultiError
 	SourceConfig_FileValidationError                = config.SourceConfig_FileValidationError

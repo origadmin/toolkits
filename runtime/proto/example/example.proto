@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package example;
+
+import "config/v1/cors.proto";
+
+option go_package = "github.com/origadmin/toolkits/runtime/example;example";
+
+message Example {
+    string name = 1;
+    string value = 2;
+    config.v1.CorsConfig cors = 3;
+}
