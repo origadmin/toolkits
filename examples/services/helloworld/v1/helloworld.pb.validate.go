@@ -238,3 +238,131 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SayHelloResponseValidationError{}
+
+// Validate checks the field values on ExampleCors with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ExampleCors) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ExampleCors with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ExampleCorsMultiError, or
+// nil if none found.
+func (m *ExampleCors) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ExampleCors) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetCors()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ExampleCorsValidationError{
+					field:  "Cors",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ExampleCorsValidationError{
+					field:  "Cors",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCors()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ExampleCorsValidationError{
+				field:  "Cors",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ExampleCorsMultiError(errors)
+	}
+
+	return nil
+}
+
+// ExampleCorsMultiError is an error wrapping multiple validation errors
+// returned by ExampleCors.ValidateAll() if the designated constraints aren't met.
+type ExampleCorsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ExampleCorsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ExampleCorsMultiError) AllErrors() []error { return m }
+
+// ExampleCorsValidationError is the validation error returned by
+// ExampleCors.Validate if the designated constraints aren't met.
+type ExampleCorsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ExampleCorsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ExampleCorsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ExampleCorsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ExampleCorsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ExampleCorsValidationError) ErrorName() string { return "ExampleCorsValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ExampleCorsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sExampleCors.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ExampleCorsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ExampleCorsValidationError{}

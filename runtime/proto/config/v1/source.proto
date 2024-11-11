@@ -3,6 +3,7 @@ syntax = "proto3";
 package config.v1;
 
 import "buf/validate/validate.proto";
+import "google/protobuf/any.proto";
 
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 
@@ -30,7 +31,12 @@ message SourceConfig {
   message ETCD {
     repeated string endpoints = 1 [json_name = "endpoints"];
   }
-  string type = 1 [(buf.validate.field).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris"]}];  // Type
+
+  message Custom {
+    google.protobuf.Any config = 1 [json_name = "config"];
+  }
+
+  string type = 1 [(buf.validate.field).string = {in: ["none", "file", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris", "custom"]}];  // Type
   string name = 2 [json_name = "name"];  // Name
   optional File file = 3 [json_name = "file"];
   optional Consul consul = 4 [json_name = "consul"];  // Consul
