@@ -43,6 +43,11 @@ func (b *builder) init() {
 	b.registries = make(map[string]RegistryBuilder)
 }
 
+// NewConfig creates a new Config using the registered ConfigBuilder.
+func NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
+	return build.NewConfig(cfg, opts...)
+}
+
 // RegisterConfig registers a ConfigBuilder with the builder.
 func RegisterConfig(name string, configBuilder ConfigBuilder) {
 	build.RegisterConfig(name, configBuilder)
@@ -53,16 +58,6 @@ func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
 	build.RegisterConfig(name, buildFunc)
 }
 
-// NewConfig creates a new Config using the registered ConfigBuilder.
-func NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
-	return build.NewConfig(cfg, opts...)
-}
-
-// RegisterRegistry registers a RegistryBuilder with the builder.
-func RegisterRegistry(name string, registryBuilder RegistryBuilder) {
-	build.RegisterRegistry(name, registryBuilder)
-}
-
 // NewDiscovery creates a new Discovery using the registered RegistryBuilder.
 func NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
 	return build.NewDiscovery(cfg)
@@ -71,6 +66,11 @@ func NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
 // NewRegistrar creates a new Registrar using the registered RegistryBuilder.
 func NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
 	return build.NewRegistrar(cfg)
+}
+
+// RegisterRegistry registers a RegistryBuilder with the builder.
+func RegisterRegistry(name string, registryBuilder RegistryBuilder) {
+	build.RegisterRegistry(name, registryBuilder)
 }
 
 // New creates a new Builder.
