@@ -15,7 +15,6 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/gorilla/mux v1.8.1
-	github.com/origadmin/slog-kratos v1.0.3
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 	github.com/origadmin/toolkits/codec v0.0.0-00010101000000-000000000000
 	google.golang.org/protobuf v1.35.1
