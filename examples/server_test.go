@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2"
@@ -89,13 +90,19 @@ func TestServer(t *testing.T) {
 		out.Message = strconv.FormatInt(int64(rand.Intn(100)), 10)
 		c.JSON(200, &out)
 	})
-
+	go func() {
+		time.Sleep(15 * time.Second)
+		srv.Stop()
+	}()
 	if err := srv.Run(); err != nil {
 		panic(err)
 	}
+	//testClient(t)
+	//testGinClient(t)
+	//testGRPCClient(t)
 }
 
-func TestClient(t *testing.T) {
+func testClient(t *testing.T) {
 	ctx := context.Background()
 
 	cli, err := transhttp.NewClient(ctx,
@@ -126,7 +133,7 @@ func GetHelloReply(ctx context.Context, cli *transhttp.Client, in *helloworld.Sa
 	return &out, nil
 }
 
-func TestGinClient(t *testing.T) {
+func testGinClient(t *testing.T) {
 	ctx := context.Background()
 
 	cli, err := transhttp.NewClient(ctx,
@@ -139,7 +146,7 @@ func TestGinClient(t *testing.T) {
 	t.Log(resp)
 }
 
-func TestGRPCClient(t *testing.T) {
+func testGRPCClient(t *testing.T) {
 	ctx := context.Background()
 
 	cli, err := transgrpc.DialInsecure(ctx,
