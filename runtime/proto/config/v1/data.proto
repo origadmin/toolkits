@@ -15,22 +15,39 @@ message Data {
     // Database
     message Database {
         // Debugging
-        bool debug = 1;
+        bool debug = 1 [json_name = "debug"];
         // Driver name: mysql, postgresql, mongodb, sqlite......
-        string driver = 2;
+        string dialect = 2 [json_name = "dialect"];
         // Data source (DSN string)
-        string source = 3;
+        string source = 3 [json_name = "source"];
         // Data migration switch
-        bool migrate = 10;
+        bool migrate = 10 [json_name = "migrate"];
         // Link tracking switch
-        bool enable_trace = 12;
+        bool enable_trace = 12 [json_name = "enable_trace"];
         // Performance analysis switch
-        bool enable_metrics = 13;
+        bool enable_metrics = 13 [json_name = "enable_metrics"];
         // Maximum number of free connections in the connection pool
-        int32 max_idle_connections = 20;
+        int32 max_idle_connections = 20 [json_name = "max_idle_connections"];
         // Maximum number of open connections in the connection pool
-        int32 max_open_connections = 21;
+        int32 max_open_connections = 21 [json_name = "max_open_connections"];
         // Maximum length of time that the connection can be reused
-        google.protobuf.Duration connection_max_lifetime = 22;
+        google.protobuf.Duration connection_max_lifetime = 22 [json_name = "connection_max_lifetime"];
+    }
+
+    message Storage {
+        message File {
+            string root = 1;
+        }
+        message Redis {
+        }
+        message Mongo {
+        }
+        message Oss {
+
+        }
+        File file = 1;
+        Redis redis = 2;
+        Mongo mongo = 3;
+        Oss oss = 4;
     }
 }

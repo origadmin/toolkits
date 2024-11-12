@@ -91,23 +91,20 @@ func New(ss ...Setting) *Logger {
 	opt := settings.Apply(defaultOption, ss)
 
 	defaultLogger := Default()
-	outputs := []io.Writer{os.Stderr}
-	if !opt.Console {
-		outputs = nil
+	var outputs []io.Writer
+	if opt.Console {
+		outputs = append(outputs, os.Stderr)
 	}
 	if opt.OutputPath != "" {
-		err := os.Mkdir(opt.OutputPath, 0766)
-		if err != nil {
+		if err := os.Mkdir(opt.OutputPath, 0766); err != nil {
 			return defaultLogger
 		}
 	}
 
 	if opt.FileName != "" {
 		pathname := filepath.Join(opt.OutputPath, opt.FileName)
-		stat, err := os.Stat(pathname)
-		if err == nil && !stat.IsDir() {
-			err := os.Rename(pathname, backupLog(pathname))
-			if err != nil {
+		if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
+			if err := os.Rename(pathname, backupLog(pathname)); err != nil {
 				return defaultLogger
 			}
 		}
@@ -130,32 +127,45 @@ func New(ss ...Setting) *Logger {
 		}
 	}
 
-	var output io.Writer
-	fileLen := len(outputs)
-	switch {
-	case fileLen == 1:
-		output = outputs[0]
-	case fileLen > 1:
-		output = io.MultiWriter(outputs...)
-	default:
+	//var output io.Writer
+	//fileLen := len(outputs)
+	//switch {
+	//case fileLen == 1:
+	//	output = outputs[0]
+	//case fileLen > 1:
+	//	output = io.MultiWriter(outputs...)
+	//default:
+	//	output = io.Discard
+	//}
+	output := io.MultiWriter(outputs...)
+	if len(outputs) == 0 {
 		output = io.Discard
 	}
-
 	//var handler Handler = NewTextHandler(output, &HandlerOptions{
 	//	Level:       opt.Level,
 	//	ReplaceAttr: opt.ReplaceAttr,
 	//	AddSource:   opt.AddSource,
 	//})
-	var handler Handler
+	handler := createHandler(opt, output)
+
+	defaultLogger = slog.New(handler)
+	if opt.Default {
+		slog.SetDefault(defaultLogger)
+	}
+
+	return defaultLogger
+}
+
+func createHandler(opt *Option, output io.Writer) slog.Handler {
 	switch opt.Format {
 	case FormatJSON:
-		handler = NewJSONHandler(output, &HandlerOptions{
+		return NewJSONHandler(output, &HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
 		})
 	case FormatTint:
-		handler = NewTintHandler(output, &TintOptions{
+		return NewTintHandler(output, &TintOptions{
 			AddSource:   opt.AddSource,
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
@@ -163,7 +173,7 @@ func New(ss ...Setting) *Logger {
 			NoColor:     opt.NoColor,
 		})
 	case FormatDev:
-		handler = NewDevSlogHandler(output, &DevSlogOptions{
+		return NewDevSlogHandler(output, &DevSlogOptions{
 			HandlerOptions: &HandlerOptions{
 				Level:       opt.Level,
 				ReplaceAttr: opt.ReplaceAttr,
@@ -183,19 +193,12 @@ func New(ss ...Setting) *Logger {
 			NoColor:            opt.NoColor,
 		})
 	default:
-		handler = slog.NewTextHandler(output, &HandlerOptions{
+		return slog.NewTextHandler(output, &HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
 		})
 	}
-
-	defaultLogger = slog.New(handler)
-	if opt.Default {
-		slog.SetDefault(defaultLogger)
-	}
-
-	return defaultLogger
 }
 
 func backupLog(filename string) string {

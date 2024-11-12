@@ -4,6 +4,8 @@ go 1.23.1
 
 toolchain go1.23.2
 
+replace github.com/origadmin/toolkits/codec => ./codec
+
 require (
 	github.com/coocood/freecache v1.2.4
 	github.com/goexts/generic v0.1.0
@@ -26,7 +28,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

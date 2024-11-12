@@ -40,7 +40,7 @@ func TestRegister(t *testing.T) {
 		t.Errorf("Expected default identifier to be set, but it was not")
 	}
 	// Check that the default identifier has been updated
-	if idgen.Default().Name() != "shortid" {
+	if idgen.Default().Name() != "ksuid" {
 		t.Errorf("Expected default identifier to be updated, but it was not")
 	}
 }

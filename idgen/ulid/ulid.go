@@ -48,7 +48,10 @@ func (U ULID) Size() int {
 	return bitSize
 }
 
+type Setting struct {
+}
+
 // New creates a new ULID implementation.
-func New() *ULID {
+func New(_ ...Setting) *ULID {
 	return &ULID{}
 }

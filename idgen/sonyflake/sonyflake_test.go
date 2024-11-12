@@ -19,7 +19,7 @@ func TestSonyflakeValidateValidID(t *testing.T) {
 	s := New()
 	id := s.Gen()
 	valid := s.Validate(id)
-	assert.True(t, valid)
+	assert.Truef(t, valid, "ID %s is not valid", id)
 }
 
 func TestSonyflakeValidateInvalidID(t *testing.T) {
@@ -40,7 +40,7 @@ func TestRegister(t *testing.T) {
 		t.Errorf("Expected default identifier to be set, but it was not")
 	}
 	// Check that the default identifier has been updated
-	if idgen.Default().Name() != "shortid" {
+	if idgen.Default().Name() != "sonyflake" {
 		t.Errorf("Expected default identifier to be updated, but it was not")
 	}
 }

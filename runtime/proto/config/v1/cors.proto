@@ -13,6 +13,7 @@ option objc_class_prefix = "Config";
 
 // cors config.
 message Cors {
+    bool enabled = 1 [json_name = "enabled"];
     // AllowCredentials indicates whether the request can include user credentials like
     // cookies, HTTP authentication or client side SSL certificates.
     bool allow_credentials = 2 [json_name = "allow_credentials"];

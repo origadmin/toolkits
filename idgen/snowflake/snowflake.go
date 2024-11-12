@@ -4,6 +4,7 @@
 package snowflake
 
 import (
+	"cmp"
 	"math/rand/v2"
 
 	"github.com/bwmarrin/snowflake"
@@ -23,7 +24,7 @@ type Snowflake struct {
 
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
-	s := New(Settings{})
+	s := New()
 	bitSize = len(s.Gen())
 	idgen.Register(s)
 }
@@ -52,16 +53,18 @@ func (s Snowflake) Size() int {
 	return bitSize
 }
 
-type Settings struct {
+type Setting struct {
 	Node int64
 }
 
 // New creates a new Snowflake generator with a unique generator.
-func New(s Settings) *Snowflake {
-	if s.Node < 0 || s.Node > 1023 {
-		s.Node = rand.Int64N(1023)
+func New(ss ...*Setting) *Snowflake {
+	ss = append(ss, &Setting{})
+	o := cmp.Or(ss...)
+	if o.Node < 0 || o.Node > 1023 {
+		o.Node = rand.Int64N(1023)
 	}
-	generator, err := snowflake.NewNode(s.Node)
+	generator, err := snowflake.NewNode(o.Node)
 	if err != nil {
 		panic(err)
 	}

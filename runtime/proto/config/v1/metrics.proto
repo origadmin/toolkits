@@ -10,7 +10,7 @@ option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
 // metric config.
-message MetricConfig {
+message Metric {
 
     repeated string includes = 2 [json_name = "includes"];
     string name = 3 [json_name = "name"];

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package config.v1;
 
+import "buf/validate/validate.proto";
+
 option cc_enable_arenas = true;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
 option java_multiple_files = true;
@@ -9,28 +11,33 @@ option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
-// Task config.
+// Task config
 message Task {
-    // Asynq
+
+    // Asynq config
     message Asynq {
-        string endpoint = 1;  // Peer network address
-        string password = 2; // redis Login password
-        int32 db = 3;// Database index
-        string location = 4;// Time Zone
+        // endpoint is peer network address
+        string endpoint = 1;
+        // login password
+        string password = 2;
+        // database index
+        int32 db = 3;
+        // timezone location
+        string location = 4;
     }
 
-    // Machinery
+    // Machinery config
     message Machinery {
-        repeated string brokers = 1;  // broker address, which can be specified as Redis, AMQP, or AWS SQS according to the actual storage medium used;
-        repeated string backends = 2;  // backend configures the media for storing results. The value can be Redis, memcached, or mongodb as required.  }
+        // brokers address, which can be specified as Redis, AMQP, or AWS SQS according to the actual storage medium used
+        repeated string brokers = 1;
+        // backends configures the media for storing results. The value can be Redis, memcached, or mongodb as required
+        repeated string backends = 2;
     }
 
-    // Cron
+    // Cron config
     message Cron {
-        string endpoint = 1;  // Peer network address
-        string password = 2; // redis Login password
-        int32 db = 3;// Database index
-        string location = 4;// Time Zone
+        // addr is peer network address
+        string addr = 1;
     }
 
     string type = 1 [json_name = "type", (buf.validate.field).string = {in: ["none", "asynq", "machinery", "cron"]}];

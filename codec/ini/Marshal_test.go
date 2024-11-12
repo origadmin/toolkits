@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+const (
+	MarshalValidResult = `Name = Jack Sparrow
+Age  = 35
+`
+)
+
 // Successfully marshals a valid struct into INI format bytes
 func TestMarshalValidStruct(t *testing.T) {
 	// Arrr, let's see if we can turn this shipshape struct into bytes!
@@ -19,9 +25,8 @@ func TestMarshalValidStruct(t *testing.T) {
 	if len(data) == 0 {
 		t.Fatal("Expected non-empty byte slice")
 	}
-	const result = `Name = Jack Sparrow
-Age  = 35`
-	if string(data) != result {
-		t.Errorf("Expected %s, but got %s", result, string(data))
+
+	if string(data) != MarshalValidResult {
+		t.Errorf("Expected %s, but got %s", MarshalValidResult, string(data))
 	}
 }

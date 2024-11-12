@@ -1,10 +1,9 @@
 package security
 
 import (
-	"github.com/go-kratos/kratos/v2/middleware"
-
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/runtime/config"
+	"github.com/origadmin/toolkits/runtime/middleware"
 )
 
 func Middleware(cfg *config.Security) (middleware.Middleware, error) {
