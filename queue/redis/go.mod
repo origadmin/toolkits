@@ -8,7 +8,7 @@ replace github.com/origadmin/toolkits => ../../
 
 require (
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/redis/go-redis/v9 v9.6.1
+	github.com/redis/go-redis/v9 v9.7.0
 )
 
 require (
