@@ -1,4 +1,9 @@
-package loge
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package sloge implements the functions, types, and interfaces for the module.
+package sloge
 
 import (
 	"fmt"
@@ -20,37 +25,23 @@ const (
 	LevelFatal = 12
 )
 
-//go:generate stringer -type=Format -trimprefix=Format
-type Format int
-
-const (
-	// FormatJSON json format
-	FormatJSON Format = iota
-	// FormatText text format
-	FormatText
-	// FormatTint tint format
-	FormatTint
-	// FormatDev dev format
-	FormatDev
-)
-
 type (
 	LumberjackConfig = struct {
 		// MaxSize is the maximum size in megabytes of the log file before it gets
 		// rotated. It defaults to 100 megabytes.
-		MaxSize int `json:"maxsize" yaml:"maxsize" toml:"maxsize"`
+		MaxSize int `json:"max_size" yaml:"max_size" toml:"max_size"`
 
 		// MaxAge is the maximum number of days to retain old log files based on the
 		// timestamp encoded in their filename.  Note that a day is defined as 24
 		// hours and may not exactly correspond to calendar days due to daylight
 		// savings, leap seconds, etc. The default is not to remove old log files
 		// based on age.
-		MaxAge int `json:"maxage" yaml:"maxage" toml:"maxage"`
+		MaxAge int `json:"max_age" yaml:"max_age" toml:"max_age"`
 
 		// MaxBackups is the maximum number of old log files to retain.  The default
 		// is to retain all old log files (though MaxAge may still cause them to get
 		// deleted.)
-		MaxBackups int `json:"maxbackups" yaml:"maxbackups" toml:"maxbackups"`
+		MaxBackups int `json:"max_backups" yaml:"max_backups" toml:"max_backups"`
 
 		// LocalTime determines if the time used for formatting the timestamps in
 		// backup files is the computer's local time.  The default is to use UTC
@@ -64,10 +55,10 @@ type (
 
 	DevConfig = struct {
 		// Max number of printed elements in slice.
-		MaxSlice uint `json:"maxslice" yaml:"maxslice" toml:"maxslice"`
+		MaxSlice uint `json:"max_slice" yaml:"max_slice" toml:"max_slice"`
 
 		// If the attributes should be sorted by keys
-		SortKeys bool `json:"sortkeys" yaml:"sortkeys" toml:"sortkeys"`
+		SortKeys bool `json:"sort_keys" yaml:"sort_keys" toml:"sort_keys"`
 
 		// Add blank line after each log
 		NewLine bool `json:"newline" yaml:"newline" toml:"newline"`
@@ -76,19 +67,19 @@ type (
 		Indent bool `json:"indent" yaml:"indent" toml:"indent"`
 
 		// Set color for Debug level, default: devslog.Blue
-		DebugColor Color `json:"debugcolor" yaml:"debugcolor" toml:"debugcolor"`
+		DebugColor Color `json:"debug_color" yaml:"debug_color" toml:"debug_color"`
 
 		// Set color for Info level, default: devslog.Green
-		InfoColor Color `json:"infocolor" yaml:"infocolor" toml:"infocolor"`
+		InfoColor Color `json:"info_color" yaml:"info_color" toml:"info_color"`
 
 		// Set color for Warn level, default: devslog.Yellow
-		WarnColor Color `json:"warncolor" yaml:"warncolor" toml:"warncolor"`
+		WarnColor Color `json:"warn_color" yaml:"warn_color" toml:"warn_color"`
 
 		// Set color for Error level, default: devslog.Red
-		ErrorColor Color `json:"errorcolor" yaml:"errorcolor" toml:"errorcolor"`
+		ErrorColor Color `json:"error_color" yaml:"error_color" toml:"error_color"`
 
 		// Max stack trace frames when unwrapping errors
-		MaxTrace uint `json:"maxtrace" yaml:"maxtrace" toml:"maxtrace"`
+		MaxTrace uint `json:"max_trace" yaml:"max_trace" toml:"max_trace"`
 
 		// Use method String() for formatting value
 		Formatter bool `json:"formatter" yaml:"formatter" toml:"formatter"`
@@ -101,7 +92,7 @@ func New(ss ...Setting) *Logger {
 
 	defaultLogger := Default()
 	outputs := []io.Writer{os.Stderr}
-	if opt.DisableConsole {
+	if !opt.Console {
 		outputs = nil
 	}
 	if opt.OutputPath != "" {
@@ -112,10 +103,10 @@ func New(ss ...Setting) *Logger {
 	}
 
 	if opt.FileName != "" {
-		pathfile := filepath.Join(opt.OutputPath, opt.FileName)
-		stat, err := os.Stat(pathfile)
+		pathname := filepath.Join(opt.OutputPath, opt.FileName)
+		stat, err := os.Stat(pathname)
 		if err == nil && !stat.IsDir() {
-			err := os.Rename(pathfile, backupLog(pathfile))
+			err := os.Rename(pathname, backupLog(pathname))
 			if err != nil {
 				return defaultLogger
 			}
@@ -131,7 +122,7 @@ func New(ss ...Setting) *Logger {
 				Compress:   opt.LumberjackConfig.Compress,
 			})
 		} else {
-			file, err := os.OpenFile(pathfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+			file, err := os.OpenFile(pathname, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 			if err != nil {
 				return defaultLogger
 			}
@@ -150,11 +141,12 @@ func New(ss ...Setting) *Logger {
 		output = io.Discard
 	}
 
-	var handler Handler = NewTextHandler(output, &HandlerOptions{
-		Level:       opt.Level,
-		ReplaceAttr: opt.ReplaceAttr,
-		AddSource:   opt.AddSource,
-	})
+	//var handler Handler = NewTextHandler(output, &HandlerOptions{
+	//	Level:       opt.Level,
+	//	ReplaceAttr: opt.ReplaceAttr,
+	//	AddSource:   opt.AddSource,
+	//})
+	var handler Handler
 	switch opt.Format {
 	case FormatJSON:
 		handler = NewJSONHandler(output, &HandlerOptions{
@@ -171,7 +163,7 @@ func New(ss ...Setting) *Logger {
 			NoColor:     opt.NoColor,
 		})
 	case FormatDev:
-		handler = NewDevslogHandler(output, &DevslogOptions{
+		handler = NewDevSlogHandler(output, &DevSlogOptions{
 			HandlerOptions: &HandlerOptions{
 				Level:       opt.Level,
 				ReplaceAttr: opt.ReplaceAttr,
@@ -199,7 +191,7 @@ func New(ss ...Setting) *Logger {
 	}
 
 	defaultLogger = slog.New(handler)
-	if opt.UseDefault {
+	if opt.Default {
 		slog.SetDefault(defaultLogger)
 	}
 

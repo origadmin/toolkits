@@ -1,4 +1,9 @@
-package loge
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package sloge implements the functions, types, and interfaces for the module.
+package sloge
 
 type Setting = func(*Option)
 
@@ -8,14 +13,14 @@ type Option struct {
 	FileName         string
 	Format           Format
 	TimeLayout       string
-	DisableConsole   bool
+	Console          bool
 	Level            Leveler
 	ReplaceAttr      func(groups []string, attr Attr) Attr
 	AddSource        bool
 	LumberjackConfig *LumberjackConfig
 	DevConfig        *DevConfig
 	NoColor          bool
-	UseDefault       bool
+	Default          bool
 }
 
 var (
@@ -57,10 +62,10 @@ func WithTimeLayout(timeLayout string) Setting {
 	}
 }
 
-// WithDisableConsole WithEnableConsole write log to os.Stdout or os.Stderr
-func WithDisableConsole() Setting {
+// WithConsole set the log to console or /dev/null
+func WithConsole(set bool) Setting {
 	return func(opt *Option) {
-		opt.DisableConsole = true
+		opt.Console = set
 	}
 }
 
@@ -99,10 +104,10 @@ func WithNoColor() Setting {
 	}
 }
 
-// WithUseDefault use output as slog.Default()
-func WithUseDefault() Setting {
+// WithDefault use output as slog.Default()
+func WithDefault(set bool) Setting {
 	return func(opt *Option) {
-		opt.UseDefault = true
+		opt.Default = set
 	}
 }
 

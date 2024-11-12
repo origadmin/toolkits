@@ -4,23 +4,33 @@ package config.v1;
 
 import "google/protobuf/duration.proto";
 
+option cc_enable_arenas = true;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option java_multiple_files = true;
+option java_outer_classname = "CorsProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
 
-message DataConfig {
+message Data {
     // Database
     message Database {
-        bool debug = 1; // Debugging
-
-        string driver = 2;  // Driver name: mysql, postgresql, mongodb, sqlite......
-        string source = 3;  // Data source (DSN string)
-
-        bool migrate = 10; // Data migration switch
-
-        bool enable_trace = 12; // Link tracking switch
-        bool enable_metrics = 13; // Performance analysis switch
-
-        int32 max_idle_connections = 20; // Maximum number of free connections in the connection pool
-        int32 max_open_connections = 21; // Maximum number of open connections in the connection pool
-        google.protobuf.Duration connection_max_lifetime = 22; // Maximum length of time that the connection can be reused
+        // Debugging
+        bool debug = 1;
+        // Driver name: mysql, postgresql, mongodb, sqlite......
+        string driver = 2;
+        // Data source (DSN string)
+        string source = 3;
+        // Data migration switch
+        bool migrate = 10;
+        // Link tracking switch
+        bool enable_trace = 12;
+        // Performance analysis switch
+        bool enable_metrics = 13;
+        // Maximum number of free connections in the connection pool
+        int32 max_idle_connections = 20;
+        // Maximum number of open connections in the connection pool
+        int32 max_open_connections = 21;
+        // Maximum length of time that the connection can be reused
+        google.protobuf.Duration connection_max_lifetime = 22;
     }
 }

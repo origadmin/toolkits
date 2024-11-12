@@ -8,7 +8,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	logger "github.com/origadmin/slog-kratos"
 
-	"github.com/origadmin/toolkits/loge"
 	"github.com/origadmin/toolkits/runtime/config"
 )
 
@@ -19,7 +18,7 @@ func Middleware(cfg *config.LoggerConfig, l log.Logger) (middleware.Middleware, 
 		return logging.Server(l), nil
 	}
 
-	nlog := loge.New(FromLoggerConfig(cfg))
+	nlog := sloge.New(FromLoggerConfig(cfg))
 	l = logger.NewLogger(logger.WithLogger(nlog))
 	return logging.Server(l), nil
 }
@@ -28,18 +27,18 @@ func NewLogger(cfg *config.LoggerConfig) log.Logger {
 	return log.NewStdLogger(os.Stdout)
 }
 
-func FromLoggerConfig(cfg *config.LoggerConfig) loge.Setting {
-	return func(option *loge.Option) {
+func FromLoggerConfig(cfg *config.LoggerConfig) sloge.Setting {
+	return func(option *sloge.Option) {
 		//option.OutputPath = cfg.Path
 		//option.Format = cfg.Format
 		//option.TimeLayout = cfg.TimeLayout
-		//option.DisableConsole = cfg.DisableConsole
+		//option.Console = cfg.Console
 		//option.Level = cfg.Level
 		//option.ReplaceAttr = cfg.ReplaceAttr
 		//option.AddSource = cfg.AddSource
 		//option.LumberjackConfig = cfg.Lumberjack
 		//option.DevConfig = cfg.Dev
 		//option.NoColor = cfg.NoColor
-		//option.UseDefault = cfg.UseDefault
+		//option.Default = cfg.Default
 	}
 }

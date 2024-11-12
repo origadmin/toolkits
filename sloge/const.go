@@ -1,4 +1,9 @@
-package loge
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package sloge implements the functions, types, and interfaces for the module.
+package sloge
 
 import (
 	"log/slog"
@@ -8,6 +13,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// slog is a wrapper around slog
 const (
 	KindAny       = slog.KindAny
 	KindBool      = slog.KindBool
@@ -27,7 +33,10 @@ const (
 	MessageKey    = slog.MessageKey
 	SourceKey     = slog.SourceKey
 	TimeKey       = slog.TimeKey
+)
 
+// devslog is a wrapper around devslog
+const (
 	Black        = devslog.Black
 	Blue         = devslog.Blue
 	Cyan         = devslog.Cyan
@@ -39,6 +48,7 @@ const (
 	Yellow       = devslog.Yellow
 )
 
+// slog is a wrapper around slog
 type (
 	Attr           = slog.Attr
 	Handler        = slog.Handler
@@ -54,40 +64,48 @@ type (
 	Source         = slog.Source
 	TextHandler    = slog.TextHandler
 	Value          = slog.Value
+)
 
+type (
+	// TintOptions is a wrapper around tint.Options
 	TintOptions = tint.Options
+)
 
+// devslog is a wrapper around devslog
+type (
 	Color          = devslog.Color
-	DevslogOptions = devslog.Options
+	DevSlogOptions = devslog.Options
+)
 
+type (
+	// LumberjackLogger is a wrapper around lumberjack.Logger
 	LumberjackLogger = lumberjack.Logger
 )
 
 var (
-	Any           = slog.Any
-	AnyValue      = slog.AnyValue
-	Bool          = slog.Bool
-	BoolValue     = slog.BoolValue
-	Debug         = slog.Debug
-	DebugContext  = slog.DebugContext
-	Default       = slog.Default
-	Duration      = slog.Duration
-	DurationValue = slog.DurationValue
-	Error         = slog.Error
-	ErrorContext  = slog.ErrorContext
-	Float64       = slog.Float64
-	Float64Value  = slog.Float64Value
-	Group         = slog.Group
-	GroupValue    = slog.GroupValue
-	Info          = slog.Info
-	InfoContext   = slog.InfoContext
-	Int           = slog.Int
-	Int64         = slog.Int64
-	Int64Value    = slog.Int64Value
-	IntValue      = slog.IntValue
-	Log           = slog.Log
-	LogAttrs      = slog.LogAttrs
-
+	Any               = slog.Any
+	AnyValue          = slog.AnyValue
+	Bool              = slog.Bool
+	BoolValue         = slog.BoolValue
+	Debug             = slog.Debug
+	DebugContext      = slog.DebugContext
+	Default           = slog.Default
+	Duration          = slog.Duration
+	DurationValue     = slog.DurationValue
+	Error             = slog.Error
+	ErrorContext      = slog.ErrorContext
+	Float64           = slog.Float64
+	Float64Value      = slog.Float64Value
+	Group             = slog.Group
+	GroupValue        = slog.GroupValue
+	Info              = slog.Info
+	InfoContext       = slog.InfoContext
+	Int               = slog.Int
+	Int64             = slog.Int64
+	Int64Value        = slog.Int64Value
+	IntValue          = slog.IntValue
+	Log               = slog.Log
+	LogAttrs          = slog.LogAttrs
 	NewJSONHandler    = slog.NewJSONHandler
 	NewLogLogger      = slog.NewLogLogger
 	NewRecord         = slog.NewRecord
@@ -103,7 +121,15 @@ var (
 	Warn              = slog.Warn
 	WarnContext       = slog.WarnContext
 	With              = slog.With
-	Err               = tint.Err
-	NewTintHandler    = tint.NewHandler
-	NewDevslogHandler = devslog.NewHandler
+)
+
+// tint is a wrapper around tint
+var (
+	Err            = tint.Err
+	NewTintHandler = tint.NewHandler
+)
+
+var (
+	// NewDevSlogHandler is a wrapper around devslog.NewHandler
+	NewDevSlogHandler = devslog.NewHandler
 )

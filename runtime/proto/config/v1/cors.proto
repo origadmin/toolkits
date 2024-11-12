@@ -4,10 +4,15 @@ package config.v1;
 
 import "google/protobuf/duration.proto";
 
+option cc_enable_arenas = true;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option java_multiple_files = true;
+option java_outer_classname = "CorsProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
 
 // cors config.
-message CorsConfig {
+message Cors {
     // AllowCredentials indicates whether the request can include user credentials like
     // cookies, HTTP authentication or client side SSL certificates.
     bool allow_credentials = 2 [json_name = "allow_credentials"];
