@@ -1,4 +1,4 @@
-package dorm
+package dbo
 
 import (
 	"github.com/origadmin/toolkits/context"
