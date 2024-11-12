@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package config.v1;
+
+option cc_enable_arenas = true;
+option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option java_multiple_files = true;
+option java_outer_classname = "CorsProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
+
+// Task config.
+message Task {
+    // Asynq
+    message Asynq {
+        string endpoint = 1;  // Peer network address
+        string password = 2; // redis Login password
+        int32 db = 3;// Database index
+        string location = 4;// Time Zone
+    }
+
+    // Machinery
+    message Machinery {
+        repeated string brokers = 1;  // broker address, which can be specified as Redis, AMQP, or AWS SQS according to the actual storage medium used;
+        repeated string backends = 2;  // backend configures the media for storing results. The value can be Redis, memcached, or mongodb as required.  }
+    }
+
+    // Cron
+    message Cron {
+        string endpoint = 1;  // Peer network address
+        string password = 2; // redis Login password
+        int32 db = 3;// Database index
+        string location = 4;// Time Zone
+    }
+
+    string type = 1 [json_name = "type", (buf.validate.field).string = {in: ["none", "asynq", "machinery", "cron"]}];
+    string name = 2 [json_name = "name"];
+
+    Asynq asynq = 3 [json_name = "asynq"];
+    Machinery machinery = 4 [json_name = "machinery"];
+    Cron cron = 5 [json_name = "cron"];
+}

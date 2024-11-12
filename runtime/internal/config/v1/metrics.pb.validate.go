@@ -35,22 +35,21 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on MetricConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on Metric with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *MetricConfig) Validate() error {
+func (m *Metric) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on MetricConfig with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in MetricConfigMultiError, or
-// nil if none found.
-func (m *MetricConfig) ValidateAll() error {
+// ValidateAll checks the field values on Metric with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in MetricMultiError, or nil if none found.
+func (m *Metric) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *MetricConfig) validate(all bool) error {
+func (m *Metric) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -62,18 +61,18 @@ func (m *MetricConfig) validate(all bool) error {
 	// no validation rules for Address
 
 	if len(errors) > 0 {
-		return MetricConfigMultiError(errors)
+		return MetricMultiError(errors)
 	}
 
 	return nil
 }
 
-// MetricConfigMultiError is an error wrapping multiple validation errors
-// returned by MetricConfig.ValidateAll() if the designated constraints aren't met.
-type MetricConfigMultiError []error
+// MetricMultiError is an error wrapping multiple validation errors returned by
+// Metric.ValidateAll() if the designated constraints aren't met.
+type MetricMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m MetricConfigMultiError) Error() string {
+func (m MetricMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -82,11 +81,11 @@ func (m MetricConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m MetricConfigMultiError) AllErrors() []error { return m }
+func (m MetricMultiError) AllErrors() []error { return m }
 
-// MetricConfigValidationError is the validation error returned by
-// MetricConfig.Validate if the designated constraints aren't met.
-type MetricConfigValidationError struct {
+// MetricValidationError is the validation error returned by Metric.Validate if
+// the designated constraints aren't met.
+type MetricValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -94,22 +93,22 @@ type MetricConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e MetricConfigValidationError) Field() string { return e.field }
+func (e MetricValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MetricConfigValidationError) Reason() string { return e.reason }
+func (e MetricValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MetricConfigValidationError) Cause() error { return e.cause }
+func (e MetricValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MetricConfigValidationError) Key() bool { return e.key }
+func (e MetricValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MetricConfigValidationError) ErrorName() string { return "MetricConfigValidationError" }
+func (e MetricValidationError) ErrorName() string { return "MetricValidationError" }
 
 // Error satisfies the builtin error interface
-func (e MetricConfigValidationError) Error() string {
+func (e MetricValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -121,14 +120,14 @@ func (e MetricConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMetricConfig.%s: %s%s",
+		"invalid %sMetric.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MetricConfigValidationError{}
+var _ error = MetricValidationError{}
 
 var _ interface {
 	Field() string
@@ -136,4 +135,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MetricConfigValidationError{}
+} = MetricValidationError{}
