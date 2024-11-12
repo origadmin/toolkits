@@ -35,22 +35,21 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on TraceConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on Trace with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *TraceConfig) Validate() error {
+func (m *Trace) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on TraceConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in TraceConfigMultiError, or
-// nil if none found.
-func (m *TraceConfig) ValidateAll() error {
+// ValidateAll checks the field values on Trace with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in TraceMultiError, or nil if none found.
+func (m *Trace) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *TraceConfig) validate(all bool) error {
+func (m *Trace) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -62,18 +61,18 @@ func (m *TraceConfig) validate(all bool) error {
 	// no validation rules for Endpoint
 
 	if len(errors) > 0 {
-		return TraceConfigMultiError(errors)
+		return TraceMultiError(errors)
 	}
 
 	return nil
 }
 
-// TraceConfigMultiError is an error wrapping multiple validation errors
-// returned by TraceConfig.ValidateAll() if the designated constraints aren't met.
-type TraceConfigMultiError []error
+// TraceMultiError is an error wrapping multiple validation errors returned by
+// Trace.ValidateAll() if the designated constraints aren't met.
+type TraceMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m TraceConfigMultiError) Error() string {
+func (m TraceMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -82,11 +81,11 @@ func (m TraceConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m TraceConfigMultiError) AllErrors() []error { return m }
+func (m TraceMultiError) AllErrors() []error { return m }
 
-// TraceConfigValidationError is the validation error returned by
-// TraceConfig.Validate if the designated constraints aren't met.
-type TraceConfigValidationError struct {
+// TraceValidationError is the validation error returned by Trace.Validate if
+// the designated constraints aren't met.
+type TraceValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -94,22 +93,22 @@ type TraceConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e TraceConfigValidationError) Field() string { return e.field }
+func (e TraceValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e TraceConfigValidationError) Reason() string { return e.reason }
+func (e TraceValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e TraceConfigValidationError) Cause() error { return e.cause }
+func (e TraceValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e TraceConfigValidationError) Key() bool { return e.key }
+func (e TraceValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e TraceConfigValidationError) ErrorName() string { return "TraceConfigValidationError" }
+func (e TraceValidationError) ErrorName() string { return "TraceValidationError" }
 
 // Error satisfies the builtin error interface
-func (e TraceConfigValidationError) Error() string {
+func (e TraceValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -121,14 +120,14 @@ func (e TraceConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sTraceConfig.%s: %s%s",
+		"invalid %sTrace.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = TraceConfigValidationError{}
+var _ error = TraceValidationError{}
 
 var _ interface {
 	Field() string
@@ -136,4 +135,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = TraceConfigValidationError{}
+} = TraceValidationError{}

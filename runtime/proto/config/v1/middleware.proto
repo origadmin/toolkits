@@ -2,19 +2,50 @@ syntax = "proto3";
 
 package config.v1;
 
-import "config/v1/cors.proto";
-import "config/v1/logger.proto";
-import "config/v1/metrics.proto";
-import "config/v1/security.proto";
+import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 
+option cc_enable_arenas = true;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option java_multiple_files = true;
+option java_outer_classname = "CorsProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
 
-message MiddlewareConfig {
-    CorsConfig cors = 1 [json_name = "cors"];
-    MetricConfig metric = 2 [json_name = "metric"];
-    LoggerConfig logger = 3 [json_name = "logger"];
-    SecurityConfig security = 4 [json_name = "security"];
+message Middleware {
+
+    // Rate limiter
+    message RateLimiter {
+        message Redis {
+            string addr = 1 [json_name = "addr"];
+            string username = 2 [json_name = "username"];
+            string password = 3 [json_name = "password"];
+            int64 db = 4 [json_name = "db"];
+        }
+        message Memory {
+            google.protobuf.Duration expiration = 1 [json_name = "expiration"];
+            google.protobuf.Duration cleanup_interval = 2 [json_name = "cleanup_interval"];
+        }
+        string name = 1; // rate limiter name, supported: bbr.
+        int64 period = 2 [json_name = "period"];
+        // The number of requests allowed in a window of time
+        int64 x_ratelimit_limit = 5 [json_name = "x_ratelimit_limit"];
+        // The number of requests that can still be made in the current window of time
+        int64 x_ratelimit_remaining = 6 [json_name = "x_ratelimit_remaining"];
+        // The number of seconds until the current rate limit window completely resets
+        int64 x_ratelimit_reset = 7 [json_name = "x_ratelimit_reset"];
+        // When rate limited, the number of seconds to wait before another request will be accepted
+        int64 retry_after = 8 [json_name = "retry_after"];
+
+        // memory/redis
+        string store_type = 100 [json_name = "store_type", (buf.validate.field).string = {in: ["memory", "redis"]}];
+        Memory memory = 101;
+        Redis redis = 102;
+    }
+
+    //    MetricConfig metric = 2 [json_name = "metric"];
+    //    LoggerConfig logger = 3 [json_name = "logger"];
+    //    SecurityConfig security = 4 [json_name = "security"];
 
     google.protobuf.Duration timeout = 5 [json_name = "timeout"];
 }

@@ -32,5 +32,5 @@ message SayHelloResponse {
 }
 
 message ExampleCors {
-  config.v1.CorsConfig cors = 1;
+  config.v1.Cors cors = 1;
 }

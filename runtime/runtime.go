@@ -59,12 +59,12 @@ func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
 }
 
 // NewDiscovery creates a new Discovery using the registered RegistryBuilder.
-func NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
+func NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
 	return build.NewDiscovery(cfg)
 }
 
 // NewRegistrar creates a new Registrar using the registered RegistryBuilder.
-func NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
+func NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
 	return build.NewRegistrar(cfg)
 }
 

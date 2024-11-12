@@ -4,23 +4,50 @@ package config.v1;
 
 import "google/protobuf/duration.proto";
 
+option cc_enable_arenas = true;
 option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option java_multiple_files = true;
+option java_outer_classname = "CorsProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
 
-message DataConfig {
+message Data {
     // Database
     message Database {
-        bool debug = 1; // Debugging
+        // Debugging
+        bool debug = 1 [json_name = "debug"];
+        // Driver name: mysql, postgresql, mongodb, sqlite......
+        string dialect = 2 [json_name = "dialect"];
+        // Data source (DSN string)
+        string source = 3 [json_name = "source"];
+        // Data migration switch
+        bool migrate = 10 [json_name = "migrate"];
+        // Link tracking switch
+        bool enable_trace = 12 [json_name = "enable_trace"];
+        // Performance analysis switch
+        bool enable_metrics = 13 [json_name = "enable_metrics"];
+        // Maximum number of free connections in the connection pool
+        int32 max_idle_connections = 20 [json_name = "max_idle_connections"];
+        // Maximum number of open connections in the connection pool
+        int32 max_open_connections = 21 [json_name = "max_open_connections"];
+        // Maximum length of time that the connection can be reused
+        google.protobuf.Duration connection_max_lifetime = 22 [json_name = "connection_max_lifetime"];
+    }
 
-        string driver = 2;  // Driver name: mysql, postgresql, mongodb, sqlite......
-        string source = 3;  // Data source (DSN string)
+    message Storage {
+        message File {
+            string root = 1;
+        }
+        message Redis {
+        }
+        message Mongo {
+        }
+        message Oss {
 
-        bool migrate = 10; // Data migration switch
-
-        bool enable_trace = 12; // Link tracking switch
-        bool enable_metrics = 13; // Performance analysis switch
-
-        int32 max_idle_connections = 20; // Maximum number of free connections in the connection pool
-        int32 max_open_connections = 21; // Maximum number of open connections in the connection pool
-        google.protobuf.Duration connection_max_lifetime = 22; // Maximum length of time that the connection can be reused
+        }
+        File file = 1;
+        Redis redis = 2;
+        Mongo mongo = 3;
+        Oss oss = 4;
     }
 }

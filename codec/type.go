@@ -1,12 +1,13 @@
 package codec
 
 import (
+	"io"
+
 	"github.com/origadmin/toolkits/codec/ini"
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
 	"github.com/origadmin/toolkits/codec/xml"
 	"github.com/origadmin/toolkits/codec/yaml"
-	"github.com/origadmin/toolkits/io"
 )
 
 //go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=Type

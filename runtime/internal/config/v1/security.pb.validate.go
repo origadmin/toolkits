@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on AuthorizationConfig with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *AuthorizationConfig) Validate() error {
+// Validate checks the field values on Authorization with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Authorization) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on AuthorizationConfig with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// AuthorizationConfigMultiError, or nil if none found.
-func (m *AuthorizationConfig) ValidateAll() error {
+// ValidateAll checks the field values on Authorization with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in AuthorizationMultiError, or
+// nil if none found.
+func (m *Authorization) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *AuthorizationConfig) validate(all bool) error {
+func (m *Authorization) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ func (m *AuthorizationConfig) validate(all bool) error {
 		switch v := interface{}(m.GetExpiredTime()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, AuthorizationConfigValidationError{
+				errors = append(errors, AuthorizationValidationError{
 					field:  "ExpiredTime",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -75,7 +75,7 @@ func (m *AuthorizationConfig) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, AuthorizationConfigValidationError{
+				errors = append(errors, AuthorizationValidationError{
 					field:  "ExpiredTime",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -84,7 +84,7 @@ func (m *AuthorizationConfig) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetExpiredTime()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return AuthorizationConfigValidationError{
+			return AuthorizationValidationError{
 				field:  "ExpiredTime",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -93,19 +93,19 @@ func (m *AuthorizationConfig) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return AuthorizationConfigMultiError(errors)
+		return AuthorizationMultiError(errors)
 	}
 
 	return nil
 }
 
-// AuthorizationConfigMultiError is an error wrapping multiple validation
-// errors returned by AuthorizationConfig.ValidateAll() if the designated
-// constraints aren't met.
-type AuthorizationConfigMultiError []error
+// AuthorizationMultiError is an error wrapping multiple validation errors
+// returned by Authorization.ValidateAll() if the designated constraints
+// aren't met.
+type AuthorizationMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m AuthorizationConfigMultiError) Error() string {
+func (m AuthorizationMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -114,11 +114,11 @@ func (m AuthorizationConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m AuthorizationConfigMultiError) AllErrors() []error { return m }
+func (m AuthorizationMultiError) AllErrors() []error { return m }
 
-// AuthorizationConfigValidationError is the validation error returned by
-// AuthorizationConfig.Validate if the designated constraints aren't met.
-type AuthorizationConfigValidationError struct {
+// AuthorizationValidationError is the validation error returned by
+// Authorization.Validate if the designated constraints aren't met.
+type AuthorizationValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -126,24 +126,22 @@ type AuthorizationConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e AuthorizationConfigValidationError) Field() string { return e.field }
+func (e AuthorizationValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AuthorizationConfigValidationError) Reason() string { return e.reason }
+func (e AuthorizationValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AuthorizationConfigValidationError) Cause() error { return e.cause }
+func (e AuthorizationValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AuthorizationConfigValidationError) Key() bool { return e.key }
+func (e AuthorizationValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AuthorizationConfigValidationError) ErrorName() string {
-	return "AuthorizationConfigValidationError"
-}
+func (e AuthorizationValidationError) ErrorName() string { return "AuthorizationValidationError" }
 
 // Error satisfies the builtin error interface
-func (e AuthorizationConfigValidationError) Error() string {
+func (e AuthorizationValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -155,14 +153,14 @@ func (e AuthorizationConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAuthorizationConfig.%s: %s%s",
+		"invalid %sAuthorization.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AuthorizationConfigValidationError{}
+var _ error = AuthorizationValidationError{}
 
 var _ interface {
 	Field() string
@@ -170,24 +168,23 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AuthorizationConfigValidationError{}
+} = AuthorizationValidationError{}
 
-// Validate checks the field values on CasbinConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on Casbin with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *CasbinConfig) Validate() error {
+func (m *Casbin) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on CasbinConfig with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CasbinConfigMultiError, or
-// nil if none found.
-func (m *CasbinConfig) ValidateAll() error {
+// ValidateAll checks the field values on Casbin with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in CasbinMultiError, or nil if none found.
+func (m *Casbin) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *CasbinConfig) validate(all bool) error {
+func (m *Casbin) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -199,18 +196,18 @@ func (m *CasbinConfig) validate(all bool) error {
 	// no validation rules for ModelFile
 
 	if len(errors) > 0 {
-		return CasbinConfigMultiError(errors)
+		return CasbinMultiError(errors)
 	}
 
 	return nil
 }
 
-// CasbinConfigMultiError is an error wrapping multiple validation errors
-// returned by CasbinConfig.ValidateAll() if the designated constraints aren't met.
-type CasbinConfigMultiError []error
+// CasbinMultiError is an error wrapping multiple validation errors returned by
+// Casbin.ValidateAll() if the designated constraints aren't met.
+type CasbinMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m CasbinConfigMultiError) Error() string {
+func (m CasbinMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -219,11 +216,11 @@ func (m CasbinConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m CasbinConfigMultiError) AllErrors() []error { return m }
+func (m CasbinMultiError) AllErrors() []error { return m }
 
-// CasbinConfigValidationError is the validation error returned by
-// CasbinConfig.Validate if the designated constraints aren't met.
-type CasbinConfigValidationError struct {
+// CasbinValidationError is the validation error returned by Casbin.Validate if
+// the designated constraints aren't met.
+type CasbinValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -231,22 +228,22 @@ type CasbinConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e CasbinConfigValidationError) Field() string { return e.field }
+func (e CasbinValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e CasbinConfigValidationError) Reason() string { return e.reason }
+func (e CasbinValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e CasbinConfigValidationError) Cause() error { return e.cause }
+func (e CasbinValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e CasbinConfigValidationError) Key() bool { return e.key }
+func (e CasbinValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e CasbinConfigValidationError) ErrorName() string { return "CasbinConfigValidationError" }
+func (e CasbinValidationError) ErrorName() string { return "CasbinValidationError" }
 
 // Error satisfies the builtin error interface
-func (e CasbinConfigValidationError) Error() string {
+func (e CasbinValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -258,14 +255,14 @@ func (e CasbinConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sCasbinConfig.%s: %s%s",
+		"invalid %sCasbin.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = CasbinConfigValidationError{}
+var _ error = CasbinValidationError{}
 
 var _ interface {
 	Field() string
@@ -273,24 +270,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = CasbinConfigValidationError{}
+} = CasbinValidationError{}
 
-// Validate checks the field values on SecurityConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on Security with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *SecurityConfig) Validate() error {
+func (m *Security) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on SecurityConfig with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in SecurityConfigMultiError,
-// or nil if none found.
-func (m *SecurityConfig) ValidateAll() error {
+// ValidateAll checks the field values on Security with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in SecurityMultiError, or nil
+// if none found.
+func (m *Security) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *SecurityConfig) validate(all bool) error {
+func (m *Security) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -301,7 +298,7 @@ func (m *SecurityConfig) validate(all bool) error {
 		switch v := interface{}(m.GetAuthorization()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SecurityConfigValidationError{
+				errors = append(errors, SecurityValidationError{
 					field:  "Authorization",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -309,7 +306,7 @@ func (m *SecurityConfig) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, SecurityConfigValidationError{
+				errors = append(errors, SecurityValidationError{
 					field:  "Authorization",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -318,7 +315,7 @@ func (m *SecurityConfig) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetAuthorization()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return SecurityConfigValidationError{
+			return SecurityValidationError{
 				field:  "Authorization",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -330,7 +327,7 @@ func (m *SecurityConfig) validate(all bool) error {
 		switch v := interface{}(m.GetCasbin()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SecurityConfigValidationError{
+				errors = append(errors, SecurityValidationError{
 					field:  "Casbin",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -338,7 +335,7 @@ func (m *SecurityConfig) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, SecurityConfigValidationError{
+				errors = append(errors, SecurityValidationError{
 					field:  "Casbin",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -347,7 +344,7 @@ func (m *SecurityConfig) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetCasbin()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return SecurityConfigValidationError{
+			return SecurityValidationError{
 				field:  "Casbin",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -356,19 +353,18 @@ func (m *SecurityConfig) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return SecurityConfigMultiError(errors)
+		return SecurityMultiError(errors)
 	}
 
 	return nil
 }
 
-// SecurityConfigMultiError is an error wrapping multiple validation errors
-// returned by SecurityConfig.ValidateAll() if the designated constraints
-// aren't met.
-type SecurityConfigMultiError []error
+// SecurityMultiError is an error wrapping multiple validation errors returned
+// by Security.ValidateAll() if the designated constraints aren't met.
+type SecurityMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m SecurityConfigMultiError) Error() string {
+func (m SecurityMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -377,11 +373,11 @@ func (m SecurityConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m SecurityConfigMultiError) AllErrors() []error { return m }
+func (m SecurityMultiError) AllErrors() []error { return m }
 
-// SecurityConfigValidationError is the validation error returned by
-// SecurityConfig.Validate if the designated constraints aren't met.
-type SecurityConfigValidationError struct {
+// SecurityValidationError is the validation error returned by
+// Security.Validate if the designated constraints aren't met.
+type SecurityValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -389,22 +385,22 @@ type SecurityConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e SecurityConfigValidationError) Field() string { return e.field }
+func (e SecurityValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e SecurityConfigValidationError) Reason() string { return e.reason }
+func (e SecurityValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e SecurityConfigValidationError) Cause() error { return e.cause }
+func (e SecurityValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e SecurityConfigValidationError) Key() bool { return e.key }
+func (e SecurityValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e SecurityConfigValidationError) ErrorName() string { return "SecurityConfigValidationError" }
+func (e SecurityValidationError) ErrorName() string { return "SecurityValidationError" }
 
 // Error satisfies the builtin error interface
-func (e SecurityConfigValidationError) Error() string {
+func (e SecurityValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -416,14 +412,14 @@ func (e SecurityConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sSecurityConfig.%s: %s%s",
+		"invalid %sSecurity.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = SecurityConfigValidationError{}
+var _ error = SecurityValidationError{}
 
 var _ interface {
 	Field() string
@@ -431,4 +427,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = SecurityConfigValidationError{}
+} = SecurityValidationError{}

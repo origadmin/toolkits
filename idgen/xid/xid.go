@@ -46,7 +46,10 @@ func (x XID) Size() int {
 	return bitSize
 }
 
+type Setting struct {
+}
+
 // New creates a new instance of the XID identifier.
-func New() *XID {
+func New(_ ...Setting) *XID {
 	return &XID{}
 }

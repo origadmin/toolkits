@@ -45,7 +45,10 @@ func (U UUID) Size() int {
 	return bitSize
 }
 
+type Setting struct {
+}
+
 // New creates a new UUID instance
-func New() *UUID {
+func New(_ ...Setting) *UUID {
 	return &UUID{}
 }

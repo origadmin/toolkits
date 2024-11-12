@@ -44,8 +44,12 @@ func (s KSUID) Size() int {
 	return bitSize
 }
 
+type Setting struct {
+}
+
 // New creates a new KSUID generator with a unique node.
-func New() *KSUID {
+func New(_ ...Setting) *KSUID {
+
 	generator, err := ksuid.NewRandom()
 	if err != nil {
 		panic(err)

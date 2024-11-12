@@ -35,27 +35,28 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on CorsConfig with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *CorsConfig) Validate() error {
+// Validate checks the field values on Cors with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Cors) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on CorsConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CorsConfigMultiError, or
-// nil if none found.
-func (m *CorsConfig) ValidateAll() error {
+// ValidateAll checks the field values on Cors with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in CorsMultiError, or nil if none found.
+func (m *Cors) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *CorsConfig) validate(all bool) error {
+func (m *Cors) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
+
+	// no validation rules for Enabled
 
 	// no validation rules for AllowCredentials
 
@@ -63,7 +64,7 @@ func (m *CorsConfig) validate(all bool) error {
 		switch v := interface{}(m.GetMaxAge()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CorsConfigValidationError{
+				errors = append(errors, CorsValidationError{
 					field:  "MaxAge",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -71,7 +72,7 @@ func (m *CorsConfig) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, CorsConfigValidationError{
+				errors = append(errors, CorsValidationError{
 					field:  "MaxAge",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -80,7 +81,7 @@ func (m *CorsConfig) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetMaxAge()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return CorsConfigValidationError{
+			return CorsValidationError{
 				field:  "MaxAge",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -99,18 +100,18 @@ func (m *CorsConfig) validate(all bool) error {
 	// no validation rules for AllowFiles
 
 	if len(errors) > 0 {
-		return CorsConfigMultiError(errors)
+		return CorsMultiError(errors)
 	}
 
 	return nil
 }
 
-// CorsConfigMultiError is an error wrapping multiple validation errors
-// returned by CorsConfig.ValidateAll() if the designated constraints aren't met.
-type CorsConfigMultiError []error
+// CorsMultiError is an error wrapping multiple validation errors returned by
+// Cors.ValidateAll() if the designated constraints aren't met.
+type CorsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m CorsConfigMultiError) Error() string {
+func (m CorsMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -119,11 +120,11 @@ func (m CorsConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m CorsConfigMultiError) AllErrors() []error { return m }
+func (m CorsMultiError) AllErrors() []error { return m }
 
-// CorsConfigValidationError is the validation error returned by
-// CorsConfig.Validate if the designated constraints aren't met.
-type CorsConfigValidationError struct {
+// CorsValidationError is the validation error returned by Cors.Validate if the
+// designated constraints aren't met.
+type CorsValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -131,22 +132,22 @@ type CorsConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e CorsConfigValidationError) Field() string { return e.field }
+func (e CorsValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e CorsConfigValidationError) Reason() string { return e.reason }
+func (e CorsValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e CorsConfigValidationError) Cause() error { return e.cause }
+func (e CorsValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e CorsConfigValidationError) Key() bool { return e.key }
+func (e CorsValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e CorsConfigValidationError) ErrorName() string { return "CorsConfigValidationError" }
+func (e CorsValidationError) ErrorName() string { return "CorsValidationError" }
 
 // Error satisfies the builtin error interface
-func (e CorsConfigValidationError) Error() string {
+func (e CorsValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -158,14 +159,14 @@ func (e CorsConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sCorsConfig.%s: %s%s",
+		"invalid %sCors.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = CorsConfigValidationError{}
+var _ error = CorsValidationError{}
 
 var _ interface {
 	Field() string
@@ -173,4 +174,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = CorsConfigValidationError{}
+} = CorsValidationError{}

@@ -32,7 +32,7 @@ func (b *builder) NewConfig(cfg *config.SourceConfig, opts ...config.Option) (co
 }
 
 // NewRegistrar creates a new Registrar object based on the given RegistryConfig.
-func (b *builder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
+func (b *builder) NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
 	registryBuilder, ok := build.registries[cfg.Type]
@@ -43,7 +43,7 @@ func (b *builder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, 
 }
 
 // NewDiscovery creates a new Discovery object based on the given RegistryConfig.
-func (b *builder) NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
+func (b *builder) NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
 	registryBuilder, ok := build.registries[cfg.Type]

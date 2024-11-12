@@ -7,28 +7,32 @@ managed:
 #      value: github.com/origadmin/toolkits/runtime
 plugins:
   - local: protoc-gen-go
-    out: services
+    out: service
     opt: paths=source_relative
   - local: protoc-gen-openapi
-    out: services
-    opt: naming=proto,fq_schema_naming=true,default_response=false
+    out: service
+    opt:
+      - naming=proto
+      - fq_schema_naming=true
+      - default_response=false
+    strategy: all # This tag will generate all files without split files in different directories.
   - local: protoc-gen-validate
-    out: services
+    out: service
     opt:
       - paths=source_relative
       - lang=go
   - local: protoc-gen-go-http
-    out: services
+    out: service
     opt: paths=source_relative
   - local: protoc-gen-go-errors
-    out: services
+    out: service
     opt: paths=source_relative
   - local: protoc-gen-go-grpc
-    out: services
+    out: service
     opt: paths=source_relative
   - local: protoc-gen-go-gins
-    out: services
+    out: service
     opt: paths=source_relative
 #  - remote: buf.build/community/google-gnostic-openapi:v0.7.0
-#    out: services
+#    out: service
 clean: true

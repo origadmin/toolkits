@@ -1,6 +1,7 @@
 package shortid
 
 import (
+	"cmp"
 	"math/rand/v2"
 
 	"github.com/teris-io/shortid"
@@ -14,7 +15,7 @@ var (
 
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
-	s := New(Settings{})
+	s := New()
 	idgen.Register(s)
 }
 
@@ -46,24 +47,26 @@ func (s ShortID) Size() int {
 	return bitSize
 }
 
-type Settings struct {
+type Setting struct {
 	Worker   uint8
 	Alphabet string
 	Seed     uint64
 }
 
 // New creates a new ShortID generator with a unique node.
-func New(s Settings) *ShortID {
-	if s.Worker > 31 {
-		s.Worker = uint8(rand.Uint32N(31))
+func New(ss ...*Setting) *ShortID {
+	ss = append(ss, &Setting{})
+	o := cmp.Or(ss...)
+	if o.Worker > 31 {
+		o.Worker = uint8(rand.Uint32N(31))
 	}
-	if s.Seed == 0 {
-		s.Seed = rand.Uint64()
+	if o.Seed == 0 {
+		o.Seed = rand.Uint64()
 	}
-	if s.Alphabet == "" {
-		s.Alphabet = shortid.DefaultABC
+	if o.Alphabet == "" {
+		o.Alphabet = shortid.DefaultABC
 	}
-	generator, err := shortid.New(s.Worker, s.Alphabet, s.Seed)
+	generator, err := shortid.New(o.Worker, o.Alphabet, o.Seed)
 	if err != nil {
 		panic(err)
 	}

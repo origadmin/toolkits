@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on RegistryConfig with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on Registry with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *RegistryConfig) Validate() error {
+func (m *Registry) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RegistryConfig with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in RegistryConfigMultiError,
-// or nil if none found.
-func (m *RegistryConfig) ValidateAll() error {
+// ValidateAll checks the field values on Registry with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in RegistryMultiError, or nil
+// if none found.
+func (m *Registry) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RegistryConfig) validate(all bool) error {
+func (m *Registry) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			switch v := interface{}(m.GetConsul()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Consul",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -75,7 +75,7 @@ func (m *RegistryConfig) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Consul",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -84,7 +84,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetConsul()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return RegistryConfigValidationError{
+				return RegistryValidationError{
 					field:  "Consul",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -100,7 +100,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			switch v := interface{}(m.GetEtcd()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Etcd",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -108,7 +108,7 @@ func (m *RegistryConfig) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Etcd",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -117,7 +117,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetEtcd()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return RegistryConfigValidationError{
+				return RegistryValidationError{
 					field:  "Etcd",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -133,7 +133,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			switch v := interface{}(m.GetCustom()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Custom",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -141,7 +141,7 @@ func (m *RegistryConfig) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, RegistryConfigValidationError{
+					errors = append(errors, RegistryValidationError{
 						field:  "Custom",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -150,7 +150,7 @@ func (m *RegistryConfig) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetCustom()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return RegistryConfigValidationError{
+				return RegistryValidationError{
 					field:  "Custom",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -161,19 +161,18 @@ func (m *RegistryConfig) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return RegistryConfigMultiError(errors)
+		return RegistryMultiError(errors)
 	}
 
 	return nil
 }
 
-// RegistryConfigMultiError is an error wrapping multiple validation errors
-// returned by RegistryConfig.ValidateAll() if the designated constraints
-// aren't met.
-type RegistryConfigMultiError []error
+// RegistryMultiError is an error wrapping multiple validation errors returned
+// by Registry.ValidateAll() if the designated constraints aren't met.
+type RegistryMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RegistryConfigMultiError) Error() string {
+func (m RegistryMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -182,11 +181,11 @@ func (m RegistryConfigMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RegistryConfigMultiError) AllErrors() []error { return m }
+func (m RegistryMultiError) AllErrors() []error { return m }
 
-// RegistryConfigValidationError is the validation error returned by
-// RegistryConfig.Validate if the designated constraints aren't met.
-type RegistryConfigValidationError struct {
+// RegistryValidationError is the validation error returned by
+// Registry.Validate if the designated constraints aren't met.
+type RegistryValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -194,22 +193,22 @@ type RegistryConfigValidationError struct {
 }
 
 // Field function returns field value.
-func (e RegistryConfigValidationError) Field() string { return e.field }
+func (e RegistryValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RegistryConfigValidationError) Reason() string { return e.reason }
+func (e RegistryValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RegistryConfigValidationError) Cause() error { return e.cause }
+func (e RegistryValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RegistryConfigValidationError) Key() bool { return e.key }
+func (e RegistryValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RegistryConfigValidationError) ErrorName() string { return "RegistryConfigValidationError" }
+func (e RegistryValidationError) ErrorName() string { return "RegistryValidationError" }
 
 // Error satisfies the builtin error interface
-func (e RegistryConfigValidationError) Error() string {
+func (e RegistryValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -221,14 +220,14 @@ func (e RegistryConfigValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRegistryConfig.%s: %s%s",
+		"invalid %sRegistry.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RegistryConfigValidationError{}
+var _ error = RegistryValidationError{}
 
 var _ interface {
 	Field() string
@@ -236,24 +235,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RegistryConfigValidationError{}
+} = RegistryValidationError{}
 
-// Validate checks the field values on RegistryConfig_Consul with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *RegistryConfig_Consul) Validate() error {
+// Validate checks the field values on Registry_Consul with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *Registry_Consul) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RegistryConfig_Consul with the rules
+// ValidateAll checks the field values on Registry_Consul with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// RegistryConfig_ConsulMultiError, or nil if none found.
-func (m *RegistryConfig_Consul) ValidateAll() error {
+// Registry_ConsulMultiError, or nil if none found.
+func (m *Registry_Consul) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RegistryConfig_Consul) validate(all bool) error {
+func (m *Registry_Consul) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -278,7 +277,7 @@ func (m *RegistryConfig_Consul) validate(all bool) error {
 		switch v := interface{}(m.GetTimeout()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, RegistryConfig_ConsulValidationError{
+				errors = append(errors, Registry_ConsulValidationError{
 					field:  "Timeout",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -286,7 +285,7 @@ func (m *RegistryConfig_Consul) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, RegistryConfig_ConsulValidationError{
+				errors = append(errors, Registry_ConsulValidationError{
 					field:  "Timeout",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -295,7 +294,7 @@ func (m *RegistryConfig_Consul) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetTimeout()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return RegistryConfig_ConsulValidationError{
+			return Registry_ConsulValidationError{
 				field:  "Timeout",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -306,19 +305,19 @@ func (m *RegistryConfig_Consul) validate(all bool) error {
 	// no validation rules for DeregisterCriticalServiceAfter
 
 	if len(errors) > 0 {
-		return RegistryConfig_ConsulMultiError(errors)
+		return Registry_ConsulMultiError(errors)
 	}
 
 	return nil
 }
 
-// RegistryConfig_ConsulMultiError is an error wrapping multiple validation
-// errors returned by RegistryConfig_Consul.ValidateAll() if the designated
-// constraints aren't met.
-type RegistryConfig_ConsulMultiError []error
+// Registry_ConsulMultiError is an error wrapping multiple validation errors
+// returned by Registry_Consul.ValidateAll() if the designated constraints
+// aren't met.
+type Registry_ConsulMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RegistryConfig_ConsulMultiError) Error() string {
+func (m Registry_ConsulMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -327,11 +326,11 @@ func (m RegistryConfig_ConsulMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RegistryConfig_ConsulMultiError) AllErrors() []error { return m }
+func (m Registry_ConsulMultiError) AllErrors() []error { return m }
 
-// RegistryConfig_ConsulValidationError is the validation error returned by
-// RegistryConfig_Consul.Validate if the designated constraints aren't met.
-type RegistryConfig_ConsulValidationError struct {
+// Registry_ConsulValidationError is the validation error returned by
+// Registry_Consul.Validate if the designated constraints aren't met.
+type Registry_ConsulValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -339,24 +338,22 @@ type RegistryConfig_ConsulValidationError struct {
 }
 
 // Field function returns field value.
-func (e RegistryConfig_ConsulValidationError) Field() string { return e.field }
+func (e Registry_ConsulValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RegistryConfig_ConsulValidationError) Reason() string { return e.reason }
+func (e Registry_ConsulValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RegistryConfig_ConsulValidationError) Cause() error { return e.cause }
+func (e Registry_ConsulValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RegistryConfig_ConsulValidationError) Key() bool { return e.key }
+func (e Registry_ConsulValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RegistryConfig_ConsulValidationError) ErrorName() string {
-	return "RegistryConfig_ConsulValidationError"
-}
+func (e Registry_ConsulValidationError) ErrorName() string { return "Registry_ConsulValidationError" }
 
 // Error satisfies the builtin error interface
-func (e RegistryConfig_ConsulValidationError) Error() string {
+func (e Registry_ConsulValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -368,14 +365,14 @@ func (e RegistryConfig_ConsulValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRegistryConfig_Consul.%s: %s%s",
+		"invalid %sRegistry_Consul.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RegistryConfig_ConsulValidationError{}
+var _ error = Registry_ConsulValidationError{}
 
 var _ interface {
 	Field() string
@@ -383,24 +380,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RegistryConfig_ConsulValidationError{}
+} = Registry_ConsulValidationError{}
 
-// Validate checks the field values on RegistryConfig_ETCD with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *RegistryConfig_ETCD) Validate() error {
+// Validate checks the field values on Registry_ETCD with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Registry_ETCD) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RegistryConfig_ETCD with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// RegistryConfig_ETCDMultiError, or nil if none found.
-func (m *RegistryConfig_ETCD) ValidateAll() error {
+// ValidateAll checks the field values on Registry_ETCD with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Registry_ETCDMultiError, or
+// nil if none found.
+func (m *Registry_ETCD) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RegistryConfig_ETCD) validate(all bool) error {
+func (m *Registry_ETCD) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -408,19 +405,19 @@ func (m *RegistryConfig_ETCD) validate(all bool) error {
 	var errors []error
 
 	if len(errors) > 0 {
-		return RegistryConfig_ETCDMultiError(errors)
+		return Registry_ETCDMultiError(errors)
 	}
 
 	return nil
 }
 
-// RegistryConfig_ETCDMultiError is an error wrapping multiple validation
-// errors returned by RegistryConfig_ETCD.ValidateAll() if the designated
-// constraints aren't met.
-type RegistryConfig_ETCDMultiError []error
+// Registry_ETCDMultiError is an error wrapping multiple validation errors
+// returned by Registry_ETCD.ValidateAll() if the designated constraints
+// aren't met.
+type Registry_ETCDMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RegistryConfig_ETCDMultiError) Error() string {
+func (m Registry_ETCDMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -429,11 +426,11 @@ func (m RegistryConfig_ETCDMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RegistryConfig_ETCDMultiError) AllErrors() []error { return m }
+func (m Registry_ETCDMultiError) AllErrors() []error { return m }
 
-// RegistryConfig_ETCDValidationError is the validation error returned by
-// RegistryConfig_ETCD.Validate if the designated constraints aren't met.
-type RegistryConfig_ETCDValidationError struct {
+// Registry_ETCDValidationError is the validation error returned by
+// Registry_ETCD.Validate if the designated constraints aren't met.
+type Registry_ETCDValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -441,24 +438,22 @@ type RegistryConfig_ETCDValidationError struct {
 }
 
 // Field function returns field value.
-func (e RegistryConfig_ETCDValidationError) Field() string { return e.field }
+func (e Registry_ETCDValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RegistryConfig_ETCDValidationError) Reason() string { return e.reason }
+func (e Registry_ETCDValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RegistryConfig_ETCDValidationError) Cause() error { return e.cause }
+func (e Registry_ETCDValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RegistryConfig_ETCDValidationError) Key() bool { return e.key }
+func (e Registry_ETCDValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RegistryConfig_ETCDValidationError) ErrorName() string {
-	return "RegistryConfig_ETCDValidationError"
-}
+func (e Registry_ETCDValidationError) ErrorName() string { return "Registry_ETCDValidationError" }
 
 // Error satisfies the builtin error interface
-func (e RegistryConfig_ETCDValidationError) Error() string {
+func (e Registry_ETCDValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -470,14 +465,14 @@ func (e RegistryConfig_ETCDValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRegistryConfig_ETCD.%s: %s%s",
+		"invalid %sRegistry_ETCD.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RegistryConfig_ETCDValidationError{}
+var _ error = Registry_ETCDValidationError{}
 
 var _ interface {
 	Field() string
@@ -485,24 +480,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RegistryConfig_ETCDValidationError{}
+} = Registry_ETCDValidationError{}
 
-// Validate checks the field values on RegistryConfig_Custom with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *RegistryConfig_Custom) Validate() error {
+// Validate checks the field values on Registry_Custom with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *Registry_Custom) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RegistryConfig_Custom with the rules
+// ValidateAll checks the field values on Registry_Custom with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// RegistryConfig_CustomMultiError, or nil if none found.
-func (m *RegistryConfig_Custom) ValidateAll() error {
+// Registry_CustomMultiError, or nil if none found.
+func (m *Registry_Custom) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RegistryConfig_Custom) validate(all bool) error {
+func (m *Registry_Custom) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -513,7 +508,7 @@ func (m *RegistryConfig_Custom) validate(all bool) error {
 		switch v := interface{}(m.GetConfig()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, RegistryConfig_CustomValidationError{
+				errors = append(errors, Registry_CustomValidationError{
 					field:  "Config",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -521,7 +516,7 @@ func (m *RegistryConfig_Custom) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, RegistryConfig_CustomValidationError{
+				errors = append(errors, Registry_CustomValidationError{
 					field:  "Config",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -530,7 +525,7 @@ func (m *RegistryConfig_Custom) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetConfig()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return RegistryConfig_CustomValidationError{
+			return Registry_CustomValidationError{
 				field:  "Config",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -539,19 +534,19 @@ func (m *RegistryConfig_Custom) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return RegistryConfig_CustomMultiError(errors)
+		return Registry_CustomMultiError(errors)
 	}
 
 	return nil
 }
 
-// RegistryConfig_CustomMultiError is an error wrapping multiple validation
-// errors returned by RegistryConfig_Custom.ValidateAll() if the designated
-// constraints aren't met.
-type RegistryConfig_CustomMultiError []error
+// Registry_CustomMultiError is an error wrapping multiple validation errors
+// returned by Registry_Custom.ValidateAll() if the designated constraints
+// aren't met.
+type Registry_CustomMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RegistryConfig_CustomMultiError) Error() string {
+func (m Registry_CustomMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -560,11 +555,11 @@ func (m RegistryConfig_CustomMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RegistryConfig_CustomMultiError) AllErrors() []error { return m }
+func (m Registry_CustomMultiError) AllErrors() []error { return m }
 
-// RegistryConfig_CustomValidationError is the validation error returned by
-// RegistryConfig_Custom.Validate if the designated constraints aren't met.
-type RegistryConfig_CustomValidationError struct {
+// Registry_CustomValidationError is the validation error returned by
+// Registry_Custom.Validate if the designated constraints aren't met.
+type Registry_CustomValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -572,24 +567,22 @@ type RegistryConfig_CustomValidationError struct {
 }
 
 // Field function returns field value.
-func (e RegistryConfig_CustomValidationError) Field() string { return e.field }
+func (e Registry_CustomValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RegistryConfig_CustomValidationError) Reason() string { return e.reason }
+func (e Registry_CustomValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RegistryConfig_CustomValidationError) Cause() error { return e.cause }
+func (e Registry_CustomValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RegistryConfig_CustomValidationError) Key() bool { return e.key }
+func (e Registry_CustomValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RegistryConfig_CustomValidationError) ErrorName() string {
-	return "RegistryConfig_CustomValidationError"
-}
+func (e Registry_CustomValidationError) ErrorName() string { return "Registry_CustomValidationError" }
 
 // Error satisfies the builtin error interface
-func (e RegistryConfig_CustomValidationError) Error() string {
+func (e Registry_CustomValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -601,14 +594,14 @@ func (e RegistryConfig_CustomValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRegistryConfig_Custom.%s: %s%s",
+		"invalid %sRegistry_Custom.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RegistryConfig_CustomValidationError{}
+var _ error = Registry_CustomValidationError{}
 
 var _ interface {
 	Field() string
@@ -616,4 +609,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RegistryConfig_CustomValidationError{}
+} = Registry_CustomValidationError{}
