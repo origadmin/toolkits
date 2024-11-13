@@ -84,12 +84,24 @@ init:
 	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-lint@latest
 	go install github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking@latest
 
+
+
+.PHONY: deps
+# export protobuf dependencies to ./third_party
+deps:
 	# errors/errors.proto
 	buf export buf.build/kratos/apis -o $(THIRD_PARTY_PATH)
 	# buf/validate/validate.proto
 	buf export buf.build/bufbuild/protovalidate -o $(THIRD_PARTY_PATH)
 	# google/api/*.proto
 	buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
+	# google/protobuf/*.proto
+	buf export buf.build/protocolbuffers/wellknowntypes -o $(THIRD_PARTY_PATH)
+	# validate/validate.proto, used buf/validate/validate.proto instead
+	buf export buf.build/envoyproxy/protoc-gen-validate -o $(THIRD_PARTY_PATH)
+	# openapi/openapi.proto
+	buf export buf.build/gnostic/gnostic -o $(THIRD_PARTY_PATH)
+
 
 .PHONY: examples
 # generate examples proto or use ./examples/generate.go
