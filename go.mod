@@ -4,8 +4,6 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/origadmin/toolkits/codec => ./codec
-
 require (
 	github.com/coocood/freecache v1.2.4
 	github.com/goexts/generic v0.1.0

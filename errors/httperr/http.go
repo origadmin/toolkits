@@ -64,10 +64,10 @@ func LookupID(code int32) (string, bool) {
 
 // Error customize the error structure for implementation errors.Error interface
 type Error struct {
-	ID     string `json:"id,omitempty"`
-	Code   int32  `json:"code,omitempty"`
-	Detail string `json:"detail,omitempty"`
-	//Cause  error  `json:"-"`
+	ID      string `json:"id,omitempty"`
+	Code    int32  `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+	Detail  string `json:"detail,omitempty"`
 }
 
 // Error returns the JSON representation of the error

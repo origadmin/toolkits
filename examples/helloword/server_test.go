@@ -1,4 +1,4 @@
-package examples
+package helloword
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -18,8 +17,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/origadmin/toolkits/runtime/transport/gins"
-
-	"github.com/origadmin/toolkits/examples/service/helloworld/v1"
 )
 
 var _ helloworld.GreeterServiceHTTPServer = &helloServer{}
