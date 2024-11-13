@@ -5,20 +5,19 @@ package codec
 
 import (
 	"encoding/xml"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/origadmin/toolkits/codec/ini"
-	"github.com/origadmin/toolkits/errors"
-
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
 	"github.com/origadmin/toolkits/codec/yaml"
 )
 
-const (
-	ErrUnsupportedEncodeType = errors.String("codec: unsupported encode type")
+var (
+	ErrUnsupportedEncodeType = errors.New("codec: unsupported encode type")
 )
 
 // Encoder interface

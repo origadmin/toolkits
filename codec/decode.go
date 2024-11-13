@@ -4,21 +4,20 @@
 package codec
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/origadmin/toolkits/codec/ini"
-	"github.com/origadmin/toolkits/codec/xml"
-	"github.com/origadmin/toolkits/errors"
-
 	"github.com/origadmin/toolkits/codec/json"
 	"github.com/origadmin/toolkits/codec/toml"
+	"github.com/origadmin/toolkits/codec/xml"
 	"github.com/origadmin/toolkits/codec/yaml"
 )
 
-const (
-	ErrUnsupportedDecodeType = errors.String("codec: unsupported decode type")
+var (
+	ErrUnsupportedDecodeType = errors.New("codec: unsupported decode type")
 )
 
 // Decoder interface
