@@ -21,6 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Data
 type Data struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

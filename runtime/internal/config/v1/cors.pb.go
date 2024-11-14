@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// cors config.
+// Cors
 type Cors struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

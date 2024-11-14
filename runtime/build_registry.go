@@ -10,16 +10,17 @@ import (
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
-// registryBuildRegistry is an interface that defines a method for registering a RegistryBuilder.
-type registryBuildRegistry interface {
-	RegisterRegistry(name string, registryBuilder RegistryBuilder)
-}
-
-// RegistryBuilder is an interface that defines methods for creating a Discovery and a Registrar.
-type RegistryBuilder interface {
-	NewRegistrar(cfg *config.Registry) (registry.Registrar, error)
-	NewDiscovery(cfg *config.Registry) (registry.Discovery, error)
-}
+type (
+	// registryBuildRegistry is an interface that defines a method for registering a RegistryBuilder.
+	registryBuildRegistry interface {
+		RegisterRegistryBuilder(name string, registryBuilder RegistryBuilder)
+	}
+	// RegistryBuilder is an interface that defines methods for creating a Discovery and a Registrar.
+	RegistryBuilder interface {
+		NewRegistrar(cfg *config.Registry) (registry.Registrar, error)
+		NewDiscovery(cfg *config.Registry) (registry.Discovery, error)
+	}
+)
 
 // RegistrarBuildFunc is a function type that takes a *config.RegistryConfig and returns a registry.Registrar and an error.
 type RegistrarBuildFunc func(cfg *config.Registry) (registry.Registrar, error)

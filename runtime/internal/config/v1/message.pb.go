@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Message config
+// Message
 type Message struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

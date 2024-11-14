@@ -11,7 +11,9 @@ option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
+// Data
 message Data {
+    
     // Database
     message Database {
         // Debugging

@@ -20,6 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Logger level
 type Logger_Level int32
 
 const (
@@ -78,7 +79,7 @@ func (Logger_Level) EnumDescriptor() ([]byte, []int) {
 	return file_config_v1_logger_proto_rawDescGZIP(), []int{0, 0}
 }
 
-// logger config.
+// Logger
 type Logger struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

@@ -35,6 +35,280 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on UserMetric with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *UserMetric) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserMetric with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in UserMetricMultiError, or
+// nil if none found.
+func (m *UserMetric) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserMetric) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Timestamp
+
+	// no validation rules for Name
+
+	// no validation rules for Value
+
+	// no validation rules for Labels
+
+	// no validation rules for Unit
+
+	// no validation rules for Type
+
+	// no validation rules for Description
+
+	// no validation rules for Context
+
+	// no validation rules for Metadata
+
+	if len(errors) > 0 {
+		return UserMetricMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserMetricMultiError is an error wrapping multiple validation errors
+// returned by UserMetric.ValidateAll() if the designated constraints aren't met.
+type UserMetricMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserMetricMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserMetricMultiError) AllErrors() []error { return m }
+
+// UserMetricValidationError is the validation error returned by
+// UserMetric.Validate if the designated constraints aren't met.
+type UserMetricValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserMetricValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserMetricValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserMetricValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserMetricValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserMetricValidationError) ErrorName() string { return "UserMetricValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UserMetricValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserMetric.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserMetricValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserMetricValidationError{}
+
+// Validate checks the field values on Security with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Security) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Security with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in SecurityMultiError, or nil
+// if none found.
+func (m *Security) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Security) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetJwt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, SecurityValidationError{
+					field:  "Jwt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, SecurityValidationError{
+					field:  "Jwt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetJwt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SecurityValidationError{
+				field:  "Jwt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetCasbin()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, SecurityValidationError{
+					field:  "Casbin",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, SecurityValidationError{
+					field:  "Casbin",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCasbin()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return SecurityValidationError{
+				field:  "Casbin",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return SecurityMultiError(errors)
+	}
+
+	return nil
+}
+
+// SecurityMultiError is an error wrapping multiple validation errors returned
+// by Security.ValidateAll() if the designated constraints aren't met.
+type SecurityMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SecurityMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SecurityMultiError) AllErrors() []error { return m }
+
+// SecurityValidationError is the validation error returned by
+// Security.Validate if the designated constraints aren't met.
+type SecurityValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SecurityValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SecurityValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SecurityValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SecurityValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SecurityValidationError) ErrorName() string { return "SecurityValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SecurityValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSecurity.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SecurityValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SecurityValidationError{}
+
 // Validate checks the field values on Middleware with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -57,12 +331,24 @@ func (m *Middleware) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for EnableLogging
+
+	// no validation rules for EnableRecovery
+
+	// no validation rules for EnableTracing
+
+	// no validation rules for EnableValidate
+
+	// no validation rules for EnableCircuitBreaker
+
+	// no validation rules for EnableMetadata
+
 	if all {
-		switch v := interface{}(m.GetTimeout()).(type) {
+		switch v := interface{}(m.GetRateLimiter()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, MiddlewareValidationError{
-					field:  "Timeout",
+					field:  "RateLimiter",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -70,16 +356,74 @@ func (m *Middleware) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, MiddlewareValidationError{
-					field:  "Timeout",
+					field:  "RateLimiter",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetTimeout()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetRateLimiter()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return MiddlewareValidationError{
-				field:  "Timeout",
+				field:  "RateLimiter",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetMetadata()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, MiddlewareValidationError{
+					field:  "Metadata",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, MiddlewareValidationError{
+					field:  "Metadata",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return MiddlewareValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetMetrics()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, MiddlewareValidationError{
+					field:  "Metrics",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, MiddlewareValidationError{
+					field:  "Metrics",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetMetrics()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return MiddlewareValidationError{
+				field:  "Metrics",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -163,6 +507,244 @@ var _ interface {
 	ErrorName() string
 } = MiddlewareValidationError{}
 
+// Validate checks the field values on Security_Casbin with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *Security_Casbin) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Security_Casbin with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// Security_CasbinMultiError, or nil if none found.
+func (m *Security_Casbin) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Security_Casbin) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PolicyFile
+
+	// no validation rules for ModelFile
+
+	if len(errors) > 0 {
+		return Security_CasbinMultiError(errors)
+	}
+
+	return nil
+}
+
+// Security_CasbinMultiError is an error wrapping multiple validation errors
+// returned by Security_Casbin.ValidateAll() if the designated constraints
+// aren't met.
+type Security_CasbinMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Security_CasbinMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Security_CasbinMultiError) AllErrors() []error { return m }
+
+// Security_CasbinValidationError is the validation error returned by
+// Security_Casbin.Validate if the designated constraints aren't met.
+type Security_CasbinValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Security_CasbinValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Security_CasbinValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Security_CasbinValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Security_CasbinValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Security_CasbinValidationError) ErrorName() string { return "Security_CasbinValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Security_CasbinValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSecurity_Casbin.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Security_CasbinValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Security_CasbinValidationError{}
+
+// Validate checks the field values on Security_JWT with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Security_JWT) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Security_JWT with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Security_JWTMultiError, or
+// nil if none found.
+func (m *Security_JWT) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Security_JWT) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SigningMethod
+
+	// no validation rules for SigningKey
+
+	// no validation rules for OldSigningKey
+
+	if all {
+		switch v := interface{}(m.GetExpiredTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Security_JWTValidationError{
+					field:  "ExpiredTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Security_JWTValidationError{
+					field:  "ExpiredTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetExpiredTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Security_JWTValidationError{
+				field:  "ExpiredTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return Security_JWTMultiError(errors)
+	}
+
+	return nil
+}
+
+// Security_JWTMultiError is an error wrapping multiple validation errors
+// returned by Security_JWT.ValidateAll() if the designated constraints aren't met.
+type Security_JWTMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Security_JWTMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Security_JWTMultiError) AllErrors() []error { return m }
+
+// Security_JWTValidationError is the validation error returned by
+// Security_JWT.Validate if the designated constraints aren't met.
+type Security_JWTValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Security_JWTValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Security_JWTValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Security_JWTValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Security_JWTValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Security_JWTValidationError) ErrorName() string { return "Security_JWTValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Security_JWTValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSecurity_JWT.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Security_JWTValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Security_JWTValidationError{}
+
 // Validate checks the field values on Middleware_RateLimiter with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -196,8 +778,6 @@ func (m *Middleware_RateLimiter) validate(all bool) error {
 	// no validation rules for XRatelimitReset
 
 	// no validation rules for RetryAfter
-
-	// no validation rules for StoreType
 
 	if all {
 		switch v := interface{}(m.GetMemory()).(type) {
@@ -336,6 +916,248 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = Middleware_RateLimiterValidationError{}
+
+// Validate checks the field values on Middleware_Metrics with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *Middleware_Metrics) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Middleware_Metrics with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// Middleware_MetricsMultiError, or nil if none found.
+func (m *Middleware_Metrics) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Middleware_Metrics) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUserMetrics() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, Middleware_MetricsValidationError{
+						field:  fmt.Sprintf("UserMetrics[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, Middleware_MetricsValidationError{
+						field:  fmt.Sprintf("UserMetrics[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return Middleware_MetricsValidationError{
+					field:  fmt.Sprintf("UserMetrics[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return Middleware_MetricsMultiError(errors)
+	}
+
+	return nil
+}
+
+// Middleware_MetricsMultiError is an error wrapping multiple validation errors
+// returned by Middleware_Metrics.ValidateAll() if the designated constraints
+// aren't met.
+type Middleware_MetricsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Middleware_MetricsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Middleware_MetricsMultiError) AllErrors() []error { return m }
+
+// Middleware_MetricsValidationError is the validation error returned by
+// Middleware_Metrics.Validate if the designated constraints aren't met.
+type Middleware_MetricsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Middleware_MetricsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Middleware_MetricsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Middleware_MetricsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Middleware_MetricsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Middleware_MetricsValidationError) ErrorName() string {
+	return "Middleware_MetricsValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Middleware_MetricsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMiddleware_Metrics.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Middleware_MetricsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Middleware_MetricsValidationError{}
+
+// Validate checks the field values on Middleware_Metadata with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *Middleware_Metadata) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Middleware_Metadata with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// Middleware_MetadataMultiError, or nil if none found.
+func (m *Middleware_Metadata) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Middleware_Metadata) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Prefix
+
+	// no validation rules for Data
+
+	if len(errors) > 0 {
+		return Middleware_MetadataMultiError(errors)
+	}
+
+	return nil
+}
+
+// Middleware_MetadataMultiError is an error wrapping multiple validation
+// errors returned by Middleware_Metadata.ValidateAll() if the designated
+// constraints aren't met.
+type Middleware_MetadataMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Middleware_MetadataMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Middleware_MetadataMultiError) AllErrors() []error { return m }
+
+// Middleware_MetadataValidationError is the validation error returned by
+// Middleware_Metadata.Validate if the designated constraints aren't met.
+type Middleware_MetadataValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Middleware_MetadataValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Middleware_MetadataValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Middleware_MetadataValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Middleware_MetadataValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Middleware_MetadataValidationError) ErrorName() string {
+	return "Middleware_MetadataValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e Middleware_MetadataValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMiddleware_Metadata.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Middleware_MetadataValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Middleware_MetadataValidationError{}
 
 // Validate checks the field values on Middleware_RateLimiter_Redis with the
 // rules defined in the proto definition for this message. If any rules are

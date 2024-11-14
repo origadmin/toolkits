@@ -11,7 +11,7 @@ option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
-// cors config.
+// Cors
 message Cors {
     bool enabled = 1 [json_name = "enabled"];
     // AllowCredentials indicates whether the request can include user credentials like

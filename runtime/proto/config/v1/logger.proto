@@ -9,8 +9,10 @@ option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
-// logger config.
+// Logger
 message Logger {
+
+    // Logger level
     enum Level {
         LEVEL_UNSPECIFIED = 0;
         LEVEL_DEBUG = 1;

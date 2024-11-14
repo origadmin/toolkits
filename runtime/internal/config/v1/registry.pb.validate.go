@@ -61,6 +61,8 @@ func (m *Registry) validate(all bool) error {
 
 	// no validation rules for ServiceName
 
+	// no validation rules for Debug
+
 	if m.Consul != nil {
 
 		if all {

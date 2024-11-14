@@ -8,14 +8,14 @@ import (
 
 // Import the kratos config package and the internal config package
 type (
-	Metric                                       = config.Metric
-	Cors                                         = config.Cors
 	Data                                         = config.Data
 	Data_Database                                = config.Data_Database
 	Data_Storage                                 = config.Data_Storage
 	Data_Storage_File                            = config.Data_Storage_File
 	Data_Storage_Redis                           = config.Data_Storage_Redis
 	Data_Storage_Mongo                           = config.Data_Storage_Mongo
+	Data_Storage_Oss                             = config.Data_Storage_Oss
+	Cors                                         = config.Cors
 	Task                                         = config.Task
 	Task_Asynq                                   = config.Task_Asynq
 	Task_Machinery                               = config.Task_Machinery
@@ -38,27 +38,24 @@ type (
 	Message_Pulsar                               = config.Message_Pulsar
 	Message_Redis                                = config.Message_Redis
 	Message_RocketMQ                             = config.Message_RocketMQ
-	EntrySelector                                = config.EntrySelector
 	Service                                      = config.Service
-	Service_Entry                                = config.Service_Entry
 	Service_GINS                                 = config.Service_GINS
 	Service_HTTP                                 = config.Service_HTTP
 	Service_GRPC                                 = config.Service_GRPC
-	Service_Websocket                            = config.Service_Websocket
-	Service_Middleware                           = config.Service_Middleware
-	Service_Middleware_Metrics                   = config.Service_Middleware_Metrics
-	Service_Middleware_Traces                    = config.Service_Middleware_Traces
-	Service_Middleware_Logger                    = config.Service_Middleware_Logger
-	Service_Middleware_Cors                      = config.Service_Middleware_Cors
 	Registry                                     = config.Registry
 	Registry_Consul                              = config.Registry_Consul
 	Registry_ETCD                                = config.Registry_ETCD
 	Registry_Custom                              = config.Registry_Custom
-	Authorization                                = config.Authorization
-	Casbin                                       = config.Casbin
+	WebSocket                                    = config.WebSocket
+	UserMetric_MetricType                        = config.UserMetric_MetricType
+	UserMetric                                   = config.UserMetric
 	Security                                     = config.Security
 	Middleware                                   = config.Middleware
+	Security_Casbin                              = config.Security_Casbin
+	Security_JWT                                 = config.Security_JWT
 	Middleware_RateLimiter                       = config.Middleware_RateLimiter
+	Middleware_Metrics                           = config.Middleware_Metrics
+	Middleware_Metadata                          = config.Middleware_Metadata
 	Middleware_RateLimiter_Redis                 = config.Middleware_RateLimiter_Redis
 	Middleware_RateLimiter_Memory                = config.Middleware_RateLimiter_Memory
 	CorsMultiError                               = config.CorsMultiError
@@ -75,6 +72,8 @@ type (
 	Data_Storage_RedisValidationError            = config.Data_Storage_RedisValidationError
 	Data_Storage_MongoMultiError                 = config.Data_Storage_MongoMultiError
 	Data_Storage_MongoValidationError            = config.Data_Storage_MongoValidationError
+	Data_Storage_OssMultiError                   = config.Data_Storage_OssMultiError
+	Data_Storage_OssValidationError              = config.Data_Storage_OssValidationError
 	TaskMultiError                               = config.TaskMultiError
 	TaskValidationError                          = config.TaskValidationError
 	Task_AsynqMultiError                         = config.Task_AsynqMultiError
@@ -117,32 +116,15 @@ type (
 	Message_RedisValidationError                 = config.Message_RedisValidationError
 	Message_RocketMQMultiError                   = config.Message_RocketMQMultiError
 	Message_RocketMQValidationError              = config.Message_RocketMQValidationError
-	MetricMultiError                             = config.MetricMultiError
-	MetricValidationError                        = config.MetricValidationError
-	EntrySelectorMultiError                      = config.EntrySelectorMultiError
-	EntrySelectorValidationError                 = config.EntrySelectorValidationError
 	ServiceMultiError                            = config.ServiceMultiError
 	ServiceValidationError                       = config.ServiceValidationError
-	Service_EntryMultiError                      = config.Service_EntryMultiError
-	Service_EntryValidationError                 = config.Service_EntryValidationError
 	Service_GINSMultiError                       = config.Service_GINSMultiError
 	Service_GINSValidationError                  = config.Service_GINSValidationError
 	Service_HTTPMultiError                       = config.Service_HTTPMultiError
 	Service_HTTPValidationError                  = config.Service_HTTPValidationError
 	Service_GRPCMultiError                       = config.Service_GRPCMultiError
 	Service_GRPCValidationError                  = config.Service_GRPCValidationError
-	Service_WebsocketMultiError                  = config.Service_WebsocketMultiError
-	Service_WebsocketValidationError             = config.Service_WebsocketValidationError
-	Service_MiddlewareMultiError                 = config.Service_MiddlewareMultiError
-	Service_MiddlewareValidationError            = config.Service_MiddlewareValidationError
-	Service_Middleware_MetricsMultiError         = config.Service_Middleware_MetricsMultiError
-	Service_Middleware_MetricsValidationError    = config.Service_Middleware_MetricsValidationError
-	Service_Middleware_TracesMultiError          = config.Service_Middleware_TracesMultiError
-	Service_Middleware_TracesValidationError     = config.Service_Middleware_TracesValidationError
-	Service_Middleware_LoggerMultiError          = config.Service_Middleware_LoggerMultiError
-	Service_Middleware_LoggerValidationError     = config.Service_Middleware_LoggerValidationError
-	Service_Middleware_CorsMultiError            = config.Service_Middleware_CorsMultiError
-	Service_Middleware_CorsValidationError       = config.Service_Middleware_CorsValidationError
+	Service_Selector                             = config.Service_Selector
 	RegistryMultiError                           = config.RegistryMultiError
 	RegistryValidationError                      = config.RegistryValidationError
 	Registry_ConsulMultiError                    = config.Registry_ConsulMultiError
@@ -151,16 +133,24 @@ type (
 	Registry_ETCDValidationError                 = config.Registry_ETCDValidationError
 	Registry_CustomMultiError                    = config.Registry_CustomMultiError
 	Registry_CustomValidationError               = config.Registry_CustomValidationError
-	AuthorizationMultiError                      = config.AuthorizationMultiError
-	AuthorizationValidationError                 = config.AuthorizationValidationError
-	CasbinMultiError                             = config.CasbinMultiError
-	CasbinValidationError                        = config.CasbinValidationError
+	WebSocketMultiError                          = config.WebSocketMultiError
+	WebSocketValidationError                     = config.WebSocketValidationError
+	UserMetricMultiError                         = config.UserMetricMultiError
+	UserMetricValidationError                    = config.UserMetricValidationError
 	SecurityMultiError                           = config.SecurityMultiError
 	SecurityValidationError                      = config.SecurityValidationError
 	MiddlewareMultiError                         = config.MiddlewareMultiError
 	MiddlewareValidationError                    = config.MiddlewareValidationError
+	Security_CasbinMultiError                    = config.Security_CasbinMultiError
+	Security_CasbinValidationError               = config.Security_CasbinValidationError
+	Security_JWTMultiError                       = config.Security_JWTMultiError
+	Security_JWTValidationError                  = config.Security_JWTValidationError
 	Middleware_RateLimiterMultiError             = config.Middleware_RateLimiterMultiError
 	Middleware_RateLimiterValidationError        = config.Middleware_RateLimiterValidationError
+	Middleware_MetricsMultiError                 = config.Middleware_MetricsMultiError
+	Middleware_MetricsValidationError            = config.Middleware_MetricsValidationError
+	Middleware_MetadataMultiError                = config.Middleware_MetadataMultiError
+	Middleware_MetadataValidationError           = config.Middleware_MetadataValidationError
 	Middleware_RateLimiter_RedisMultiError       = config.Middleware_RateLimiter_RedisMultiError
 	Middleware_RateLimiter_RedisValidationError  = config.Middleware_RateLimiter_RedisValidationError
 	Middleware_RateLimiter_MemoryMultiError      = config.Middleware_RateLimiter_MemoryMultiError
@@ -184,26 +174,12 @@ type (
 
 // Define variables for proto files
 var (
-	Logger_LEVEL_UNSPECIFIED        = config.Logger_LEVEL_UNSPECIFIED
-	Logger_LEVEL_DEBUG              = config.Logger_LEVEL_DEBUG
-	Logger_LEVEL_INFO               = config.Logger_LEVEL_INFO
-	Logger_LEVEL_WARN               = config.Logger_LEVEL_WARN
-	Logger_LEVEL_ERROR              = config.Logger_LEVEL_ERROR
-	Logger_LEVEL_FATAL              = config.Logger_LEVEL_FATAL
-	File_config_v1_metrics_proto    = config.File_config_v1_metrics_proto
-	File_config_v1_cors_proto       = config.File_config_v1_cors_proto
-	File_config_v1_data_proto       = config.File_config_v1_data_proto
-	File_config_v1_task_proto       = config.File_config_v1_task_proto
-	Logger_Level_name               = config.Logger_Level_name
-	Logger_Level_value              = config.Logger_Level_value
-	File_config_v1_logger_proto     = config.File_config_v1_logger_proto
-	File_config_v1_source_proto     = config.File_config_v1_source_proto
-	File_config_v1_tracer_proto     = config.File_config_v1_tracer_proto
-	File_config_v1_message_proto    = config.File_config_v1_message_proto
-	File_config_v1_service_proto    = config.File_config_v1_service_proto
-	File_config_v1_registry_proto   = config.File_config_v1_registry_proto
-	File_config_v1_security_proto   = config.File_config_v1_security_proto
-	File_config_v1_middleware_proto = config.File_config_v1_middleware_proto
+	Logger_LEVEL_UNSPECIFIED = config.Logger_LEVEL_UNSPECIFIED
+	Logger_LEVEL_DEBUG       = config.Logger_LEVEL_DEBUG
+	Logger_LEVEL_INFO        = config.Logger_LEVEL_INFO
+	Logger_LEVEL_WARN        = config.Logger_LEVEL_WARN
+	Logger_LEVEL_ERROR       = config.Logger_LEVEL_ERROR
+	Logger_LEVEL_FATAL       = config.Logger_LEVEL_FATAL
 )
 
 var (

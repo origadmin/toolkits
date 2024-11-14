@@ -8,16 +8,22 @@ package runtime
 import (
 	"sync"
 
+	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"google.golang.org/grpc"
+
 	"github.com/origadmin/toolkits/runtime/config"
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
 // builder is a struct that holds a map of ConfigBuilders and a map of RegistryBuilders.
 type builder struct {
-	configs     map[string]ConfigBuilder
 	configMux   sync.RWMutex
-	registries  map[string]RegistryBuilder
+	configs     map[string]ConfigBuilder
 	registryMux sync.RWMutex
+	registries  map[string]RegistryBuilder
+	serviceMux  sync.RWMutex
+	services    map[string]ServiceBuilder
 }
 
 // NewConfig creates a new Config object based on the given SourceConfig and options.
@@ -29,6 +35,18 @@ func (b *builder) NewConfig(cfg *config.SourceConfig, opts ...config.Option) (co
 		return nil, ErrNotFound
 	}
 	return configBuilder.NewConfig(cfg, opts...)
+}
+
+// RegisterConfigBuilder registers a new ConfigBuilder with the given name.
+func (b *builder) RegisterConfigBuilder(name string, configBuilder ConfigBuilder) {
+	b.configMux.Lock()
+	defer b.configMux.Unlock()
+	build.configs[name] = configBuilder
+}
+
+// RegisterConfigFunc registers a new ConfigBuilder with the given name and function.
+func (b *builder) RegisterConfigFunc(name string, configBuilder ConfigBuildFunc) {
+	b.RegisterConfigBuilder(name, configBuilder)
 }
 
 // NewRegistrar creates a new Registrar object based on the given RegistryConfig.
@@ -53,20 +71,8 @@ func (b *builder) NewDiscovery(cfg *config.Registry) (registry.Discovery, error)
 	return registryBuilder.NewDiscovery(cfg)
 }
 
-// RegisterConfig registers a new ConfigBuilder with the given name.
-func (b *builder) RegisterConfig(name string, configBuilder ConfigBuilder) {
-	b.configMux.Lock()
-	defer b.configMux.Unlock()
-	build.configs[name] = configBuilder
-}
-
-// RegisterConfigFunc registers a new ConfigBuilder with the given name and function.
-func (b *builder) RegisterConfigFunc(name string, configBuilder ConfigBuildFunc) {
-	b.RegisterConfig(name, configBuilder)
-}
-
-// RegisterRegistry registers a new RegistryBuilder with the given name.
-func (b *builder) RegisterRegistry(name string, registryBuilder RegistryBuilder) {
+// RegisterRegistryBuilder registers a new RegistryBuilder with the given name.
+func (b *builder) RegisterRegistryBuilder(name string, registryBuilder RegistryBuilder) {
 	b.registryMux.Lock()
 	defer b.registryMux.Unlock()
 	build.registries[name] = registryBuilder
@@ -74,8 +80,59 @@ func (b *builder) RegisterRegistry(name string, registryBuilder RegistryBuilder)
 
 // RegisterRegistryFunc registers a new RegistryBuilder with the given name and functions.
 func (b *builder) RegisterRegistryFunc(name string, registryBuilder RegistrarBuildFunc, discoveryBuilder DiscoveryBuildFunc) {
-	b.RegisterRegistry(name, &registryWrap{
+	b.RegisterRegistryBuilder(name, &registryWrap{
 		RegistrarBuildFunc: registryBuilder,
 		DiscoveryBuildFunc: discoveryBuilder,
 	})
+}
+
+// NewGRPCServer creates a new gRPC server based on the given ServiceConfig.
+func (b *builder) NewGRPCServer(cfg *config.Service) (*transgrpc.Server, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	serviceBuilder, ok := build.services[cfg.Name]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return serviceBuilder.NewGRPCServer(cfg)
+}
+
+// NewHTTPServer creates a new HTTP server based on the given ServiceConfig.
+func (b *builder) NewHTTPServer(cfg *config.Service) (*transhttp.Server, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	serviceBuilder, ok := build.services[cfg.Name]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return serviceBuilder.NewHTTPServer(cfg)
+}
+
+// NewGRPCClient creates a new gRPC client based on the given ServiceConfig.
+func (b *builder) NewGRPCClient(cfg *config.Service) (*grpc.ClientConn, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	serviceBuilder, ok := build.services[cfg.Name]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return serviceBuilder.NewGRPCClient(cfg)
+}
+
+// NewHTTPClient creates a new HTTP client based on the given ServiceConfig.
+func (b *builder) NewHTTPClient(cfg *config.Service) (*transhttp.Client, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	serviceBuilder, ok := build.services[cfg.Name]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return serviceBuilder.NewHTTPClient(cfg)
+}
+
+// RegisterServiceBuilder registers a new ServiceBuilder with the given service name.
+func (b *builder) RegisterServiceBuilder(name string, builder ServiceBuilder) {
+	b.serviceMux.Lock()
+	defer b.serviceMux.Unlock()
+	build.services[name] = builder
 }

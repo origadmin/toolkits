@@ -10,27 +10,3 @@ option java_multiple_files = true;
 option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
-
-// Authorization middleware config
-message Authorization {
-    repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
-    string signing_method = 3 [json_name = "signing_method"]; // Signing method
-    string signing_key = 4 [json_name = "signing_key"]; // Signing key
-    string old_signing_key = 5 [json_name = "old_signing_key"]; // Old signing key
-    google.protobuf.Duration expired_time = 6 [json_name = "expired_time"]; // Expired time
-}
-
-// Casbin middleware config
-message Casbin {
-    repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
-    string policy_file = 3 [json_name = "policy_file"]; // Policy file
-    string model_file = 4 [json_name = "model_file"]; // Model file
-}
-
-// Security middleware config.
-message Security {
-    repeated string allowed_method_paths = 2 [json_name = "allowed_method_paths"]; // Direct release method paths
-    Authorization authorization = 5 [json_name = "authorization"]; // Authorization config
-    Casbin casbin = 6 [json_name = "casbin"]; // Casbin config
-
-}

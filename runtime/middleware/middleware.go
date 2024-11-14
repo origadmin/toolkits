@@ -7,6 +7,8 @@ package middleware
 
 import (
 	"github.com/go-kratos/kratos/v2/middleware"
+
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
 type (
@@ -15,6 +17,34 @@ type (
 )
 
 // Chain returns a middleware that executes a chain of middleware.
-func Chain(m ...middleware.Middleware) middleware.Middleware {
+func Chain(m ...Middleware) Middleware {
 	return middleware.Chain(m...)
+}
+
+func NewClient(cfg *config.Middleware) []Middleware {
+	var middlewares []Middleware
+
+	if cfg == nil {
+		return middlewares
+	}
+	middlewares = Recovery(middlewares, cfg.EnableRecovery)
+	middlewares = Validate(middlewares, cfg.EnableValidate)
+	middlewares = TracingClient(middlewares, cfg.EnableTracing)
+	middlewares = MetadataClient(middlewares, cfg.EnableMetadata, cfg.Metadata)
+	middlewares = CircuitBreakerClient(middlewares, cfg.EnableCircuitBreaker)
+	return middlewares
+}
+
+func NewServer(cfg *config.Middleware) []Middleware {
+	var middlewares []Middleware
+
+	if cfg == nil {
+		return middlewares
+	}
+	middlewares = Recovery(middlewares, cfg.EnableRecovery)
+	middlewares = Validate(middlewares, cfg.EnableValidate)
+	middlewares = TracingServer(middlewares, cfg.EnableTracing)
+	middlewares = MetadataServer(middlewares, cfg.EnableMetadata, cfg.Metadata)
+	middlewares = RateLimitServer(middlewares, cfg.RateLimiter)
+	return middlewares
 }
