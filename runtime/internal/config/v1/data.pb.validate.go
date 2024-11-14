@@ -56,6 +56,93 @@ func (m *Data) validate(all bool) error {
 
 	var errors []error
 
+	if all {
+		switch v := interface{}(m.GetDatabase()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Database",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Database",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDatabase()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DataValidationError{
+				field:  "Database",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetCache()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Cache",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Cache",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCache()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DataValidationError{
+				field:  "Cache",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetStorage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Storage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DataValidationError{
+					field:  "Storage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetStorage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DataValidationError{
+				field:  "Storage",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return DataMultiError(errors)
 	}
@@ -157,7 +244,7 @@ func (m *Data_Database) validate(all bool) error {
 
 	// no validation rules for Debug
 
-	// no validation rules for Dialect
+	// no validation rules for Driver
 
 	// no validation rules for Source
 
@@ -278,6 +365,797 @@ var _ interface {
 	ErrorName() string
 } = Data_DatabaseValidationError{}
 
+// Validate checks the field values on Data_Redis with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Redis) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_Redis with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_RedisMultiError, or
+// nil if none found.
+func (m *Data_Redis) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_Redis) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Network
+
+	// no validation rules for Addr
+
+	// no validation rules for Password
+
+	// no validation rules for Db
+
+	if all {
+		switch v := interface{}(m.GetDialTimeout()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "DialTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "DialTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDialTimeout()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_RedisValidationError{
+				field:  "DialTimeout",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetReadTimeout()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "ReadTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "ReadTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetReadTimeout()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_RedisValidationError{
+				field:  "ReadTimeout",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetWriteTimeout()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "WriteTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_RedisValidationError{
+					field:  "WriteTimeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetWriteTimeout()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_RedisValidationError{
+				field:  "WriteTimeout",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return Data_RedisMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_RedisMultiError is an error wrapping multiple validation errors
+// returned by Data_Redis.ValidateAll() if the designated constraints aren't met.
+type Data_RedisMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_RedisMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_RedisMultiError) AllErrors() []error { return m }
+
+// Data_RedisValidationError is the validation error returned by
+// Data_Redis.Validate if the designated constraints aren't met.
+type Data_RedisValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_RedisValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_RedisValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_RedisValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_RedisValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_RedisValidationError) ErrorName() string { return "Data_RedisValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_RedisValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_Redis.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_RedisValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_RedisValidationError{}
+
+// Validate checks the field values on Data_Memcached with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Memcached) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_Memcached with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_MemcachedMultiError,
+// or nil if none found.
+func (m *Data_Memcached) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_Memcached) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Addr
+
+	// no validation rules for Username
+
+	// no validation rules for Password
+
+	// no validation rules for MaxIdle
+
+	if all {
+		switch v := interface{}(m.GetTimeout()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_MemcachedValidationError{
+					field:  "Timeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_MemcachedValidationError{
+					field:  "Timeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetTimeout()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_MemcachedValidationError{
+				field:  "Timeout",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return Data_MemcachedMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_MemcachedMultiError is an error wrapping multiple validation errors
+// returned by Data_Memcached.ValidateAll() if the designated constraints
+// aren't met.
+type Data_MemcachedMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_MemcachedMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_MemcachedMultiError) AllErrors() []error { return m }
+
+// Data_MemcachedValidationError is the validation error returned by
+// Data_Memcached.Validate if the designated constraints aren't met.
+type Data_MemcachedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_MemcachedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_MemcachedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_MemcachedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_MemcachedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_MemcachedValidationError) ErrorName() string { return "Data_MemcachedValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_MemcachedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_Memcached.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_MemcachedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_MemcachedValidationError{}
+
+// Validate checks the field values on Data_Memory with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Memory) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_Memory with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_MemoryMultiError, or
+// nil if none found.
+func (m *Data_Memory) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_Memory) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Size
+
+	// no validation rules for Capacity
+
+	if all {
+		switch v := interface{}(m.GetExpiration()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_MemoryValidationError{
+					field:  "Expiration",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_MemoryValidationError{
+					field:  "Expiration",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetExpiration()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_MemoryValidationError{
+				field:  "Expiration",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetCleanupInterval()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_MemoryValidationError{
+					field:  "CleanupInterval",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_MemoryValidationError{
+					field:  "CleanupInterval",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCleanupInterval()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_MemoryValidationError{
+				field:  "CleanupInterval",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return Data_MemoryMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_MemoryMultiError is an error wrapping multiple validation errors
+// returned by Data_Memory.ValidateAll() if the designated constraints aren't met.
+type Data_MemoryMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_MemoryMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_MemoryMultiError) AllErrors() []error { return m }
+
+// Data_MemoryValidationError is the validation error returned by
+// Data_Memory.Validate if the designated constraints aren't met.
+type Data_MemoryValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_MemoryValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_MemoryValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_MemoryValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_MemoryValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_MemoryValidationError) ErrorName() string { return "Data_MemoryValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_MemoryValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_Memory.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_MemoryValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_MemoryValidationError{}
+
+// Validate checks the field values on Data_File with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_File) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_File with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_FileMultiError, or nil
+// if none found.
+func (m *Data_File) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_File) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Root
+
+	if len(errors) > 0 {
+		return Data_FileMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_FileMultiError is an error wrapping multiple validation errors returned
+// by Data_File.ValidateAll() if the designated constraints aren't met.
+type Data_FileMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_FileMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_FileMultiError) AllErrors() []error { return m }
+
+// Data_FileValidationError is the validation error returned by
+// Data_File.Validate if the designated constraints aren't met.
+type Data_FileValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_FileValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_FileValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_FileValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_FileValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_FileValidationError) ErrorName() string { return "Data_FileValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_FileValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_File.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_FileValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_FileValidationError{}
+
+// Validate checks the field values on Data_Oss with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Oss) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_Oss with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_OssMultiError, or nil
+// if none found.
+func (m *Data_Oss) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_Oss) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return Data_OssMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_OssMultiError is an error wrapping multiple validation errors returned
+// by Data_Oss.ValidateAll() if the designated constraints aren't met.
+type Data_OssMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_OssMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_OssMultiError) AllErrors() []error { return m }
+
+// Data_OssValidationError is the validation error returned by
+// Data_Oss.Validate if the designated constraints aren't met.
+type Data_OssValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_OssValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_OssValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_OssValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_OssValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_OssValidationError) ErrorName() string { return "Data_OssValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_OssValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_Oss.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_OssValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_OssValidationError{}
+
+// Validate checks the field values on Data_Mongo with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Mongo) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Data_Mongo with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_MongoMultiError, or
+// nil if none found.
+func (m *Data_Mongo) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Data_Mongo) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return Data_MongoMultiError(errors)
+	}
+
+	return nil
+}
+
+// Data_MongoMultiError is an error wrapping multiple validation errors
+// returned by Data_Mongo.ValidateAll() if the designated constraints aren't met.
+type Data_MongoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Data_MongoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Data_MongoMultiError) AllErrors() []error { return m }
+
+// Data_MongoValidationError is the validation error returned by
+// Data_Mongo.Validate if the designated constraints aren't met.
+type Data_MongoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Data_MongoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Data_MongoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Data_MongoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Data_MongoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Data_MongoValidationError) ErrorName() string { return "Data_MongoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Data_MongoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sData_Mongo.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Data_MongoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Data_MongoValidationError{}
+
 // Validate checks the field values on Data_Storage with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -299,6 +1177,8 @@ func (m *Data_Storage) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for Type
 
 	if all {
 		switch v := interface{}(m.GetFile()).(type) {
@@ -493,44 +1373,130 @@ var _ interface {
 	ErrorName() string
 } = Data_StorageValidationError{}
 
-// Validate checks the field values on Data_Storage_File with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *Data_Storage_File) Validate() error {
+// Validate checks the field values on Data_Cache with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Data_Cache) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Data_Storage_File with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// Data_Storage_FileMultiError, or nil if none found.
-func (m *Data_Storage_File) ValidateAll() error {
+// ValidateAll checks the field values on Data_Cache with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Data_CacheMultiError, or
+// nil if none found.
+func (m *Data_Cache) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Data_Storage_File) validate(all bool) error {
+func (m *Data_Cache) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Root
+	// no validation rules for Driver
+
+	if all {
+		switch v := interface{}(m.GetRedis()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Redis",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Redis",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRedis()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_CacheValidationError{
+				field:  "Redis",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetMemcached()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Memcached",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Memcached",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetMemcached()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_CacheValidationError{
+				field:  "Memcached",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetMemory()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Memory",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_CacheValidationError{
+					field:  "Memory",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetMemory()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_CacheValidationError{
+				field:  "Memory",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
-		return Data_Storage_FileMultiError(errors)
+		return Data_CacheMultiError(errors)
 	}
 
 	return nil
 }
 
-// Data_Storage_FileMultiError is an error wrapping multiple validation errors
-// returned by Data_Storage_File.ValidateAll() if the designated constraints
-// aren't met.
-type Data_Storage_FileMultiError []error
+// Data_CacheMultiError is an error wrapping multiple validation errors
+// returned by Data_Cache.ValidateAll() if the designated constraints aren't met.
+type Data_CacheMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m Data_Storage_FileMultiError) Error() string {
+func (m Data_CacheMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -539,11 +1505,11 @@ func (m Data_Storage_FileMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m Data_Storage_FileMultiError) AllErrors() []error { return m }
+func (m Data_CacheMultiError) AllErrors() []error { return m }
 
-// Data_Storage_FileValidationError is the validation error returned by
-// Data_Storage_File.Validate if the designated constraints aren't met.
-type Data_Storage_FileValidationError struct {
+// Data_CacheValidationError is the validation error returned by
+// Data_Cache.Validate if the designated constraints aren't met.
+type Data_CacheValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -551,24 +1517,22 @@ type Data_Storage_FileValidationError struct {
 }
 
 // Field function returns field value.
-func (e Data_Storage_FileValidationError) Field() string { return e.field }
+func (e Data_CacheValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e Data_Storage_FileValidationError) Reason() string { return e.reason }
+func (e Data_CacheValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e Data_Storage_FileValidationError) Cause() error { return e.cause }
+func (e Data_CacheValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e Data_Storage_FileValidationError) Key() bool { return e.key }
+func (e Data_CacheValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e Data_Storage_FileValidationError) ErrorName() string {
-	return "Data_Storage_FileValidationError"
-}
+func (e Data_CacheValidationError) ErrorName() string { return "Data_CacheValidationError" }
 
 // Error satisfies the builtin error interface
-func (e Data_Storage_FileValidationError) Error() string {
+func (e Data_CacheValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -580,14 +1544,14 @@ func (e Data_Storage_FileValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sData_Storage_File.%s: %s%s",
+		"invalid %sData_Cache.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = Data_Storage_FileValidationError{}
+var _ error = Data_CacheValidationError{}
 
 var _ interface {
 	Field() string
@@ -595,308 +1559,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = Data_Storage_FileValidationError{}
-
-// Validate checks the field values on Data_Storage_Redis with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *Data_Storage_Redis) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Data_Storage_Redis with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// Data_Storage_RedisMultiError, or nil if none found.
-func (m *Data_Storage_Redis) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Data_Storage_Redis) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return Data_Storage_RedisMultiError(errors)
-	}
-
-	return nil
-}
-
-// Data_Storage_RedisMultiError is an error wrapping multiple validation errors
-// returned by Data_Storage_Redis.ValidateAll() if the designated constraints
-// aren't met.
-type Data_Storage_RedisMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m Data_Storage_RedisMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m Data_Storage_RedisMultiError) AllErrors() []error { return m }
-
-// Data_Storage_RedisValidationError is the validation error returned by
-// Data_Storage_Redis.Validate if the designated constraints aren't met.
-type Data_Storage_RedisValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e Data_Storage_RedisValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e Data_Storage_RedisValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e Data_Storage_RedisValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e Data_Storage_RedisValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e Data_Storage_RedisValidationError) ErrorName() string {
-	return "Data_Storage_RedisValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e Data_Storage_RedisValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sData_Storage_Redis.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = Data_Storage_RedisValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = Data_Storage_RedisValidationError{}
-
-// Validate checks the field values on Data_Storage_Mongo with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *Data_Storage_Mongo) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Data_Storage_Mongo with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// Data_Storage_MongoMultiError, or nil if none found.
-func (m *Data_Storage_Mongo) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Data_Storage_Mongo) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return Data_Storage_MongoMultiError(errors)
-	}
-
-	return nil
-}
-
-// Data_Storage_MongoMultiError is an error wrapping multiple validation errors
-// returned by Data_Storage_Mongo.ValidateAll() if the designated constraints
-// aren't met.
-type Data_Storage_MongoMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m Data_Storage_MongoMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m Data_Storage_MongoMultiError) AllErrors() []error { return m }
-
-// Data_Storage_MongoValidationError is the validation error returned by
-// Data_Storage_Mongo.Validate if the designated constraints aren't met.
-type Data_Storage_MongoValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e Data_Storage_MongoValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e Data_Storage_MongoValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e Data_Storage_MongoValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e Data_Storage_MongoValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e Data_Storage_MongoValidationError) ErrorName() string {
-	return "Data_Storage_MongoValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e Data_Storage_MongoValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sData_Storage_Mongo.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = Data_Storage_MongoValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = Data_Storage_MongoValidationError{}
-
-// Validate checks the field values on Data_Storage_Oss with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *Data_Storage_Oss) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Data_Storage_Oss with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// Data_Storage_OssMultiError, or nil if none found.
-func (m *Data_Storage_Oss) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Data_Storage_Oss) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return Data_Storage_OssMultiError(errors)
-	}
-
-	return nil
-}
-
-// Data_Storage_OssMultiError is an error wrapping multiple validation errors
-// returned by Data_Storage_Oss.ValidateAll() if the designated constraints
-// aren't met.
-type Data_Storage_OssMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m Data_Storage_OssMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m Data_Storage_OssMultiError) AllErrors() []error { return m }
-
-// Data_Storage_OssValidationError is the validation error returned by
-// Data_Storage_Oss.Validate if the designated constraints aren't met.
-type Data_Storage_OssValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e Data_Storage_OssValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e Data_Storage_OssValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e Data_Storage_OssValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e Data_Storage_OssValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e Data_Storage_OssValidationError) ErrorName() string { return "Data_Storage_OssValidationError" }
-
-// Error satisfies the builtin error interface
-func (e Data_Storage_OssValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sData_Storage_Oss.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = Data_Storage_OssValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = Data_Storage_OssValidationError{}
+} = Data_CacheValidationError{}

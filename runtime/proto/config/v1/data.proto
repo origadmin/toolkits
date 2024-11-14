@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package config.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
@@ -13,13 +14,13 @@ option objc_class_prefix = "Config";
 
 // Data
 message Data {
-    
+
     // Database
     message Database {
         // Debugging
         bool debug = 1 [json_name = "debug"];
         // Driver name: mysql, postgresql, mongodb, sqlite......
-        string dialect = 2 [json_name = "dialect"];
+        string driver = 2 [json_name = "driver", (buf.validate.field).string = {in: ["mssql", "mysql", "postgresql", "mongodb", "sqlite", "oracle", "sqlserver", "sqlite3"]}];
         // Data source (DSN string)
         string source = 3 [json_name = "source"];
         // Data migration switch
@@ -35,21 +36,61 @@ message Data {
         // Maximum length of time that the connection can be reused
         google.protobuf.Duration connection_max_lifetime = 22 [json_name = "connection_max_lifetime"];
     }
-
-    message Storage {
-        message File {
-            string root = 1;
-        }
-        message Redis {
-        }
-        message Mongo {
-        }
-        message Oss {
-
-        }
-        File file = 1;
-        Redis redis = 2;
-        Mongo mongo = 3;
-        Oss oss = 4;
+    message Redis {
+        string network = 1;
+        string addr = 2;
+        string password = 3;
+        int32 db = 4;
+        google.protobuf.Duration dial_timeout = 5;
+        google.protobuf.Duration read_timeout = 6;
+        google.protobuf.Duration write_timeout = 7;
     }
+    message Memcached {
+        string addr = 1 [json_name = "addr"];
+        string username = 2 [json_name = "username"];
+        string password = 3 [json_name = "password"];
+        int32 max_idle = 4 [json_name = "max_idle"];
+        google.protobuf.Duration timeout = 5 [json_name = "timeout"];
+    }
+    message Memory {
+        int32 size = 1;
+        int32 capacity = 2;
+        google.protobuf.Duration expiration = 3 [json_name = "expiration"];
+        google.protobuf.Duration cleanup_interval = 4 [json_name = "cleanup_interval"];
+    }
+    message File {
+        string root = 1;
+    }
+    message Oss {
+
+    }
+    message Mongo {
+
+    }
+    message Storage {
+        string type = 1 [json_name = "type", (buf.validate.field).string = {in: ["none", "file", "redis", "mongo", "oss"]}];
+        File file = 10;
+        Redis redis = 11;
+        Mongo mongo = 12;
+        Oss oss = 13;
+    }
+
+    message Cache {
+        // Driver name: redis, memcached, etc.
+        string driver = 1 [json_name = "driver", (buf.validate.field).string = {in: ["redis", "memcached", "memory"]}];
+        // Redis
+        Redis redis = 2 [json_name = "redis"];
+        // Memcached
+        Memcached memcached = 3 [json_name = "memcached"];
+        // Memory cache
+        Memory memory = 4 [json_name = "memory"];
+    }
+
+    // Database
+    Database database = 1 [json_name = "database"];
+    // Cache
+    Cache cache = 2 [json_name = "cache"];
+    // Storage
+    Storage storage = 3 [json_name = "storage"];
+
 }
