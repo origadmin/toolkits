@@ -6,7 +6,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option go_package = "github.com/origadmin/toolkits/runtime/gen/go/config/v1;configv1";
 option java_multiple_files = true;
 option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
@@ -36,6 +36,8 @@ message Data {
         // Maximum length of time that the connection can be reused
         google.protobuf.Duration connection_max_lifetime = 22 [json_name = "connection_max_lifetime"];
     }
+
+    // Redis
     message Redis {
         string network = 1;
         string addr = 2;
@@ -45,6 +47,8 @@ message Data {
         google.protobuf.Duration read_timeout = 6;
         google.protobuf.Duration write_timeout = 7;
     }
+
+    // Memcached
     message Memcached {
         string addr = 1 [json_name = "addr"];
         string username = 2 [json_name = "username"];
@@ -52,21 +56,31 @@ message Data {
         int32 max_idle = 4 [json_name = "max_idle"];
         google.protobuf.Duration timeout = 5 [json_name = "timeout"];
     }
+
+    // Memory
     message Memory {
         int32 size = 1;
         int32 capacity = 2;
         google.protobuf.Duration expiration = 3 [json_name = "expiration"];
         google.protobuf.Duration cleanup_interval = 4 [json_name = "cleanup_interval"];
     }
+
+    // File
     message File {
         string root = 1;
     }
+
+    // OSS
     message Oss {
 
     }
+
+    // Mongo
     message Mongo {
 
     }
+
+    // Storage
     message Storage {
         string type = 1 [json_name = "type", (buf.validate.field).string = {in: ["none", "file", "redis", "mongo", "oss"]}];
         File file = 10;
@@ -75,6 +89,7 @@ message Data {
         Oss oss = 13;
     }
 
+    // Cache
     message Cache {
         // Driver name: redis, memcached, etc.
         string driver = 1 [json_name = "driver", (buf.validate.field).string = {in: ["redis", "memcached", "memory"]}];

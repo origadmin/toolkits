@@ -6,10 +6,10 @@
 package validate
 
 import (
+	"fmt"
+
 	"github.com/bufbuild/protovalidate-go"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/origadmin/toolkits/errors"
 )
 
 // Validator is an interface for validating protobuf messages.
@@ -31,7 +31,7 @@ func (v validate) Validate(message proto.Message) error {
 func NewValidate(opts ...ProtoValidatorOption) (Validator, error) {
 	v, err := NewProtoValidate(opts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize validator")
+		return nil, fmt.Errorf("failed to initialize validator: %w", err)
 	}
 
 	return v, nil

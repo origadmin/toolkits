@@ -6,7 +6,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option go_package = "github.com/origadmin/toolkits/runtime/gen/go/config/v1;configv1";
 option java_multiple_files = true;
 option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
@@ -169,6 +169,11 @@ message Middleware {
         map<string, string> data = 2 [json_name = "data"];
     }
 
+    message Validator {
+        int32 version = 1 [json_name = "version", (buf.validate.field).int32 = {gt: 0, lt: 3}];
+        bool fail_fast = 2 [json_name = "fail_fast"];
+    }
+
     // Logging switch
     bool enable_logging = 1;
     // Recovery switch
@@ -186,4 +191,5 @@ message Middleware {
     Metadata metadata = 101 [json_name = "metadata"];
 
     Metrics metrics = 200 [json_name = "metrics"];
+    Validator validator = 201 [json_name = "validator"];
 }

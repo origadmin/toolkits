@@ -12,26 +12,22 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 )
 
-// ValidationError is an error that occurs during validation.
-type ValidationError = protovalidate.ValidationError
-
-// CompilationError is an error that occurs during compilation.
-type CompilationError = protovalidate.CompilationError
-
-// RuntimeError is an error that occurs during runtime.
-type RuntimeError = protovalidate.RuntimeError
-
-// ProtoValidator is a validator for protobuf messages.
-type ProtoValidator = protovalidate.Validator
-
-// ProtoValidatorOption is an option for the ProtoValidator.
-type ProtoValidatorOption = protovalidate.ValidatorOption
-
-// StandardConstraintResolver is a constraint resolver for the ProtoValidator.
-type StandardConstraintResolver = protovalidate.StandardConstraintResolver
-
-// StandardConstraintInterceptor is a constraint interceptor for the ProtoValidator.
-type StandardConstraintInterceptor = protovalidate.StandardConstraintInterceptor
+type (
+	// ValidationError is an error that occurs during validation.
+	ValidationError = protovalidate.ValidationError
+	// CompilationError is an error that occurs during compilation.
+	CompilationError = protovalidate.CompilationError
+	// RuntimeError is an error that occurs during runtime.
+	RuntimeError = protovalidate.RuntimeError
+	// ProtoValidator is a validator for protobuf messages.
+	ProtoValidator = protovalidate.Validator
+	// ProtoValidatorOption is an option for the ProtoValidator.
+	ProtoValidatorOption = protovalidate.ValidatorOption
+	// StandardConstraintResolver is a constraint resolver for the ProtoValidator.
+	StandardConstraintResolver = protovalidate.StandardConstraintResolver
+	// StandardConstraintInterceptor is a constraint interceptor for the ProtoValidator.
+	StandardConstraintInterceptor = protovalidate.StandardConstraintInterceptor
+)
 
 // NewProtoValidate creates a new ProtoValidator.
 func NewProtoValidate(opts ...ProtoValidatorOption) (*protovalidate.Validator, error) {

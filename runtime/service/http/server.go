@@ -8,13 +8,13 @@ import (
 
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/utils"
 )
 
 // NewServer Create a HTTP server
-func NewServer(cfg *config.Service, m ...middleware.Middleware) *transhttp.Server {
+func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transhttp.Server {
 	var options []transhttp.ServerOption
 
 	var ms []middleware.Middleware

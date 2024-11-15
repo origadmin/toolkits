@@ -7,7 +7,7 @@
 package helloworld
 
 import (
-	config "github.com/origadmin/toolkits/runtime/config"
+	v1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -119,7 +119,7 @@ type ExampleCors struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Cors *config.Cors `protobuf:"bytes,1,opt,name=cors,proto3" json:"cors,omitempty"`
+	Cors *v1.Cors `protobuf:"bytes,1,opt,name=cors,proto3" json:"cors,omitempty"`
 }
 
 func (x *ExampleCors) Reset() {
@@ -152,7 +152,7 @@ func (*ExampleCors) Descriptor() ([]byte, []int) {
 	return file_helloworld_v1_helloworld_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ExampleCors) GetCors() *config.Cors {
+func (x *ExampleCors) GetCors() *v1.Cors {
 	if x != nil {
 		return x.Cors
 	}
@@ -218,7 +218,7 @@ var file_helloworld_v1_helloworld_proto_goTypes = []any{
 	(*SayHelloRequest)(nil),  // 0: helloworld.v1.SayHelloRequest
 	(*SayHelloResponse)(nil), // 1: helloworld.v1.SayHelloResponse
 	(*ExampleCors)(nil),      // 2: helloworld.v1.ExampleCors
-	(*config.Cors)(nil),      // 3: config.v1.Cors
+	(*v1.Cors)(nil),          // 3: config.v1.Cors
 }
 var file_helloworld_v1_helloworld_proto_depIdxs = []int32{
 	3, // 0: helloworld.v1.ExampleCors.cors:type_name -> config.v1.Cors

@@ -8,7 +8,7 @@ package middleware
 import (
 	"github.com/go-kratos/kratos/v2/middleware"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
 type (
@@ -21,28 +21,28 @@ func Chain(m ...Middleware) Middleware {
 	return middleware.Chain(m...)
 }
 
-func NewClient(cfg *config.Middleware) []Middleware {
+func NewClient(cfg *configv1.Middleware) []Middleware {
 	var middlewares []Middleware
 
 	if cfg == nil {
 		return middlewares
 	}
 	middlewares = Recovery(middlewares, cfg.EnableRecovery)
-	middlewares = Validate(middlewares, cfg.EnableValidate)
+	middlewares = Validate(middlewares, cfg.EnableValidate, cfg.Validator)
 	middlewares = TracingClient(middlewares, cfg.EnableTracing)
 	middlewares = MetadataClient(middlewares, cfg.EnableMetadata, cfg.Metadata)
 	middlewares = CircuitBreakerClient(middlewares, cfg.EnableCircuitBreaker)
 	return middlewares
 }
 
-func NewServer(cfg *config.Middleware) []Middleware {
+func NewServer(cfg *configv1.Middleware) []Middleware {
 	var middlewares []Middleware
 
 	if cfg == nil {
 		return middlewares
 	}
 	middlewares = Recovery(middlewares, cfg.EnableRecovery)
-	middlewares = Validate(middlewares, cfg.EnableValidate)
+	middlewares = Validate(middlewares, cfg.EnableValidate, cfg.Validator)
 	middlewares = TracingServer(middlewares, cfg.EnableTracing)
 	middlewares = MetadataServer(middlewares, cfg.EnableMetadata, cfg.Metadata)
 	middlewares = RateLimitServer(middlewares, cfg.RateLimiter)

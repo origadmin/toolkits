@@ -15,7 +15,7 @@ import (
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/runtime/registry"
 	"github.com/origadmin/toolkits/utils"
@@ -24,7 +24,7 @@ import (
 const defaultTimeout = 5 * time.Second
 
 // NewClient Creating a GRPC client
-func NewClient(ctx context.Context, r registry.Discovery, service *config.Service, m ...middleware.Middleware) (*transhttp.Client, error) {
+func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Service, m ...middleware.Middleware) (*transhttp.Client, error) {
 	endpoint := utils.NameDiscovery(service.GetName())
 
 	var ms []middleware.Middleware
@@ -57,7 +57,7 @@ func NewClient(ctx context.Context, r registry.Discovery, service *config.Servic
 	return conn, nil
 }
 
-func CreateSelectorOption(options []transhttp.ClientOption, cfg *config.Service_Selector) []transhttp.ClientOption {
+func CreateSelectorOption(options []transhttp.ClientOption, cfg *configv1.Service_Selector) []transhttp.ClientOption {
 	if cfg == nil {
 		return options
 	}

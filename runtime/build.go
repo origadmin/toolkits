@@ -12,7 +12,8 @@ import (
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	"github.com/origadmin/toolkits/runtime/bootstrap"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
@@ -27,7 +28,7 @@ type builder struct {
 }
 
 // NewConfig creates a new Config object based on the given SourceConfig and options.
-func (b *builder) NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
+func (b *builder) NewConfig(cfg *configv1.SourceConfig, opts ...bootstrap.Option) (bootstrap.Config, error) {
 	b.configMux.RLock()
 	defer b.configMux.RUnlock()
 	configBuilder, ok := build.configs[cfg.Type]
@@ -50,7 +51,7 @@ func (b *builder) RegisterConfigFunc(name string, configBuilder ConfigBuildFunc)
 }
 
 // NewRegistrar creates a new Registrar object based on the given RegistryConfig.
-func (b *builder) NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
+func (b *builder) NewRegistrar(cfg *configv1.Registry) (registry.Registrar, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
 	registryBuilder, ok := build.registries[cfg.Type]
@@ -61,7 +62,7 @@ func (b *builder) NewRegistrar(cfg *config.Registry) (registry.Registrar, error)
 }
 
 // NewDiscovery creates a new Discovery object based on the given RegistryConfig.
-func (b *builder) NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
+func (b *builder) NewDiscovery(cfg *configv1.Registry) (registry.Discovery, error) {
 	b.registryMux.RLock()
 	defer b.registryMux.RUnlock()
 	registryBuilder, ok := build.registries[cfg.Type]
@@ -87,7 +88,7 @@ func (b *builder) RegisterRegistryFunc(name string, registryBuilder RegistrarBui
 }
 
 // NewGRPCServer creates a new gRPC server based on the given ServiceConfig.
-func (b *builder) NewGRPCServer(cfg *config.Service) (*transgrpc.Server, error) {
+func (b *builder) NewGRPCServer(cfg *configv1.Service) (*transgrpc.Server, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	serviceBuilder, ok := build.services[cfg.Name]
@@ -98,7 +99,7 @@ func (b *builder) NewGRPCServer(cfg *config.Service) (*transgrpc.Server, error) 
 }
 
 // NewHTTPServer creates a new HTTP server based on the given ServiceConfig.
-func (b *builder) NewHTTPServer(cfg *config.Service) (*transhttp.Server, error) {
+func (b *builder) NewHTTPServer(cfg *configv1.Service) (*transhttp.Server, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	serviceBuilder, ok := build.services[cfg.Name]
@@ -109,7 +110,7 @@ func (b *builder) NewHTTPServer(cfg *config.Service) (*transhttp.Server, error) 
 }
 
 // NewGRPCClient creates a new gRPC client based on the given ServiceConfig.
-func (b *builder) NewGRPCClient(cfg *config.Service) (*grpc.ClientConn, error) {
+func (b *builder) NewGRPCClient(cfg *configv1.Service) (*grpc.ClientConn, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	serviceBuilder, ok := build.services[cfg.Name]
@@ -120,7 +121,7 @@ func (b *builder) NewGRPCClient(cfg *config.Service) (*grpc.ClientConn, error) {
 }
 
 // NewHTTPClient creates a new HTTP client based on the given ServiceConfig.
-func (b *builder) NewHTTPClient(cfg *config.Service) (*transhttp.Client, error) {
+func (b *builder) NewHTTPClient(cfg *configv1.Service) (*transhttp.Client, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	serviceBuilder, ok := build.services[cfg.Name]

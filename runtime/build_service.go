@@ -4,11 +4,8 @@
 package runtime
 
 import (
-	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
-	"google.golang.org/grpc"
-
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
+	"github.com/origadmin/toolkits/runtime/service"
 )
 
 type (
@@ -18,9 +15,9 @@ type (
 	}
 	// ServiceBuilder is an interface that defines a method for creating a new service.
 	ServiceBuilder interface {
-		NewGRPCServer(cfg *config.Service) (*transgrpc.Server, error)
-		NewHTTPServer(cfg *config.Service) (*transhttp.Server, error)
-		NewGRPCClient(cfg *config.Service) (*grpc.ClientConn, error)
-		NewHTTPClient(cfg *config.Service) (*transhttp.Client, error)
+		NewGRPCServer(cfg *configv1.Service) (*service.GRPCServer, error)
+		NewHTTPServer(cfg *configv1.Service) (*service.HTTPServer, error)
+		NewGRPCClient(cfg *configv1.Service) (*service.GRPCClient, error)
+		NewHTTPClient(cfg *configv1.Service) (*service.HTTPClient, error)
 	}
 )

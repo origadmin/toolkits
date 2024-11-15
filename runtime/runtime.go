@@ -10,6 +10,7 @@ import (
 
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
@@ -46,7 +47,7 @@ func (b *builder) init() {
 }
 
 // NewConfig creates a new Config using the registered ConfigBuilder.
-func NewConfig(cfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
+func NewConfig(cfg *configv1.SourceConfig, opts ...config.Option) (config.Config, error) {
 	return build.NewConfig(cfg, opts...)
 }
 
@@ -61,12 +62,12 @@ func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
 }
 
 // NewDiscovery creates a new Discovery using the registered RegistryBuilder.
-func NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
+func NewDiscovery(cfg *configv1.Registry) (registry.Discovery, error) {
 	return build.NewDiscovery(cfg)
 }
 
 // NewRegistrar creates a new Registrar using the registered RegistryBuilder.
-func NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
+func NewRegistrar(cfg *configv1.Registry) (registry.Registrar, error) {
 	return build.NewRegistrar(cfg)
 }
 

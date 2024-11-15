@@ -5,7 +5,7 @@ package config.v1;
 import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option go_package = "github.com/origadmin/toolkits/runtime/gen/go/config/v1;configv1";
 option java_multiple_files = true;
 option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
@@ -13,6 +13,7 @@ option objc_class_prefix = "Config";
 
 // Cors
 message Cors {
+    // Enabled indicates whether CORS should be enabled for the target.
     bool enabled = 1 [json_name = "enabled"];
     // AllowCredentials indicates whether the request can include user credentials like
     // cookies, HTTP authentication or client side SSL certificates.
