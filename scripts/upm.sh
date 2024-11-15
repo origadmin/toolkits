@@ -79,8 +79,15 @@ update_go_mod() {
             fi
         fi
     else
-        # Skip the root directory ('.')
-        find . -mindepth 1 -type d -not -path './.*' -print0 | while IFS= read -r -d '' dir; do
+    	  # Specify root directory
+        start_dir="."
+        find "$start_dir" -mindepth 1 -type d \
+  				-not -path "$start_dir/.*" \
+					-not -path "$start_dir/example*" \
+					-not -path "$start_dir/examples*" \
+					-not -path "$start_dir/test*" \
+					-not -path "$start_dir/tests*" \
+        	-print0 | while IFS= read -r -d '' dir; do
             if check_go_mod_and_act "$dir"; then
                 echo "Processing directories in: $dir"
                 local updated=$?
