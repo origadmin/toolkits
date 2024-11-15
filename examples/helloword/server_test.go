@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -16,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 
+	"examples/helloword/services/helloworld/v1"
 	"github.com/origadmin/toolkits/runtime/transport/gins"
 )
 
