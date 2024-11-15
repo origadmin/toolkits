@@ -113,7 +113,7 @@ add_go_mod_tag() {
 		# Save all local changes to the Git stash
 		echo "Saving all local changes and change to the main branch..."
     git stash save --include-untracked
-    git checkout -B "main" "original/main"
+    git checkout -B "main" "origin/main"
 
     # If a module_name is specified, process only that directory
     if [ "$module_name" == "." ]; then
