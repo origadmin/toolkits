@@ -59,6 +59,7 @@ check_all_go_mod() {
             if [ $need_test -eq 0 ]; then
                 echo "Testing packages in: $dir"
                 cd "$dir" || continue
+                go fmt ./...
                 go mod tidy || return 1
                 go test -race ./... || return 1
             fi
