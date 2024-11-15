@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 
 	"github.com/origadmin/toolkits/codec"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 
 	"github.com/origadmin/toolkits/errors"
-	"github.com/origadmin/toolkits/runtime/config"
 )
 
 // loadSource loads the config file from the given path
-func loadSource(si os.FileInfo, path string) (*config.SourceConfig, error) {
+func loadSource(si os.FileInfo, path string) (*configv1.SourceConfig, error) {
 	// Check if the file or directory exists
 	if si == nil {
 		return nil, errors.New("load config file target is not exist")
@@ -31,8 +31,8 @@ func loadSource(si os.FileInfo, path string) (*config.SourceConfig, error) {
 }
 
 // loadSourceFile loads the config file from the given path
-func loadSourceFile(path string) (*config.SourceConfig, error) {
-	var cfg config.SourceConfig
+func loadSourceFile(path string) (*configv1.SourceConfig, error) {
+	var cfg configv1.SourceConfig
 	// Decode the file into the config struct
 	if err := codec.DecodeFromFile(path, &cfg); err != nil {
 		return nil, errors.Wrapf(err, "failed to parse config file %s", path)
@@ -41,8 +41,8 @@ func loadSourceFile(path string) (*config.SourceConfig, error) {
 }
 
 // loadSourceDir loads the config file from the given directory
-func loadSourceDir(path string) (*config.SourceConfig, error) {
-	var cfg config.SourceConfig
+func loadSourceDir(path string) (*configv1.SourceConfig, error) {
+	var cfg configv1.SourceConfig
 	// Walk through the directory and load each file
 	err := filepath.WalkDir(path, func(walkpath string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -72,7 +72,7 @@ func loadSourceDir(path string) (*config.SourceConfig, error) {
 }
 
 // LoadSourceConfig loads the config file from the given path
-func LoadSourceConfig(bootstrap *Bootstrap) (*config.SourceConfig, error) {
+func LoadSourceConfig(bootstrap *Bootstrap) (*configv1.SourceConfig, error) {
 	// Get the path from the bootstrap
 	path := bootstrap.WorkPath()
 

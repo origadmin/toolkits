@@ -6,79 +6,55 @@
 package config
 
 import (
-	"github.com/bufbuild/protovalidate-go"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/reflect/protoregistry"
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
 )
 
-// ValidationError is an error that occurs during validation.
-type ValidationError = protovalidate.ValidationError
+// Define types from kratos config package
+type (
+	Config   = kratosconfig.Config
+	Decoder  = kratosconfig.Decoder
+	KeyValue = kratosconfig.KeyValue
+	Merge    = kratosconfig.Merge
+	Observer = kratosconfig.Observer
+	Option   = kratosconfig.Option
+	Reader   = kratosconfig.Reader
+	Resolver = kratosconfig.Resolver
+	Source   = kratosconfig.Source
+	Value    = kratosconfig.Value
+	Watcher  = kratosconfig.Watcher
+)
 
-// CompilationError is an error that occurs during compilation.
-type CompilationError = protovalidate.CompilationError
+var (
+	// ErrNotFound defined error from kratos config package
+	ErrNotFound = kratosconfig.ErrNotFound
+)
 
-// RuntimeError is an error that occurs during runtime.
-type RuntimeError = protovalidate.RuntimeError
-
-// ProtoValidator is a validator for protobuf messages.
-type ProtoValidator = protovalidate.Validator
-
-// ProtoValidatorOption is an option for the ProtoValidator.
-type ProtoValidatorOption = protovalidate.ValidatorOption
-
-// StandardConstraintResolver is a constraint resolver for the ProtoValidator.
-type StandardConstraintResolver = protovalidate.StandardConstraintResolver
-
-// StandardConstraintInterceptor is a constraint interceptor for the ProtoValidator.
-type StandardConstraintInterceptor = protovalidate.StandardConstraintInterceptor
-
-// NewProtoValidate creates a new ProtoValidator.
-func NewProtoValidate(opts ...ProtoValidatorOption) (*protovalidate.Validator, error) {
-	return protovalidate.New(opts...)
+// New returns a new config instance
+func New(opts ...Option) Config {
+	return kratosconfig.New(opts...)
 }
 
-// ProtoValidate validates a protobuf message.
-func ProtoValidate(message proto.Message) error {
-	return protovalidate.Validate(message)
+// WithDecoder sets the decoder
+func WithDecoder(d Decoder) Option {
+	return kratosconfig.WithDecoder(d)
 }
 
-// WithUTC sets the time zone to UTC.
-func WithUTC(use bool) ProtoValidatorOption {
-	return protovalidate.WithUTC(use)
+// WithMergeFunc sets the merge function
+func WithMergeFunc(m Merge) Option {
+	return kratosconfig.WithMergeFunc(m)
 }
 
-// WithFailFast sets the fail fast option.
-func WithFailFast(failFast bool) ProtoValidatorOption {
-	return protovalidate.WithFailFast(failFast)
+// WithResolveActualTypes enables resolving actual types
+func WithResolveActualTypes(enableConvertToType bool) Option {
+	return kratosconfig.WithResolveActualTypes(enableConvertToType)
 }
 
-// WithMessages sets the messages to validate.
-func WithMessages(messages ...proto.Message) ProtoValidatorOption {
-	return protovalidate.WithMessages(messages...)
+// WithResolver sets the resolver
+func WithResolver(r Resolver) Option {
+	return kratosconfig.WithResolver(r)
 }
 
-// WithDescriptors sets the descriptors to validate.
-func WithDescriptors(descriptors ...protoreflect.MessageDescriptor) ProtoValidatorOption {
-	return protovalidate.WithDescriptors(descriptors...)
-}
-
-// WithDisableLazy disables lazy validation.
-func WithDisableLazy(disable bool) ProtoValidatorOption {
-	return protovalidate.WithDisableLazy(disable)
-}
-
-// WithStandardConstraintInterceptor adds a standard constraint interceptor.
-func WithStandardConstraintInterceptor(interceptor StandardConstraintInterceptor) ProtoValidatorOption {
-	return protovalidate.WithStandardConstraintInterceptor(interceptor)
-}
-
-// WithExtensionTypeResolver sets the extension type resolver.
-func WithExtensionTypeResolver(extensionTypeResolver protoregistry.ExtensionTypeResolver) ProtoValidatorOption {
-	return protovalidate.WithExtensionTypeResolver(extensionTypeResolver)
-}
-
-// WithAllowUnknownFields allows unknown fields.
-func WithAllowUnknownFields(allow bool) ProtoValidatorOption {
-	return protovalidate.WithAllowUnknownFields(allow)
+// WithSource sets the source
+func WithSource(s ...Source) Option {
+	return kratosconfig.WithSource(s...)
 }

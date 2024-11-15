@@ -7,14 +7,15 @@ import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
-option go_package = "github.com/origadmin/toolkits/runtime/config;config";
+option go_package = "github.com/origadmin/toolkits/runtime/gen/go/config/v1;configv1";
 option java_multiple_files = true;
 option java_outer_classname = "CorsProto";
 option java_package = "com.github.origadmin.toolkits.runtime.config";
 option objc_class_prefix = "Config";
 
-// Registration registry center
+// Registry
 message Registry {
+
   // Consul
   message Consul {
     string address = 1 [json_name = "address"];
@@ -39,6 +40,7 @@ message Registry {
 
   string type = 1 [(buf.validate.field).string = {in: ["none", "consul", "etcd", "nacos", "apollo", "kubernetes", "polaris", "custom"]}];  // Type
   string service_name = 2 [json_name = "service_name"];  // ServiceName
+  bool debug = 5 [json_name = "debug"];
 
   optional Consul consul = 300 [json_name = "consul"];  // Consul
   optional ETCD etcd = 400 [json_name = "etcd"];  // ETCD
