@@ -1,4 +1,4 @@
-package dbo
+package database
 
 import (
 	"github.com/origadmin/toolkits/context"
@@ -8,12 +8,12 @@ import (
 type ExecFunc = func(context.Context) error
 
 // Trans is a transaction wrapper
-type Trans interface {
+type Trans = interface {
 	Tx(ctx context.Context, fn func(context.Context) error) error
 	InTx(ctx context.Context, fn func(tx Tx) error) error
 }
 
-type Tx interface {
+type Tx = interface {
 	Commit() error
 	Rollback() error
 }
