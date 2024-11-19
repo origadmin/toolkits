@@ -1,7 +1,7 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-// Package utils implements the functions, types, and interfaces for the module.
-package utils
+// Package helpers implements the functions, types, and interfaces for the module.
+package helpers
 
 import (
 	"net/netip"
@@ -13,11 +13,11 @@ const (
 	defaultDiscoveryPrefix = "discovery:///"
 )
 
-func NameDiscovery(serviceName string) string {
+func ServiceDiscoveryName(serviceName string) string {
 	return defaultDiscoveryPrefix + serviceName
 }
 
-func DiscoveryEndpoint(endpoint, scheme, host, addr string) string {
+func ServiceDiscoveryEndpoint(endpoint, scheme, host, addr string) string {
 	naip, _ := netip.ParseAddrPort(addr)
 	if endpoint == "" {
 		endpoint = scheme + "://" + host + ":" + strconv.Itoa(int(naip.Port()))

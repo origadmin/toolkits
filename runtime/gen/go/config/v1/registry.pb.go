@@ -121,9 +121,9 @@ type Registry_Consul struct {
 	HeartBeat   bool   `protobuf:"varint,4,opt,name=heart_beat,proto3" json:"heart_beat,omitempty"`
 	HealthCheck bool   `protobuf:"varint,5,opt,name=health_check,proto3" json:"health_check,omitempty"`
 	Datacenter  string `protobuf:"bytes,6,opt,name=datacenter,proto3" json:"datacenter,omitempty"`
-	//  string tag = 7 [json_name = "tag"];
+	// string tag = 7 [json_name = "tag"];
 	HealthCheckInterval uint32 `protobuf:"varint,8,opt,name=health_check_interval,proto3" json:"health_check_interval,omitempty"`
-	//  string health_check_timeout = 9[json_name = "health_check_timeout"];
+	// string health_check_timeout = 9[json_name = "health_check_timeout"];
 	Timeout                        *durationpb.Duration `protobuf:"bytes,10,opt,name=timeout,proto3" json:"timeout,omitempty"`
 	DeregisterCriticalServiceAfter uint32               `protobuf:"varint,11,opt,name=deregister_critical_service_after,proto3" json:"deregister_critical_service_after,omitempty"`
 }

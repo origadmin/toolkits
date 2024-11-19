@@ -287,6 +287,35 @@ func (m *Data_Database) validate(all bool) error {
 		}
 	}
 
+	if all {
+		switch v := interface{}(m.GetConnectionMaxIdleTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Data_DatabaseValidationError{
+					field:  "ConnectionMaxIdleTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Data_DatabaseValidationError{
+					field:  "ConnectionMaxIdleTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetConnectionMaxIdleTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Data_DatabaseValidationError{
+				field:  "ConnectionMaxIdleTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return Data_DatabaseMultiError(errors)
 	}

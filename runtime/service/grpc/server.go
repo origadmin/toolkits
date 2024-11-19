@@ -18,7 +18,6 @@ func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transgrpc.Ser
 	var options []transgrpc.ServerOption
 
 	var ms []middleware.Middleware
-
 	ms = middleware.NewServer(cfg.GetMiddleware())
 	ms = append(ms, m...)
 	options = append(options, transgrpc.Middleware(ms...))

@@ -13,18 +13,30 @@ import (
 )
 
 const (
-	ErrConfigNil = errors.String("database: config is nil")
+	ErrDatabaseConfigNil = errors.String("database: config is nil")
 )
 
-func Open(data *configv1.Data) (*sql.DB, error) {
-	database := data.GetDatabase()
+func OpenDB(database *configv1.Data_Database) (*sql.DB, error) {
 	if database == nil {
-		return nil, ErrConfigNil
+		return nil, ErrDatabaseConfigNil
 	}
 
 	db, err := sql.Open(database.Driver, database.Source)
 	if err != nil {
 		return nil, err
 	}
+	if database.MaxOpenConnections > 0 {
+		db.SetMaxOpenConns(int(database.MaxOpenConnections))
+	}
+	if database.MaxIdleConnections > 0 {
+		db.SetMaxIdleConns(int(database.MaxIdleConnections))
+	}
+	if t := database.ConnectionMaxLifetime; t != nil && t.AsDuration() > 0 {
+		db.SetConnMaxLifetime(t.AsDuration())
+	}
+	if t := database.ConnectionMaxIdleTime; t != nil && t.AsDuration() > 0 {
+		db.SetConnMaxIdleTime(t.AsDuration())
+	}
+
 	return db, nil
 }
