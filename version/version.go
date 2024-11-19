@@ -91,21 +91,21 @@ func initialize() {
 	}
 }
 
-// Get returns an instance of BuildInfo.
+// ReadBuildInfo returns an instance of BuildInfo.
 // This function ensures that the build information is initialized only once using sync.Once,
 // which improves performance and ensures thread safety.
 //
 // Returns:
 //   - BuildInfo: A struct containing detailed build information.
-func Get() BuildInfo {
+func ReadBuildInfo() BuildInfo {
 	once.Do(initialize)
 	return info
 }
 
-// Show prints the build information in JSON format.
+// PrintBuildInfo prints the build information in JSON format.
 // This function uses the sync.Once mechanism to ensure that the build information is initialized only once,
 // thus avoiding the problem of concurrent initialization and ensuring thread safety.
-func Show() {
+func PrintBuildInfo() {
 	once.Do(initialize)
 	if text == nil {
 		fmt.Println("marshaled build info is not available")
