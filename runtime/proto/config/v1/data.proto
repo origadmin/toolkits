@@ -94,7 +94,7 @@ message Data {
     // Cache
     message Cache {
         // Driver name: redis, memcached, etc.
-        string driver = 1 [json_name = "driver", (buf.validate.field).string = {in: ["redis", "memcached", "memory"]}];
+      string driver = 1 [json_name = "driver", (buf.validate.field).string = {in: ["none", "redis", "memcached", "memory"]}];
         // Redis
         Redis redis = 2 [json_name = "redis"];
         // Memcached

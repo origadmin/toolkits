@@ -11,6 +11,8 @@ import (
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
+const Type = "middleware"
+
 type (
 	Handler    = middleware.Handler
 	Middleware = middleware.Middleware

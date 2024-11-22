@@ -11,6 +11,7 @@ import (
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
+	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
@@ -18,10 +19,12 @@ type Builder interface {
 	ConfigBuilder
 	RegistryBuilder
 	ServiceBuilder
+	MiddlewareBuilders
 
 	configBuildRegistry
 	registryBuildRegistry
 	serviceBuildRegistry
+	middlewareBuildRegistry
 }
 
 // build is a global variable that holds an instance of the builder struct.
@@ -40,15 +43,14 @@ func init() {
 	})
 }
 
-// init initializes the builder struct.
-func (b *builder) init() {
-	b.configs = make(map[string]ConfigBuilder)
-	b.registries = make(map[string]RegistryBuilder)
+// Global returns the global instance of the builder.
+func Global() Builder {
+	return build
 }
 
 // NewConfig creates a new Config using the registered ConfigBuilder.
-func NewConfig(cfg *configv1.SourceConfig, opts ...config.Option) (config.Config, error) {
-	return build.NewConfig(cfg, opts...)
+func NewConfig(cfg *configv1.SourceConfig, ss ...config.SettingFunc) (config.Config, error) {
+	return build.NewConfig(cfg, ss...)
 }
 
 // RegisterConfig registers a ConfigBuilder with the builder.
@@ -74,6 +76,31 @@ func NewRegistrar(cfg *configv1.Registry) (registry.Registrar, error) {
 // RegisterRegistry registers a RegistryBuilder with the builder.
 func RegisterRegistry(name string, registryBuilder RegistryBuilder) {
 	build.RegisterRegistryBuilder(name, registryBuilder)
+}
+
+// NewMiddlewareClient creates a new Middleware with the builder.
+func NewMiddlewareClient(name string, cm *configv1.Customize_Config) (middleware.Middleware, error) {
+	return build.NewMiddlewareClient(name, cm)
+}
+
+// NewMiddlewareServer creates a new Middleware with the builder.
+func NewMiddlewareServer(name string, cm *configv1.Customize_Config) (middleware.Middleware, error) {
+	return build.NewMiddlewareServer(name, cm)
+}
+
+// NewMiddlewaresClient creates a new Middleware with the builder.
+func NewMiddlewaresClient(cc *configv1.Customize) []middleware.Middleware {
+	return build.NewMiddlewaresClient(nil, cc)
+}
+
+// NewMiddlewaresServer creates a new Middleware with the builder.
+func NewMiddlewaresServer(cc *configv1.Customize) []middleware.Middleware {
+	return build.NewMiddlewaresServer(nil, cc)
+}
+
+// RegisterMiddleware registers a MiddlewareBuilder with the builder.
+func RegisterMiddleware(name string, middlewareBuilder MiddlewareBuilder) {
+	build.RegisterMiddlewareBuilder(name, middlewareBuilder)
 }
 
 // New creates a new Builder.

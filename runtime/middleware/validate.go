@@ -27,7 +27,7 @@ func Validate(ms []Middleware, ok bool, validator *configv1.Middleware_Validator
 	return ms
 }
 
-func validateMiddlewareV1(v *configv1.Middleware_Validator) middleware.Middleware {
+func validateMiddlewareV1(_ *configv1.Middleware_Validator) middleware.Middleware {
 	return middlewareValidate.Validator()
 }
 
