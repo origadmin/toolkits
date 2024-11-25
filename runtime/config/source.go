@@ -26,8 +26,8 @@ func WithOptions(options ...Option) SourceFunc {
 }
 
 // WithCustomize sets the customize field of the SourceOption struct.
-func WithCustomize(custom *configv1.Customize) SourceFunc {
+func WithCustomize(customize *configv1.Customize) SourceFunc {
 	return func(s *SourceOption) {
-		s.Customize = custom
+		s.Customize = customize
 	}
 }
