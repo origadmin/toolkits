@@ -56,6 +56,8 @@ func (m *Mail) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Type
+
 	// no validation rules for Host
 
 	// no validation rules for Port
@@ -63,6 +65,8 @@ func (m *Mail) validate(all bool) error {
 	// no validation rules for Username
 
 	// no validation rules for Password
+
+	// no validation rules for TokenSecret
 
 	// no validation rules for Ssl
 
@@ -73,8 +77,6 @@ func (m *Mail) validate(all bool) error {
 	// no validation rules for Nickname
 
 	// no validation rules for From
-
-	// no validation rules for TokenSecret
 
 	if len(errors) > 0 {
 		return MailMultiError(errors)
