@@ -5,19 +5,22 @@ import (
 	"time"
 
 	"github.com/coocood/freecache"
+	"github.com/goexts/generic/types"
 
 	"github.com/origadmin/toolkits/errors"
+
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
 const (
 	ErrNotFound = errors.String("not found")
+	defaultSize = 64 * 1024 * 1024
 )
 
 type Cache struct {
-	Delimiter         string
-	Cache             *freecache.Cache
-	DefaultExpiration time.Duration
-	CleanupInterval   time.Duration
+	Expiration      time.Duration
+	CleanupInterval time.Duration
+	Cache           *freecache.Cache
 }
 
 func (obj *Cache) Set(ctx context.Context, key, value string, expiration ...time.Duration) error {
@@ -79,12 +82,14 @@ func (obj *Cache) Close(_ context.Context) error {
 	return nil
 }
 
-func NewCache() *Cache {
+func NewCache(cfg *configv1.Data_Memory) *Cache {
+	if cfg == nil {
+		cfg = new(configv1.Data_Memory)
+	}
 	return &Cache{
-		Delimiter:         ":",
-		DefaultExpiration: time.Second * 60,
-		CleanupInterval:   time.Second * 60,
-		Cache:             newFreeCache(100 * 1024 * 1024),
+		Expiration:      types.ZeroOr(cfg.GetExpiration().AsDuration(), 24*time.Hour),
+		CleanupInterval: types.ZeroOr(cfg.GetCleanupInterval().AsDuration(), 30*time.Minute),
+		Cache:           newFreeCache(defaultSize),
 	}
 }
 
