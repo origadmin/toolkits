@@ -7,24 +7,28 @@ import (
 	"time"
 
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/goexts/generic/settings"
 	"google.golang.org/grpc"
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/helpers"
+	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
-	"github.com/origadmin/toolkits/runtime/registry"
 	"github.com/origadmin/toolkits/runtime/service/selector"
 )
 
 const defaultTimeout = 5 * time.Second
 
 // NewClient Creating a GRPC client instance
-func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Service, m ...middleware.Middleware) (*grpc.ClientConn, error) {
+func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceOption) (*grpc.ClientConn, error) {
+	option := settings.Apply(&config.ServiceConfig{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewClient(service.GetMiddleware())
-	ms = append(ms, m...)
+	if option.Middlewares != nil {
+		ms = append(ms, option.Middlewares...)
+	}
 
 	timeout := defaultTimeout
 	if serviceGrpc := service.GetGrpc(); serviceGrpc != nil {
@@ -38,11 +42,11 @@ func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Serv
 		transgrpc.WithMiddleware(ms...),
 	}
 
-	if r != nil {
+	if option.Discovery != nil {
 		endpoint := helpers.ServiceDiscoveryName(service.GetName())
 		options = append(options,
 			transgrpc.WithEndpoint(endpoint),
-			transgrpc.WithDiscovery(r),
+			transgrpc.WithDiscovery(option.Discovery),
 		)
 	}
 

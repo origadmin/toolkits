@@ -7,23 +7,28 @@ import (
 	"time"
 
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/goexts/generic/settings"
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/helpers"
+	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
-	"github.com/origadmin/toolkits/runtime/registry"
 	"github.com/origadmin/toolkits/runtime/service/selector"
 )
 
 const defaultTimeout = 5 * time.Second
 
 // NewClient Creating an HTTP client instance.
-func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Service, m ...middleware.Middleware) (*transhttp.Client, error) {
+func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceOption) (*transhttp.Client, error) {
+
+	option := settings.Apply(&config.ServiceConfig{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewClient(service.GetMiddleware())
-	ms = append(ms, m...)
+	if option.Middlewares != nil {
+		ms = append(ms, option.Middlewares...)
+	}
 
 	timeout := defaultTimeout
 	if serviceHttp := service.GetHttp(); serviceHttp != nil {
@@ -37,11 +42,11 @@ func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Serv
 		transhttp.WithMiddleware(ms...),
 	}
 
-	if r != nil {
+	if option.Discovery != nil {
 		endpoint := helpers.ServiceDiscoveryName(service.GetName())
 		options = append(options,
 			transhttp.WithEndpoint(endpoint),
-			transhttp.WithDiscovery(r),
+			transhttp.WithDiscovery(option.Discovery),
 		)
 	}
 
