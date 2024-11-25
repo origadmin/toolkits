@@ -6,49 +6,53 @@ package grpc
 import (
 	"time"
 
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/filter"
-	"github.com/go-kratos/kratos/v2/selector/p2c"
-	"github.com/go-kratos/kratos/v2/selector/random"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/goexts/generic/settings"
 	"google.golang.org/grpc"
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/helpers"
+	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
-	"github.com/origadmin/toolkits/runtime/registry"
-	"github.com/origadmin/toolkits/utils"
+	"github.com/origadmin/toolkits/runtime/service/selector"
 )
 
 const defaultTimeout = 5 * time.Second
 
-// NewClient Creating a GRPC client
-func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Service, m ...middleware.Middleware) (*grpc.ClientConn, error) {
-	endpoint := utils.NameDiscovery(service.GetName())
-
+// NewClient Creating a GRPC client instance
+func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceOption) (*grpc.ClientConn, error) {
+	option := settings.Apply(&config.ServiceConfig{}, opts)
 	var ms []middleware.Middleware
-
 	ms = middleware.NewClient(service.GetMiddleware())
-	ms = append(ms, m...)
+	if option.Middlewares != nil {
+		ms = append(ms, option.Middlewares...)
+	}
 
 	timeout := defaultTimeout
-
-	serviceGrpc := service.GetGrpc()
-	if serviceGrpc != nil {
+	if serviceGrpc := service.GetGrpc(); serviceGrpc != nil {
 		if serviceGrpc.Timeout != nil {
 			timeout = serviceGrpc.Timeout.AsDuration()
 		}
 	}
 
 	options := []transgrpc.ClientOption{
-		transgrpc.WithEndpoint(endpoint),
-		transgrpc.WithDiscovery(r),
 		transgrpc.WithTimeout(timeout),
 		transgrpc.WithMiddleware(ms...),
 	}
-	options = CreateSelectorOption(options, service.GetSelector())
+
+	if option.Discovery != nil {
+		endpoint := helpers.ServiceDiscoveryName(service.GetName())
+		options = append(options,
+			transgrpc.WithEndpoint(endpoint),
+			transgrpc.WithDiscovery(option.Discovery),
+		)
+	}
+
+	if option, err := selector.NewGRPC(service.GetSelector()); err == nil {
+		options = append(options, option)
+	}
 	conn, err := transgrpc.DialInsecure(ctx, options...)
 
 	if err != nil {
@@ -56,31 +60,4 @@ func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Serv
 	}
 
 	return conn, nil
-}
-
-func CreateSelectorOption(options []transgrpc.ClientOption, cfg *configv1.Service_Selector) []transgrpc.ClientOption {
-	if cfg == nil {
-		return options
-	}
-	if cfg.Version != "" {
-		v := filter.Version(cfg.Version)
-		options = append(options, transgrpc.WithNodeFilter(v))
-	}
-
-	var builder selector.Builder
-	switch cfg.Builder {
-	case "random":
-		builder = random.NewBuilder()
-	case "wrr":
-		builder = wrr.NewBuilder()
-	case "p2c":
-		builder = p2c.NewBuilder()
-	default:
-	}
-
-	if builder != nil {
-		selector.SetGlobalSelector(builder)
-	}
-
-	return options
 }

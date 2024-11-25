@@ -1,0 +1,22 @@
+package database
+
+import (
+	"database/sql/driver"
+
+	"github.com/origadmin/toolkits/context"
+)
+
+type (
+	// Tx is a transaction aliased to driver.Tx
+	Tx = driver.Tx
+	// ExecFunc is a function that can be executed within a transaction
+	ExecFunc = func(context.Context) error
+	// TxFunc is a function that can be executed within a transaction
+	TxFunc = func(tx Tx) error
+)
+
+// Trans is a transaction wrapper
+type Trans = interface {
+	Tx(ctx context.Context, fn ExecFunc) error
+	InTx(ctx context.Context, fn TxFunc) error
+}

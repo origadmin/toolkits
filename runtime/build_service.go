@@ -4,6 +4,12 @@
 package runtime
 
 import (
+	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"google.golang.org/grpc"
+
+	"github.com/origadmin/toolkits/context"
+	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/service"
 )
@@ -15,9 +21,56 @@ type (
 	}
 	// ServiceBuilder is an interface that defines a method for creating a new service.
 	ServiceBuilder interface {
-		NewGRPCServer(cfg *configv1.Service) (*service.GRPCServer, error)
-		NewHTTPServer(cfg *configv1.Service) (*service.HTTPServer, error)
-		NewGRPCClient(cfg *configv1.Service) (*service.GRPCClient, error)
-		NewHTTPClient(cfg *configv1.Service) (*service.HTTPClient, error)
+		NewGRPCServer(cfg *configv1.Service, opts ...config.ServiceOption) (*service.GRPCServer, error)
+		NewHTTPServer(cfg *configv1.Service, opts ...config.ServiceOption) (*service.HTTPServer, error)
+		NewGRPCClient(ctx context.Context, cfg *configv1.Service, opts ...config.ServiceOption) (*service.GRPCClient, error)
+		NewHTTPClient(ctx context.Context, cfg *configv1.Service, opts ...config.ServiceOption) (*service.HTTPClient, error)
 	}
 )
+
+// NewGRPCServer creates a new gRPC server based on the given ServiceConfig.
+func (b *builder) NewGRPCServer(cfg *configv1.Service, opts ...config.ServiceOption) (*transgrpc.Server, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	if serviceBuilder, ok := b.services[cfg.Name]; ok {
+		return serviceBuilder.NewGRPCServer(cfg, opts...)
+	}
+	return nil, ErrNotFound
+}
+
+// NewHTTPServer creates a new HTTP server based on the given ServiceConfig.
+func (b *builder) NewHTTPServer(cfg *configv1.Service, opts ...config.ServiceOption) (*transhttp.Server, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	if serviceBuilder, ok := b.services[cfg.Name]; ok {
+		return serviceBuilder.NewHTTPServer(cfg, opts...)
+	}
+	return nil, ErrNotFound
+}
+
+// NewGRPCClient creates a new gRPC client based on the given ServiceConfig.
+func (b *builder) NewGRPCClient(ctx context.Context, cfg *configv1.Service, opts ...config.ServiceOption) (*grpc.ClientConn, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	if serviceBuilder, ok := b.services[cfg.Name]; ok {
+		return serviceBuilder.NewGRPCClient(ctx, cfg, opts...)
+	}
+	return nil, ErrNotFound
+}
+
+// NewHTTPClient creates a new HTTP client based on the given ServiceConfig.
+func (b *builder) NewHTTPClient(ctx context.Context, cfg *configv1.Service, opts ...config.ServiceOption) (*transhttp.Client, error) {
+	b.serviceMux.RLock()
+	defer b.serviceMux.RUnlock()
+	if serviceBuilder, ok := b.services[cfg.Name]; ok {
+		return serviceBuilder.NewHTTPClient(ctx, cfg, opts...)
+	}
+	return nil, ErrNotFound
+}
+
+// RegisterServiceBuilder registers a new ServiceBuilder with the given service name.
+func (b *builder) RegisterServiceBuilder(name string, builder ServiceBuilder) {
+	b.serviceMux.Lock()
+	defer b.serviceMux.Unlock()
+	b.services[name] = builder
+}

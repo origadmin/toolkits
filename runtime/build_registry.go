@@ -44,5 +44,42 @@ type registryWrap struct {
 	DiscoveryBuildFunc
 }
 
+// NewRegistrar creates a new Registrar object based on the given RegistryConfig.
+func (b *builder) NewRegistrar(cfg *configv1.Registry) (registry.Registrar, error) {
+	b.registryMux.RLock()
+	defer b.registryMux.RUnlock()
+	registryBuilder, ok := b.registries[cfg.Type]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return registryBuilder.NewRegistrar(cfg)
+}
+
+// NewDiscovery creates a new Discovery object based on the given RegistryConfig.
+func (b *builder) NewDiscovery(cfg *configv1.Registry) (registry.Discovery, error) {
+	b.registryMux.RLock()
+	defer b.registryMux.RUnlock()
+	registryBuilder, ok := b.registries[cfg.Type]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return registryBuilder.NewDiscovery(cfg)
+}
+
+// RegisterRegistryBuilder registers a new RegistryBuilder with the given name.
+func (b *builder) RegisterRegistryBuilder(name string, registryBuilder RegistryBuilder) {
+	b.registryMux.Lock()
+	defer b.registryMux.Unlock()
+	b.registries[name] = registryBuilder
+}
+
+// RegisterRegistryFunc registers a new RegistryBuilder with the given name and functions.
+func (b *builder) RegisterRegistryFunc(name string, registryBuilder RegistrarBuildFunc, discoveryBuilder DiscoveryBuildFunc) {
+	b.RegisterRegistryBuilder(name, &registryWrap{
+		RegistrarBuildFunc: registryBuilder,
+		DiscoveryBuildFunc: discoveryBuilder,
+	})
+}
+
 // _ is a blank identifier that is used to satisfy the interface requirement for RegistryBuilder.
 var _ RegistryBuilder = &registryWrap{}

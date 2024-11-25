@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Call the Get function to retrieve the build information
-	buildInfo := version.Get()
+	buildInfo := version.ReadBuildInfo()
 	fmt.Println("Build Information:")
 	fmt.Printf("Git Tag: %s\n", buildInfo.GitTag)
 	fmt.Printf("Git Commit: %s\n", buildInfo.GitCommit)
@@ -23,5 +23,5 @@ func main() {
 
 	// Call the Show function to print the build information in JSON format
 	fmt.Println("\nBuild Information in JSON format:")
-	version.Show()
+	version.PrintBuildInfo()
 }
