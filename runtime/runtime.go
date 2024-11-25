@@ -105,7 +105,5 @@ func RegisterMiddleware(name string, middlewareBuilder MiddlewareBuilder) {
 
 // New creates a new Builder.
 func New() Builder {
-	b := &builder{}
-	b.init()
-	return b
+	return newBuilder()
 }

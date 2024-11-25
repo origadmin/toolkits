@@ -27,3 +27,12 @@ func (b *builder) init() {
 	b.services = make(map[string]ServiceBuilder)
 	b.middlewares = make(map[string]MiddlewareBuilder)
 }
+
+func newBuilder() *builder {
+	return &builder{
+		configs:     make(map[string]ConfigBuilder),
+		registries:  make(map[string]RegistryBuilder),
+		services:    make(map[string]ServiceBuilder),
+		middlewares: make(map[string]MiddlewareBuilder),
+	}
+}
