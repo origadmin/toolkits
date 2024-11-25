@@ -8,11 +8,13 @@ package runtime
 import (
 	"sync"
 
+	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/runtime/config"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/runtime/registry"
+	"github.com/origadmin/toolkits/runtime/service"
 )
 
 type Builder interface {
@@ -101,6 +103,36 @@ func NewMiddlewaresServer(cc *configv1.Customize) []middleware.Middleware {
 // RegisterMiddleware registers a MiddlewareBuilder with the builder.
 func RegisterMiddleware(name string, middlewareBuilder MiddlewareBuilder) {
 	build.RegisterMiddlewareBuilder(name, middlewareBuilder)
+}
+
+// NewHTTPServiceServer creates a new HTTP server using the provided configuration
+func NewHTTPServiceServer(cfg *configv1.Service) (*service.HTTPServer, error) {
+	// Call the build.NewHTTPServer function with the provided configuration
+	return build.NewHTTPServer(cfg)
+}
+
+// NewHTTPServiceClient creates a new HTTP client using the provided context and configuration
+func NewHTTPServiceClient(ctx context.Context, cfg *configv1.Service) (*service.HTTPClient, error) {
+	// Call the build.NewHTTPClient function with the provided context and configuration
+	return build.NewHTTPClient(ctx, cfg)
+}
+
+// NewGRPCServiceServer creates a new GRPC server using the provided configuration
+func NewGRPCServiceServer(cfg *configv1.Service) (*service.GRPCServer, error) {
+	// Call the build.NewGRPCServer function with the provided configuration
+	return build.NewGRPCServer(cfg)
+}
+
+// NewGRPCServiceClient creates a new GRPC client using the provided context and configuration
+func NewGRPCServiceClient(ctx context.Context, cfg *configv1.Service) (*service.GRPCClient, error) {
+	// Call the build.NewGRPCClient function with the provided context and configuration
+	return build.NewGRPCClient(ctx, cfg)
+}
+
+// RegisterService registers a service builder with the provided name
+func RegisterService(name string, serviceBuilder ServiceBuilder) {
+	// Call the build.RegisterServiceBuilder function with the provided name and service builder
+	build.RegisterServiceBuilder(name, serviceBuilder)
 }
 
 // New creates a new Builder.

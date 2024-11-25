@@ -58,7 +58,7 @@ func (m *Service) validate(all bool) error {
 
 	// no validation rules for Name
 
-	// no validation rules for AutoEndpoint
+	// no validation rules for EndpointURL
 
 	if all {
 		switch v := interface{}(m.GetGrpc()).(type) {
@@ -403,7 +403,7 @@ func (m *Service_GINS) validate(all bool) error {
 
 	// no validation rules for KeyFile
 
-	// no validation rules for Endpoint
+	// no validation rules for EndpointURL
 
 	if m.Timeout != nil {
 
@@ -824,7 +824,7 @@ func (m *Service_HTTP) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for Endpoint
+	// no validation rules for EndpointURL
 
 	if len(errors) > 0 {
 		return Service_HTTPMultiError(errors)
@@ -935,7 +935,7 @@ func (m *Service_GRPC) validate(all bool) error {
 
 	// no validation rules for KeyFile
 
-	// no validation rules for Endpoint
+	// no validation rules for EndpointURL
 
 	if m.Timeout != nil {
 

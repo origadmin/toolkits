@@ -58,7 +58,7 @@ func (m *Trace) validate(all bool) error {
 
 	// no validation rules for Name
 
-	// no validation rules for Endpoint
+	// no validation rules for EndpointURL
 
 	if len(errors) > 0 {
 		return TraceMultiError(errors)

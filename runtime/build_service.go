@@ -8,6 +8,7 @@ import (
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc"
 
+	"github.com/origadmin/toolkits/context"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/service"
 )
@@ -21,8 +22,8 @@ type (
 	ServiceBuilder interface {
 		NewGRPCServer(cfg *configv1.Service) (*service.GRPCServer, error)
 		NewHTTPServer(cfg *configv1.Service) (*service.HTTPServer, error)
-		NewGRPCClient(cfg *configv1.Service) (*service.GRPCClient, error)
-		NewHTTPClient(cfg *configv1.Service) (*service.HTTPClient, error)
+		NewGRPCClient(ctx context.Context, cfg *configv1.Service) (*service.GRPCClient, error)
+		NewHTTPClient(ctx context.Context, cfg *configv1.Service) (*service.HTTPClient, error)
 	}
 )
 
@@ -47,21 +48,21 @@ func (b *builder) NewHTTPServer(cfg *configv1.Service) (*transhttp.Server, error
 }
 
 // NewGRPCClient creates a new gRPC client based on the given ServiceConfig.
-func (b *builder) NewGRPCClient(cfg *configv1.Service) (*grpc.ClientConn, error) {
+func (b *builder) NewGRPCClient(ctx context.Context, cfg *configv1.Service) (*grpc.ClientConn, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	if serviceBuilder, ok := b.services[cfg.Name]; ok {
-		return serviceBuilder.NewGRPCClient(cfg)
+		return serviceBuilder.NewGRPCClient(ctx, cfg)
 	}
 	return nil, ErrNotFound
 }
 
 // NewHTTPClient creates a new HTTP client based on the given ServiceConfig.
-func (b *builder) NewHTTPClient(cfg *configv1.Service) (*transhttp.Client, error) {
+func (b *builder) NewHTTPClient(ctx context.Context, cfg *configv1.Service) (*transhttp.Client, error) {
 	b.serviceMux.RLock()
 	defer b.serviceMux.RUnlock()
 	if serviceBuilder, ok := b.services[cfg.Name]; ok {
-		return serviceBuilder.NewHTTPClient(cfg)
+		return serviceBuilder.NewHTTPClient(ctx, cfg)
 	}
 	return nil, ErrNotFound
 }
