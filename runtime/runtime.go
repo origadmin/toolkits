@@ -51,7 +51,7 @@ func Global() Builder {
 }
 
 // NewConfig creates a new Config using the registered ConfigBuilder.
-func NewConfig(cfg *configv1.SourceConfig, ss ...config.SettingFunc) (config.Config, error) {
+func NewConfig(cfg *configv1.SourceConfig, ss ...config.SourceFunc) (config.Config, error) {
 	return build.NewConfig(cfg, ss...)
 }
 
