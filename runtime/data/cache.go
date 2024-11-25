@@ -14,9 +14,28 @@ const (
 	ErrCacheConfigNil = errors.String("cache: config is nil")
 )
 
-func NewCache(cfg *configv1.Data_Cache) (cache.Cache, error) {
+type (
+	Cache = cache.Cache
+)
+
+func NewCache(cfg *configv1.Data_Cache) (Cache, error) {
 	if cfg == nil {
 		return nil, ErrCacheConfigNil
 	}
-	return memory.NewCache(cfg.Memory), nil
+
+	if c := cfg.GetMemory(); c != nil {
+		memcache := memory.NewCache()
+		//if c.Capacity > 0 {
+		//	cache.Capacity = c.Capacity
+		//}
+		if exp := c.Expiration; exp != nil && exp.AsDuration() > 0 {
+			memcache.DefaultExpiration = exp.AsDuration()
+		}
+		if interval := c.CleanupInterval; interval != nil && interval.AsDuration() > 0 {
+			memcache.CleanupInterval = interval.AsDuration()
+		}
+		return memcache, nil
+
+	}
+	return nil, errors.String("cache: unknown cache type")
 }

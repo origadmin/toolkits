@@ -13,14 +13,11 @@ const (
 	ErrNotFound = errors.String("not found")
 )
 
-type Config struct {
+type Cache struct {
+	Delimiter         string
+	Cache             *freecache.Cache
 	DefaultExpiration time.Duration
 	CleanupInterval   time.Duration
-}
-
-type Cache struct {
-	Delimiter string
-	Cache     *freecache.Cache
 }
 
 func (obj *Cache) Set(ctx context.Context, key, value string, expiration ...time.Duration) error {
@@ -82,12 +79,15 @@ func (obj *Cache) Close(_ context.Context) error {
 	return nil
 }
 
-func NewCache(cfg Config) *Cache {
+func NewCache() *Cache {
 	return &Cache{
-		Cache: FreeCache(cfg),
+		Delimiter:         ":",
+		DefaultExpiration: time.Second * 60,
+		CleanupInterval:   time.Second * 60,
+		Cache:             newFreeCache(100 * 1024 * 1024),
 	}
 }
 
-func FreeCache(config Config) *freecache.Cache {
-	return freecache.NewCache(100 * 1024 * 1024)
+func newFreeCache(size int) *freecache.Cache {
+	return freecache.NewCache(size)
 }
