@@ -62,10 +62,11 @@ func NewTokenStorage(ss ...StorageSetting) TokenStorage {
 	}, ss)
 
 	if opt.Cache == nil {
-		opt.Cache = memory.NewCache(memory.Config{
-			CleanupInterval:   5 * time.Minute,
-			DefaultExpiration: 24 * time.Hour,
-		})
+		c := memory.NewCache()
+		c.DefaultExpiration = 24 * time.Hour
+		c.CleanupInterval = 30 * time.Minute
+		c.Delimiter = ":"
+		opt.Cache = c
 	}
 
 	s := &tokenStorage{

@@ -181,7 +181,6 @@ func (s *Server) init(opts ...ServerOption) {
 }
 
 func (s *Server) filter() HandlerFunc {
-	s.engine.Use()
 	return func(c *gin.Context) {
 		var (
 			ctx    context.Context
@@ -213,6 +212,7 @@ func (s *Server) filter() HandlerFunc {
 			tr.endpoint = s.endpoint.String()
 		}
 		tr.ginCtx.Request = c.Request.WithContext(transport.NewServerContext(ctx, tr))
+		tr.ginCtx.Request = c.Request.WithContext(NewContext(c))
 		c.Next()
 	}
 }
@@ -269,6 +269,8 @@ func (s *Server) listenAndEndpoint() error {
 		}
 		s.endpoint = NewEndpoint(Scheme("http", s.tlsConf != nil), addr)
 	}
+	s.filters = append(s.filters, s.filter())
+	s.engine.Use(s.filters...)
 	return s.err
 }
 
