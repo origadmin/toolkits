@@ -8,12 +8,12 @@ import (
 
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 
+	"github.com/origadmin/toolkits/helpers"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
-	"github.com/origadmin/toolkits/utils"
 )
 
-// NewServer Create a GRPC server
+// NewServer Create a GRPC server instance
 func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transgrpc.Server {
 	var options []transgrpc.ServerOption
 
@@ -34,7 +34,7 @@ func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transgrpc.Ser
 			options = append(options, transgrpc.Timeout(serviceGrpc.Timeout.AsDuration()))
 		}
 		if cfg.AutoEndpoint {
-			endpoint := utils.DiscoveryEndpoint(serviceGrpc.Endpoint, "grpc", cfg.Host, serviceGrpc.Addr)
+			endpoint := helpers.ServiceDiscoveryEndpoint(serviceGrpc.Endpoint, "grpc", cfg.Host, serviceGrpc.Addr)
 			if e, err := url.Parse(endpoint); err == nil {
 				options = append(options, transgrpc.Endpoint(e))
 			}

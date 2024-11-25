@@ -8,12 +8,12 @@ import (
 
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 
+	"github.com/origadmin/toolkits/helpers"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
-	"github.com/origadmin/toolkits/utils"
 )
 
-// NewServer Create a HTTP server
+// NewServer Create an HTTP server instance.
 func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transhttp.Server {
 	var options []transhttp.ServerOption
 
@@ -35,7 +35,7 @@ func NewServer(cfg *configv1.Service, m ...middleware.Middleware) *transhttp.Ser
 			options = append(options, transhttp.Timeout(serviceHttp.Timeout.AsDuration()))
 		}
 		if cfg.AutoEndpoint {
-			endpoint := utils.DiscoveryEndpoint(serviceHttp.Endpoint, "http", cfg.Host, serviceHttp.Addr)
+			endpoint := helpers.ServiceDiscoveryEndpoint(serviceHttp.Endpoint, "http", cfg.Host, serviceHttp.Addr)
 			if e, err := url.Parse(endpoint); err == nil {
 				options = append(options, transhttp.Endpoint(e))
 			}

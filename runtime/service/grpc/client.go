@@ -16,17 +16,17 @@ import (
 
 	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/helpers"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/runtime/registry"
-	"github.com/origadmin/toolkits/utils"
 )
 
 const defaultTimeout = 5 * time.Second
 
-// NewClient Creating a GRPC client
+// NewClient Creating a GRPC client instance
 func NewClient(ctx context.Context, r registry.Discovery, service *configv1.Service, m ...middleware.Middleware) (*grpc.ClientConn, error) {
-	endpoint := utils.NameDiscovery(service.GetName())
+	endpoint := helpers.ServiceDiscoveryName(service.GetName())
 
 	var ms []middleware.Middleware
 
