@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package config.v1;
+
+option cc_enable_arenas = true;
+option go_package = "github.com/origadmin/toolkits/runtime/gen/go/config/v1;configv1";
+option java_multiple_files = true;
+option java_outer_classname = "MailProto";
+option java_package = "com.github.origadmin.toolkits.runtime.config";
+option objc_class_prefix = "Config";
+
+// Mail
+message Mail {
+  string host = 1 [json_name = "host"];
+  int32 port = 2 [json_name = "port"];
+  string username = 3 [json_name = "username"];
+  string password = 4 [json_name = "password"];
+  bool ssl = 5 [json_name = "ssl"];
+  int32 max_retries = 6 [json_name = "max_retries"];
+  int32 retry_interval = 7 [json_name = "retry_interval"];
+
+  string nickname = 8 [json_name = "nickname"];
+  string from = 9 [json_name = "from"];
+  string token_secret = 10 [json_name = "token_secret"];
+}
