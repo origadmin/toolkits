@@ -37,8 +37,8 @@ func (c *cacheError) Is(err error) bool {
 }
 
 var (
-	ErrCacheClosed   error = &cacheError{msg: "cache closed"}
-	ErrCacheNotFound error = &cacheError{msg: "cache not found"}
+	ErrClosed   error = &cacheError{msg: "cache closed"}
+	ErrNotFound error = &cacheError{msg: "cache not found"}
 )
 
 func NewError(msg string) error {

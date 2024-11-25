@@ -13,8 +13,11 @@ import (
 )
 
 const (
-	ErrNotFound = errors.String("not found")
 	defaultSize = 64 * 1024 * 1024
+)
+
+const (
+	ErrNotFound = errors.String("not found")
 )
 
 type Cache struct {

@@ -10,7 +10,6 @@ import (
 	"github.com/goexts/generic/settings"
 
 	"github.com/origadmin/toolkits/storage/cache"
-	"github.com/origadmin/toolkits/storage/cache/memory"
 )
 
 const (
@@ -62,11 +61,7 @@ func NewTokenStorage(ss ...StorageSetting) TokenStorage {
 	}, ss)
 
 	if opt.Cache == nil {
-		c := memory.NewCache()
-		c.DefaultExpiration = 24 * time.Hour
-		c.CleanupInterval = 30 * time.Minute
-		c.Delimiter = ":"
-		opt.Cache = c
+		opt.Cache = NewSecurityCache()
 	}
 
 	s := &tokenStorage{
