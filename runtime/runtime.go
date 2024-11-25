@@ -106,9 +106,9 @@ func RegisterMiddleware(name string, middlewareBuilder MiddlewareBuilder) {
 }
 
 // NewHTTPServiceServer creates a new HTTP server using the provided configuration
-func NewHTTPServiceServer(cfg *configv1.Service) (*service.HTTPServer, error) {
+func NewHTTPServiceServer(cfg *configv1.Service, opts ...config.ServiceOption) (*service.HTTPServer, error) {
 	// Call the build.NewHTTPServer function with the provided configuration
-	return build.NewHTTPServer(cfg)
+	return build.NewHTTPServer(cfg, opts...)
 }
 
 // NewHTTPServiceClient creates a new HTTP client using the provided context and configuration
