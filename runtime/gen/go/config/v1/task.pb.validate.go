@@ -246,7 +246,7 @@ func (m *Task_Asynq) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Password
 

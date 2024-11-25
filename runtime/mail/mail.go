@@ -8,7 +8,10 @@ import (
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
-type Builder = func(cfg *configv1.Mail) mail.Sender
+type (
+	Builder = func(cfg *configv1.Mail) mail.Sender
+	Sender  = mail.Sender
+)
 
 var (
 	builder Builder

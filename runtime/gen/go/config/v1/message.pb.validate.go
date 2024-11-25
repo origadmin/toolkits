@@ -420,7 +420,7 @@ func (m *Message_MQTT) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -523,7 +523,7 @@ func (m *Message_Kafka) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -627,7 +627,7 @@ func (m *Message_RabbitMQ) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -731,7 +731,7 @@ func (m *Message_ActiveMQ) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -835,7 +835,7 @@ func (m *Message_NATS) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -938,7 +938,7 @@ func (m *Message_NSQ) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -1041,7 +1041,7 @@ func (m *Message_Pulsar) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -1145,7 +1145,7 @@ func (m *Message_Redis) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
@@ -1249,7 +1249,7 @@ func (m *Message_RocketMQ) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for EndpointURL
+	// no validation rules for Endpoint
 
 	// no validation rules for Codec
 
