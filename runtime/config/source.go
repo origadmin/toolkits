@@ -14,8 +14,14 @@ const Type = "config"
 type SourceOption struct {
 	Options   []Option
 	Customize *configv1.Customize
+	Decoder   Decoder
+	Encoder   Encoder
 }
 
+// Encoder is a function that takes a value and returns a byte slice and an error.
+type Encoder func(v any) ([]byte, error)
+
+// SourceSetting is a function that takes a pointer to a SourceOption struct and modifies it.
 type SourceSetting = func(s *SourceOption)
 
 // WithOptions sets the options field of the SourceOption struct.

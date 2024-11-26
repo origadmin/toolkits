@@ -14,22 +14,22 @@ type (
 	// configBuildRegistry is an interface that defines a method for registering a config builder.
 	configBuildRegistry interface {
 		// RegisterConfigBuilder registers a config builder with the given name.
-		RegisterConfigBuilder(name string, configBuilder ConfigBuilder)
+		RegisterConfigBuilder(string, ConfigBuilder)
 	}
 	// configSyncRegistry is an interface that defines a method for synchronizing a config.
 	configSyncRegistry interface {
-		SyncConfig(cfg *configv1.SourceConfig, v any) error
+		SyncConfig(*configv1.SourceConfig, any) error
 	}
 
 	// ConfigBuilder is an interface that defines a method for creating a new config.
 	ConfigBuilder interface {
 		// NewConfig creates a new config using the given SourceConfig and a list of Options.
-		NewConfig(cfg *configv1.SourceConfig, ss ...config.SourceSetting) (config.Config, error)
+		NewConfig(*configv1.SourceConfig, ...config.SourceSetting) (config.Config, error)
 	}
 
 	// ConfigSyncer is an interface that defines a method for synchronizing a config.
 	ConfigSyncer interface {
-		SyncConfig(cfg *configv1.SourceConfig, v any) error
+		SyncConfig(*configv1.SourceConfig, any, ...config.SourceSetting) error
 	}
 )
 
@@ -55,23 +55,23 @@ func (b *builder) NewConfig(cfg *configv1.SourceConfig, ss ...config.SourceSetti
 }
 
 // ConfigSyncFunc is a function type that takes a SourceConfig and a list of Options and returns an error.
-type ConfigSyncFunc func(*configv1.SourceConfig, any) error
+type ConfigSyncFunc func(*configv1.SourceConfig, any, ...config.SourceSetting) error
 
 // SyncConfig is a method that implements the ConfigSyncer interface for ConfigSyncFunc.
-func (fn ConfigSyncFunc) SyncConfig(cfg *configv1.SourceConfig, v any) error {
+func (fn ConfigSyncFunc) SyncConfig(cfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
 	// Call the function with the given SourceConfig and a list of Options.
 	return fn(cfg, v)
 }
 
 // SyncConfig is a method that implements the ConfigSyncer interface for ConfigSyncFunc.
-func (b *builder) SyncConfig(cfg *configv1.SourceConfig, v any) error {
+func (b *builder) SyncConfig(cfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
 	b.syncMux.RLock()
 	defer b.syncMux.RUnlock()
 	configSyncer, ok := b.syncs[cfg.Type]
 	if !ok {
 		return ErrNotFound
 	}
-	return configSyncer.SyncConfig(cfg, v)
+	return configSyncer.SyncConfig(cfg, v, ss...)
 }
 
 // RegisterConfigBuilder registers a new ConfigBuilder with the given name.

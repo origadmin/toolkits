@@ -66,8 +66,8 @@ func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
 }
 
 // SyncConfig synchronizes the given configuration with the given value.
-func SyncConfig(cfg *configv1.SourceConfig, v any) error {
-	return build.SyncConfig(cfg, v)
+func SyncConfig(cfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
+	return build.SyncConfig(cfg, v, ss...)
 }
 
 func RegisterConfigSync(name string, syncFunc ConfigSyncFunc) {
