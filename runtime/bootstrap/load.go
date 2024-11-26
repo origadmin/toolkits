@@ -53,7 +53,7 @@ func loadSourceDir(path string) (*configv1.SourceConfig, error) {
 			return nil
 		}
 		// Get the file type from the extension
-		typo := codec.TypeFromExt(filepath.Ext(walkpath))
+		typo := codec.TypeFromString(filepath.Ext(walkpath))
 		// Check if the file type is unknown
 		if typo == codec.UNKNOWN {
 			return nil
