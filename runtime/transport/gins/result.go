@@ -74,8 +74,8 @@ func RetPage(c *gin.Context, v any, total int64, args ...map[string]any) {
 // RetError Response error data with status code
 func RetError(c *Context, err error, status ...int) {
 	var ierr *httperr.Error
-	if ok := errors.As(err, &ierr); ok {
-		ierr = httperr.FromError(httperr.InternalServerError(err.Error()))
+	if ok := errors.As(err, &ierr); !ok {
+		ierr = httperr.FromError(httperr.InternalServerError(err.Error())) // default error
 	}
 
 	code := int(ierr.Code)
