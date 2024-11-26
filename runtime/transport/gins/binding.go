@@ -2,6 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package gins is a gin extension package.
 package gins
 
 import (
@@ -9,6 +10,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin/binding"
+)
+
+const (
+	ContextBodyBytesKey = "_gins_context_body_bytes"
 )
 
 type jsonBinding struct{}
@@ -60,9 +65,19 @@ func BindQuery(ctx *Context, target interface{}) error {
 
 // BindBody bind json body to target.
 func BindBody(ctx *Context, obj any) error {
-	body, err := io.ReadAll(ctx.Request.Body)
-	if err != nil {
-		return err
+	var body []byte
+	var err error
+	if cb, ok := ctx.Get(ContextBodyBytesKey); ok {
+		if cbb, ok := cb.([]byte); ok {
+			body = cbb
+		}
+	}
+	if body == nil {
+		body, err = io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			return err
+		}
+		ctx.Set(ContextBodyBytesKey, body)
 	}
 	return bind.BindBody(body, obj)
 }

@@ -2,6 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package gins is a gin extension package.
 package gins
 
 import (
@@ -60,10 +61,10 @@ type Server struct {
 
 	filters    []HandlerFunc
 	middleware HandlerFunc
-	dec        DecodeRequestFunc
-	enc        EncodeResponseFunc
-	ene        EncodeErrorFunc
-	endpoint   *url.URL
+	//dec        DecodeRequestFunc
+	//enc        EncodeResponseFunc
+	//ene        EncodeErrorFunc
+	endpoint *url.URL
 }
 
 func (s *Server) Use(handlers ...HandlerFunc) IRoutes {
@@ -160,9 +161,9 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		addr:    ":0",
 		timeout: 1 * time.Second,
-		dec:     DefaultRequestDecoder,
-		enc:     DefaultResponseEncoder,
-		ene:     DefaultErrorEncoder,
+		//dec:     DefaultRequestDecoder,
+		//enc:     DefaultResponseEncoder,
+		//ene:     DefaultErrorEncoder,
 	}
 
 	srv.init(opts...)
@@ -209,8 +210,6 @@ func (s *Server) filter() HandlerFunc {
 			reqHeader:    headerCarrier(c.Request.Header),
 			replyHeader:  headerCarrier(c.Writer.Header()),
 			ginCtx:       c,
-			//request:      c.Request,
-			//response:     c.Writer,
 		}
 		if s.endpoint != nil {
 			tr.endpoint = s.endpoint.String()
@@ -240,10 +239,10 @@ func (s *Server) Start(ctx context.Context) error {
 	} else {
 		err = s.server.Serve(s.lis)
 	}
+
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
-
 	return nil
 }
 

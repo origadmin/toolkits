@@ -4,6 +4,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package gins is a gin extension package.
 package gins
 
 import "net/http"
