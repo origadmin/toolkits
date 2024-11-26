@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	ContextBodyBytesKey = "_gins_context_body_bytes"
+	ContextRequestBodyBytesKey = "_gins_context_request_body_bytes"
+	ContextResponseBodBytesKey = "_gins_context_response_body_bytes"
 )
 
 type jsonBinding struct{}
@@ -67,7 +68,7 @@ func BindQuery(ctx *Context, target interface{}) error {
 func BindBody(ctx *Context, obj any) error {
 	var body []byte
 	var err error
-	if cb, ok := ctx.Get(ContextBodyBytesKey); ok {
+	if cb, ok := ctx.Get(ContextRequestBodyBytesKey); ok {
 		if cbb, ok := cb.([]byte); ok {
 			body = cbb
 		}
@@ -77,7 +78,7 @@ func BindBody(ctx *Context, obj any) error {
 		if err != nil {
 			return err
 		}
-		ctx.Set(ContextBodyBytesKey, body)
+		ctx.Set(ContextRequestBodyBytesKey, body)
 	}
 	return bind.BindBody(body, obj)
 }
