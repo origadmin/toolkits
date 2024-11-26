@@ -25,7 +25,7 @@ const defaultTimeout = 5 * time.Second
 
 // NewClient Creating a GRPC client instance
 func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceSetting) (*grpc.ClientConn, error) {
-	option := settings.Apply(&config.ServiceConfig{}, opts)
+	option := settings.Apply(&config.ServiceOption{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewClient(service.GetMiddleware())
 	if option.Middlewares != nil {
