@@ -21,7 +21,7 @@ import (
 func NewServer(cfg *configv1.Service, opts ...config.ServiceSetting) *transhttp.Server {
 	var options []transhttp.ServerOption
 
-	option := settings.Apply(&config.ServiceConfig{}, opts)
+	option := settings.Apply(&config.ServiceOption{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewServer(cfg.GetMiddleware())
 	if option.Middlewares != nil {
