@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package xid provides a unique identifier generator based on xid.
 package xid

@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package rand provides the random string
 package rand

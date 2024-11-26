@@ -16,17 +16,17 @@ type SourceOption struct {
 	Customize *configv1.Customize
 }
 
-type SourceFunc = func(s *SourceOption)
+type SourceSetting = func(s *SourceOption)
 
 // WithOptions sets the options field of the SourceOption struct.
-func WithOptions(options ...Option) SourceFunc {
+func WithOptions(options ...Option) SourceSetting {
 	return func(s *SourceOption) {
 		s.Options = options
 	}
 }
 
 // WithCustomize sets the customize field of the SourceOption struct.
-func WithCustomize(customize *configv1.Customize) SourceFunc {
+func WithCustomize(customize *configv1.Customize) SourceSetting {
 	return func(s *SourceOption) {
 		s.Customize = customize
 	}

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package helloword
 
 ////go:generate protoc --proto_path=. --proto_path=../third_party --go_out=paths=source_relative:. --go-gins_out=paths=source_relative:. ./helloworld/helloworld.proto

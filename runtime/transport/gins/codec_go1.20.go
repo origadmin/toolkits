@@ -1,5 +1,9 @@
 //go:build go1.20
 
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package gins
 
 import "net/http"

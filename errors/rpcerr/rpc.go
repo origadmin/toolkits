@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 // Package rpcerr provides a way to return detailed information
 // for an RPC request error. The error is normally JSON encoded.
 package rpcerr

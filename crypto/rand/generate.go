@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package rand
 
 // DefaultSaltSize is the default length of the salt string.

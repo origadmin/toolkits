@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package grpc implements the functions, types, and interfaces for the module.
 package grpc
@@ -16,7 +18,7 @@ import (
 )
 
 // NewServer Create an HTTP server instance.
-func NewServer(cfg *configv1.Service, opts ...config.ServiceOption) *transhttp.Server {
+func NewServer(cfg *configv1.Service, opts ...config.ServiceSetting) *transhttp.Server {
 	var options []transhttp.ServerOption
 
 	option := settings.Apply(&config.ServiceConfig{}, opts)

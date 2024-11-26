@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package grpc implements the functions, types, and interfaces for the module.
 package grpc
@@ -16,10 +18,10 @@ import (
 )
 
 // NewServer Create a GRPC server instance
-func NewServer(cfg *configv1.Service, opts ...config.ServiceOption) *transgrpc.Server {
+func NewServer(cfg *configv1.Service, opts ...config.ServiceSetting) *transgrpc.Server {
 	var options []transgrpc.ServerOption
 
-	option := settings.Apply(&config.ServiceConfig{}, opts)
+	option := settings.Apply(&config.ServiceOption{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewServer(cfg.GetMiddleware())
 	if option.Middlewares != nil {

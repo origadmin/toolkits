@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 // TestThreadSafeMultiError tests the ThreadSafeMultiError type
 package errors
 

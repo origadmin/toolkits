@@ -1,6 +1,8 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
-
 //go:build jsoniter
+
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package json provides the json functions based on github.com/json-iterator/go
 package json
