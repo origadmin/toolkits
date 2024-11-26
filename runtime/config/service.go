@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 // Package config implements the functions, types, and interfaces for the module.
 package config
 
@@ -12,28 +16,28 @@ type (
 	EndpointURLFunc = func(endpoint string, scheme string, host string, addr string) (*url.URL, error)
 )
 
-type ServiceOption = func(*ServiceConfig)
-
-type ServiceConfig struct {
+type ServiceOption struct {
 	Discovery   registry.Discovery
 	Middlewares []middleware.Middleware
 	EndpointURL func(endpoint string, scheme string, host string, addr string) (*url.URL, error)
 }
 
-func WithDiscovery(discovery registry.Discovery) func(*ServiceConfig) {
-	return func(config *ServiceConfig) {
+type ServiceSetting = func(config *ServiceOption)
+
+func WithDiscovery(discovery registry.Discovery) ServiceSetting {
+	return func(config *ServiceOption) {
 		config.Discovery = discovery
 	}
 }
 
-func WithMiddlewares(middlewares ...middleware.Middleware) func(*ServiceConfig) {
-	return func(config *ServiceConfig) {
+func WithMiddlewares(middlewares ...middleware.Middleware) ServiceSetting {
+	return func(config *ServiceOption) {
 		config.Middlewares = middlewares
 	}
 }
 
-func WithEndpointURL(endpoint EndpointURLFunc) func(*ServiceConfig) {
-	return func(config *ServiceConfig) {
+func WithEndpointURL(endpoint EndpointURLFunc) ServiceSetting {
+	return func(config *ServiceOption) {
 		config.EndpointURL = endpoint
 	}
 }

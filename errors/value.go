@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package errors
 
 // Valuer defines an interface for retrieving encapsulated values and error information.

@@ -51,7 +51,7 @@ func Global() Builder {
 }
 
 // NewConfig creates a new Config using the registered ConfigBuilder.
-func NewConfig(cfg *configv1.SourceConfig, ss ...config.SourceFunc) (config.Config, error) {
+func NewConfig(cfg *configv1.SourceConfig, ss ...config.SourceSetting) (config.Config, error) {
 	return build.NewConfig(cfg, ss...)
 }
 
@@ -63,6 +63,15 @@ func RegisterConfig(name string, configBuilder ConfigBuilder) {
 // RegisterConfigFunc registers a ConfigBuilder with the builder.
 func RegisterConfigFunc(name string, buildFunc ConfigBuildFunc) {
 	build.RegisterConfigBuilder(name, buildFunc)
+}
+
+// SyncConfig synchronizes the given configuration with the given value.
+func SyncConfig(cfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
+	return build.SyncConfig(cfg, v, ss...)
+}
+
+func RegisterConfigSync(name string, syncFunc ConfigSyncFunc) {
+	build.RegisterConfigSync(name, syncFunc)
 }
 
 // NewDiscovery creates a new Discovery using the registered RegistryBuilder.
@@ -106,7 +115,7 @@ func RegisterMiddleware(name string, middlewareBuilder MiddlewareBuilder) {
 }
 
 // NewHTTPServiceServer creates a new HTTP server using the provided configuration
-func NewHTTPServiceServer(cfg *configv1.Service, opts ...config.ServiceOption) (*service.HTTPServer, error) {
+func NewHTTPServiceServer(cfg *configv1.Service, opts ...config.ServiceSetting) (*service.HTTPServer, error) {
 	// Call the build.NewHTTPServer function with the provided configuration
 	return build.NewHTTPServer(cfg, opts...)
 }

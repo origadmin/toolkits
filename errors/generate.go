@@ -2,8 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package runtime implements the functions, types, and interfaces for the module.
-package runtime
+// Package errors provides the error functions
+package errors
 
 //go:generate buf dep update
 //go:generate buf build

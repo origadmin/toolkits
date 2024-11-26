@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package codec
 
 import (
 	"io"
+	"path/filepath"
 
 	"github.com/origadmin/toolkits/codec/ini"
 	"github.com/origadmin/toolkits/codec/json"
@@ -148,4 +153,9 @@ func TypeFromExt(ext string) Type {
 	default:
 		return UNKNOWN
 	}
+}
+
+// TypeFromPath returns the codec type from the file path.
+func TypeFromPath(path string) Type {
+	return TypeFromExt(filepath.Ext(path))
 }

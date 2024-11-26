@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package bootstrap
 
 import (
@@ -5,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/origadmin/toolkits/codec"
+	"github.com/origadmin/toolkits/runtime"
 	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 
 	"github.com/origadmin/toolkits/errors"
@@ -53,7 +58,7 @@ func loadSourceDir(path string) (*configv1.SourceConfig, error) {
 			return nil
 		}
 		// Get the file type from the extension
-		typo := codec.TypeFromExt(filepath.Ext(walkpath))
+		typo := codec.TypeFromString(filepath.Ext(walkpath))
 		// Check if the file type is unknown
 		if typo == codec.UNKNOWN {
 			return nil
@@ -83,4 +88,20 @@ func LoadSourceConfig(bootstrap *Bootstrap) (*configv1.SourceConfig, error) {
 	}
 	// Load the config file
 	return loadSource(stat, path)
+}
+
+// LoadRemoteConfig loads the config file from the given path
+func LoadRemoteConfig(bootstrap *Bootstrap, v any) error {
+	sourceConfig, err := LoadSourceConfig(bootstrap)
+	if err != nil {
+		return err
+	}
+	config, err := runtime.NewConfig(sourceConfig)
+	if err != nil {
+		return err
+	}
+	if err := config.Load(); err != nil {
+		return err
+	}
+	return config.Scan(v)
 }

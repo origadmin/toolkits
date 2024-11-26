@@ -1,6 +1,8 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
-
 //go:build sonic
+
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package json provides the json functions based on standard library
 package json

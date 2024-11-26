@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2024 OrigAdmin. All rights reserved.
+#
+
 # Helper function to get tags matching a pattern
 # Args:
 #   pattern (string): The pattern to match tags against

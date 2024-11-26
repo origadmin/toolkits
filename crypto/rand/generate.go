@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package rand provides functions for generating random salt strings.
 package rand
 
 // DefaultSaltSize is the default length of the salt string.

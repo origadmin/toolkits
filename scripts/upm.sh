@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2024 OrigAdmin. All rights reserved.
+#
+
 # Record the original working directory
 ORIGINAL_DIR=$(pwd)
 MODULE_NAME=$1

@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package grpc implements the functions, types, and interfaces for the module.
 package grpc
@@ -22,7 +24,7 @@ import (
 const defaultTimeout = 5 * time.Second
 
 // NewClient Creating a GRPC client instance
-func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceOption) (*grpc.ClientConn, error) {
+func NewClient(ctx context.Context, service *configv1.Service, opts ...config.ServiceSetting) (*grpc.ClientConn, error) {
 	option := settings.Apply(&config.ServiceConfig{}, opts)
 	var ms []middleware.Middleware
 	ms = middleware.NewClient(service.GetMiddleware())

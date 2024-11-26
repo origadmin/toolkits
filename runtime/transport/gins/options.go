@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package gins is a gin extension package.
 package gins
 
 import (
@@ -25,11 +30,11 @@ func Address(addr string) ServerOption {
 	}
 }
 
-func ErrorEncoder(en EncodeErrorFunc) ServerOption {
-	return func(s *Server) {
-		s.ene = en
-	}
-}
+//func ErrorEncoder(en EncodeErrorFunc) ServerOption {
+//	return func(s *Server) {
+//		s.ene = en
+//	}
+//}
 
 func StrictSlash(strictSlash bool) ServerOption {
 	return func(s *Server) {
@@ -85,18 +90,18 @@ func Filter(filters ...HandlerFunc) ServerOption {
 }
 
 // RequestDecoder with request decoder.
-func RequestDecoder(dec DecodeRequestFunc) ServerOption {
-	return func(o *Server) {
-		o.dec = dec
-	}
-}
+//func RequestDecoder(dec DecodeRequestFunc) ServerOption {
+//	return func(o *Server) {
+//		o.dec = dec
+//	}
+//}
 
 // ResponseEncoder with response encoder.
-func ResponseEncoder(en EncodeResponseFunc) ServerOption {
-	return func(o *Server) {
-		o.enc = en
-	}
-}
+//func ResponseEncoder(en EncodeResponseFunc) ServerOption {
+//	return func(o *Server) {
+//		o.enc = en
+//	}
+//}
 
 // TLSConfig with TLS config.
 func TLSConfig(c *tls.Config) ServerOption {

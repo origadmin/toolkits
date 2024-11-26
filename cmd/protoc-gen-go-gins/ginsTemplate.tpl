@@ -26,17 +26,17 @@ func Register{{.ServiceType}}GINSServer(router gin.IRouter, srv {{.ServiceType}}
 	var in {{.Request}}
   {{- if.HasBody}}
 		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		ctx.Error(err)
+		gins.RetError(ctx,err)
 		return
 		}
   {{- end}}
 	if err := gins.BindQuery(ctx,&in); err != nil {
-	ctx.Error(err)
+	gins.RetError(ctx,err)
 	return
 	}
   {{- if.HasVars}}
 		if err := gins.BindURI(ctx,&in); err != nil {
-		ctx.Error(err)
+		gins.RetError(ctx,err)
 		return
 		}
   {{- end}}
@@ -44,10 +44,10 @@ func Register{{.ServiceType}}GINSServer(router gin.IRouter, srv {{.ServiceType}}
 	newCtx := gins.NewContext(ctx)
 	reply, err := srv.{{.Name}}(newCtx, &in)
 	if err != nil {
-	ctx.Error(err)
+	gins.RetError(ctx,err)
 	return
 	}
-	ctx.JSON(200, reply{{.ResponseBody}})
+	gins.RetJSON(ctx,200, reply{{.ResponseBody}})
 	return
 	}
 	}

@@ -1,4 +1,6 @@
-// Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package ulid provides a ULID (Universally Unique Lexicographically Sortable Identifier) implementation.
 package ulid
