@@ -1,14 +1,15 @@
 name: Auto Tagging Submodule After Release
 
 on:
+  release:
+    types: [ created ]
   push:
     branches:
       - main
-
+    tags:
+      - "v*.*.*"
 jobs:
   tag_push:
-    needs: [ release ]
-    if: success()
     runs-on: ubuntu-latest
     permissions:
       contents: write
