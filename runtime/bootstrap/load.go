@@ -90,6 +90,17 @@ func LoadSourceConfig(bootstrap *Bootstrap) (*configv1.SourceConfig, error) {
 	return loadSource(stat, path)
 }
 
+// LoadSourceConfigFromPath loads the config file from the given path
+func LoadSourceConfigFromPath(path string) (*configv1.SourceConfig, error) {
+	// Get the file info from the path
+	stat, err := os.Stat(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "load config stat error")
+	}
+	// Load the config file
+	return loadSource(stat, path)
+}
+
 // LoadRemoteConfig loads the config file from the given path
 func LoadRemoteConfig(bootstrap *Bootstrap, v any) error {
 	sourceConfig, err := LoadSourceConfig(bootstrap)
