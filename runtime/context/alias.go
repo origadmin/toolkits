@@ -18,7 +18,6 @@ type (
 )
 
 // TODO returns an empty Context. It is never canceled, has no deadline, and has no values.
-// Deprecated: Use runtime.context instead.
 func TODO() Context {
 	return context.TODO()
 }
@@ -26,7 +25,6 @@ func TODO() Context {
 // Background returns a non-nil, empty Context. It is never canceled, has no deadline, and has no values.
 // Background is typically used by the main function, initialization, and tests, and as the top-level
 // Context for incoming requests.
-// Deprecated: Use runtime.context instead.
 func Background() Context {
 	return context.Background()
 }
@@ -34,7 +32,6 @@ func Background() Context {
 // WithCancel returns a copy of the parent Context with a new Done channel. The returned
 // context's Done channel is closed when the returned cancel function is called or when the parent
 // context's Done channel is closed, whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithCancel(parent Context) (Context, CancelFunc) {
 	return context.WithCancel(parent)
 }
@@ -43,21 +40,18 @@ func WithCancel(parent Context) (Context, CancelFunc) {
 // cause. The returned context's Done channel is closed when the returned cancel function is called,
 // when the parent context's Done channel is closed, or when the provided cause is returned by the
 // parent context's Err method, whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithCancelCause(parent Context) (Context, CancelCauseFunc) {
 	return context.WithCancelCause(parent)
 }
 
 // Cause returns the underlying cause of the context's cancellation or nil if it was not caused
 // by another error.
-// Deprecated: Use runtime.context instead.
 func Cause(ctx Context) error {
 	return context.Cause(ctx)
 }
 
 // AfterFunc waits for the duration to elapse and then calls f in its own goroutine. If the context
 // is canceled before the duration elapses, f will not be called.
-// Deprecated: Use runtime.context instead.
 func AfterFunc(ctx Context, f func()) func() bool {
 	return context.AfterFunc(ctx, f)
 }
@@ -65,7 +59,6 @@ func AfterFunc(ctx Context, f func()) func() bool {
 // WithoutCancel returns a non-cancellable Context derived from parent. It is never canceled, has no
 // deadline, and has the same values as the parent. If the parent is already non-cancellable,
 // WithoutCancel returns the parent.
-// Deprecated: Use runtime.context instead.
 func WithoutCancel(parent Context) Context {
 	return context.WithoutCancel(parent)
 }
@@ -75,7 +68,6 @@ func WithoutCancel(parent Context) Context {
 // equivalent to parent. The returned context's Done channel is closed when the deadline expires,
 // when the returned cancel function is called, or when the parent context's Done channel is closed,
 // whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) {
 	return context.WithDeadline(parent, deadline)
 }
@@ -85,7 +77,6 @@ func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) {
 // is semantically equivalent to parent. The returned context's Done channel is closed when the deadline
 // expires, when the returned cancel function is called, or when the provided cause is returned by the
 // parent context's Err method, whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithDeadlineCause(parent Context, deadline time.Time, cause error) (Context, CancelFunc) {
 	return context.WithDeadlineCause(parent, deadline, cause)
 }
@@ -94,7 +85,6 @@ func WithDeadlineCause(parent Context, deadline time.Time, cause error) (Context
 // the duration d elapses. It is equivalent to WithDeadline(parent, time.Now().Add(d)).
 // The returned context's Done channel is closed when the timeout elapses, when the returned cancel
 // function is called, or when the parent context's Done channel is closed, whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc) {
 	return context.WithTimeout(parent, timeout)
 }
@@ -104,7 +94,6 @@ func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc) {
 // The returned context's Done channel is closed when the timeout elapses, when the returned cancel
 // function is called, or when the provided cause is returned by the parent context's Err method,
 // whichever happens first.
-// Deprecated: Use runtime.context instead.
 func WithTimeoutCause(parent Context, timeout time.Duration, cause error) (
 	Context, CancelFunc,
 ) {
@@ -115,7 +104,6 @@ func WithTimeoutCause(parent Context, timeout time.Duration, cause error) (
 // type must be comparable for equality; otherwise, WithValue will panic. Use context Values only
 // for request-scoped data that transits processes and API boundaries, not for passing optional parameters
 // to functions.
-// Deprecated: Use runtime.context instead.
 func WithValue(parent Context, key, val any) Context {
 	return context.WithValue(parent, key, val)
 }

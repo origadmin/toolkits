@@ -671,6 +671,8 @@ github.com/go-pdf/fpdf v0.6.0/go.mod h1:HzcnA+A23uwogo0tp9yU+l3V+KXhiESpt1PMayhO
 github.com/goccy/go-json v0.9.11/go.mod h1:6MelG93GURQebXPDq3khkgXZkazVtN9CRI+MGFi0w8I=
 github.com/goexts/generic v0.1.0 h1:C6xn8/Xu4KBGSFvMP0CMAhle5HDqqX3iShE3EKV3WYI=
 github.com/goexts/generic v0.1.0/go.mod h1:j/ZjWHYt+If6VjeHWvDhYKdoP+gAiAKpm0cu3yvKmfo=
+github.com/goexts/generic v0.1.1 h1:dg5aPYVoH9MzdfRLngOVwb6Ws7dR6q1/BJeoVm3fO9k=
+github.com/goexts/generic v0.1.1/go.mod h1:j/ZjWHYt+If6VjeHWvDhYKdoP+gAiAKpm0cu3yvKmfo=
 github.com/golang-cz/devslog v0.0.11 h1:v4Yb9o0ZpuZ/D8ZrtVw1f9q5XrjnkxwHF1XmWwO8IHg=
 github.com/golang-cz/devslog v0.0.11/go.mod h1:bSe5bm0A7Nyfqtijf1OMNgVJHlWEuVSXnkuASiE1vV8=
 github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
