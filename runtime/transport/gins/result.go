@@ -11,23 +11,34 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/goexts/generic/maps"
 
-	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/errors/httperr"
+	"github.com/origadmin/toolkits/net/pagination"
+	"github.com/origadmin/toolkits/runtime/context"
 )
 
 type Result struct {
-	Success bool           `json:"success"`
-	Total   int64          `json:"total,omitempty"`
-	Data    any            `json:"data,omitempty"`
-	Extra   any            `json:"extra,omitempty"`
-	Error   *httperr.Error `json:"error,omitempty"`
+	pagination.UnimplementedResponder `json:"-"`
+	Success                           bool           `json:"success"`
+	Total                             int64          `json:"total,omitempty"`
+	Data                              any            `json:"data,omitempty"`
+	Extra                             any            `json:"extra,omitempty"`
+	Error                             *httperr.Error `json:"error,omitempty"`
 }
 
-// RetJSON Response json data with status code
-func RetJSON(c *gin.Context, status int, v any) {
-	buf, err := json.Marshal(v)
+func (r Result) GetData() any {
+	return r.Data
+}
+
+func (r Result) GetSuccess() bool {
+	return r.Success
+}
+
+// ResultJSON result json data with status code
+func ResultJSON(c *gin.Context, status int, resp pagination.Responder) {
+	buf, err := json.Marshal(resp.GetData())
 	if err != nil {
 		panic(err)
 	}
@@ -37,42 +48,38 @@ func RetJSON(c *gin.Context, status int, v any) {
 	c.Abort()
 }
 
-// RetSuccess Response success data with status code
-func RetSuccess(c *gin.Context, v any) {
-	RetJSON(c, http.StatusOK, Result{
+// ResultSuccess result success data with status code
+func ResultSuccess(c *gin.Context, resp pagination.Responder) {
+	ResultJSON(c, http.StatusOK, Result{
 		Success: true,
-		Data:    v,
+		Data:    resp.GetData(),
 	})
 }
 
-// RetOK Response success data with status code
-func RetOK(c *gin.Context) {
-	RetJSON(c, http.StatusOK, Result{
+// ResultOK result success data with status code
+func ResultOK(c *gin.Context) {
+	ResultJSON(c, http.StatusOK, Result{
 		Success: true,
 	})
 }
 
-// RetPage Response page data with status code
-func RetPage(c *gin.Context, v any, total int64, args ...map[string]any) {
-	if v == nil {
-		v = make([]any, 0)
+// ResultPage result page data with status code
+func ResultPage(c *gin.Context, resp pagination.Responder, args ...map[string]any) {
+	extra := resp.GetExtra()
+	if extra == nil && len(args) > 0 {
+		maps.MergeMaps(args[0], args[1:]...)
+		extra = args[0]
 	}
-	var extra any
-	if len(args) > 0 {
-		if v, ok := args[0]["extra"]; ok {
-			extra = v
-		}
-	}
-	RetJSON(c, http.StatusOK, Result{
+	ResultJSON(c, http.StatusOK, Result{
 		Success: true,
-		Data:    v,
+		Data:    resp.GetData(),
 		Extra:   extra,
-		Total:   total,
+		Total:   int64(resp.GetTotal()),
 	})
 }
 
-// RetError Response error data with status code
-func RetError(c *Context, err error, status ...int) {
+// ResultError result error data with status code
+func ResultError(c *Context, err error, status ...int) {
 	var ierr *httperr.Error
 	if ok := errors.As(err, &ierr); !ok {
 		ierr = httperr.FromError(httperr.InternalServerError(err.Error())) // default error
@@ -97,5 +104,7 @@ func RetError(c *Context, err error, status ...int) {
 		Type: gin.ErrorTypeAny,
 		Meta: c.Request.URL.RawQuery,
 	})
-	RetJSON(c, code, Result{Error: ierr})
+	ResultJSON(c, code, Result{
+		Error: ierr,
+	})
 }
