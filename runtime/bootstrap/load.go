@@ -140,7 +140,7 @@ func LoadLocalConfig(bs *Bootstrap, v any) error {
 	if err != nil {
 		return err
 	}
-	if source.Type != "file" {
+	if source.GetType() != "file" {
 		return errors.New("local config type must be file")
 	}
 
