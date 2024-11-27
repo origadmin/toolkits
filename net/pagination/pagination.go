@@ -26,3 +26,66 @@ type Responder interface {
 	GetNextPageToken() string
 	GetExtra() any
 }
+
+type UnimplementedRequester struct{}
+
+func (u UnimplementedRequester) GetCurrent() int32 {
+	return 0
+}
+
+func (u UnimplementedRequester) GetPageSize() int32 {
+	return 0
+}
+
+func (u UnimplementedRequester) GetPageToken() string {
+	return ""
+}
+
+func (u UnimplementedRequester) GetOnlyCount() bool {
+	return false
+}
+
+func (u UnimplementedRequester) GetNoPaging() bool {
+	return false
+}
+
+func (u UnimplementedRequester) GetOrderBy() []string {
+	return nil
+}
+
+func (u UnimplementedRequester) GetFieldMask() []string {
+	return nil
+}
+
+type UnimplementedResponder struct{}
+
+func (u UnimplementedResponder) GetSuccess() bool {
+	return false
+}
+
+func (u UnimplementedResponder) GetTotal() int32 {
+	return 0
+}
+
+func (u UnimplementedResponder) GetData() any {
+	return nil
+}
+
+func (u UnimplementedResponder) GetCurrent() int32 {
+	return 0
+}
+
+func (u UnimplementedResponder) GetPageSize() int32 {
+	return 0
+}
+
+func (u UnimplementedResponder) GetNextPageToken() string {
+	return ""
+}
+
+func (u UnimplementedResponder) GetExtra() any {
+	return nil
+}
+
+var _ Requester = (*UnimplementedRequester)(nil)
+var _ Responder = (*UnimplementedResponder)(nil)
