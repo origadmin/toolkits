@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package pagination;
+package pagination.v1;
 
-option go_package = "github.com/origadmin/toolkits/net/pagination;pagination";
+option go_package = "github.com/origadmin/toolkits/gen/go/net/pagination/v1;pagination";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/field_mask.proto";

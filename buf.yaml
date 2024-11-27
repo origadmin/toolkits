@@ -2,7 +2,7 @@
 version: v2
 
 modules:
-  - path: net/proto/v1
+  - path: net/proto
 
 lint:
   use:
