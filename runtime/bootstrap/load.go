@@ -21,33 +21,49 @@ func loadSource(si os.FileInfo, path string) (*configv1.SourceConfig, error) {
 	if si == nil {
 		return nil, errors.New("load config file target is not exist")
 	}
+	var cfg configv1.SourceConfig
+	err := loadCustomize(si, path, &cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+// loadCustomize loads the user config file from the given path
+func loadCustomize(si os.FileInfo, path string, cfg any) error {
 	// Check if the path is a directory
 	if si.IsDir() {
-		return loadSourceDir(path)
+		err := loadDir(path, cfg)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	// Get the file type from the extension
 	typo := codec.TypeFromExt(filepath.Ext(path))
 	// Check if the file type is unknown
 	if typo == codec.UNKNOWN {
-		return nil, errors.New("unknown file type: " + path)
+		return errors.New("unknown file type: " + path)
 	}
 	// Load the config file
-	return loadSourceFile(path)
+	err := loadFile(path, cfg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// loadSourceFile loads the config file from the given path
-func loadSourceFile(path string) (*configv1.SourceConfig, error) {
-	var cfg configv1.SourceConfig
+// loadFile loads the config file from the given path
+func loadFile(path string, cfg any) error {
 	// Decode the file into the config struct
 	if err := codec.DecodeFromFile(path, &cfg); err != nil {
-		return nil, errors.Wrapf(err, "failed to parse config file %s", path)
+		return errors.Wrapf(err, "failed to parse config file %s", path)
 	}
-	return &cfg, nil
+	return nil
 }
 
-// loadSourceDir loads the config file from the given directory
-func loadSourceDir(path string) (*configv1.SourceConfig, error) {
-	var cfg configv1.SourceConfig
+// loadDir loads the config file from the given directory
+func loadDir(path string, cfg any) error {
 	// Walk through the directory and load each file
 	err := filepath.WalkDir(path, func(walkpath string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -71,9 +87,9 @@ func loadSourceDir(path string) (*configv1.SourceConfig, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "load config error")
+		return errors.Wrap(err, "load config error")
 	}
-	return &cfg, nil
+	return nil
 }
 
 // LoadSourceConfig loads the config file from the given path
@@ -86,6 +102,7 @@ func LoadSourceConfig(bootstrap *Bootstrap) (*configv1.SourceConfig, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "load config stat error")
 	}
+
 	// Load the config file
 	return loadSource(stat, path)
 }
@@ -115,4 +132,24 @@ func LoadRemoteConfig(bootstrap *Bootstrap, v any) error {
 		return err
 	}
 	return config.Scan(v)
+}
+
+// LoadLocalConfig loads the config file from the given path
+func LoadLocalConfig(bs *Bootstrap, v any) error {
+	source, err := LoadSourceConfig(bs)
+	if err != nil {
+		return err
+	}
+	if source.Type != "file" {
+		return errors.New("local config type must be file")
+	}
+
+	path := source.GetFile().GetPath()
+	// Get the file info from the path
+	stat, err := os.Stat(path)
+	if err != nil {
+		return errors.Wrap(err, "load config stat error")
+	}
+
+	return loadCustomize(stat, path, v)
 }
