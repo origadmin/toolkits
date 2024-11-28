@@ -67,40 +67,43 @@ import (
 - Refer to the package documentation and examples to learn how to utilize the toolkit components in your code.
 - You can access the documentation by running `godoc` locally or visiting the package documentation hosted on godoc.org.
 
-## Call relationships between packages
+## Call relationships intro
 
-In OrigAdmin, the call relationship between packages is as follows:
+In `OrigAdmin`, the call relationship between packages is as follows:
 
-- [**contrib**](https://github.com/origadmin/contrib): defines configuration structs and parsing functions for reading and parsing configuration files.
-    - [**contrib/config**](https://github.com/origadmin/contrib/config): provides configuration parsing functions for reading and parsing configuration files.
-  
-- [**runtime**](https://github.com/origadmin/runtime): Provides the basic functions of the runtime environment, such as logging and configuration management.
-    - [**runtime/registry**](https://github.com/origadmin/runtime/registry): provides basic registry functions, such as service registration and service discovery.
-    - [**runtime/config**](https://github.com/origadmin/runtime/config): provides configuration parsing functions for reading and parsing configuration files.
-
-- [**toolkits**](https://github.com/origadmin/toolkits): provides basic functions for toolkit, such as error handling, context management, and logging.
-    - [**toolkits/codec**](https://github.com/origadmin/toolkits/codec): provides functions for serializing and deserializing data in a variety of formats.
-    - [**toolkits/errors**](https://github.com/origadmin/toolkits/errors): provides enhanced error handling utilities, such as error wrapping, context propagation, and error inspection.
+- [Contrib] (https://github.com/origadmin/contrib) : in view of the toolkits interface, the realization of the runtime and kratos.
+- [contrib/consul/config ] (https://github.com/origadmin/contrib/consul/config) : the runtime config to encapsulate an implementation, encapsulates the consul of the client
+- [contrib/consul/registry] (https://github.com/origadmin/contrib/consul/registry) : An implementation of kratos config's encapsulation that encapsulates consul's client
+- [contrib/config] (https://github.com/origadmin/contrib/config) : kratos config encapsulation of implementation
+- [Runtime] (https://github.com/origadmin/runtime) : encapsulates the kratos runtime required interfaces, including basic functions, initialize the application, as well as the service registry, service discovery, etc.
+    - [runtime/registry] (https://github.com/origadmin/runtime/registry) : provide basic service registry found the function definition.
+    - [runtime/config ] (https://github.com/origadmin/runtime/config) : provide configuration file is read and parse the definition of the configuration of the analytic function.
+-  [Toolkit] (https://github.com/origadmin/toolkits) : toolkits provide some of the basic function of the general interface definition or implementation, such as the serialization and deserialization, error handling, a unique identifier generated, etc.
+    -  [toolkits/codec] (https://github.com/origadmin/toolkits/codec) : provide a variety of formats data serialization and deserialization.
+    -  [toolkit/errors] (https://github.com/origadmin/toolkits/errors) : provide enhanced error handling utility, such as wrong packaging, context propagation and error checking.
 
 ```shell
-your_project -> contrib -> contrib/config -> runtime -> toolkits
-			 -> runtime -> rumtime/registry
-			 -> other_package
+your_project --> contrib --> contrib/config --> runtime --> toolkits
+             --> contrib/config
+             --> runtime --> rumtime/registry
+             --> rumtime/registry
+             --> toolkits
+             --> toolkits/codec
+             --> toolkits/errors
+             --> other_package
 ```
 
 ```mermaid
 graph LR
-A(your_project) --> B(contrib)
+A(your_project) 
+A --> B(contrib)
 A --> C(runtime)
 A --> D(toolkits)
 B --> E(contrib/config)
-B --> C(runtime)
-B --> D(toolkits)
 C --> F(runtime/config)
 C --> G(runtime/registry)
 D --> H(toolkits/codec)
 D --> I(toolkits/errors)
-I --> J(other_package)
 ```
 
 ## Contributing
