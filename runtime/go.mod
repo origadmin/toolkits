@@ -13,7 +13,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/gorilla/mux v1.8.1
 	github.com/origadmin/toolkits v0.0.97
-	github.com/origadmin/toolkits/codec v0.0.27
+	github.com/origadmin/toolkits/codec v0.0.28
 	google.golang.org/grpc v1.68.0
 	google.golang.org/protobuf v1.35.2
 )

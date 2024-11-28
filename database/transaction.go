@@ -21,7 +21,7 @@ type (
 )
 
 // Trans is a transaction wrapper
-type Trans = interface {
+type Trans interface {
 	Tx(ctx context.Context, fn ExecFunc) error
 	InTx(ctx context.Context, fn TxFunc) error
 }

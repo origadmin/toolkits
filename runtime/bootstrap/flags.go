@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+const (
+	DefaultServiceName = "origadmin.service.v1"
+	DefaultVersion     = "v1.0.0"
+)
+
 // Flags is a struct that holds the flags for the service
 type Flags struct {
 	ID          string
@@ -25,17 +30,17 @@ func (f Flags) ServiceID() string {
 
 // DefaultFlags returns the default flags for the service
 func DefaultFlags() Flags {
-	id, _ := os.Hostname()
-	return Flags{
-		ID:        id,
-		StartTime: time.Now(),
-	}
+	return NewFlags(DefaultServiceName, DefaultVersion)
 }
 
 // NewFlags returns a new set of flags for the service
 func NewFlags(name string, version string) Flags {
-	f := DefaultFlags()
-	f.Version = version
-	f.ServiceName = name
-	return f
+	id, _ := os.Hostname()
+	return Flags{
+		ID:          id,
+		Version:     version,
+		ServiceName: name,
+		StartTime:   time.Now(),
+		Metadata:    make(map[string]string),
+	}
 }
