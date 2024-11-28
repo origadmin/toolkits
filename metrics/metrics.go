@@ -6,22 +6,12 @@
 package metrics
 
 import (
-	"github.com/origadmin/toolkits/context"
+	"context"
 )
 
 type MetricType string
 
 const (
-	//MetricRequestSizeBytes       MetricType = "request_size_bytes"       // MetricRequestSizeBytes is the request size in bytes
-	//MetricRequestDurationSeconds MetricType = "request_duration_seconds" // MetricRequestDurationSeconds is the request duration in seconds
-	//MetricRequestsTotal          MetricType = "requests_total"           // MetricRequestsTotal is the total number of requests
-	//MetricRequestsSlowTotal      MetricType = "requests_slow_total"      // MetricRequestsSlowTotal is the total number of slow requests
-	//MetricRequestsInFlight       MetricType = "requests_in_flight"       // MetricRequestsInFlight is the number of requests in flight
-	//MetricResponseSizeBytes      MetricType = "response_size_bytes"      // MetricResponseSizeBytes is the response size in bytes
-	//MetricErrorsTotal            MetricType = "errors_total"             // MetricErrorsTotal is the total number of errors
-	//MetricEvent                  MetricType = "event"                    // MetricEvent is the event
-	//MetricSiteEvent              MetricType = "site_event"               // MetricSiteEvent is the site event
-	//MetricSummaryLatency         MetricType = "summary_latency"          // MetricSummaryLatency is the summary latency
 	MetricUptime                  MetricType = "uptime"
 	MetricRequestsTotal           MetricType = "requests_total"
 	MetricRequestsDurationSeconds MetricType = "requests_duration_seconds"

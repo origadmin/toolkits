@@ -5,9 +5,8 @@
 package cache
 
 import (
+	"context"
 	"time"
-
-	"github.com/origadmin/toolkits/context"
 )
 
 // Cache is the interface that wraps the basic Get, Set, and Delete methods.

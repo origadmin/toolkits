@@ -6,7 +6,7 @@
 package mail
 
 import (
-	"github.com/origadmin/toolkits/context"
+	"context"
 )
 
 // Sender is an interface for sending email

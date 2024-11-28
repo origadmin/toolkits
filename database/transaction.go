@@ -6,9 +6,8 @@
 package database
 
 import (
+	"context"
 	"database/sql/driver"
-
-	"github.com/origadmin/toolkits/context"
 )
 
 type (
