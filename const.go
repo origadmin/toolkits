@@ -9,4 +9,6 @@ import (
 	_ "github.com/origadmin/toolkits/codec"
 	_ "github.com/origadmin/toolkits/errors"
 	_ "github.com/origadmin/toolkits/idgen"
+
+	_ "github.com/origadmin/toolkits/sloge"
 )
