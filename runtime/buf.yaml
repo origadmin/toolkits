@@ -25,3 +25,4 @@ deps:
   #  - buf.build/envoyproxy/protoc-gen-validate
   - buf.build/bufbuild/protovalidate
   - buf.build/gnostic/gnostic
+  - buf.build/gnostic/gnostic

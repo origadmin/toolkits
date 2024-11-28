@@ -19,12 +19,12 @@ ifeq ($(GOHOSTOS), windows)
 	gitHash = $(shell git rev-parse HEAD)
 
 	# Use PowerShell to find .proto files, convert to relative paths, and replace \ with /
-	RUNTIME_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse runtime/proto -Filter *.proto | Resolve-Path -Relative")
+	# RUNTIME_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse runtime/proto -Filter *.proto | Resolve-Path -Relative")
 	TOOLKITS_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse toolkits -Filter *.proto | Resolve-Path -Relative")
 	API_PROTO_FILES := $(shell powershell -Command "Get-ChildItem -Recurse api -Filter *.proto | Resolve-Path -Relative")
 
 	# Replace \ with /
-	RUNTIME_PROTO_FILES := $(subst \,/, $(RUNTIME_PROTO_FILES))
+	# RUNTIME_PROTO_FILES := $(subst \,/, $(RUNTIME_PROTO_FILES))
 	TOOLKITS_PROTO_FILES := $(subst \,/, $(TOOLKITS_PROTO_FILES))
 	API_PROTO_FILES := $(subst \,/, $(API_PROTO_FILES))
 
@@ -41,7 +41,7 @@ else
 	# gitHash Current commit id, same as gitCommit result
     gitHash = $(shell git rev-parse HEAD)
 
-	RUNTIME_PROTO_FILES=$(shell find runtime -name *.proto)
+	# RUNTIME_PROTO_FILES=$(shell find runtime -name *.proto)
 	TOOLKITS_PROTO_FILES=$(shell find toolkits -name *.proto)
 	API_PROTO_FILES=$(shell find api -name *.proto)
 
@@ -89,19 +89,18 @@ init:
 .PHONY: deps
 # export protobuf dependencies to ./third_party
 deps:
-	# errors/errors.proto
+	@echo Exporting errors/errors.proto dependencies to ./third_party
 	buf export buf.build/kratos/apis -o $(THIRD_PARTY_PATH)
-	# buf/validate/validate.proto
+	@echo Exporting googleapis/googleapis.proto dependencies to ./third_party
 	buf export buf.build/bufbuild/protovalidate -o $(THIRD_PARTY_PATH)
-	# google/api/*.proto
+	@echo Exporting rpcerr/rpcerr.proto dependencies to ./third_party
 	buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
-	# google/protobuf/*.proto
+	@echo Exporting wellknowntypes/wellknowntypes.proto dependencies to ./third_party
 	buf export buf.build/protocolbuffers/wellknowntypes -o $(THIRD_PARTY_PATH)
-	# validate/validate.proto, used buf/validate/validate.proto instead
+	@echo Exporting validate/validate.proto dependencies to ./third_party , please use buf.build/bufbuild/protovalidate instead
 	buf export buf.build/envoyproxy/protoc-gen-validate -o $(THIRD_PARTY_PATH)
-	# openapi/openapi.proto
+	@echo Exporting google.golang.org/protobuf/protovalidate/protocolbuffers/go dependencies to ./third_party
 	buf export buf.build/gnostic/gnostic -o $(THIRD_PARTY_PATH)
-
 
 .PHONY: examples
 # generate examples proto or use ./examples/generate.go
@@ -127,19 +126,19 @@ examples:
 #client:
 #	kratos proto client ./api
 
-.PHONY: runtime
-# generate internal proto or use ./internal/generate.go
-runtime:
-	protoc \
-	--proto_path=./runtime/proto \
-	--proto_path=./third_party \
-	--go_out=paths=source_relative:./runtime/internal \
-	--validate_out=lang=go,paths=source_relative:./runtime/internal \
-	$(RUNTIME_PROTO_FILES)
-	.PHONY: generate
-# run go generate to generate code
-generate:
-	go generate ./...
+#.PHONY: runtime
+## generate internal proto or use ./internal/generate.go
+#runtime:
+#	protoc \
+#	--proto_path=./runtime/proto \
+#	--proto_path=./third_party \
+#	--go_out=paths=source_relative:./runtime/internal \
+#	--validate_out=lang=go,paths=source_relative:./runtime/internal \
+#	$(RUNTIME_PROTO_FILES)
+#	.PHONY: generate
+## run go generate to generate code
+#generate:
+#	go generate ./...
 
 .PHONY: all
 # generate all

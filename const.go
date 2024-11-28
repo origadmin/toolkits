@@ -5,6 +5,9 @@
 // Package toolkits implements the functions, types, and interfaces for the module.
 package toolkits
 
-//go:generate buf dep update
-//go:generate buf build
-//go:generate buf generate
+import (
+	_ "github.com/origadmin/toolkits/errors"
+
+	_ "github.com/origadmin/toolkits/codec"
+	_ "github.com/origadmin/toolkits/idgen"
+)
