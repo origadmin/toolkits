@@ -23,46 +23,85 @@ Go projects. This README focuses on the Toolkit, detailing its contents, usage, 
 
 The Toolkit main package is `toolkit` and is the interface package.:
 
-1. **`[registry](registry)`**: The registry package is register implementation for the main package definition.
+1. [**registry**](registry): The registry package is register implementation for the main package definition.
 
 The Toolkit currently offers the following packages:
 
-1. **`[codec](codec)`**: A set of utilities for serializing and deserializing data in a variety of formats.
-2. **`[context](context)`**: A set of utilities for managing context values and cancellation signals.
-3. **`[errors](errors)`**: Enhanced error handling utilities, such as error wrapping, context propagation, and error
+1. [**codec**](codec): A set of utilities for serializing and deserializing data in a variety of formats.
+2. [**errors**](errors): Enhanced error handling utilities, such as error wrapping, context propagation, and error
    inspection.
-4. **`[ident](ident)`**: A package for generating unique identifiers.
-5. **`[scripts](scripts)`**: A set of utilities for managing scripts and tasks.
-6. **`[runtime](runtime)`**: The runtime package Implements some common functions in toolkits.
+3. [**idgen**](idgen): A package for generating unique identifiers.
 
 ## Getting Started
 
-To incorporate the Toolkit into your project, follow these steps:
+### To incorporate the Toolkit into your project, follow these steps:
 
-1. **Add the dependency**: Add the Toolkit as a dependency in your `go.mod` file, specifying the latest version:
+1. **Add the dependency**:
+
+- Add the Toolkit as a dependency in your `go.mod` file, specifying the latest version:
 
 ```bash
 go get github.com/origadmin/toolkit@vX.Y.Z
 ```
 
-Replace `vX.Y.Z` with the desired version or `latest` to fetch the most recent release.
+- Replace `vX.Y.Z` with the desired version or `latest` to fetch the most recent release.
 
-2. **Import required packages**: In your Go source files, import the necessary packages from the Toolkit:
+2. **Import required packages**:
+
+- In your Go source files, import the necessary packages from the Toolkit:
 
 ```go
 import (
-"github.com/origadmin/toolkit/errors"
-"github.com/origadmin/toolkit/httpclient"
-"github.com/origadmin/toolkit/jsonutil"
-"github.com/origadmin/toolkit/concurrency"
-"github.com/origadmin/toolkit/config"
-"github.com/origadmin/toolkit/logging"
+"github.com/origadmin/toolkits/errors"
+"github.com/origadmin/runtime"
+//    "github.com/origadmin/runtime/xxx"
+"github.com/origadmin/runtime/config"
+"github.com/origadmin/contrib"
+//    "github.com/origadmin/contrib/xxx"    
+"github.com/origadmin/contrib/config"
 )
 ```
 
-3. **Use the toolkit components**: Refer to the package documentation and examples to learn how to utilize the toolkit
-   components in your code. You can access the documentation by running `godoc` locally or visiting the package
-   documentation hosted on godoc.org.
+3. **Use the toolkit components**:
+
+- Refer to the package documentation and examples to learn how to utilize the toolkit components in your code.
+- You can access the documentation by running `godoc` locally or visiting the package documentation hosted on godoc.org.
+
+## Call relationships between packages
+
+In OrigAdmin, the call relationship between packages is as follows:
+
+- [**contrib**](https://github.com/origadmin/contrib): defines configuration structs and parsing functions for reading and parsing configuration files.
+    - [**contrib/config**](https://github.com/origadmin/contrib/config): provides configuration parsing functions for reading and parsing configuration files.
+  
+- [**runtime**](https://github.com/origadmin/runtime): Provides the basic functions of the runtime environment, such as logging and configuration management.
+    - [**runtime/registry**](https://github.com/origadmin/runtime/registry): provides basic registry functions, such as service registration and service discovery.
+    - [**runtime/config**](https://github.com/origadmin/runtime/config): provides configuration parsing functions for reading and parsing configuration files.
+
+- [**toolkits**](https://github.com/origadmin/toolkits): provides basic functions for toolkit, such as error handling, context management, and logging.
+    - [**toolkits/codec**](https://github.com/origadmin/toolkits/codec): provides functions for serializing and deserializing data in a variety of formats.
+    - [**toolkits/errors**](https://github.com/origadmin/toolkits/errors): provides enhanced error handling utilities, such as error wrapping, context propagation, and error inspection.
+
+```shell
+your_project -> contrib -> contrib/config -> runtime -> toolkits
+			 -> runtime -> rumtime/registry
+			 -> other_package
+```
+
+```mermaid
+graph LR
+A(your_project) --> B(contrib)
+A --> C(runtime)
+A --> D(toolkits)
+B --> E(contrib/config)
+B --> C(runtime)
+B --> D(toolkits)
+C --> F(runtime/config)
+C --> G(runtime/registry)
+D --> H(toolkits/codec)
+D --> I(toolkits/errors)
+I --> J(other_package)
+```
 
 ## Contributing
 
