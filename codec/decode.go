@@ -86,7 +86,7 @@ func DecodeINIFile(name string, obj any) error {
 
 // DecodeFromFile Decodes the given file
 func DecodeFromFile(name string, obj any) error {
-	dec := TypeFromExt(filepath.Ext(name))
+	dec := TypeFromPath(name)
 	if !dec.IsSupported() {
 		return ErrUnsupportedDecodeType
 	}
@@ -116,6 +116,8 @@ func Decode(rd io.Reader, obj any, ext string) error {
 		return yaml.NewDecoder(rd).Decode(obj)
 	case ".toml":
 		return toml.NewDecoder(rd).Decode(obj)
+	case ".xml":
+		return xml.NewDecoder(rd).Decode(obj)
 	case ".ini":
 		return ini.NewDecoder(rd).Decode(obj)
 	default:
