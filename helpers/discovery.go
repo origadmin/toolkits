@@ -10,6 +10,8 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
+
+	"github.com/origadmin/toolkits/errors"
 )
 
 const (
@@ -51,17 +53,17 @@ func ServiceDiscoveryEndpoint(endpoint, scheme, host, addr string) string {
 	return endpoint
 }
 
-func ServiceEndpoint(scheme, host, hostPort string) string {
+func ServiceEndpoint(scheme, host, hostPort string) (string, error) {
 	_, port, err := net.SplitHostPort(hostPort)
 	if err != nil && host == "" {
-		return hostPort
+		return "", errors.Wrap(err, "invalid host")
 	}
 	if len(host) > 0 && (host != "0.0.0.0" && host != "[::]" && host != "::") {
-		return schemeHost(scheme, net.JoinHostPort(host, port))
+		return schemeHost(scheme, net.JoinHostPort(host, port)), nil
 	}
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return schemeHost(scheme, hostPort)
+		return "", errors.Wrap(err, "failed to get local ip")
 	}
 	minIndex := int(^uint(0) >> 1)
 	ips := make([]net.IP, 0)
@@ -99,9 +101,9 @@ func ServiceEndpoint(scheme, host, hostPort string) string {
 		}
 	}
 	if len(ips) != 0 {
-		return schemeHost(scheme, net.JoinHostPort(ips[len(ips)-1].String(), port))
+		return schemeHost(scheme, net.JoinHostPort(ips[len(ips)-1].String(), port)), nil
 	}
-	return schemeHost(scheme, hostPort)
+	return "", errors.New("no local ip found")
 }
 
 func schemeHost(scheme, host string) string {
