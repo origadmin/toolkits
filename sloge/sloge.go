@@ -25,6 +25,10 @@ const (
 	LevelFatal = 12
 )
 
+func NewDebug(ss ...Setting) *Logger {
+	return New(append(ss, WithLevel(LevelDebug))...)
+}
+
 // New create a new slog.Logger
 func New(ss ...Setting) *Logger {
 	opt := settings.Apply(defaultOption, ss)

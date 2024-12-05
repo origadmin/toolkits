@@ -27,7 +27,7 @@ var (
 		Output:     "output.log",
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
-		Level:      LevelDebug,
+		Level:      LevelInfo,
 	}
 )
 
