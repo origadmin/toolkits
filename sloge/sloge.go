@@ -25,6 +25,7 @@ const (
 	LevelFatal = 12
 )
 
+// NewDebug create a new slog.Logger with debug level
 func NewDebug(ss ...Setting) *Logger {
 	return New(append(ss, WithLevel(LevelDebug))...)
 }
