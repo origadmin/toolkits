@@ -18,72 +18,11 @@ import (
 
 const (
 	// DefaultTimeLayout the default time layout;
-	DefaultTimeLayout = time.RFC3339
+	DefaultTimeLayout = time.DateTime
 )
 
 const (
 	LevelFatal = 12
-)
-
-type (
-	LumberjackConfig = struct {
-		// MaxSize is the maximum size in megabytes of the log file before it gets
-		// rotated. It defaults to 100 megabytes.
-		MaxSize int `json:"max_size" yaml:"max_size" toml:"max_size"`
-
-		// MaxAge is the maximum number of days to retain old log files based on the
-		// timestamp encoded in their filename.  Note that a day is defined as 24
-		// hours and may not exactly correspond to calendar days due to daylight
-		// savings, leap seconds, etc. The default is not to remove old log files
-		// based on age.
-		MaxAge int `json:"max_age" yaml:"max_age" toml:"max_age"`
-
-		// MaxBackups is the maximum number of old log files to retain.  The default
-		// is to retain all old log files (though MaxAge may still cause them to get
-		// deleted.)
-		MaxBackups int `json:"max_backups" yaml:"max_backups" toml:"max_backups"`
-
-		// LocalTime determines if the time used for formatting the timestamps in
-		// backup files is the computer's local time.  The default is to use UTC
-		// time.
-		LocalTime bool `json:"localtime" yaml:"localtime" toml:"localtime"`
-
-		// Compress determines if the rotated log files should be compressed
-		// using gzip. The default is not to perform compression.
-		Compress bool `json:"compress" yaml:"compress" toml:"compress"`
-	}
-
-	DevConfig = struct {
-		// Max number of printed elements in slice.
-		MaxSlice uint `json:"max_slice" yaml:"max_slice" toml:"max_slice"`
-
-		// If the attributes should be sorted by keys
-		SortKeys bool `json:"sort_keys" yaml:"sort_keys" toml:"sort_keys"`
-
-		// Add blank line after each log
-		NewLine bool `json:"newline" yaml:"newline" toml:"newline"`
-
-		// Indent \n in strings
-		Indent bool `json:"indent" yaml:"indent" toml:"indent"`
-
-		// Set color for Debug level, default: devslog.Blue
-		DebugColor Color `json:"debug_color" yaml:"debug_color" toml:"debug_color"`
-
-		// Set color for Info level, default: devslog.Green
-		InfoColor Color `json:"info_color" yaml:"info_color" toml:"info_color"`
-
-		// Set color for Warn level, default: devslog.Yellow
-		WarnColor Color `json:"warn_color" yaml:"warn_color" toml:"warn_color"`
-
-		// Set color for Error level, default: devslog.Red
-		ErrorColor Color `json:"error_color" yaml:"error_color" toml:"error_color"`
-
-		// Max stack trace frames when unwrapping errors
-		MaxTrace uint `json:"max_trace" yaml:"max_trace" toml:"max_trace"`
-
-		// Use method String() for formatting value
-		Formatter bool `json:"formatter" yaml:"formatter" toml:"formatter"`
-	}
 )
 
 // New create a new slog.Logger
@@ -95,14 +34,8 @@ func New(ss ...Setting) *Logger {
 	if opt.Console {
 		outputs = append(outputs, os.Stderr)
 	}
-	if opt.OutputPath != "" {
-		if err := os.Mkdir(opt.OutputPath, 0766); err != nil {
-			return defaultLogger
-		}
-	}
-
-	if opt.FileName != "" {
-		pathname := filepath.Join(opt.OutputPath, opt.FileName)
+	if opt.Output != "" || opt.LumberjackConfig != nil {
+		pathname := opt.Output
 		if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
 			if err := os.Rename(pathname, backupLog(pathname)); err != nil {
 				return defaultLogger
@@ -110,15 +43,23 @@ func New(ss ...Setting) *Logger {
 		}
 
 		if opt.LumberjackConfig != nil {
-			outputs = append(outputs, &LumberjackLogger{
-				Filename:   filepath.Join(opt.OutputPath, opt.FileName),
-				MaxSize:    opt.LumberjackConfig.MaxSize,
-				MaxAge:     opt.LumberjackConfig.MaxAge,
-				MaxBackups: opt.LumberjackConfig.MaxBackups,
-				LocalTime:  opt.LumberjackConfig.LocalTime,
-				Compress:   opt.LumberjackConfig.Compress,
-			})
+			if opt.LumberjackConfig.Filename != "" {
+				pathname = opt.LumberjackConfig.Filename
+				if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
+					if err := os.Rename(pathname, backupLog(pathname)); err != nil {
+						return defaultLogger
+					}
+				}
+			} else {
+				opt.LumberjackConfig.Filename = pathname
+			}
+			outputs = append(outputs, opt.LumberjackConfig)
 		} else {
+			if _, err := os.Stat(filepath.Dir(opt.Output)); os.IsNotExist(err) {
+				if err := os.Mkdir(opt.Output, 0766); err != nil {
+					return defaultLogger
+				}
+			}
 			file, err := os.OpenFile(pathname, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 			if err != nil {
 				return defaultLogger
@@ -127,30 +68,21 @@ func New(ss ...Setting) *Logger {
 		}
 	}
 
-	//var output io.Writer
-	//fileLen := len(outputs)
-	//switch {
-	//case fileLen == 1:
-	//	output = outputs[0]
-	//case fileLen > 1:
-	//	output = io.MultiWriter(outputs...)
-	//default:
-	//	output = io.Discard
-	//}
-	output := io.MultiWriter(outputs...)
-	if len(outputs) == 0 {
-		output = io.Discard
+	multiOutput := io.Discard
+	if len(outputs) > 0 {
+		multiOutput = io.MultiWriter(outputs...)
 	}
 	//var handler Handler = NewTextHandler(output, &HandlerOptions{
 	//	Level:       opt.Level,
 	//	ReplaceAttr: opt.ReplaceAttr,
 	//	AddSource:   opt.AddSource,
 	//})
-	handler := createHandler(opt, output)
+	handler := createHandler(opt, multiOutput)
 
 	defaultLogger = slog.New(handler)
 	if opt.Default {
 		slog.SetDefault(defaultLogger)
+		slog.SetLogLoggerLevel(opt.Level.Level())
 	}
 
 	return defaultLogger
@@ -159,11 +91,12 @@ func New(ss ...Setting) *Logger {
 func createHandler(opt *Option, output io.Writer) slog.Handler {
 	switch opt.Format {
 	case FormatJSON:
-		return NewJSONHandler(output, &HandlerOptions{
+		handler := &HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
-		})
+		}
+		return NewJSONHandler(output, handler)
 	case FormatTint:
 		return NewTintHandler(output, &TintOptions{
 			AddSource:   opt.AddSource,
@@ -173,31 +106,33 @@ func createHandler(opt *Option, output io.Writer) slog.Handler {
 			NoColor:     opt.NoColor,
 		})
 	case FormatDev:
-		return NewDevSlogHandler(output, &DevSlogOptions{
-			HandlerOptions: &HandlerOptions{
-				Level:       opt.Level,
-				ReplaceAttr: opt.ReplaceAttr,
-				AddSource:   opt.AddSource,
-			},
-			MaxSlicePrintSize:  opt.DevConfig.MaxSlice,
-			SortKeys:           opt.DevConfig.SortKeys,
-			TimeFormat:         opt.TimeLayout,
-			NewLineAfterLog:    opt.DevConfig.NewLine,
-			StringIndentation:  opt.DevConfig.Indent,
-			DebugColor:         opt.DevConfig.DebugColor,
-			InfoColor:          opt.DevConfig.InfoColor,
-			WarnColor:          opt.DevConfig.WarnColor,
-			ErrorColor:         opt.DevConfig.ErrorColor,
-			MaxErrorStackTrace: opt.DevConfig.MaxTrace,
-			StringerFormatter:  opt.DevConfig.Formatter,
-			NoColor:            opt.NoColor,
-		})
+		timeFormat := DefaultTimeLayout
+		if opt.TimeLayout != "" {
+			timeFormat = opt.TimeLayout
+		}
+		if opt.DevConfig != nil {
+			if opt.DevConfig.HandlerOptions == nil {
+				opt.DevConfig.HandlerOptions = &HandlerOptions{
+					Level:       opt.Level,
+					ReplaceAttr: opt.ReplaceAttr,
+					AddSource:   opt.AddSource,
+				}
+			}
+			if opt.DevConfig.TimeFormat == "" {
+				opt.DevConfig.TimeFormat = timeFormat
+			}
+			if !opt.DevConfig.NoColor {
+				opt.DevConfig.NoColor = opt.NoColor
+			}
+		}
+		return NewDevSlogHandler(output, opt.DevConfig)
 	default:
-		return slog.NewTextHandler(output, &HandlerOptions{
+		handler := &HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
-		})
+		}
+		return slog.NewTextHandler(output, handler)
 	}
 }
 

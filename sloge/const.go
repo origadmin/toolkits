@@ -73,8 +73,8 @@ type (
 
 // devslog is a wrapper around devslog
 type (
-	Color          = devslog.Color
-	DevSlogOptions = devslog.Options
+	Color     = devslog.Color
+	DevConfig = devslog.Options
 )
 
 type (
