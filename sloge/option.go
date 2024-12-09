@@ -9,15 +9,14 @@ type Setting = func(*Option)
 
 // Option custom setup config
 type Option struct {
-	OutputPath       string
-	FileName         string
+	Output           string
 	Format           Format
 	TimeLayout       string
 	Console          bool
 	Level            Leveler
 	ReplaceAttr      func(groups []string, attr Attr) Attr
 	AddSource        bool
-	LumberjackConfig *LumberjackConfig
+	LumberjackConfig *LumberjackLogger
 	DevConfig        *DevConfig
 	NoColor          bool
 	Default          bool
@@ -25,32 +24,23 @@ type Option struct {
 
 var (
 	defaultOption = &Option{
-		OutputPath: "",
-		FileName:   "output.log",
+		Output:     "output.log",
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
-		Level:      LevelDebug,
+		Level:      LevelInfo,
 	}
 )
-
-// WithPath custom path to write log
-func WithPath(path string) Setting {
-	return func(opt *Option) {
-		opt.OutputPath = path
-	}
-}
 
 // WithFile write log to some File
 func WithFile(file string) Setting {
 	return func(opt *Option) {
-		opt.FileName = file
+		opt.Output = file
 	}
 }
 
 // WithLumberjack write log to some File with rotation
-func WithLumberjack(filename string, config *LumberjackConfig) Setting {
+func WithLumberjack(config *LumberjackLogger) Setting {
 	return func(opt *Option) {
-		opt.FileName = filename
 		opt.LumberjackConfig = config
 	}
 }
@@ -66,6 +56,14 @@ func WithTimeLayout(timeLayout string) Setting {
 func WithConsole(set bool) Setting {
 	return func(opt *Option) {
 		opt.Console = set
+	}
+}
+
+// WithConsoleOnly set the log to console only
+func WithConsoleOnly() Setting {
+	return func(opt *Option) {
+		opt.Console = true
+		opt.Output = ""
 	}
 }
 
