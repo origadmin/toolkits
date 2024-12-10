@@ -105,5 +105,11 @@ func ParseMultipart(header *multipart.FileHeader) FileInfo {
 	}
 }
 
+func ParseHeader(header FileHeader) FileInfo {
+	return &multipartFileInfo{
+		header: header,
+	}
+}
+
 var _ fs.FileInfo = (*multipartFileInfo)(nil)
 var _ FileInfo = (*multipartFileInfo)(nil)
