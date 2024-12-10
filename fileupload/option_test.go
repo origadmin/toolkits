@@ -23,7 +23,7 @@ func TestGenerateFileNameHash(t *testing.T) {
 			args: args{
 				name: "test.jpg",
 			},
-			want: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.jpg",
+			want: "0d407ee6406a1216f2366674a1a9ff71361d5bef47021f8eb8b51f95e319dd56",
 		},
 	}
 	for _, tt := range tests {
