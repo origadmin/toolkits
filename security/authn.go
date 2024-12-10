@@ -19,7 +19,7 @@ type Authenticator interface {
 	// Authenticate validates if a token is valid.
 	Authenticate(context.Context, string) (bool, error)
 	// AuthenticateContext validates if a token is valid.
-	AuthenticateContext(context.Context, TokenType, string) (bool, error)
+	AuthenticateContext(context.Context, TokenType) (bool, error)
 	// CreateToken inject user claims into token string.
 	CreateToken(context.Context, Claims) (string, error)
 	// CreateTokenContext inject user claims into context.
@@ -27,7 +27,7 @@ type Authenticator interface {
 	// DestroyToken invalidate a token by removing it from the token store.
 	DestroyToken(context.Context, string) error
 	// DestroyTokenContext invalidate a token by removing it from the token store.
-	DestroyTokenContext(context.Context, TokenType, string) error
+	DestroyTokenContext(context.Context, TokenType) error
 	// Close Cleans up the authenticator.
 	Close()
 }
