@@ -42,7 +42,7 @@ type PolicyChecker interface {
 	// CheckPolicy checks if the policy for a given subject, object, action, domain and extra is allowed
 	CheckPolicy(Policy) bool
 	// CheckPolicyContext checks if the policy for a given subject, object, action
-	CheckPolicyContext(context.Context, ContextType, Policy) bool
+	CheckPolicyContext(context.Context, TokenType, Policy) bool
 }
 
 type Authorizer interface {

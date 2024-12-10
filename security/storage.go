@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	TokenNamespace = "security:jwt:token"
+	TokenNamespace = "security:token"
 )
 
 // TokenStorage is the interface that tokenStorage the token.

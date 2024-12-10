@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package hash provides the hash functions
+// Package hash provides hash functions for password encryption and comparison.
 package hash
 
 import (
@@ -62,8 +62,8 @@ func TestGenerate(t *testing.T) {
 
 	expectedHash := "generatedHash123"
 
-	// Mocking the Generate function of defaultGAC package
-	defaultGAC.Generate = func(password, salt string) (string, error) {
+	// Mocking the Generate function of gac package
+	gac.Generate = func(password, salt string) (string, error) {
 		return expectedHash, nil
 	}
 
@@ -75,8 +75,8 @@ func TestGenerate(t *testing.T) {
 	// Test case 2: Generation fails
 	expectedError := "generation failed"
 
-	// Mocking the Generate function of defaultGAC package
-	defaultGAC.Generate = func(password, salt string) (string, error) {
+	// Mocking the Generate function of gac package
+	gac.Generate = func(password, salt string) (string, error) {
 		return "", errors.New(expectedError)
 	}
 

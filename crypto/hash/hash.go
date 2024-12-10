@@ -18,16 +18,17 @@ import (
 
 const (
 	// ENV environment variable name
-	ENV = "ORIG_ADMIN_HASH_TYPE"
+	ENV = "ORIGADMIN_HASH_TYPE"
 	// ErrPasswordNotMatch error when password not match
 	ErrPasswordNotMatch = errors.String("password not match")
 )
 
-// GenerateFunc generate password hash function
-type GenerateFunc func(password string, salt string) (string, error)
-
-// CompareFunc compare password hash function
-type CompareFunc func(hashpass, password, salt string) error
+type (
+	// GenerateFunc generate password hash function
+	GenerateFunc func(password string, salt string) (string, error)
+	// CompareFunc compare password hash function
+	CompareFunc func(hashpass, password, salt string) error
+)
 
 // GenerateAndCompare hash type Generate and Compare functions
 type GenerateAndCompare struct {
@@ -46,12 +47,12 @@ var (
 		TypeHMAC256: {Generate: GenerateHMAC256Password, Compare: CompareHMAC256HashAndPassword},
 	}
 
-	// defaultGAC default generate and compare function
-	defaultGAC GenerateAndCompare
+	// gac default generate and compare function
+	gac GenerateAndCompare
 )
 
 func init() {
-	defaultGAC = GenerateAndCompare{
+	gac = GenerateAndCompare{
 		Generate: GenerateMD5Password,
 		Compare:  CompareMD5HashAndPassword,
 	}
@@ -62,7 +63,7 @@ func init() {
 	}
 
 	if v, ok := hashes[Type(env)]; ok {
-		defaultGAC = v
+		gac = v
 	}
 }
 
@@ -71,38 +72,43 @@ func init() {
 // t Type - the hash type to update the functions with.
 func UseCrypto(t Type) {
 	if v, ok := hashes[t]; ok {
-		defaultGAC = v
+		gac = v
 	}
 }
 
 // UseMD5 sets the global hash compare function to the one corresponding to the TypeMD5 hash type.
 func UseMD5() {
-	defaultGAC = hashes[TypeMD5]
+	gac = hashes[TypeMD5]
 }
 
 // UseSHA1 sets the global hash compare function to the one corresponding to the TypeSHA1 hash type.
 func UseSHA1() {
-	defaultGAC = hashes[TypeSHA1]
+	gac = hashes[TypeSHA1]
 }
 
 // UseSHA256 sets the global hash compare function to the one corresponding to the TypeSHA256 hash type.
 func UseSHA256() {
-	defaultGAC = hashes[TypeSHA256]
+	gac = hashes[TypeSHA256]
 }
 
 // UseBcrypt sets the global hash compare function to the one corresponding to the TypeBcrypt hash type.
 func UseBcrypt() {
-	defaultGAC = hashes[TypeBcrypt]
+	gac = hashes[TypeBcrypt]
 }
 
 // UseScrypt sets the global hash compare function to the one corresponding to the TypeScrypt hash type.
 func UseScrypt() {
-	defaultGAC = hashes[TypeScrypt]
+	gac = hashes[TypeScrypt]
 }
 
 // UseArgon2 sets the global hash compare function to the one corresponding to the TypeArgon2 hash type.
 func UseArgon2() {
-	defaultGAC = hashes[TypeArgon2]
+	gac = hashes[TypeArgon2]
+}
+
+// UseHMAC256 sets the global hash compare function to the one corresponding to the TypeHMAC256 hash type.
+func UseHMAC256() {
+	gac = hashes[TypeHMAC256]
 }
 
 // Generate generates a password hash using the global hash compare function.
@@ -113,7 +119,7 @@ func UseArgon2() {
 //
 // It returns a string representing the generated password hash and an error if the generation fails.
 func Generate(password string, salt string) (string, error) {
-	return defaultGAC.Generate(password, salt)
+	return gac.Generate(password, salt)
 }
 
 // Compare compares the given hashed password, password, and salt with the global
@@ -127,7 +133,7 @@ func Generate(password string, salt string) (string, error) {
 // Returns:
 // - error: an error if the comparison fails, otherwise nil.
 func Compare(hashpass, password, salt string) error {
-	return defaultGAC.Compare(hashpass, password, salt)
+	return gac.Compare(hashpass, password, salt)
 }
 
 // GenerateSHA1Password generates a SHA1 password hash using the provided password and salt.
