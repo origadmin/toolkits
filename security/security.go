@@ -32,8 +32,17 @@ const (
 	ContextTypeUnknown
 )
 
-// HeaderAuthorize is the name of the authorization header.
 const (
 	// HeaderAuthorize is the name of the authorization header.
 	HeaderAuthorize = "Authorization"
+	// HeaderContentType is the name of the content type header.
+	HeaderContentType = "Content-Type"
+	// HeaderContentLength is the name of the content length header.
+	HeaderContentLength = "Content-Length"
+	// HeaderUserAgent is the name of the user agent header.
+	HeaderUserAgent = "User-Agent"
+	// HeaderReferer is the name of the referer header.
+	HeaderReferer = "Referer"
+	// HeaderOrigin is the name of the origin header.
+	HeaderOrigin = "Origin"
 )
