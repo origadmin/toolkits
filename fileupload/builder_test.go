@@ -28,3 +28,29 @@ func TestGenerateRandomHash(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateFileNameHash(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "test",
+			args: args{
+				name: "test.jpg",
+			},
+			want: "0d407ee6406a1216f2366674a1a9ff71361d5bef47021f8eb8b51f95e319dd56",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GenerateFileNameHash(tt.args.name); got != tt.want {
+				t.Errorf("GenerateFileNameHash() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
