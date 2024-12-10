@@ -2,6 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package hash provides hash functions for password encryption and comparison.
 package hash
 
 import (
