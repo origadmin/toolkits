@@ -9,6 +9,26 @@ import (
 	"testing"
 )
 
+func TestGenerateRandomHash(t *testing.T) {
+	tests := []struct {
+		name string
+		want int
+	}{
+		// TODO: Add test cases.
+		{
+			name: "test",
+			want: 32,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GenerateRandomHash(); len(got) != tt.want {
+				t.Errorf("GenerateRandomHash() = %v, want %v", len(got), tt.want)
+			}
+		})
+	}
+}
+
 func TestGenerateFileNameHash(t *testing.T) {
 	type args struct {
 		name string
@@ -23,7 +43,7 @@ func TestGenerateFileNameHash(t *testing.T) {
 			args: args{
 				name: "test.jpg",
 			},
-			want: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.jpg",
+			want: "0d407ee6406a1216f2366674a1a9ff71361d5bef47021f8eb8b51f95e319dd56",
 		},
 	}
 	for _, tt := range tests {

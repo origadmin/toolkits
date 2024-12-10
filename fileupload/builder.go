@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/goexts/generic/settings"
+	"github.com/google/uuid"
 )
 
 // uploadBuilder implements the Builder interface
@@ -55,6 +56,11 @@ func GenerateFileNameHash(data string) string {
 	hash := sha256.New()
 	hash.Write([]byte(data))
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func GenerateRandomHash() string {
+	id := uuid.Must(uuid.NewRandom())
+	return hex.EncodeToString(id[:])
 }
 
 // GenerateContentHash generates a content-addressed hash for a file.
