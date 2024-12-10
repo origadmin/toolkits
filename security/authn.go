@@ -29,5 +29,5 @@ type Authenticator interface {
 	// DestroyTokenContext invalidate a token by removing it from the token store.
 	DestroyTokenContext(context.Context, TokenType) error
 	// Close Cleans up the authenticator.
-	Close()
+	Close(context.Context) error
 }
