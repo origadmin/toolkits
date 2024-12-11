@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
+
+	"github.com/goexts/generic/settings"
 )
 
 type httpUploader struct {
-	builder  Builder
+	builder  *uploadBuilder
 	client   *http.Client
 	request  *http.Request
 	response *http.Response
@@ -26,7 +29,6 @@ func (u *httpUploader) SetFileHeader(ctx context.Context, header FileHeader) err
 	if err != nil {
 		return err
 	}
-
 	// Set headers
 	req.Header.Set("Content-Type", header.GetContentType())
 	req.Header.Set("Content-Length", fmt.Sprintf("%d", header.GetSize()))
@@ -44,41 +46,41 @@ func (u *httpUploader) UploadFile(ctx context.Context, rd io.Reader) error {
 	}
 
 	// Create pipe for request body
-	pr, pw := io.Pipe()
-	u.request.Body = pr
+	//pr, pw := io.Pipe()
+	u.request.Body = io.NopCloser(rd)
 	if u.buf == nil {
 		u.buf = u.builder.NewBuffer()
 	}
 	// Start uploading in background
-	go func() {
-		defer func() {
-			u.builder.Free(u.buf)
-			pw.Close()
-		}()
-
-		for {
-			select {
-			case <-ctx.Done():
-				pw.CloseWithError(ctx.Err())
-				return
-			default:
-				n, err := rd.Read(u.buf)
-				if n > 0 {
-					if _, werr := pw.Write(u.buf[:n]); werr != nil {
-						pw.CloseWithError(werr)
-						return
-					}
-				}
-				if err == io.EOF {
-					return
-				}
-				if err != nil {
-					pw.CloseWithError(err)
-					return
-				}
-			}
-		}
-	}()
+	//go func() {
+	//	defer func() {
+	//		u.builder.Free(u.buf)
+	//		pw.Close()
+	//	}()
+	//
+	//	for {
+	//		select {
+	//		case <-ctx.Done():
+	//			pw.CloseWithError(ctx.Err())
+	//			return
+	//		default:
+	//			n, err := rd.Read(u.buf)
+	//			if n > 0 {
+	//				if _, werr := pw.Write(u.buf[:n]); werr != nil {
+	//					pw.CloseWithError(werr)
+	//					return
+	//				}
+	//			}
+	//			if err == io.EOF {
+	//				return
+	//			}
+	//			if err != nil {
+	//				pw.CloseWithError(err)
+	//				return
+	//			}
+	//		}
+	//	}
+	//}()
 	if u.client == nil {
 		u.client = &http.Client{}
 	}
@@ -93,10 +95,28 @@ func (u *httpUploader) UploadFile(ctx context.Context, rd io.Reader) error {
 
 func (u *httpUploader) Finalize(ctx context.Context) (UploadResponse, error) {
 	var resp httpFileResponse
+	if u.response == nil {
+		return &resp, ErrInvalidReceiverResponse
+	}
 	decoder := json.NewDecoder(u.response.Body)
 	if err := decoder.Decode(&resp); err != nil {
-		return nil, err
+		return &resp, err
 	}
 
 	return &resp, nil
+}
+func NewHTTPUploader(ctx context.Context, url string, ss ...BuildSetting) Uploader {
+	b := settings.Apply(&uploadBuilder{
+		uri:     url,
+		bufSize: bufSize,
+	}, ss)
+	b.bufPool = &sync.Pool{
+		New: func() interface{} {
+			return make([]byte, b.bufSize)
+		},
+	}
+	return &httpUploader{
+		builder: b,
+		uri:     b.uri,
+	}
 }

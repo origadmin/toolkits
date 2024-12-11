@@ -6,13 +6,11 @@
 package fileupload
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/goexts/generic/settings"
 	"github.com/google/uuid"
@@ -20,12 +18,12 @@ import (
 
 // uploadBuilder implements the Builder interface
 type uploadBuilder struct {
-	buildType string
-	uri       string
-	hash      func(string) string
-	client    *http.Client
-	bufPool   *sync.Pool
-	bufSize   int
+	services map[ServiceType]Builder
+	uri      string
+	hash     func(string) string
+	client   *http.Client
+	bufPool  *sync.Pool
+	bufSize  int
 }
 
 func (b uploadBuilder) Free(buf []byte) {
@@ -92,46 +90,4 @@ func WithBufferSize(size int) BuildSetting {
 	return func(o *uploadBuilder) {
 		o.bufSize = size
 	}
-}
-
-func NewUploader(ctx context.Context, ss ...BuildSetting) (Uploader, error) {
-	b := settings.Apply(&uploadBuilder{}, ss)
-	return &httpUploader{
-		builder: b,
-		uri:     b.uri,
-	}, nil
-}
-
-func NewDownloader(req *http.Request, resp http.ResponseWriter, ss ...BuildSetting) (Downloader, error) {
-	b := settings.Apply(&uploadBuilder{}, ss)
-	// Read the file header from the request
-	file, header, err := req.FormFile("file")
-	if err != nil {
-		return nil, err
-	}
-
-	fileheader := make(map[string]string, len(header.Header))
-	for k, v := range header.Header {
-		fileheader[k] = v[0]
-	}
-	modTime := uint32(time.Now().Unix())
-	if mod, err := time.Parse(ModTimeFormat, header.Header.Get("Last-Modified")); err == nil {
-		modTime = uint32(mod.Unix())
-	}
-
-	// Create a FileHeader struct and populate it with the file information
-	fileHeader := &httpFileHeader{
-		Filename:    header.Filename,
-		Size:        uint32(header.Size),
-		ContentType: header.Header.Get("Content-Type"),
-		Header:      fileheader,
-		ModTime:     modTime,
-	}
-
-	return &httpDownloader{
-		builder:  b,
-		file:     file,
-		response: resp,
-		header:   fileHeader,
-	}, nil
 }

@@ -10,6 +10,13 @@ import (
 	"io"
 )
 
+const (
+	ServiceTypeGRPC ServiceType = "GRPC"
+	ServiceTypeHTTP ServiceType = "HTTP"
+)
+
+type ServiceType string
+
 // FileHeader represents a file header with metadata.
 type FileHeader interface {
 	// GetFilename returns the name of the file.
@@ -61,22 +68,22 @@ type Uploader interface {
 	Finalize(ctx context.Context) (UploadResponse, error)
 }
 
-type Downloader interface {
-	// GetFileHeader retrieves the file header after the file has been downloaded.
+type Receiver interface {
+	// GetFileHeader retrieves the file header after the file has been received.
 	GetFileHeader(ctx context.Context) (FileHeader, error)
-	// DownloadFile downloads the file first and then retrieves the header.
-	DownloadFile(ctx context.Context) (io.ReadCloser, error)
-	// Finalize finalizes the download process.
+	// ReceiveFile receives the file first and then retrieves the header.
+	ReceiveFile(ctx context.Context) (io.ReadCloser, error)
+	// Finalize finalizes the receipt process.
 	Finalize(ctx context.Context, resp UploadResponse) error
 }
 
-// Builder defines the interface for creating uploaders and downloaders
+// Builder defines the interface for creating Uploaders and Receivers
 type Builder interface {
 	NewBuffer() []byte
 	Free([]byte)
 
-	// NewUploader creates a new uploader instance
-	//NewUploader(ctx context.Context, opts ...BuildSetting) (Uploader, error)
-	// NewDownloader creates a new downloader instance
-	//NewDownloader(ctx context.Context, opts ...BuildSetting) (Downloader, error)
+	//// NewUploader creates a new uploader instance
+	//NewUploader(ctx context.Context) (Uploader, error)
+	//// NewReceiver creates a new receiver instance
+	//NewReceiver(ctx context.Context) (Receiver, error)
 }
