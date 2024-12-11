@@ -65,7 +65,7 @@ type Downloader interface {
 	// GetFileHeader retrieves the file header after the file has been downloaded.
 	GetFileHeader(ctx context.Context) (FileHeader, error)
 	// DownloadFile downloads the file first and then retrieves the header.
-	DownloadFile(ctx context.Context) (io.Reader, error)
+	DownloadFile(ctx context.Context) (io.ReadCloser, error)
 	// Finalize finalizes the download process.
 	Finalize(ctx context.Context, resp UploadResponse) error
 }
