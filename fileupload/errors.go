@@ -1,9 +1,11 @@
 package fileupload
 
-import "errors"
+import (
+	"github.com/origadmin/toolkits/errors"
+)
 
 var (
-	ErrNoFile         = errors.New("no file provided")
-	ErrInvalidRequest = errors.New("invalid request")
-	ErrUploadFailed   = errors.New("upload failed")
+	ErrNoFile         = errors.String("no file provided")
+	ErrInvalidRequest = errors.String("invalid request")
+	ErrUploadFailed   = errors.String("upload failed")
 )

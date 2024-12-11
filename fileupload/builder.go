@@ -115,7 +115,7 @@ func NewDownloader(req *http.Request, resp http.ResponseWriter, ss ...BuildSetti
 		fileheader[k] = v[0]
 	}
 	modTime := uint32(time.Now().Unix())
-	if mod, err := time.Parse(ModTimeFormat, header.Header.Get("Last-Modified")); err != nil {
+	if mod, err := time.Parse(ModTimeFormat, header.Header.Get("Last-Modified")); err == nil {
 		modTime = uint32(mod.Unix())
 	}
 
