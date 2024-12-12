@@ -11,15 +11,7 @@ import (
 )
 
 const (
-	bufSize       = 1024 * 64
 	ModTimeFormat = "Mon, 02 Jan 2006 15:04:05 MST"
-)
-
-type ServiceType string
-
-const (
-	ServiceTypeGRPC ServiceType = "GRPC"
-	ServiceTypeHTTP ServiceType = "HTTP"
 )
 
 // FileHeader represents a file header with metadata.
@@ -65,6 +57,8 @@ type UploadResponse interface {
 }
 
 type Uploader interface {
+	// ServiceType returns the type of the receiver.
+	ServiceType() ServiceType
 	// SetFileHeader sets the file header after the file has been uploaded.
 	SetFileHeader(ctx context.Context, header FileHeader) error
 	// UploadFile uploads the file first and then sets the header.
@@ -76,6 +70,8 @@ type Uploader interface {
 }
 
 type Receiver interface {
+	// ServiceType returns the type of the receiver.
+	ServiceType() ServiceType
 	// GetFileHeader retrieves the file header after the file has been received.
 	GetFileHeader(ctx context.Context) (FileHeader, error)
 	// ReceiveFile receives the file first and then retrieves the header.
@@ -84,9 +80,4 @@ type Receiver interface {
 	GetOffset(ctx context.Context) (int64, error)
 	// Finalize finalizes the receipt process.
 	Finalize(ctx context.Context, resp UploadResponse) error
-}
-
-type Buffer interface {
-	New() []byte
-	Free([]byte)
 }
