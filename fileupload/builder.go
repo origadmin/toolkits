@@ -6,6 +6,7 @@
 package fileupload
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
@@ -16,14 +17,48 @@ import (
 	"github.com/google/uuid"
 )
 
+// Builder interface defines methods for creating uploaders and receivers
+type Builder interface {
+	// NewUploader creates a new uploader instance
+	NewUploader(ctx context.Context) Uploader
+
+	// NewReceiver creates a new receiver instance
+	NewReceiver(ctx context.Context) Receiver
+
+	// Free releases resources
+	Free(buf []byte)
+
+	// NewBuffer allocates a new buffer
+	NewBuffer() []byte
+}
+
 // uploadBuilder implements the Builder interface
 type uploadBuilder struct {
-	services map[ServiceType]Builder
-	uri      string
-	hash     func(string) string
-	client   *http.Client
-	bufPool  *sync.Pool
-	bufSize  int
+	services    map[ServiceType]Builder
+	uri         string
+	hash        func(string) string
+	client      *http.Client
+	bufPool     *sync.Pool
+	bufSize     int
+	serviceType ServiceType
+}
+
+func (b *uploadBuilder) NewUploader(ctx context.Context) Uploader {
+	switch b.serviceType {
+	case ServiceTypeGRPC:
+		return NewGRPCUploader(ctx, b.uri)
+	default:
+		return NewHTTPUploader(ctx, b.uri)
+	}
+}
+
+func (b *uploadBuilder) NewReceiver(ctx context.Context) Receiver {
+	switch b.serviceType {
+	case ServiceTypeGRPC:
+		return NewGRPCReceiver(ctx)
+	default:
+		return NewHTTPReceiver(ctx)
+	}
 }
 
 func (b uploadBuilder) Free(buf []byte) {
@@ -89,5 +124,11 @@ func NewBuilder(ss ...BuildSetting) Builder {
 func WithBufferSize(size int) BuildSetting {
 	return func(o *uploadBuilder) {
 		o.bufSize = size
+	}
+}
+
+func WithServiceType(st ServiceType) BuildSetting {
+	return func(o *uploadBuilder) {
+		o.serviceType = st
 	}
 }

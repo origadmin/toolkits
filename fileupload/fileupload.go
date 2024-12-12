@@ -11,11 +11,16 @@ import (
 )
 
 const (
-	ServiceTypeGRPC ServiceType = "GRPC"
-	ServiceTypeHTTP ServiceType = "HTTP"
+	bufSize       = 1024 * 64
+	ModTimeFormat = "Mon, 02 Jan 2006 15:04:05 MST"
 )
 
 type ServiceType string
+
+const (
+	ServiceTypeGRPC ServiceType = "GRPC"
+	ServiceTypeHTTP ServiceType = "HTTP"
+)
 
 // FileHeader represents a file header with metadata.
 type FileHeader interface {
@@ -64,6 +69,8 @@ type Uploader interface {
 	SetFileHeader(ctx context.Context, header FileHeader) error
 	// UploadFile uploads the file first and then sets the header.
 	UploadFile(ctx context.Context, rd io.Reader) error
+	// Resume resumes upload from specified offset
+	Resume(ctx context.Context, offset int64) error
 	// Finalize finalizes the upload process.
 	Finalize(ctx context.Context) (UploadResponse, error)
 }
@@ -73,17 +80,13 @@ type Receiver interface {
 	GetFileHeader(ctx context.Context) (FileHeader, error)
 	// ReceiveFile receives the file first and then retrieves the header.
 	ReceiveFile(ctx context.Context) (io.ReadCloser, error)
+	// GetOffset returns current offset for resume support
+	GetOffset(ctx context.Context) (int64, error)
 	// Finalize finalizes the receipt process.
 	Finalize(ctx context.Context, resp UploadResponse) error
 }
 
-// Builder defines the interface for creating Uploaders and Receivers
-type Builder interface {
-	NewBuffer() []byte
+type Buffer interface {
+	New() []byte
 	Free([]byte)
-
-	//// NewUploader creates a new uploader instance
-	//NewUploader(ctx context.Context) (Uploader, error)
-	//// NewReceiver creates a new receiver instance
-	//NewReceiver(ctx context.Context) (Receiver, error)
 }
