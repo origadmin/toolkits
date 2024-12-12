@@ -8,6 +8,11 @@ package fileupload
 import (
 	"context"
 	"io"
+	"net/http"
+)
+
+const (
+	ModTimeFormat = "Mon, 02 Jan 2006 15:04:05 MST"
 )
 
 // FileHeader represents a file header with metadata.
@@ -57,26 +62,23 @@ type Uploader interface {
 	SetFileHeader(ctx context.Context, header FileHeader) error
 	// UploadFile uploads the file first and then sets the header.
 	UploadFile(ctx context.Context, rd io.Reader) error
+	// Resume resumes upload from specified offset
+	Resume(ctx context.Context, offset int64) error
 	// Finalize finalizes the upload process.
 	Finalize(ctx context.Context) (UploadResponse, error)
 }
 
-type Downloader interface {
-	// GetFileHeader retrieves the file header after the file has been downloaded.
+type Receiver interface {
+	// GetFileHeader retrieves the file header after the file has been received.
 	GetFileHeader(ctx context.Context) (FileHeader, error)
-	// DownloadFile downloads the file first and then retrieves the header.
-	DownloadFile(ctx context.Context) (io.Reader, error)
-	// Finalize finalizes the download process.
+	// ReceiveFile receives the file first and then retrieves the header.
+	ReceiveFile(ctx context.Context) (io.ReadCloser, error)
+	// GetOffset returns current offset for resume support
+	GetOffset(ctx context.Context) (int64, error)
+	// Finalize finalizes the receipt process.
 	Finalize(ctx context.Context, resp UploadResponse) error
 }
 
-// Builder defines the interface for creating uploaders and downloaders
-type Builder interface {
-	NewBuffer() []byte
-	Free([]byte)
-
-	// NewUploader creates a new uploader instance
-	//NewUploader(ctx context.Context, opts ...BuildSetting) (Uploader, error)
-	// NewDownloader creates a new downloader instance
-	//NewDownloader(ctx context.Context, opts ...BuildSetting) (Downloader, error)
+type BridgeUploader interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
