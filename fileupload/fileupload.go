@@ -8,6 +8,7 @@ package fileupload
 import (
 	"context"
 	"io"
+	"net/http"
 )
 
 const (
@@ -76,4 +77,9 @@ type Receiver interface {
 	GetOffset(ctx context.Context) (int64, error)
 	// Finalize finalizes the receipt process.
 	Finalize(ctx context.Context, resp UploadResponse) error
+}
+
+type UploadBridger interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	Uploader
 }
