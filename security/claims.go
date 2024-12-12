@@ -6,8 +6,30 @@
 package security
 
 import (
+	"context"
 	"time"
 )
+
+// UserClaimsParser is an interface that defines the methods for a user claims parser
+type UserClaimsParser interface {
+	Parse(ctx context.Context, id string) (UserClaims, error)
+}
+
+// UserClaims is an interface that defines the methods for a casbin policy
+type UserClaims interface {
+	// GetSubject returns the subject of the casbin policy
+	GetSubject() string
+	// GetObject returns the object of the casbin policy
+	GetObject() string
+	// GetAction returns the action of the casbin policy
+	GetAction() string
+	// GetDomain returns the domain of the casbin policy
+	GetDomain() string
+	// GetClaims returns the claims of the casbin policy
+	GetClaims() Claims
+	// GetExtra returns the extra information of the casbin policy
+	GetExtra() map[string]string
+}
 
 // Claims is an interface that defines the methods that a security claims object should have
 type Claims interface {
