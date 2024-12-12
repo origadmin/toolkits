@@ -79,7 +79,6 @@ type Receiver interface {
 	Finalize(ctx context.Context, resp UploadResponse) error
 }
 
-type UploadBridger interface {
+type BridgeUploader interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	Uploader
 }
