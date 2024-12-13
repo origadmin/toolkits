@@ -14,8 +14,8 @@ const (
 	ContextTypeContext TokenType = iota
 	// ContextTypeHeader represents the context type for the header.
 	ContextTypeHeader
-	// ContentTypeMetadata represents the context type for the metadata.
-	ContentTypeMetadata
+	// ContextTypeMetadata represents the context type for the metadata.
+	ContextTypeMetadata
 	// ContextTypeQuery represents the context type for the query.
 	ContextTypeQuery
 	// ContextTypeCookie represents the context type for the cookie.
