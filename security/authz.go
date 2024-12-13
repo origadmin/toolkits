@@ -9,18 +9,12 @@ import (
 	"context"
 )
 
-// Policy is an interface that defines the methods for a policy
-type Policy interface {
-	// GetSubject returns the subject of the policy
-	GetSubject() string
-	// GetObject returns the object of the policy
-	GetObject() string
-	// GetAction returns the action of the policy
-	GetAction() string
-	// GetDomain returns the domain of the policy
-	GetDomain() []string
-	// GetExtra returns the extra information of the policy
-	GetExtra() map[string]string
+type Policy struct {
+	Subject string
+	Object  string
+	Action  string
+	Domain  []string
+	Extra   map[string]string
 }
 
 // PolicyManager is an interface that defines the methods for a policy manager
@@ -50,5 +44,5 @@ type Authorizer interface {
 	//FilterAuthorizedPairs(context.Context, Subjects, Pairs) (Pairs, error)
 	//FilterAuthorizedProjects(context.Context, Subjects) (Projects, error)
 
-	Authorized(context.Context, Policy) (bool, error)
+	Authorized(context.Context, UserClaims) (bool, error)
 }
