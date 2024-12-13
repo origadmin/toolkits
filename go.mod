@@ -6,7 +6,6 @@ toolchain go1.23.2
 
 require (
 	github.com/goexts/generic v0.1.1
-	github.com/google/uuid v1.6.0
 	github.com/origadmin/toolkits/codec v0.0.28
 	github.com/origadmin/toolkits/errors v0.0.5
 	github.com/origadmin/toolkits/idgen v0.0.21
