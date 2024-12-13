@@ -21,8 +21,8 @@ type element struct {
 }
 
 type mapCache struct {
-	elems sync.Pool
-	maps  sync.Map
+	elems *sync.Pool
+	maps  *sync.Map
 }
 
 func (s *mapCache) Get(ctx context.Context, key string) (string, error) {
@@ -94,7 +94,14 @@ func (s *mapCache) putElement(elem *element) {
 }
 
 func NewMapCache() cache.Cache {
-	return &mapCache{}
+	return &mapCache{
+		elems: &sync.Pool{
+			New: func() any {
+				return &element{}
+			},
+		},
+		maps: &sync.Map{},
+	}
 }
 
 var _ cache.Cache = (*mapCache)(nil)
