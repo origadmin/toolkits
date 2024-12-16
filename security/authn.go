@@ -28,6 +28,10 @@ type Authenticator interface {
 	CreateToken(context.Context, Claims) (string, error)
 	// CreateTokenContext inject user claims into context.
 	CreateTokenContext(context.Context, TokenType, Claims) (context.Context, error)
+	// CreateRefreshToken inject user claims into refresh token string.
+	CreateRefreshToken(context.Context, Claims) (string, error)
+	// CreateRefreshTokenContext inject user claims into context.
+	CreateRefreshTokenContext(context.Context, TokenType, Claims) (context.Context, error)
 	// DestroyToken invalidate a token by removing it from the token store.
 	DestroyToken(context.Context, string) error
 	// DestroyTokenContext invalidate a token by removing it from the token store.
