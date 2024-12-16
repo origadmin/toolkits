@@ -11,8 +11,8 @@ import (
 
 // Authenticator interface
 type Authenticator interface {
-	// CreateIdentityClaims creates a new identity claims.It should be used when a new user is created.
-	CreateIdentityClaims(context.Context, string) (Claims, error)
+	// CreateIdentityClaims creates a new identity claims. bool true is for refresh token
+	CreateIdentityClaims(context.Context, string, bool) (Claims, error)
 	// CreateIdentityClaimsContext creates a new identity.It should be used when a new user is created.
 	CreateIdentityClaimsContext(context.Context, TokenType, string) (context.Context, error)
 	// Authenticate returns a nil error and the AuthClaims info (if available).
@@ -28,10 +28,6 @@ type Authenticator interface {
 	CreateToken(context.Context, Claims) (string, error)
 	// CreateTokenContext inject user claims into context.
 	CreateTokenContext(context.Context, TokenType, Claims) (context.Context, error)
-	// CreateRefreshToken inject user claims into refresh token string.
-	CreateRefreshToken(context.Context, Claims) (string, error)
-	// CreateRefreshTokenContext inject user claims into context.
-	CreateRefreshTokenContext(context.Context, TokenType, Claims) (context.Context, error)
 	// DestroyToken invalidate a token by removing it from the token store.
 	DestroyToken(context.Context, string) error
 	// DestroyTokenContext invalidate a token by removing it from the token store.
