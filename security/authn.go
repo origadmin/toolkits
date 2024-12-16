@@ -24,14 +24,10 @@ type Authenticator interface {
 	Verify(context.Context, string) (bool, error)
 	// VerifyContext validates if a token is valid.
 	VerifyContext(context.Context, TokenType) (bool, error)
-	// CreateToken inject user claims into token string.
-	CreateToken(context.Context, Claims) (string, error)
+	// CreateToken inject user claims into token string. bool true is for refresh token
+	CreateToken(context.Context, Claims, bool) (string, error)
 	// CreateTokenContext inject user claims into context.
 	CreateTokenContext(context.Context, TokenType, Claims) (context.Context, error)
-	// CreateRefreshToken inject user claims into refresh token string.
-	CreateRefreshToken(context.Context, Claims) (string, error)
-	// CreateRefreshTokenContext inject user claims into context.
-	CreateRefreshTokenContext(context.Context, TokenType, Claims) (context.Context, error)
 	// DestroyToken invalidate a token by removing it from the token store.
 	DestroyToken(context.Context, string) error
 	// DestroyTokenContext invalidate a token by removing it from the token store.
