@@ -15,6 +15,7 @@ type UserClaimsParser func(ctx context.Context, id string) (UserClaims, error)
 
 // UserClaims is an interface that defines the methods for a casbin policy
 type UserClaims interface {
+	IsRoot() bool
 	// GetSubject returns the subject of the casbin policy
 	GetSubject() string
 	// GetObject returns the object of the casbin policy
