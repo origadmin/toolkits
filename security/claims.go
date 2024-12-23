@@ -11,7 +11,7 @@ import (
 )
 
 // UserClaimsParser is an interface that defines the methods for a user claims parser
-type UserClaimsParser func(ctx context.Context, id string) (UserClaims, error)
+type UserClaimsParser func(ctx context.Context, claims Claims) (UserClaims, error)
 
 // UserClaims is an interface that defines the methods for a casbin policy
 type UserClaims interface {

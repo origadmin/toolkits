@@ -9,40 +9,26 @@ import (
 	"context"
 )
 
-type Policy struct {
-	Subject string
-	Object  string
-	Action  string
-	Domain  []string
-	Extra   map[string]string
-}
-
 // PolicyManager is an interface that defines the methods for a policy manager
 type PolicyManager interface {
-	// AddPolicy adds a policy for a given subject, object, action, domain and extra
+	// AddPolicy adds a policy for a given subject, object, action, domain
 	AddPolicy(sec string, pt string, rule []string) error
-	// RemovePolicy removes a policy for a given subject, object, action, domain and extra
+	// RemovePolicy removes a policy for a given subject, object, action, domain
 	RemovePolicy(sec string, pt string, rule []string) error
-	// GetPolicy returns the policy for a given subject, object, action, domain and extra
-	GetPolicy(subject string, object string, action string, domain []string, extra map[string]string) Policy
-	// SetPolicy sets the policy for a given subject, object, action, domain and extra
-	SetPolicy(subject string, object string, action string, domain []string, extra map[string]string)
 	// SetPolicies sets the policies for a given context
-	SetPolicies(context.Context, map[string]Policy) error
+	SetPolicies(context.Context, map[string]any) error
 }
 
-// PolicyChecker is an interface that defines the methods for a policy checker
-type PolicyChecker interface {
-	// CheckPolicy checks if the policy for a given subject, object, action, domain and extra is allowed
-	CheckPolicy(Policy) bool
-	// CheckPolicyContext checks if the policy for a given subject, object, action
-	CheckPolicyContext(context.Context, TokenType, Policy) bool
-}
-
+// Authorizer is an interface that defines the methods for an authorizer.
+// It is used to manage policies and check authorization.
 type Authorizer interface {
-	//ProjectsAuthorized(context.Context, securityv1.AuthZ) ([]string, error)
-	//FilterAuthorizedPairs(context.Context, Subjects, Pairs) (Pairs, error)
-	//FilterAuthorizedProjects(context.Context, Subjects) (Projects, error)
+	// SetPolicies sets the policies for a given context.
+	// It takes a context, a map of policies, and a map of roles as input.
+	// It returns an error if the policies cannot be set.
+	SetPolicies(ctx context.Context, policies map[string]any, roles map[string]any) error
 
-	Authorized(context.Context, UserClaims) (bool, error)
+	// Authorized checks if a user is authorized to perform an action.
+	// It takes a context and a UserClaims object as input.
+	// It returns a boolean indicating whether the user is authorized and an error if the check fails.
+	Authorized(ctx context.Context, claims UserClaims) (bool, error)
 }
