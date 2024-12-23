@@ -40,9 +40,6 @@ type PolicyChecker interface {
 }
 
 type Authorizer interface {
-	//ProjectsAuthorized(context.Context, securityv1.AuthZ) ([]string, error)
-	//FilterAuthorizedPairs(context.Context, Subjects, Pairs) (Pairs, error)
-	//FilterAuthorizedProjects(context.Context, Subjects) (Projects, error)
-
+	SetPolicies(context.Context, map[string]any, map[string]any) error
 	Authorized(context.Context, UserClaims) (bool, error)
 }
