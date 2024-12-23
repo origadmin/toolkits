@@ -15,7 +15,6 @@ type UserClaimsParser func(ctx context.Context, id string) (UserClaims, error)
 
 // UserClaims is an interface that defines the methods for a casbin policy
 type UserClaims interface {
-	IsRoot() bool
 	// GetSubject returns the subject of the casbin policy
 	GetSubject() string
 	// GetObject returns the object of the casbin policy
@@ -52,86 +51,15 @@ type Claims interface {
 	GetExtra() map[string]string
 }
 
-// UnimplementedClaims is a struct that implements the Claims interface
-type UnimplementedClaims struct {
+type rootCtxKey struct{}
+
+func WithRootContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, rootCtxKey{}, true)
 }
 
-func (u UnimplementedClaims) GetJWTID() string {
-	return ""
-}
-
-// GetSubject returns an empty string
-func (u UnimplementedClaims) GetSubject() string {
-	return ""
-}
-
-// GetIssuer returns an empty string
-func (u UnimplementedClaims) GetIssuer() string {
-	return ""
-}
-
-// GetAudience returns an empty slice
-func (u UnimplementedClaims) GetAudience() []string {
-	return []string{}
-}
-
-// GetExpiration returns the current time
-func (u UnimplementedClaims) GetExpiration() time.Time {
-	return time.Now()
-}
-
-// GetNotBefore returns the current time
-func (u UnimplementedClaims) GetNotBefore() time.Time {
-	return time.Now()
-}
-
-// GetIssuedAt returns the current time
-func (u UnimplementedClaims) GetIssuedAt() time.Time {
-	return time.Now()
-}
-
-// GetJwtID returns an empty string
-func (u UnimplementedClaims) GetJwtID() string {
-	return ""
-}
-
-// GetScopes returns an empty map
-func (u UnimplementedClaims) GetScopes() map[string]bool {
-	return make(map[string]bool)
-}
-
-// GetExtra returns an empty map
-func (u UnimplementedClaims) GetExtra() map[string]string {
-	return make(map[string]string)
-}
-
-type UnimplementedUserClaims struct {
-}
-
-func (u UnimplementedUserClaims) IsRoot() bool {
+func ContextIsRoot(ctx context.Context) bool {
+	if _, ok := ctx.Value(rootCtxKey{}).(bool); ok {
+		return true
+	}
 	return false
-}
-
-func (u UnimplementedUserClaims) GetSubject() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetObject() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetAction() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetDomain() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetClaims() Claims {
-	return &UnimplementedClaims{}
-}
-
-func (u UnimplementedUserClaims) GetExtra() map[string]string {
-	return nil
 }
