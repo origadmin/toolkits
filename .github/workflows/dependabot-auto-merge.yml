@@ -16,8 +16,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PR_URL: ${{github.event.pull_request.html_url}}
     steps:
-     - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4.2.0
         with:
           fetch-depth: 0
       - name: SetUp auto-merge
