@@ -23,8 +23,22 @@ jobs:
       - name: Log reason
         run: |
           echo "Actor: ${{ github.actor }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
           echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
           echo "Dependabot PR: ${{ contains(github.event.pull_request.title, 'dependabot') }}"
+      - name: Check for dependencies label
+        id: labels
+        run: |
+          dependencies=false
+          for label in "${{ github.event.pull_request.labels.*.name }}"; do
+            echo "Label: $label" 
+            if [ "$label" == "dependencies" ]; then
+              dependencies=true
+              break
+            fi
+          done
+          echo "dependencies=$dependencies" >> $GITHUB_OUTPUT
+          echo "Dependencies: $dependencies"
       - name: Checkout code
         uses: actions/checkout@v4.2.0
         with:
