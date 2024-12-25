@@ -4,9 +4,18 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - ' dependabot/**'  # Adjust this path as needed
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths-ignore:
+      - ' dependabot/**'  # Adjust this path as needed
 
 jobs:
   test:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,7 +35,7 @@ jobs:
 
   tagging:
     needs: [ test ]
-    if: success() && github.event.pull_request.user.login != 'dependabot[bot]'
+    if: success() && github.actor!= 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
