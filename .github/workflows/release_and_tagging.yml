@@ -18,7 +18,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Log information about the pull request
+      - name: Log information about the push
         run: |
           echo "Actor: ${{ github.actor }}"          
           echo "Event name: ${{ github.event_name }}"          
@@ -26,12 +26,7 @@ jobs:
           echo "Event Commit Message: ${{ github.event.commits.*.message }}"
           for commit in "${{ github.event.commits }}"; do
             echo "Event Commit Message: $commit"
-#            echo "Event Contains #release: ${{ contains($commit.message, '#release') }}"
           done
-          echo "Pull request merged: ${{ github.event.pull_request.merged }}"
-          echo "PR Title: ${{ github.event.pull_request.title }}"
-          echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
-          echo "Dependabot PR: ${{ contains(github.event.pull_request.title, 'dependabot') }}"
       - name: Check for dependencies label
         id: labels
         run: |
