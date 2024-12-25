@@ -14,7 +14,7 @@ on:
 
 jobs:
   tagging:
-    if: github.actor != 'dependabot[bot]' && github.repository == 'owner/repo'
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
