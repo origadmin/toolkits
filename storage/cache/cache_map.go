@@ -2,17 +2,13 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package security implements the functions, types, and interfaces for the module.
-package security
+// Package cache implements the functions, types, and interfaces for the module.
+package cache
 
 import (
 	"context"
 	"sync"
 	"time"
-
-	"github.com/origadmin/toolkits/errors"
-
-	"github.com/origadmin/toolkits/storage/cache"
 )
 
 type element struct {
@@ -25,19 +21,33 @@ type mapCache struct {
 	maps  *sync.Map
 }
 
+func (s *mapCache) Clear(ctx context.Context) error {
+	s.maps.Clear()
+	return nil
+}
+
+func (s *mapCache) Exists(ctx context.Context, key string) (bool, error) {
+	_, ok := s.maps.Load(key)
+	return ok, nil
+}
+
+func (s *mapCache) Close(ctx context.Context) error {
+	return nil
+}
+
 func (s *mapCache) Get(ctx context.Context, key string) (string, error) {
 	value, ok := s.maps.Load(key)
 	if !ok {
-		return "", cache.ErrNotFound
+		return "", ErrNotFound
 	}
 	elem, ok := value.(*element)
 	if !ok {
-		return "", errors.New("invalid cache value")
+		return "", ErrInvalidElement
 	}
-	if elem.expireAt.Before(time.Now()) {
+	if !elem.expireAt.IsZero() && elem.expireAt.Before(time.Now()) {
 		s.maps.Delete(key)
 		s.elems.Put(elem)
-		return "", cache.ErrNotFound
+		return "", ErrExpired
 	}
 	return elem.value, nil
 }
@@ -45,30 +55,26 @@ func (s *mapCache) Get(ctx context.Context, key string) (string, error) {
 func (s *mapCache) GetAndDelete(ctx context.Context, key string) (string, error) {
 	value, ok := s.maps.LoadAndDelete(key)
 	if !ok {
-		return "", cache.ErrNotFound
+		return "", ErrNotFound
 	}
 	elem, ok := value.(*element)
 	if !ok {
-		return "", errors.New("invalid cache value")
+		return "", ErrInvalidElement
+	}
+	if !elem.expireAt.IsZero() && elem.expireAt.Before(time.Now()) {
+		s.maps.Delete(key)
+		s.elems.Put(elem)
+		return "", ErrExpired
 	}
 	v := elem.value
 	s.elems.Put(elem)
 	return v, nil
 }
 
-func (s *mapCache) Exists(ctx context.Context, key string) error {
-	if _, ok := s.maps.Load(key); ok {
-		return nil
-	}
-	return cache.ErrNotFound
-}
-
 func (s *mapCache) Set(ctx context.Context, key string, value string, expiration ...time.Duration) error {
 	var expireAt time.Time
-	if len(expiration) > 0 {
+	if len(expiration) > 0 && expiration[0].Seconds() > 0 {
 		expireAt = time.Now().Add(expiration[0])
-	} else {
-		expireAt = time.Now().Add(time.Hour)
 	}
 	elem := s.getElement()
 	elem.value = value
@@ -82,7 +88,7 @@ func (s *mapCache) Delete(ctx context.Context, key string) error {
 		s.elems.Put(v)
 		return nil
 	}
-	return cache.ErrNotFound
+	return ErrNotFound
 }
 
 func (s *mapCache) getElement() *element {
@@ -93,7 +99,7 @@ func (s *mapCache) putElement(elem *element) {
 	s.elems.Put(elem)
 }
 
-func NewMapCache() cache.Cache {
+func NewMemoryCache() Cache {
 	return &mapCache{
 		elems: &sync.Pool{
 			New: func() any {
@@ -104,4 +110,4 @@ func NewMapCache() cache.Cache {
 	}
 }
 
-var _ cache.Cache = (*mapCache)(nil)
+var _ Cache = (*mapCache)(nil)
