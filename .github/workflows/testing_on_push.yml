@@ -1,0 +1,55 @@
+name: Auto Tagging And Release After Tests
+
+on:
+  push:
+    branches:
+      - "main"
+      - "!dependabot/**"
+      - "!origadmin/dependabot/**"
+  #     paths-ignore:
+  #       - 'dependabot/**'  # Adjust this path as needed
+  #       - 'origadmin/dependabot/**'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log information about the push
+        run: |
+          echo "Actor: ${{ github.actor }}"          
+          echo "Event name: ${{ github.event_name }}"          
+          echo "Event Ref: ${{ github.event.ref }}"
+          echo "Event Commit Message: ${{ github.event.commits.*.message }}"
+          for commit in "${{ github.event.commits }}"; do
+            echo "Event Commit Message: $commit"
+          done
+      - name: Check for dependencies label
+        id: labels
+        run: |
+          dependencies=false
+          for label in "${{ github.event.pull_request.labels.*.name }}"; do
+            echo "Label: $label" 
+            if [ "$label" == "dependencies" ]; then
+              dependencies=true
+              break
+            fi
+          done
+          echo "dependencies=$dependencies" >> $GITHUB_OUTPUT
+          echo "Dependencies: $dependencies"
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+      - name: Set up Go
+        uses: actions/setup-go@v5.0.2
+        with:
+          go-version: stable
+      - name: Run tests
+        run: |
+          chmod +x ./.github/scripts/test.sh     
+          ./.github/scripts/test.sh
