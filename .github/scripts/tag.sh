@@ -73,13 +73,7 @@ handle_go_mod_directory() {
     if [ "$module_name" != "." ]; then
         module="$module_name"
     fi
-
-    MAIN_TAG=$(get_head_version_tag)
-# Check if MAIN_TAG is empty and exit if it is
-		if [ -z "$MAIN_TAG" ]; then
-				echo "TAG is empty. Exiting."
-				exit 0
-		fi
+    
     if check_for_go_mod "$dir"; then
         local HEAD_TAG
         local LATEST_TAG
@@ -93,8 +87,8 @@ handle_go_mod_directory() {
         fi
         LATEST_TAG=$(get_latest_module_tag "$module_name")
         echo " ->LATEST_TAG: $LATEST_TAG"
-        NEXT_TAG="$module_name/$MAIN_TAG"
-        echo " ->NEXT_TAG: $module_name/$MAIN_TAG"
+        NEXT_TAG=$(get_next_module_version "$module_name")
+        echo " ->NEXT_TAG: $NEXT_TAG"
         
         if [ -z "$HEAD_TAG" ]; then
             echo "Creating new tag: $NEXT_TAG"
@@ -121,14 +115,14 @@ add_go_mod_tag() {
 		echo "Current branch: $current_branch"
 
 		# Save all local changes to the Git stash
-		echo "Saving all local changes and change to the stash..."
+		echo "Saving all local changes and change to the main branch..."
     git stash save --include-untracked
     git checkout -B "main" "origin/main"
 
     # If a module_name is specified, process only that directory
     if [ "$module_name" == "." ]; then
         handle_go_mod_directory "."
-		elif [ -n "$module_name" ]; then
+        elif [ -n "$module_name" ]; then
         handle_go_mod_directory "$module_name"
     else
         # Skip the root directory ('.')

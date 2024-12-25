@@ -68,59 +68,6 @@ get_next_module_version() {
     echo "$next_tag"
 }
 
-get_next_version_main(){
-	function_checks
-
-	local module_name=$1
-	local main_version=$2  # New argument for the main version
-
-	# If main_version is provided, use it directly
-	if [[ -n "$main_version" ]]; then
-			local next_tag="$main_version"
-			if [[ "$module_name" != "." ]]; then
-					next_tag="$module_name/$next_tag"
-			fi
-			echo "$next_tag"
-			return
-	fi
-
-	# Determine the pattern based on whether module_name is provided
-	local pattern="v*"
-	if [ "$module_name" != "." ]; then
-			pattern="${module_name}/v*"
-	fi
-
-	# Get all tags that match the pattern
-	local tags=""
-	tags=$(get_matching_tags "$pattern")
-
-	# Get the latest tag
-	local latest_tag=""
-	latest_tag=$(get_latest_tag "$tags")
-
-	local next_tag
-	if [[ -z "$latest_tag" ]]; then
-			# Default to v0.0.1
-			next_tag="v0.0.1"
-	else
-			# Correctly extract the version part from the tag
-			local version_part=${latest_tag##"$module_name/"}       # Changed to use ## instead of #
-			IFS='.' read -r -a version_array <<<"${version_part#v}" # Also remove leading 'v'
-			local major=${version_array[0]}
-			local minor=${version_array[1]}
-			local patch=${version_array[2]}
-			((patch++))
-			next_tag="v$major.$minor.$patch"
-	fi
-
-	# If module_name is provided, prepend it to the tag
-	if [[ "$module_name" != "." ]]; then
-			next_tag="$module_name/$next_tag"
-	fi
-
-	echo "$next_tag"
-}
-
 # Function to find the latest tag matching the module name
 get_head_version_tag() {
     function_checks
