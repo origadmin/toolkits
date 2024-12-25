@@ -11,7 +11,7 @@ require (
 	github.com/origadmin/toolkits/idgen v0.0.21
 	github.com/origadmin/toolkits/sloge v0.0.2
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.29.0
+	golang.org/x/crypto v0.31.0
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.12.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
