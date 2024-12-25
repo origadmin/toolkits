@@ -25,8 +25,8 @@ jobs:
           echo "Event Ref: ${{ github.event.ref }}"
           echo "Event Commit Message: ${{ github.event.commits.*.message }}"
           for commit in "${{ github.event.commits }}"; do
-            echo "Event Commit Message: $commit.message"
-            echo "Event Contains #release: ${{ contains($commit.message, '#release') }}"
+            echo "Event Commit Message: $commit"
+#            echo "Event Contains #release: ${{ contains($commit.message, '#release') }}"
           done      
           echo "Event Description: ${{ github.event.description }}"
           echo "Event Push Title: ${{ github.event.head_commit.message }}"
