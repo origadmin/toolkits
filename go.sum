@@ -48,8 +48,8 @@ github.com/origadmin/toolkits/codec v0.0.58 h1:91/ifnLtNmmjyWPdn2bW6K9AevT4SgV6/
 github.com/origadmin/toolkits/codec v0.0.58/go.mod h1:KouXvcRysdeDe6syxc3XL3two0yIIsk47bjZy6bhOoo=
 github.com/origadmin/toolkits/errors v0.0.36 h1:B7WS42rL1jDpo/EqWIeOtAA2qSIkbCeUSYcxCMvmKNI=
 github.com/origadmin/toolkits/errors v0.0.36/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
-github.com/origadmin/toolkits/idgen v0.0.21 h1:hEJbp9Z2I/nJ2JGhF95E8h8/SA7Xipnrl/xrAmHMKoM=
-github.com/origadmin/toolkits/idgen v0.0.21/go.mod h1:dJxgCZR0ipD/OMJ0yUMjW/OXW928I0bd9T+zA+xl5E0=
+github.com/origadmin/toolkits/idgen v0.0.77 h1:AZFpXvAFUk0OtYd6x8WIvQRlOe++JL/RKa7Nr18OsCc=
+github.com/origadmin/toolkits/idgen v0.0.77/go.mod h1:mo95k+IJ4ZFp97jzU7oPOC5QtPasR3XnPZwbE1D/CKc=
 github.com/origadmin/toolkits/sloge v0.0.2 h1:Pbr104mVbGIbqtsTN4vmz5Hk4gk5LkWKi+jlivj+/r0=
 github.com/origadmin/toolkits/sloge v0.0.2/go.mod h1:6Uv6I+ot/ywCrqPfzqerrEmH2Mk6RyqDW2LVMKJAZtQ=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=

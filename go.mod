@@ -8,7 +8,7 @@ require (
 	github.com/goexts/generic v0.1.5
 	github.com/origadmin/toolkits/codec v0.0.58
 	github.com/origadmin/toolkits/errors v0.0.36
-	github.com/origadmin/toolkits/idgen v0.0.21
+	github.com/origadmin/toolkits/idgen v0.0.77
 	github.com/origadmin/toolkits/sloge v0.0.2
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.31.0
