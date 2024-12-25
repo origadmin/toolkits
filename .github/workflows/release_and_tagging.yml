@@ -17,7 +17,7 @@ on:
 
 jobs:
   test:
-    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.title, 'bump') && !contains(github.event.pull_request.title, 'dependabot')
+    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && (!contains(github.event.pull_request.title, 'bump') || !contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
 
   tagging:
     needs: [ test ]
-    if: success() && github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.title, 'bump') && !contains(github.event.pull_request.title, 'dependabot')
+    if: success() && github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && (!contains(github.event.pull_request.title, 'bump') || !contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
