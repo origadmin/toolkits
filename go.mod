@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/goexts/generic v0.1.5
-	github.com/origadmin/toolkits/codec v0.0.58
+	github.com/origadmin/toolkits/codec v0.0.86
 	github.com/origadmin/toolkits/errors v0.0.66
 	github.com/origadmin/toolkits/idgen v0.0.78
 	github.com/origadmin/toolkits/sloge v0.0.58
@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/bytedance/sonic v1.12.4 // indirect
+	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
