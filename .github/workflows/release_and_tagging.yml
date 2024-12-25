@@ -8,7 +8,7 @@ on:
       - 'dependabot/**'  # Adjust this path as needed
       - 'origadmin/dependabot/**'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
     branches:
       - main
     paths-ignore:
@@ -17,27 +17,29 @@ on:
 
 jobs:
   test:
-    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && (!contains(github.event.pull_request.title, 'bump') || !contains(github.event.pull_request.title, 'dependabot'))
+    if: github.actor != 'dependabot[bot]' && !(contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     steps:
+      - name: Log reason
+        if: github.actor == 'dependabot[bot]' || contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot')
+        run: |
+          echo "Running job because it was triggered by Dependabot or the PR title contains 'bump' or 'dependabot'."
       - name: Checkout code
         uses: actions/checkout@v4.2.0
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
-
       - name: Set up Go
         uses: actions/setup-go@v5.0.2
         with:
           go-version: stable
-
       - name: Run tests
         run: |
           go test -v ./...
 
   tagging:
     needs: [ test ]
-    if: success() && github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && (!contains(github.event.pull_request.title, 'bump') || !contains(github.event.pull_request.title, 'dependabot'))
+    if: success() && github.actor != 'dependabot[bot]' && !(contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
