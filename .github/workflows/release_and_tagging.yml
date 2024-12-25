@@ -5,13 +5,15 @@ on:
     branches:
       - main
     paths-ignore:
-      - ' dependabot/**'  # Adjust this path as needed
+      - 'dependabot/**'  # Adjust this path as needed
+      - 'origadmin/dependabot/**'  # Adjust this path as needed
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - main
     paths-ignore:
-      - ' dependabot/**'  # Adjust this path as needed
+      - 'dependabot/**'  # Adjust this path as needed
+      - 'origadmin/dependabot/**'  # Adjust this path as needed
 
 jobs:
   test:
