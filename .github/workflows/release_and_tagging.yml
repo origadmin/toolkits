@@ -28,7 +28,7 @@ jobs:
             echo "Event Commit Message: $commit"
 #            echo "Event Contains #release: ${{ contains($commit.message, '#release') }}"
           done      
-          echo "Event Description: ${{ github.event.description }}"
+          echo "Event Description: ${{ github.event }}"
           echo "Event Push Title: ${{ github.event.head_commit.message }}"
           echo "Event Comment Body: ${{ github.event.comment.body }}"
           echo "Event Contains #release: ${{ contains(github.event.comment.body, '#release') }}"
