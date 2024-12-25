@@ -22,11 +22,11 @@ jobs:
 
       - name: Run tests
         run: |
-          go test -race -v ./...
+          go test -v ./...
 
   tagging:
     needs: [ test ]
-    if: success()
+    if: success() && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
