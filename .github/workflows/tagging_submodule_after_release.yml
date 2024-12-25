@@ -3,12 +3,6 @@ name: Auto Tagging Submodule After Release
 on:
   release:
     types: [ created ]
-  push:
-    tags:
-      - "v*.*.*"
-    branches-ignore:
-      - 'dependabot/**'  # Adjust this path as needed
-      - 'origadmin/dependabot/**'  # Adjust this path as needed
 
 jobs:
   tag_push:
@@ -18,12 +12,20 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Log information about the pull request
+        run: |
+          echo "Comment: ${{ github.event.comment.body }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Pull request merged: ${{ github.event.pull_request.merged }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
+          echo "Dependabot PR: ${{ contains(github.event.pull_request.title, 'dependabot') }}"
       - name: Checkout code
         uses: actions/checkout@v4.2.0 # v4
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
-
       - name: Run tag script
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
