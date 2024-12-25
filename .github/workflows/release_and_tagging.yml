@@ -28,8 +28,6 @@ jobs:
             echo "Event Commit Message: $commit"
 #            echo "Event Contains #release: ${{ contains($commit.message, '#release') }}"
           done
-          echo "Event Comment Body: ${{ github.event.comment.body }}"
-          echo "Event Contains #release: ${{ contains(github.event.comment.body, '#release') }}"
           echo "Pull request merged: ${{ github.event.pull_request.merged }}"
           echo "PR Title: ${{ github.event.pull_request.title }}"
           echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
