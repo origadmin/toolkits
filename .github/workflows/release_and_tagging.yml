@@ -75,6 +75,21 @@ jobs:
       #          body_path: changelog.txt
       #          draft: false
       #          prerelease: false
+
+  tag_push:
+    needs: [ tagging ]
+    if: github.actor!= 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0 # v4
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
       - name: Run tag script
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -88,3 +103,8 @@ jobs:
           git push origin --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Upload assets
+#        uses: actions/upload-artifact@v4.4.3
+#        with:
+#          name: protoc-gen-go-gins
+#          path: ./cmd/protoc-gen-go-gins/dist/*
