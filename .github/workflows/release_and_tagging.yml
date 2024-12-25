@@ -1,27 +1,27 @@
 name: Auto Tagging And Release After Tests
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'dependabot/**'  # Adjust this path as needed
-      - 'origadmin/dependabot/**'
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [ closed ]
     branches:
-      - main
-    paths-ignore:
-      - 'dependabot/**'  # Adjust this path as needed
-      - 'origadmin/dependabot/**'
+      - "main"
+      - "!dependabot/**"
+      - "!origadmin/dependabot/**"
+#     paths-ignore:
+#       - 'dependabot/**'  # Adjust this path as needed
+#       - 'origadmin/dependabot/**'
 
 jobs:
   test:
-    if: github.actor != 'dependabot[bot]' && !(contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot'))
+    if: (contains(github.event.comment.body, '#test') || contains(github.event.comment.body, '#release')) &&
+      github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Log reason
+      - name: Log information about the pull request
         run: |
+          echo "Comment: ${{ github.event.comment.body }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Pull request merged: ${{ github.event.pull_request.merged }}"
           echo "Actor: ${{ github.actor }}"
           echo "PR Title: ${{ github.event.pull_request.title }}"
           echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
@@ -54,7 +54,8 @@ jobs:
 
   tagging:
     needs: [ test ]
-    if: success() && github.actor != 'dependabot[bot]' && !(contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot'))
+    if: success() && contains(github.event.comment.body, '#release') &&
+      github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
