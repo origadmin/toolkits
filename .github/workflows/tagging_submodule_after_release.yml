@@ -8,8 +8,11 @@ on:
       - main
     tags:
       - "v*.*.*"
+    paths-ignore:
+      - ' dependabot/**'  # Adjust this path as needed      
 jobs:
   tag_push:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
