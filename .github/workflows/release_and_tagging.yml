@@ -1,62 +1,20 @@
 name: Auto Tagging And Release After Tests
 
 on:
+  release:
+    types: [ created ]
   push:
     branches:
       - "main"
       - "!dependabot/**"
       - "!origadmin/dependabot/**"
-  #     paths-ignore:
-  #       - 'dependabot/**'  # Adjust this path as needed
-  #       - 'origadmin/dependabot/**'
-  pull_request:
-    types: [ opened, synchronize, reopened ]
-    branches:
-      - main
+    #     paths-ignore:
+    #       - 'dependabot/**'  # Adjust this path as needed
+    #       - 'origadmin/dependabot/**'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log information about the push
-        run: |
-          echo "Actor: ${{ github.actor }}"          
-          echo "Event name: ${{ github.event_name }}"          
-          echo "Event Ref: ${{ github.event.ref }}"
-          echo "Event Commit Message: ${{ github.event.commits.*.message }}"
-          for commit in "${{ github.event.commits }}"; do
-            echo "Event Commit Message: $commit"
-          done
-      - name: Check for dependencies label
-        id: labels
-        run: |
-          dependencies=false
-          for label in "${{ github.event.pull_request.labels.*.name }}"; do
-            echo "Label: $label" 
-            if [ "$label" == "dependencies" ]; then
-              dependencies=true
-              break
-            fi
-          done
-          echo "dependencies=$dependencies" >> $GITHUB_OUTPUT
-          echo "Dependencies: $dependencies"
-      - name: Checkout code
-        uses: actions/checkout@v4.2.0
-        with:
-          ref: main
-          fetch-depth: 0 # Fetch all history
-      - name: Set up Go
-        uses: actions/setup-go@v5.0.2
-        with:
-          go-version: stable
-      - name: Run tests
-        run: |
-          go test -v ./...
-
   tagging:
-    needs: [ test ]
-    if: success() && contains(github.event.comment.body, '#release') &&
-      github.event_name == 'push' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    if: github.actor != 'dependabot[bot]' && github.repository == 'owner/repo'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -68,13 +26,11 @@ jobs:
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
-
       - name: Get latest release
         id: get_latest_release
         run: |
           LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ env.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
           echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_OUTPUT
-
       - name: Determine next version
         id: determine_next_version
         run: |
@@ -85,7 +41,6 @@ jobs:
           echo "HEAD_TAG=$HEAD_TAG" >> $GITHUB_OUTPUT
           echo "NEXT_TAG=$NEXT_TAG"
           echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
-
       - name: Generate changelog
         id: generate_changelog
         run: |
@@ -102,7 +57,6 @@ jobs:
             # CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an")
             git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an" >> changelog.txt
           fi
-
       - name: Create release
         if: ${{ !steps.determine_next_version.outputs.HEAD_TAG }}
         uses: softprops/action-gh-release@v2.0.8
@@ -121,3 +75,16 @@ jobs:
       #          body_path: changelog.txt
       #          draft: false
       #          prerelease: false
+      - name: Run tag script
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          chmod +x ./.github/scripts/tag.sh
+          ./.github/scripts/tag.sh
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git push origin --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
