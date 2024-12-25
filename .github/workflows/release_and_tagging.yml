@@ -26,7 +26,7 @@ jobs:
           echo "Event Commit Message: ${{ github.event.commits.*.message }}"
           for message in "${{ github.event.commits.*.message }}"; do
             echo "Event Commit Message: $message"
-          fi          
+          done          
           echo "Event Comment Body: ${{ github.event.comment.body }}"
           echo "Event Contains #release: ${{ contains(github.event.comment.body, '#release') }}"
           echo "Pull request merged: ${{ github.event.pull_request.merged }}"
