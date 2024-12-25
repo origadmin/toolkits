@@ -16,6 +16,7 @@ on:
 
 jobs:
   test:
+    if: github.actor != 'dependabot[bot]' && github.repository == 'owner/repo'
     runs-on: ubuntu-latest
     steps:
       - name: Log information about the push

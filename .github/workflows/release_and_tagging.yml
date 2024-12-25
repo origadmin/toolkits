@@ -3,9 +3,18 @@ name: Auto Tagging And Release After Tests
 on:
   release:
     types: [ created ]
+  push:
+    branches:
+      - "main"
+      - "!dependabot/**"
+      - "!origadmin/dependabot/**"
+    #     paths-ignore:
+    #       - 'dependabot/**'  # Adjust this path as needed
+    #       - 'origadmin/dependabot/**'
 
 jobs:
   tagging:
+    if: github.actor != 'dependabot[bot]' && github.repository == 'owner/repo'
     runs-on: ubuntu-latest
     permissions:
       contents: write
