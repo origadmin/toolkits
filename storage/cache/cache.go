@@ -35,4 +35,7 @@ type Cache interface {
 
 	// Close closes the cache.
 	Close(ctx context.Context) error
+
+	// Clear clears the cache.
+	Clear(ctx context.Context) error
 }
