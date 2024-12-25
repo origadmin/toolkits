@@ -23,13 +23,16 @@ type Cache interface {
 
 	// Exists checks if a value exists for the given key.
 	// It returns an error if the key is not found.
-	Exists(ctx context.Context, key string) error
+	Exists(ctx context.Context, key string) (bool, error)
 
 	// Set sets the value for the given key.
 	// It returns an error if the operation fails.
-	Set(ctx context.Context, key string, value string, expiration ...time.Duration) error
+	Set(ctx context.Context, key string, value string, exp ...time.Duration) error
 
 	// Delete deletes the value associated with the given key.
 	// It returns an error if the operation fails.
 	Delete(ctx context.Context, key string) error
+
+	// Close closes the cache.
+	Close(ctx context.Context) error
 }
