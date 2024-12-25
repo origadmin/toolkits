@@ -9,7 +9,8 @@ on:
     tags:
       - "v*.*.*"
     paths-ignore:
-      - ' dependabot/**'  # Adjust this path as needed      
+      - 'dependabot/**'  # Adjust this path as needed
+      - 'origadmin/dependabot/**'  # Adjust this path as needed
 jobs:
   tag_push:
     if: github.actor != 'dependabot[bot]'
