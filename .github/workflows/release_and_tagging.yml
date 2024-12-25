@@ -1,8 +1,7 @@
 name: Auto Tagging And Release After Tests
 
 on:
-  pull_request:
-    types: [ closed ]
+  push:
     branches:
       - "main"
       - "!dependabot/**"
@@ -10,19 +9,24 @@ on:
 #     paths-ignore:
 #       - 'dependabot/**'  # Adjust this path as needed
 #       - 'origadmin/dependabot/**'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - main
 
 jobs:
   test:
-    if: (contains(github.event.comment.body, '#test') || contains(github.event.comment.body, '#release')) &&
-      github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Log information about the pull request
         run: |
-          echo "Comment: ${{ github.event.comment.body }}"
-          echo "Event name: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"          
+          echo "Event name: ${{ github.event_name }}"          
+          echo "Event Ref: ${{ github.event.ref }}"
+          echo "Event Commit Message: ${{ github.event.commits.*.message }}"
+          echo "Event Comment Body: ${{ github.event.comment.body }}"
+          echo "Event Contains #release: ${{ contains(github.event.comment.body, '#release') }}"
           echo "Pull request merged: ${{ github.event.pull_request.merged }}"
-          echo "Actor: ${{ github.actor }}"
           echo "PR Title: ${{ github.event.pull_request.title }}"
           echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
           echo "Dependabot PR: ${{ contains(github.event.pull_request.title, 'dependabot') }}"
@@ -55,7 +59,7 @@ jobs:
   tagging:
     needs: [ test ]
     if: success() && contains(github.event.comment.body, '#release') &&
-      github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+      github.event_name == 'push' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
