@@ -21,9 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Log reason
-        if: github.actor == 'dependabot[bot]' || contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot')
         run: |
-          echo "Running job because it was triggered by Dependabot or the PR title contains 'bump' or 'dependabot'."
+          echo "Actor: ${{ github.actor }}"
+          echo "Bump PR: ${{ contains(github.event.pull_request.title, 'bump') }}"
+          echo "Dependabot PR: ${{ contains(github.event.pull_request.title, 'dependabot') }}"
       - name: Checkout code
         uses: actions/checkout@v4.2.0
         with:
