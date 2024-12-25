@@ -4,16 +4,14 @@ on:
   release:
     types: [ created ]
   push:
-    branches:
-      - main
     tags:
       - "v*.*.*"
-    paths-ignore:
+    branches-ignore:
       - 'dependabot/**'  # Adjust this path as needed
       - 'origadmin/dependabot/**'  # Adjust this path as needed
+
 jobs:
   tag_push:
-    if: github.actor != 'dependabot[bot]' && !(contains(github.event.pull_request.title, 'bump') || contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -32,7 +30,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           chmod +x ./.github/scripts/tag.sh
           ./.github/scripts/tag.sh
-
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
