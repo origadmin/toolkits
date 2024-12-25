@@ -6,18 +6,18 @@ on:
       - main
     paths-ignore:
       - 'dependabot/**'  # Adjust this path as needed
-      - 'origadmin/dependabot/**'  # Adjust this path as needed
+      - 'origadmin/dependabot/**'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - main
     paths-ignore:
       - 'dependabot/**'  # Adjust this path as needed
-      - 'origadmin/dependabot/**'  # Adjust this path as needed
+      - 'origadmin/dependabot/**'
 
 jobs:
   test:
-    if: github.actor != 'dependabot[bot]'
+    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.title, 'bump') && !contains(github.event.pull_request.title, 'dependabot')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
 
   tagging:
     needs: [ test ]
-    if: success() && github.actor!= 'dependabot[bot]'
+    if: success() && github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.title, 'bump') && !contains(github.event.pull_request.title, 'dependabot')
     runs-on: ubuntu-latest
     permissions:
       contents: write
