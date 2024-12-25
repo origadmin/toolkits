@@ -13,7 +13,7 @@ on:
       - 'origadmin/dependabot/**'  # Adjust this path as needed
 jobs:
   tag_push:
-    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.title, 'bump') && !contains(github.event.pull_request.title, 'dependabot')
+    if: github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && (!contains(github.event.pull_request.title, 'bump') || !contains(github.event.pull_request.title, 'dependabot'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
