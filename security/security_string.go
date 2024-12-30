@@ -9,20 +9,22 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[ContextTypeContext-0]
-	_ = x[ContextTypeHeader-1]
-	_ = x[ContextTypeMetadata-2]
-	_ = x[ContextTypeQuery-3]
-	_ = x[ContextTypeCookie-4]
-	_ = x[ContextTypeParam-5]
-	_ = x[ContextTypeForm-6]
-	_ = x[ContextTypeBody-7]
-	_ = x[ContextTypeSession-8]
-	_ = x[ContextTypeUnknown-9]
+	_ = x[ContextTypeClientHeader-1]
+	_ = x[ContextTypeServerHeader-2]
+	_ = x[ContextTypeMetadataClient-3]
+	_ = x[ContextTypeMetadata-4]
+	_ = x[ContextTypeQuery-5]
+	_ = x[ContextTypeCookie-6]
+	_ = x[ContextTypeParam-7]
+	_ = x[ContextTypeForm-8]
+	_ = x[ContextTypeBody-9]
+	_ = x[ContextTypeSession-10]
+	_ = x[ContextTypeUnknown-11]
 }
 
-const _TokenType_name = "ContextHeaderMetadataQueryCookieParamFormBodySessionUnknown"
+const _TokenType_name = "ContextClientHeaderServerHeaderMetadataClientMetadataQueryCookieParamFormBodySessionUnknown"
 
-var _TokenType_index = [...]uint8{0, 7, 13, 21, 26, 32, 37, 41, 45, 52, 59}
+var _TokenType_index = [...]uint8{0, 7, 19, 31, 45, 53, 58, 64, 69, 73, 77, 84, 91}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

@@ -9,7 +9,6 @@ package security
 
 // TokenType represents the type of token.
 //
-//go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=TokenType -trimprefix=ContextType -output=security_string
 //go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=TokenType -trimprefix=ContextType -output=security_string.go
 type TokenType int
 
