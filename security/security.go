@@ -17,8 +17,12 @@ type TokenType int
 const (
 	// ContextTypeContext represents the context type for the context.
 	ContextTypeContext TokenType = iota
-	// ContextTypeHeader represents the context type for the header.
-	ContextTypeHeader
+	// ContextTypeClientHeader represents the context type for the header.
+	ContextTypeClientHeader
+	// ContextTypeServerHeader represents the context type for the header.
+	ContextTypeServerHeader
+	// ContextTypeMetadataClient represents the context type for the metadata.
+	ContextTypeMetadataClient
 	// ContextTypeMetadata represents the context type for the metadata.
 	ContextTypeMetadata
 	// ContextTypeQuery represents the context type for the query.
