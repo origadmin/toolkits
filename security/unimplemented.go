@@ -5,10 +5,6 @@
 // Package security implements the functions, types, and interfaces for the module.
 package security
 
-import (
-	"time"
-)
-
 // UnimplementedClaims is a struct that implements the Claims interface
 type UnimplementedClaims struct {
 }
@@ -33,22 +29,22 @@ func (u UnimplementedClaims) GetAudience() []string {
 }
 
 // GetExpiration returns the current time
-func (u UnimplementedClaims) GetExpiration() time.Time {
-	return time.Now()
+func (u UnimplementedClaims) GetExpiration() int64 {
+	return 0
 }
 
 // GetNotBefore returns the current time
-func (u UnimplementedClaims) GetNotBefore() time.Time {
-	return time.Now()
+func (u UnimplementedClaims) GetNotBefore() int64 {
+	return 0
 }
 
 // GetIssuedAt returns the current time
-func (u UnimplementedClaims) GetIssuedAt() time.Time {
-	return time.Now()
+func (u UnimplementedClaims) GetIssuedAt() int64 {
+	return 0
 }
 
-// GetJwtID returns an empty string
-func (u UnimplementedClaims) GetJwtID() string {
+// GetID returns an empty string
+func (u UnimplementedClaims) GetID() string {
 	return ""
 }
 
@@ -57,38 +53,32 @@ func (u UnimplementedClaims) GetScopes() map[string]bool {
 	return make(map[string]bool)
 }
 
-// GetExtra returns an empty map
-func (u UnimplementedClaims) GetExtra() map[string]string {
-	return make(map[string]string)
+type UnimplementedPolicy struct {
 }
 
-type UnimplementedUserClaims struct {
-}
-
-func (u UnimplementedUserClaims) IsRoot() bool {
-	return false
-}
-
-func (u UnimplementedUserClaims) GetSubject() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetObject() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetAction() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetDomain() string {
-	return ""
-}
-
-func (u UnimplementedUserClaims) GetClaims() Claims {
-	return &UnimplementedClaims{}
-}
-
-func (u UnimplementedUserClaims) GetExtra() map[string]string {
+func (u UnimplementedPolicy) GetRoles() []string {
 	return nil
 }
+
+func (u UnimplementedPolicy) GetPermissions() []string {
+	return nil
+}
+
+func (u UnimplementedPolicy) GetSubject() string {
+	return ""
+}
+
+func (u UnimplementedPolicy) GetObject() string {
+	return ""
+}
+
+func (u UnimplementedPolicy) GetAction() string {
+	return ""
+}
+
+func (u UnimplementedPolicy) GetDomain() string {
+	return ""
+}
+
+var _ Claims = (*UnimplementedClaims)(nil)
+var _ Policy = (*UnimplementedPolicy)(nil)
