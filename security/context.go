@@ -37,13 +37,32 @@ func ClaimsFromContext(ctx context.Context) Claims {
 
 type userClaimsCtx struct{}
 
-func NewUserClaimsContext(ctx context.Context, claims UserClaims) context.Context {
-	return context.WithValue(ctx, userClaimsCtx{}, claims)
+func NewPolicyContext(ctx context.Context, policy Policy) context.Context {
+	return context.WithValue(ctx, userClaimsCtx{}, policy)
 }
 
-func UserClaimsFromContext(ctx context.Context) UserClaims {
-	if claims, ok := ctx.Value(userClaimsCtx{}).(UserClaims); ok {
+func PolicyFromContext(ctx context.Context) Policy {
+	if claims, ok := ctx.Value(userClaimsCtx{}).(Policy); ok {
 		return claims
 	}
 	return nil
+}
+
+// rootCtxKey is a type used to store a boolean value in the context.
+type rootCtxKey struct{}
+
+// WithRootContext returns a new context with the rootCtxKey set to true.
+func WithRootContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, rootCtxKey{}, true)
+}
+
+// ContextIsRoot checks if the context has the rootCtxKey set to true.
+func ContextIsRoot(ctx context.Context) bool {
+	// Try to get the value from the context.
+	if _, ok := ctx.Value(rootCtxKey{}).(bool); ok {
+		// If the value is present and is a boolean, return true.
+		return true
+	}
+	// Otherwise, return false.
+	return false
 }

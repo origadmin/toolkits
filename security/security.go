@@ -54,3 +54,9 @@ const (
 	// HeaderOrigin is the name of the origin header.
 	HeaderOrigin = "Origin"
 )
+
+// Security represents the security interface.
+type Security interface {
+	Authenticator
+	Authorizer
+}
