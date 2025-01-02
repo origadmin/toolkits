@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package linkFilter for Toolkits
+// Package filter for Toolkits
 package filter
 
 import (

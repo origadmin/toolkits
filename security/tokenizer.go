@@ -12,10 +12,12 @@ import (
 type Tokenizer interface {
 	// CreateClaims creates a new identity claims. bool true is for refresh token
 	CreateClaims(context.Context, string) (Claims, error)
-	// Validate validates if a token is valid.
-	Validate(context.Context, string) (bool, error)
 	// CreateToken inject user claims into token string.
 	CreateToken(context.Context, Claims) (string, error)
+	// ParseClaims parses a token string and returns the Claims.
+	ParseClaims(context.Context, string) (Claims, error)
+	// Validate validates if a token is valid.
+	Validate(context.Context, string) (bool, error)
 	// DestroyToken invalidate a token by removing it from the token store.
 	DestroyToken(context.Context, string) error
 }

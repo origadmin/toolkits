@@ -25,12 +25,14 @@ type Filter interface {
 type Setting = func(*Option)
 
 type Option struct {
-	Delimiter string
-	SkipAny   bool
-	DenyOff   bool
-	AllowOff  bool
-	Allows    []string
-	Denies    []string
+	Delimiter         string
+	SkipAny           bool
+	DenyOff           bool
+	AllowOff          bool
+	Allows            []string
+	Denies            []string
+	ExpectedElements  uint
+	FalsePositiveRate float64
 }
 
 func WithDelimiter(delimiter string) Setting {
