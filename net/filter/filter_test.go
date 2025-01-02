@@ -252,3 +252,32 @@ func BenchmarkNewStringFilter(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkFilterVsStringFilter(b *testing.B) {
+	// Create a slice of allows and denies
+	allows := make([]string, 100000)
+	denies := make([]string, 100000)
+
+	for i := 0; i < 100000; i++ {
+		allows[i] = fmt.Sprintf("GET:/home/%d/id", i)
+		denies[i] = fmt.Sprintf("/home/%d/id", i+100)
+	}
+
+	// Create a filter and a string filter
+	f := NewFilter(WithAllows(allows...), WithDenies(denies...))
+	sf := NewStringFilter(WithAllows(allows...), WithDenies(denies...))
+
+	// Benchmark the filter
+	b.Run("Filter", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f.Allowed("GET", "/home/1/id")
+		}
+	})
+
+	// Benchmark the string filter
+	b.Run("StringFilter", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			sf.Allowed("GET", "/home/1/id")
+		}
+	})
+}
