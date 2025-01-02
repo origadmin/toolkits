@@ -6,6 +6,7 @@ package filter
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"testing"
 )
@@ -310,12 +311,24 @@ func BenchmarkNewStringFilter(b *testing.B) {
 	}
 }
 
+// BenchmarkFilterVsStringFilter benchmarks the performance of the filter and string filter.
+// goos: windows
+// goarch: amd64
+// pkg: github.com/origadmin/toolkits/net/filter
+// cpu: 12th Gen Intel(R) Core(TM) i7-12700H
+// BenchmarkFilterVsStringFilter
+// BenchmarkFilterVsStringFilter/Filter
+// BenchmarkFilterVsStringFilter/Filter-20         	  500352	      2234 ns/op
+// BenchmarkFilterVsStringFilter/StringFilter
+// BenchmarkFilterVsStringFilter/StringFilter-20   	11157154	       106.8 ns/op
+// BenchmarkFilterVsStringFilter/BloomFilter
+// BenchmarkFilterVsStringFilter/BloomFilter-20    	 9271764	       134.2 ns/op
 func BenchmarkFilterVsStringFilter(b *testing.B) {
 	// Create a slice of allows and denies
-	allows := make([]string, 100000)
-	denies := make([]string, 100000)
+	allows := make([]string, 1000)
+	denies := make([]string, 1000)
 
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 1000; i++ {
 		allows[i] = fmt.Sprintf("GET:/home/%d/id", i)
 		denies[i] = fmt.Sprintf("/home/%d/id", i+100)
 	}
@@ -324,24 +337,24 @@ func BenchmarkFilterVsStringFilter(b *testing.B) {
 	f := NewFilter(WithAllows(allows...), WithDenies(denies...))
 	sf := NewStringFilter(WithAllows(allows...), WithDenies(denies...))
 	bf := NewBloomFilter(WithAllows(allows...), WithDenies(denies...))
-
+	b.ResetTimer()
 	// Benchmark the filter
 	b.Run("Filter", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			f.Allowed("GET", "/home/1/id")
+			f.Allowed("GET", fmt.Sprintf("/home/%d/id", rand.Intn(1000)))
 		}
 	})
 
 	// Benchmark the string filter
 	b.Run("StringFilter", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			sf.Allowed("GET", "/home/1/id")
+			sf.Allowed("GET", fmt.Sprintf("/home/%d/id", rand.Intn(1000)))
 		}
 	})
 
 	b.Run("BloomFilter", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			bf.Allowed("GET", "/home/1/id")
+			bf.Allowed("GET", fmt.Sprintf("/home/%d/id", rand.Intn(1000)))
 		}
 	})
 
