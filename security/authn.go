@@ -16,4 +16,8 @@ type Authenticator interface {
 	// AuthenticateContext returns a nil error and the AuthClaims info (if available).
 	// if the subject is authenticated or a non-nil error with an appropriate error cause otherwise.
 	AuthenticateContext(context.Context, TokenType) (Claims, error)
+	// DestroyToken invalidate a token by removing it from the token store.
+	DestroyToken(context.Context, string) error
+	// DestroyRefreshToken by removing from the token store to invalidate a refresh token
+	DestroyRefreshToken(context.Context, string) error
 }
