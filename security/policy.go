@@ -71,5 +71,71 @@ func (r RegisteredPolicy) GetPermissions() []string {
 	return r.Permission
 }
 
-// Policy is an interface that RegisteredPolicy satisfies.
+// ExtraPolicy represents an extended policy that includes additional metadata.
+type ExtraPolicy struct {
+	// Policy is the underlying-registered policy.
+	Policy Policy
+	// Extra is the additional metadata associated with the policy.
+	Extra Extra
+}
+
+// GetSubject returns the subject of the policy.
+func (e ExtraPolicy) GetSubject() string {
+	// Return the subject from the underlying registered policy.
+	return e.Policy.GetSubject()
+}
+
+// GetObject returns the object of the policy.
+func (e ExtraPolicy) GetObject() string {
+	// Return the object from the underlying registered policy.
+	return e.Policy.GetObject()
+}
+
+// GetAction returns the action of the policy.
+func (e ExtraPolicy) GetAction() string {
+	// Return the action from the underlying registered policy.
+	return e.Policy.GetAction()
+}
+
+// GetDomain returns the domain of the policy.
+func (e ExtraPolicy) GetDomain() string {
+	// Return the domain from the underlying registered policy.
+	return e.Policy.GetDomain()
+}
+
+// GetRoles returns the roles associated with the policy.
+func (e ExtraPolicy) GetRoles() []string {
+	// Return the roles from the underlying registered policy.
+	return e.Policy.GetRoles()
+}
+
+// GetPermissions returns the permissions associated with the policy.
+func (e ExtraPolicy) GetPermissions() []string {
+	// Return the permissions from the underlying registered policy.
+	return e.Policy.GetPermissions()
+}
+
+func (e ExtraPolicy) GetExtra() map[string]string {
+	// Assuming Extra is a type that can be converted to a map[string]string
+	// If not, you need to implement the conversion logic here
+	extraMap := make(map[string]string)
+	// Add logic to populate extraMap from e.Extra
+	return extraMap
+}
+
+func (e ExtraPolicy) Get(key string) (string, bool) {
+	// Assuming Extra is a type that has a Get method
+	// If not, you need to implement the logic to retrieve the value from e.Extra
+	value, ok := e.Extra.Get(key)
+	return value, ok
+}
+
+func (e ExtraPolicy) Set(key string, value string) {
+	// Assuming Extra is a type that has a Set method
+	// If not, you need to implement the logic to set the value in e.Extra
+	e.Extra.Set(key, value)
+}
+
 var _ Policy = (*RegisteredPolicy)(nil)
+var _ Policy = (*ExtraPolicy)(nil)
+var _ Extra = (*ExtraPolicy)(nil)

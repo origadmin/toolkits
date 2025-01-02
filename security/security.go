@@ -7,10 +7,6 @@
 // Package security is a package that provides security-related functions and types.
 package security
 
-import (
-	"context"
-)
-
 // TokenType represents the type of token.
 //
 //go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=TokenType -trimprefix=ContextType -output=security_string.go
@@ -63,46 +59,4 @@ const (
 type Security interface {
 	Authenticator
 	Authorizer
-}
-
-type security struct {
-	authenticator Authenticator
-	authorizer    Authorizer
-}
-
-func (s security) Authenticate(ctx context.Context, s2 string) (Claims, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s security) AuthenticateContext(ctx context.Context, tokenType TokenType) (Claims, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s security) SetPolicies(ctx context.Context, policies map[string]any, roles map[string]any) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s security) Authorized(ctx context.Context, claims Claims, object string, action string) (bool, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s security) AuthorizedWithDomain(ctx context.Context, claims Claims, domain string, object string, action string) (bool, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s security) xxxxAuthorized(ctx context.Context, policy Policy) (bool, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewSecurity(authenticator Authenticator, authorizer Authorizer) Security {
-	return &security{
-		authenticator: authenticator,
-		authorizer:    authorizer,
-	}
 }

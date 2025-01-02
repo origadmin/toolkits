@@ -98,5 +98,80 @@ func (r RegisteredClaims) GetScopes() map[string]bool {
 	return r.Scopes
 }
 
-// Assert that RegisteredClaims implements the Claims interface.
+// ExtraClaims represents a claims object that contains both registered claims and extra claims.
+type ExtraClaims struct {
+	// Claims is the registered claims part of the ExtraClaims object.
+	Claims Claims
+	// Extra is the extra claims part of the ExtraClaims object.
+	Extra Extra
+}
+
+// GetSubject returns the subject of the claims.
+func (e ExtraClaims) GetSubject() string {
+	// Delegate to the Claims field to get the subject.
+	return e.Claims.GetSubject()
+}
+
+// GetIssuer returns the issuer of the claims.
+func (e ExtraClaims) GetIssuer() string {
+	// Delegate to the Claims field to get the issuer.
+	return e.Claims.GetIssuer()
+}
+
+// GetAudience returns the audience of the claims.
+func (e ExtraClaims) GetAudience() []string {
+	// Delegate to the Claims field to get the audience.
+	return e.Claims.GetAudience()
+}
+
+// GetExpiration returns the expiration time of the claims.
+func (e ExtraClaims) GetExpiration() int64 {
+	// Delegate to the Claims field to get the expiration time.
+	return e.Claims.GetExpiration()
+}
+
+// GetNotBefore returns the time before which the claims cannot be accepted.
+func (e ExtraClaims) GetNotBefore() int64 {
+	// Delegate to the Claims field to get the not-before time.
+	return e.Claims.GetNotBefore()
+}
+
+// GetIssuedAt returns the time at which the claims were issued.
+func (e ExtraClaims) GetIssuedAt() int64 {
+	// Delegate to the Claims field to get the issued-at time.
+	return e.Claims.GetIssuedAt()
+}
+
+// GetID returns the unique identifier for the claims.
+func (e ExtraClaims) GetID() string {
+	// Delegate to the Claims field to get the ID.
+	return e.Claims.GetID()
+}
+
+// GetScopes returns the scopes associated with the claims.
+func (e ExtraClaims) GetScopes() map[string]bool {
+	// Delegate to the Claims field to get the scopes.
+	return e.Claims.GetScopes()
+}
+
+// GetExtra returns the extra claims as a map of strings.
+func (e ExtraClaims) GetExtra() map[string]string {
+	// Delegate to the Extra field to get the extra claims.
+	return e.Extra.GetExtra()
+}
+
+// Get returns the value of the given key from the extra claims.
+func (e ExtraClaims) Get(key string) (string, bool) {
+	// Delegate to the Extra field to get the value of the given key.
+	return e.Extra.Get(key)
+}
+
+// Set sets the value of the given key in the extra claims.
+func (e ExtraClaims) Set(key string, value string) {
+	// Delegate to the Extra field to set the value of the given key.
+	e.Extra.Set(key, value)
+}
+
 var _ Claims = (*RegisteredClaims)(nil)
+var _ Claims = (*ExtraClaims)(nil)
+var _ Extra = (*ExtraClaims)(nil)

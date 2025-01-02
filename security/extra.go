@@ -5,12 +5,7 @@
 // Package security implements the functions, types, and interfaces for the module.
 package security
 
-// ExtraData is an interface that defines methods for handling extra data associated with the security claims
-type ExtraData interface {
-	// GetClaims returns the Claims object associated with the extra data,if Claims exists
-	GetClaims() (Claims, bool)
-	// GetPolicy returns the Policy object associated with the extra data,if Policy exists
-	GetPolicy() (Policy, bool)
+type Extra interface {
 	// GetExtra returns the extra data as a map of strings
 	GetExtra() map[string]string
 	// Get returns the value associated with the given key
@@ -19,10 +14,46 @@ type ExtraData interface {
 	Set(key string, value string)
 }
 
+// ExtraData is an interface that defines methods for handling extra data associated with the security claims
+type ExtraData interface {
+	Extra
+	// GetClaims returns the Claims object associated with the extra data,if Claims exists
+	GetClaims() (Claims, bool)
+	// HasClaims returns true if the extra data contains a Claims object
+	HasClaims() bool
+	// GetPolicy returns the Policy object associated with the extra data,if Policy exists
+	GetPolicy() (Policy, bool)
+	// HasPolicy returns true if the extra data contains a Policy object
+	HasPolicy() bool
+}
+
+type extra map[string]string
+
+func (e extra) GetExtra() map[string]string {
+	return e
+}
+
+func (e extra) Get(key string) (string, bool) {
+	ev, ok := e[key]
+	return ev, ok
+}
+
+func (e extra) Set(key string, value string) {
+	e[key] = value
+}
+
 type extraData struct {
-	Claims
-	Policy
-	Extra map[string]string
+	Claims Claims
+	Policy Policy
+	Extra  Extra
+}
+
+func (e extraData) HasClaims() bool {
+	return e.Claims != nil
+}
+
+func (e extraData) HasPolicy() bool {
+	return e.Policy != nil
 }
 
 func (e extraData) GetClaims() (Claims, bool) {
@@ -34,36 +65,61 @@ func (e extraData) GetPolicy() (Policy, bool) {
 }
 
 func (e extraData) GetExtra() map[string]string {
-	return e.Extra
+	if e.Extra == nil {
+		return make(map[string]string)
+	}
+	return e.Extra.GetExtra()
 }
 
 func (e extraData) Get(key string) (string, bool) {
-	return e.Extra[key], true
+	if e.Extra == nil {
+		return "", false
+	}
+	return e.Extra.Get(key)
 }
 
 func (e extraData) Set(key string, value string) {
-	e.Extra[key] = value
+	if e.Extra == nil {
+		e.Extra = &extra{}
+	}
+	e.Extra.Set(key, value)
 }
 
-// ExtraDataObject retrieves the ExtraData object from a Policy if it implements the ExtraData interface
-func ExtraDataObject(extra any) (ExtraData, bool) {
-	if ex, ok := extra.(ExtraData); ok {
+// ExtraObject retrieves the ExtraData object from a Policy if it implements the ExtraData interface
+func ExtraObject(extra any) (Extra, bool) {
+	if ex, ok := extra.(Extra); ok {
 		return ex, true
 	}
 	return nil, false
 }
 
-func ClaimsWithExtra(claims Claims, extra map[string]string) Claims {
+func DataWithExtra(claims Claims, policy Policy, ext map[string]string) ExtraData {
 	return &extraData{
 		Claims: claims,
-		Extra:  extra,
+		Policy: policy,
+		Extra:  (extra)(ext),
 	}
 }
 
-func PolicyWithExtra(policy Policy, extra map[string]string) Policy {
-	return &extraData{
+func ClaimsWithExtra(claims Claims, ext map[string]string) Claims {
+	if v, ok := claims.(ExtraClaims); ok {
+		v.Extra = (extra)(ext)
+		return v
+	}
+	return &ExtraClaims{
+		Claims: claims,
+		Extra:  (extra)(ext),
+	}
+}
+
+func PolicyWithExtra(policy Policy, ext map[string]string) Policy {
+	if v, ok := policy.(ExtraPolicy); ok {
+		v.Extra = (extra)(ext)
+		return v
+	}
+	return &ExtraPolicy{
 		Policy: policy,
-		Extra:  extra,
+		Extra:  (extra)(ext),
 	}
 }
 
