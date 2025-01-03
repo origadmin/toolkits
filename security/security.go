@@ -7,37 +7,41 @@
 // Package security is a package that provides security-related functions and types.
 package security
 
-// TokenType represents the type of token.
+// TokenSource type is defined to represent the origin of the token.
 //
-//go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=TokenType -trimprefix=ContextType -output=security_string.go
-type TokenType int
+//go:generate go run -mod=mod golang.org/x/tools/cmd/stringer@latest -type=TokenSource -trimprefix=TokenSource -output=security_string.go
+type TokenSource int
 
-// ContextType constants represent the different types of context.
+// TokenSource constants represent the different types of context.
 const (
-	// ContextTypeContext represents the context type for the context.
-	ContextTypeContext TokenType = iota
-	// ContextTypeClientHeader represents the context type for the header.
-	ContextTypeClientHeader
-	// ContextTypeServerHeader represents the context type for the header.
-	ContextTypeServerHeader
-	// ContextTypeMetadataClient represents the context type for the metadata.
-	ContextTypeMetadataClient
-	// ContextTypeMetadata represents the context type for the metadata.
-	ContextTypeMetadata
-	// ContextTypeQuery represents the context type for the query.
-	ContextTypeQuery
-	// ContextTypeCookie represents the context type for the cookie.
-	ContextTypeCookie
-	// ContextTypeParam represents the context type for the parameter.
-	ContextTypeParam
-	// ContextTypeForm represents the context type for the form.
-	ContextTypeForm
-	// ContextTypeBody represents the context type for the body.
-	ContextTypeBody
-	// ContextTypeSession represents the context type for the session.
-	ContextTypeSession
-	// ContextTypeUnknown represents an unknown context type.
-	ContextTypeUnknown
+	// TokenSourceContext represents the token source for the context.
+	TokenSourceContext TokenSource = iota
+	// TokenSourceHeader represents the token source for the header, if you don't know server or client
+	TokenSourceHeader
+	// TokenSourceClientHeader represents the token source for the header.
+	TokenSourceClientHeader
+	// TokenSourceServerHeader represents the token source for the header.
+	TokenSourceServerHeader
+	// TokenSourceMetadata represents the token source for the metadata, if you don't know server or client.
+	TokenSourceMetadata
+	// TokenSourceMetadataClient represents the token source for the metadata.
+	TokenSourceMetadataClient
+	// TokenSourceMetadataServer represents the token source for the metadata.
+	TokenSourceMetadataServer
+	// TokenSourceQueryParameter represents the token source for the query.
+	TokenSourceQueryParameter
+	// TokenSourceCookie represents the token source for the cookie.
+	TokenSourceCookie
+	// TokenSourceURLParameter represents the token source for the parameter.
+	TokenSourceURLParameter
+	// TokenSourceForm represents the token source for the form.
+	TokenSourceForm
+	// TokenSourceRequestBody represents the token source for the body.
+	TokenSourceRequestBody
+	// TokenSourceSession represents the token source for the session.
+	TokenSourceSession
+	// TokenSourceUnknown represents an unknown token source.
+	TokenSourceUnknown
 )
 
 const (
