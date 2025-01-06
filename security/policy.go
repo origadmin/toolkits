@@ -33,12 +33,12 @@ type Policy interface {
 // RegisteredPolicy represents a registered policy in your system.
 // It contains information about the subject, object, action, domain, roles, and permissions.
 type RegisteredPolicy struct {
-	Subject    string   `json:"subject"`    // The subject of the policy.
-	Object     string   `json:"object"`     // The object of the policy.
-	Action     string   `json:"action"`     // The action of the policy.
-	Domain     string   `json:"domain"`     // The domain of the policy.
-	Roles      []string `json:"roles"`      // The roles associated with the policy.
-	Permission []string `json:"permission"` // The permissions associated with the policy.
+	Subject     string   `json:"subject"`     // The subject of the policy.
+	Object      string   `json:"object"`      // The object of the policy.
+	Action      string   `json:"action"`      // The action of the policy.
+	Domain      string   `json:"domain"`      // The domain of the policy.
+	Roles       []string `json:"roles"`       // The roles associated with the policy.
+	Permissions []string `json:"permissions"` // The permissions associated with the policy.
 }
 
 // GetSubject returns the subject of the policy.
@@ -68,7 +68,7 @@ func (r RegisteredPolicy) GetRoles() []string {
 
 // GetPermissions returns the permissions associated with the policy.
 func (r RegisteredPolicy) GetPermissions() []string {
-	return r.Permission
+	return r.Permissions
 }
 
 // ExtraPolicy represents an extended policy that includes additional metadata.
