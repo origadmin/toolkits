@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/bytedance/sonic v1.12.8
+	github.com/bytedance/sonic v1.12.9
 	github.com/goexts/generic v0.1.6
 	github.com/json-iterator/go v1.1.12
 	gopkg.in/ini.v1 v1.67.0
