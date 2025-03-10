@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/bytedance/sonic v1.12.10
+	github.com/bytedance/sonic v1.13.1
 	github.com/goexts/generic v0.1.6
 	github.com/json-iterator/go v1.1.12
 	gopkg.in/ini.v1 v1.67.0
@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	github.com/bytedance/sonic/loader v0.2.2 // indirect
+	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
