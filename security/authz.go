@@ -38,7 +38,7 @@ type Authorizer interface {
 	// AuthorizedWithDomain checks if a user is authorized to perform an action within a specific domain.
 	// It takes a context, a UserClaims object, a domain, an object, and an action as input.
 	// It returns a boolean indicating whether the user is authorized and an error if the check fails.
-	AuthorizedWithDomain(ctx context.Context, policy Policy, domain string, object string, action string) (bool, error)
+	AuthorizedWithDomain(ctx context.Context, policy Policy, object string, action string, domain string) (bool, error)
 	// AuthorizedWithExtra checks if a user is authorized to perform an action within a specific domain.
 	// It takes a context, a UserClaims object, a domain, an object, and an action as input.
 	// It returns a boolean indicating whether the user is authorized and an error if the check fails.
