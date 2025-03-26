@@ -6,7 +6,6 @@
 package net
 
 import (
-	"log/slog"
 	"net"
 	"os"
 	"path/filepath"
@@ -17,6 +16,7 @@ import (
 // HostConfig defines the configuration for the host.
 type HostConfig struct {
 	envVar          string       // The name of the environment variable
+	patterns        []string     // Interface name patterns
 	cidrFilters     []*net.IPNet // Segment filters
 	fallbackToFirst bool         // Whether to roll back to the first NIC
 }
@@ -44,10 +44,17 @@ func WithCIDRFilters(cidrs []string) Option {
 	}
 }
 
+func WithInterfacePatterns(patterns []string) Option {
+	return func(c *HostConfig) {
+		c.patterns = patterns
+	}
+}
+
 type Option = func(*HostConfig)
 
 var defaultConfig = &HostConfig{
 	//cidrFilters:     []string{"192.168.0.0/16", "10.0.0.0/8"},
+	patterns:        []string{"eth*", "eno*", "wlan*"},
 	fallbackToFirst: true,
 }
 
@@ -102,16 +109,11 @@ func getValidIP(iface net.Interface) net.IP {
 }
 
 func getByCIDR(cidrFilters []*net.IPNet) string {
-	slog.Info("getByCIDR", "cidrFilters", cidrFilters)
 	interfaces, _ := net.Interfaces()
 	for _, iface := range interfaces {
-		addrs, _ := iface.Addrs()
-		slog.Info("getByCIDR", "i", addrs)
 		if ip := getValidIP(iface); ip != nil {
 			for _, filter := range cidrFilters {
-				slog.Info("getByCIDR", "filter", filter)
 				if filter.Contains(ip) {
-					slog.Info("getByCIDR", "ip", ip)
 					return ip.String()
 				}
 			}
@@ -125,9 +127,6 @@ func getByInterfacePattern(patterns []string) string {
 	for _, iface := range interfaces {
 		// Match the name of the interface（like: eth*, eno*, wlan*, etc）
 		for _, pattern := range patterns {
-			multicastAddrs, _ := iface.MulticastAddrs()
-			addrs, _ := iface.Addrs()
-			slog.Info("getByInterfacePattern", "i", iface, "ma", multicastAddrs, "addrs", addrs)
 			if matched, _ := filepath.Match(pattern, iface.Name); matched {
 				if ip := getValidIP(iface); ip != nil {
 					//return ip
@@ -160,6 +159,12 @@ func HostAddr(opts ...Option) string {
 
 	if len(cfg.cidrFilters) > 0 {
 		if ip := getByCIDR(cfg.cidrFilters); ip != "" {
+			return ip
+		}
+	}
+
+	if len(cfg.patterns) > 0 {
+		if ip := getByInterfacePattern(cfg.patterns); ip != "" {
 			return ip
 		}
 	}
