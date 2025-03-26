@@ -52,7 +52,7 @@ func WithInterfacePatterns(patterns []string) Option {
 
 type Option = func(*HostConfig)
 
-var defaultConfig = &HostConfig{
+var defaultConfig = HostConfig{
 	//cidrFilters:     []string{"192.168.0.0/16", "10.0.0.0/8"},
 	patterns:        []string{"eth*", "eno*", "wlan*"},
 	fallbackToFirst: true,
@@ -148,8 +148,7 @@ func getFirstAvailableIP() net.IP {
 }
 
 func HostAddr(opts ...Option) string {
-	cfg := *defaultConfig
-	settings.Apply(&cfg, opts)
+	cfg := settings.ApplyDefault(defaultConfig, opts)
 
 	if cfg.envVar != "" {
 		if ip := getFromEnv(cfg.envVar); ip != "" {

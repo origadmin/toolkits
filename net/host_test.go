@@ -12,7 +12,6 @@ func TestGetHostAddrFromEnvironmentVariable(t *testing.T) {
 	// Setup
 	const envVarName = "TEST_HOST_IP"
 	const expectedIP = "192.168.1.100"
-
 	os.Setenv(envVarName, expectedIP)
 
 	// Call function with environment variable option
