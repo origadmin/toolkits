@@ -53,6 +53,8 @@ func ServiceDiscoveryEndpoint(endpoint, scheme, host, addr string) string {
 	return endpoint
 }
 
+// ServiceEndpoint get the local ip address and port
+// Deprecated: move to runtime.service
 func ServiceEndpoint(scheme, host, hostPort string) (string, error) {
 	_, port, err := net.SplitHostPort(hostPort)
 	if err != nil && host == "" {
