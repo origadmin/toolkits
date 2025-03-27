@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+package types
+
+// Type represents the hash algorithm type
+type Type string
+
+const (
+	// TypeCustom custom type
+	TypeCustom Type = "custom"
+	// TypeMD5 md5 type
+	TypeMD5 Type = "md5"
+	// TypeSHA1 sha1 type
+	TypeSHA1 Type = "sha1"
+	// TypeSHA256 sha256 type
+	TypeSHA256 Type = "sha256"
+	// TypeSHA512 sha512 type
+	TypeSHA512 Type = "sha512"
+	// TypeSHA384 sha384 type
+	TypeSHA384 Type = "sha384"
+	// TypeSHA3256 sha3-256 type
+	TypeSHA3256 Type = "sha3-256"
+	// TypeArgon2 argon2 type
+	TypeArgon2 Type = "argon2"
+	// TypeScrypt scrypt type
+	TypeScrypt Type = "scrypt"
+	// TypeBcrypt bcrypt type
+	TypeBcrypt Type = "bcrypt"
+	// TypeHMAC256 hmac sha256 type
+	TypeHMAC256 Type = "hmac256"
+	// TypeHMAC512 hmac sha512 type
+	TypeHMAC512 Type = "hmac512"
+	// TypePBKDF2 pbkdf2 type
+	TypePBKDF2 Type = "pbkdf2"
+	// TypePBKDF2SHA256 pbkdf2 sha256 type
+	TypePBKDF2SHA256 Type = "pbkdf2-sha256"
+	// TypePBKDF2SHA512 pbkdf2 sha512 type
+	TypePBKDF2SHA512 Type = "pbkdf2-sha512"
+	// TypePBKDF2SHA384 pbkdf2 sha384 type
+	TypePBKDF2SHA384 Type = "pbkdf2-sha384"
+	// TypePBKDF2SHA3256 pbkdf2 sha3-256 type
+	TypePBKDF2SHA3256 Type = "pbkdf2-sha3-256"
+	// TypePBKDF2SHA3224 pbkdf2 sha3-224 type
+	TypePBKDF2SHA3224 Type = "pbkdf2-sha3-224"
+	// TypePBKDF2SHA3384 pbkdf2 sha3-384 type
+	TypePBKDF2SHA3384 Type = "pbkdf2-sha3-384"
+	// TypePBKDF2SHA3512224 pbkdf2 sha3-512-224 type
+	TypePBKDF2SHA3512224 Type = "pbkdf2-sha3-512-224"
+	// TypePBKDF2SHA3512256 pbkdf2 sha3-512-256 type
+	TypePBKDF2SHA3512256 Type = "pbkdf2-sha3-512-256"
+	// TypePBKDF2SHA3512384 pbkdf2 sha3-512-384 type
+	TypePBKDF2SHA3512384 Type = "pbkdf2-sha3-512-384"
+	// TypePBKDF2SHA3512512 pbkdf2 sha3-512-512 type
+	TypePBKDF2SHA3512512 Type = "pbkdf2-sha3-512-512"
+)
+
+// String returns the string representation of the type
+func (t Type) String() string {
+	return string(t)
+}
+
+// ParseType parses a string into a Type
+func ParseType(s string) Type {
+	return Type(s)
+}
