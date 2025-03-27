@@ -6,6 +6,7 @@
 package pagination
 
 import (
+	"github.com/goexts/generic/settings"
 	"github.com/goexts/generic/types"
 )
 
@@ -28,6 +29,32 @@ type Limiter struct {
 	DefaultPageSize int32
 }
 
+type LimiterOption = func(*Limiter)
+
+func WithMaxPageSize(size int32) LimiterOption {
+	return func(l *Limiter) {
+		l.MaxPageSize = size
+	}
+}
+
+func WithMaxPage(page int32) LimiterOption {
+	return func(l *Limiter) {
+		l.MaxPage = page
+	}
+}
+
+func WithDefaultPageSize(size int32) LimiterOption {
+	return func(l *Limiter) {
+		l.DefaultPageSize = size
+	}
+}
+
+func WithDefaultPage(page int32) LimiterOption {
+	return func(l *Limiter) {
+		l.DefaultPage = page
+	}
+}
+
 func (obj Limiter) Current(in int32) int32 {
 	in = types.ZeroOr(in, obj.DefaultPage)
 	if in > obj.MaxPage {
@@ -44,16 +71,15 @@ func (obj Limiter) PerPage(in int32) int32 {
 	return in
 }
 
-func NewLimiter(page, defaultPage, pageSize, defaultPageSize int32) Limiter {
-	return Limiter{
-		MaxPage:         page,
-		DefaultPage:     defaultPage,
-		MaxPageSize:     pageSize,
-		DefaultPageSize: defaultPageSize,
-	}
+func NewLimiter(page, defaultPage, pageSize, defaultPageSize int32) *Limiter {
+	return settings.ApplyWithZero(
+		WithMaxPageSize(pageSize),
+		WithMaxPage(page),
+		WithDefaultPageSize(defaultPageSize),
+		WithDefaultPage(defaultPage))
 }
 
-func DefaultLimiter() Limiter {
+func DefaultLimiter() *Limiter {
 	return NewLimiter(MaxPage, DefaultPage, MaxPageSize, DefaultPageSize)
 }
 

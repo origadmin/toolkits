@@ -86,3 +86,31 @@ type Responder interface {
 	NextPageTokenGetter
 	ExtraGetter
 }
+
+type PageRequest interface {
+	CurrentGetter
+	PageSizeGetter
+	PageTokenGetter
+}
+
+type FilterRequest interface {
+	OrderByGetter
+	FieldMaskGetter
+}
+
+type ControlRequest interface {
+	OnlyCountGetter
+	NoPagingGetter
+}
+
+type PageResponse interface {
+	CurrentGetter
+	PageSizeGetter
+	NextPageTokenGetter
+}
+
+type DataResponse interface {
+	TotalGetter
+	DataGetter
+	ExtraGetter
+}
