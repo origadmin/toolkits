@@ -7,7 +7,6 @@ package scrypt
 import (
 	"crypto/subtle"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 
@@ -152,7 +151,7 @@ func (p *Params) String() string {
 
 // Hash implements the hash method
 func (c *Scrypt) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := utils.GenerateSaltString(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -176,27 +175,22 @@ func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(hashed, password string) error {
-	slog.Info("Verify", "hashed", hashed, "password", password)
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "parts", parts)
 	if parts.Algorithm != types.TypeScrypt {
 		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters
-	slog.Info("Verify", "params", parts.Params)
 	params, err := parseParams(parts.Params)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "params", params)
 	hash, err := scrypt.Key([]byte(password), []byte(parts.Salt), params.N, params.R, params.P, params.KeyLen)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "hash", hash)
 	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
 		return core.ErrPasswordNotMatch
 	}

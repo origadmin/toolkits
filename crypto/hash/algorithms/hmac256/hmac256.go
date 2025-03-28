@@ -59,7 +59,7 @@ func (c *HMAC256) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.HashWithSalt(password, salt)
+	return c.HashWithSalt(password, string(salt))
 }
 
 // HashWithSalt implements the hash with salt method
@@ -81,7 +81,7 @@ func (c *HMAC256) Verify(hashed, password string) error {
 		return fmt.Errorf("algorithm mismatch")
 	}
 
-	h := hmac.New(sha256.New, []byte(parts.Salt))
+	h := hmac.New(sha256.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)
 	if string(newHash) != string(parts.Hash) {

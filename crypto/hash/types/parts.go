@@ -10,5 +10,5 @@ type HashParts struct {
 	Version   string
 	Params    string
 	Hash      []byte
-	Salt      string
+	Salt      []byte
 }

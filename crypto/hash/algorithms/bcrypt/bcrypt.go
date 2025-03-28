@@ -6,7 +6,6 @@ package bcrypt
 
 import (
 	"fmt"
-	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -63,7 +62,7 @@ func (c *Bcrypt) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.HashWithSalt(password, salt)
+	return c.HashWithSalt(password, string(salt))
 }
 
 // HashWithSalt implements the hash with salt method
@@ -77,16 +76,13 @@ func (c *Bcrypt) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Bcrypt) Verify(hashed, password string) error {
-	slog.Info("Verify", "hashed", hashed, "password", password)
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "parts", parts)
 	if parts.Algorithm != types.TypeBcrypt {
 		return fmt.Errorf("algorithm mismatch")
 	}
-	slog.Info("Verify", "parts.Params", parts.Params)
 	err = bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt)))
 	if err != nil {
 		return fmt.Errorf("password not match")

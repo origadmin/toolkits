@@ -8,22 +8,19 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func main() {
-	// 创建配置
-	config := &types.Config{
-		Algorithm:  types.TypeArgon2,
-		TimeCost:   3,
-		MemoryCost: 64 * 1024,
-		Threads:    4,
-		SaltLength: 16,
-	}
 
 	// 创建加密实例
-	crypto, err := core.NewCrypto(config)
+	crypto, err := hash.NewCrypto(types.TypeArgon2, func(config *types.Config) {
+		config.TimeCost = 3
+		config.MemoryCost = 64 * 1024
+		config.Threads = 4
+		config.SaltLength = 16
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

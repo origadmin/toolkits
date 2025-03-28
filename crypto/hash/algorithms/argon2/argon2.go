@@ -7,7 +7,6 @@ package argon2
 import (
 	"crypto/subtle"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 
@@ -172,7 +171,7 @@ func (c *Argon2) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.HashWithSalt(password, salt)
+	return c.HashWithSalt(password, string(salt))
 }
 
 // HashWithSalt implements the hash with salt method
@@ -191,25 +190,21 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Argon2) Verify(hashed, password string) error {
-	slog.Info("Verify", "hashed", hashed, "password", password)
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "parts", parts)
 	if parts.Algorithm != types.TypeArgon2 {
 		return fmt.Errorf("algorithm mismatch")
 	}
-	slog.Info("Verify", "parts.Params", parts.Params)
 	// Parse parameters
 	params, err := parseParams(parts.Params)
 	if err != nil {
 		return err
 	}
-	slog.Info("Verify", "params", params)
 	hash := argon2.IDKey(
 		[]byte(password),
-		[]byte(parts.Salt),
+		parts.Salt,
 		params.TimeCost,
 		params.MemoryCost,
 		params.Threads,

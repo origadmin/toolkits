@@ -58,7 +58,7 @@ func (c *SHA1Crypto) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.HashWithSalt(password, salt)
+	return c.HashWithSalt(password, string(salt))
 }
 
 // HashWithSalt implements the hash with salt method

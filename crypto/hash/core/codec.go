@@ -52,7 +52,7 @@ func (e *Codec) Encode(salt []byte, hash []byte, params ...string) string {
 		e.version,
 		paramStr,
 		hex.EncodeToString(hash),
-		salt,
+		hex.EncodeToString(salt),
 	)
 }
 
@@ -73,8 +73,10 @@ func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid hash: %v", err)
 	}
-	salt := parts[5]
-
+	salt, err := hex.DecodeString(parts[5])
+	if err != nil {
+		return nil, fmt.Errorf("invalid salt: %v", err)
+	}
 	return &types.HashParts{
 		Algorithm: algorithm,
 		Version:   varsion,
