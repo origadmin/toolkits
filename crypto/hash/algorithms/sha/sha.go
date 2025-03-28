@@ -7,6 +7,7 @@ package sha
 import (
 	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/sha512"
 	"crypto/subtle"
 	"fmt"
 	"hash"
@@ -54,6 +55,8 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 		hashHash = sha1.New()
 	case types.TypeSha256:
 		hashHash = sha256.New()
+	case types.TypeSha512:
+		hashHash = sha512.New()
 	default:
 		return nil, fmt.Errorf("unsupported hash type: %s", hashType)
 	}
@@ -63,6 +66,18 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 		hashHash: hashHash,
 		hashType: hashType,
 	}, nil
+}
+
+func NewSha1Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha1, config)
+}
+
+func NewSha256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha256, config)
+}
+
+func NewSha512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha512, config)
 }
 
 func DefaultConfig() *types.Config {
