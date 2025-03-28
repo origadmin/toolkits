@@ -108,6 +108,10 @@ type Argon2 struct {
 	codec  interfaces.Codec
 }
 
+func (c *Argon2) Type() string {
+	return types.TypeArgon2.String()
+}
+
 // ConfigValidator implements the config validator for Argon2
 type ConfigValidator struct{}
 

@@ -20,6 +20,10 @@ type Sha256 struct {
 	codec  interfaces.Codec
 }
 
+func (c *Sha256) Type() string {
+	return types.TypeSha256.String()
+}
+
 // NewSHA256Crypto creates a new Sha256 crypto instance
 func NewSHA256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Sha256{

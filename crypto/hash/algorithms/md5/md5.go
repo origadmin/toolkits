@@ -21,6 +21,10 @@ type MD5 struct {
 	codec  interfaces.Codec
 }
 
+func (c *MD5) Type() string {
+	return types.TypeMD5.String()
+}
+
 type ConfigValidator struct {
 	SaltLength int
 }

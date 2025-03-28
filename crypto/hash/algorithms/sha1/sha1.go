@@ -15,10 +15,14 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/utils"
 )
 
-// SHA1Crypto implements the SHA1 hashing algorithm
-type SHA1Crypto struct {
+// Sha1 implements the SHA1 hashing algorithm
+type Sha1 struct {
 	config *types.Config
 	codec  interfaces.Codec
+}
+
+func (c *Sha1) Type() string {
+	return types.TypeSha1.String()
 }
 
 type ConfigValidator struct {
@@ -40,7 +44,7 @@ func NewSHA1Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha1 config: %v", err)
 	}
-	return &SHA1Crypto{
+	return &Sha1{
 		config: config,
 		codec:  core.NewCodec(types.TypeSha1),
 	}, nil
@@ -53,7 +57,7 @@ func DefaultConfig() *types.Config {
 }
 
 // Hash implements the hash method
-func (c *SHA1Crypto) Hash(password string) (string, error) {
+func (c *Sha1) Hash(password string) (string, error) {
 	salt, err := utils.GenerateSalt(c.config.SaltLength)
 	if err != nil {
 		return "", err
@@ -62,13 +66,13 @@ func (c *SHA1Crypto) Hash(password string) (string, error) {
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *SHA1Crypto) HashWithSalt(password, salt string) (string, error) {
+func (c *Sha1) HashWithSalt(password, salt string) (string, error) {
 	hash := sha1.Sum([]byte(password + salt))
 	return c.codec.Encode([]byte(salt), hash[:]), nil
 }
 
 // Verify implements the verify method
-func (c *SHA1Crypto) Verify(hashed, password string) error {
+func (c *Sha1) Verify(hashed, password string) error {
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err

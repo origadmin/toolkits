@@ -21,6 +21,10 @@ type Bcrypt struct {
 	codec  interfaces.Codec
 }
 
+func (c *Bcrypt) Type() string {
+	return types.TypeBcrypt.String()
+}
+
 type ConfigValidator struct {
 }
 

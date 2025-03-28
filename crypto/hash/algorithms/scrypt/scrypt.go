@@ -20,8 +20,13 @@ import (
 
 // Scrypt implements the Scrypt hashing algorithm
 type Scrypt struct {
+	params *Params
 	config *types.Config
 	codec  interfaces.Codec
+}
+
+func (c *Scrypt) Type() string {
+	return types.TypeScrypt.String()
 }
 
 type ConfigValidator struct {
@@ -49,6 +54,12 @@ func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, fmt.Errorf("invalid scrypt config: %v", err)
 	}
 	return &Scrypt{
+		params: &Params{
+			N:      config.Scrypt.N,
+			R:      config.Scrypt.R,
+			P:      config.Scrypt.P,
+			KeyLen: int(config.KeyLength),
+		},
 		config: config,
 		codec:  core.NewCodec(types.TypeScrypt),
 	}, nil
@@ -160,17 +171,11 @@ func (c *Scrypt) Hash(password string) (string, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
-	params := &Params{
-		N:      c.config.Scrypt.N,
-		R:      c.config.Scrypt.R,
-		P:      c.config.Scrypt.P,
-		KeyLen: int(c.config.KeyLength),
-	}
-	hash, err := scrypt.Key([]byte(password), []byte(salt), params.N, params.R, params.P, params.KeyLen)
+	hash, err := scrypt.Key([]byte(password), []byte(salt), c.params.N, c.params.R, c.params.P, c.params.KeyLen)
 	if err != nil {
 		return "", err
 	}
-	return c.codec.Encode([]byte(salt), hash, params.String()), nil
+	return c.codec.Encode([]byte(salt), hash, c.params.String()), nil
 }
 
 // Verify implements the verify method

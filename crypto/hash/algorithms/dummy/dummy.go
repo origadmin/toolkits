@@ -16,6 +16,10 @@ type Crypto struct {
 	config *types.Config
 }
 
+func (c *Crypto) Type() string {
+	return "dummy"
+}
+
 // NewDummyCrypto creates a new dummy crypto instance
 func NewDummyCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Crypto{

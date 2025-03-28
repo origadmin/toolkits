@@ -21,6 +21,10 @@ type HMAC256 struct {
 	codec  interfaces.Codec
 }
 
+func (c *HMAC256) Type() string {
+	return types.TypeHMAC256.String()
+}
+
 type ConfigValidator struct {
 	SaltLength int
 }
