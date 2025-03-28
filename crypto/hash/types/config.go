@@ -78,10 +78,17 @@ func WithScryptConfig(scrypt ScryptConfig) ConfigOption {
 // DefaultConfig 返回默认配置
 func DefaultConfig() *Config {
 	return &Config{
-		TimeCost:   3,     // 默认时间成本
-		MemoryCost: 65536, // 默认内存成本 (64MB)
-		Threads:    4,     // 默认线程数
-		SaltLength: 16,    // 默认盐长度
-		KeyLength:  32,    // 默认密钥长度
+		TimeCost:   3,     // Default time cost
+		MemoryCost: 65536, // Default memory cost (64MB)
+		Threads:    4,     // Default number of threads
+		SaltLength: 16,    // Default salt length
+		KeyLength:  32,    // Default key length
+		Cost:       10,    // Default cost parameter
+		Salt:       "",    // Default salt
+		Scrypt: ScryptConfig{
+			N: 16384, // Default N value
+			R: 8,     // Default R value
+			P: 1,     // Default P value
+		},
 	}
 }
