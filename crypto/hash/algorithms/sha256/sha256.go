@@ -6,7 +6,7 @@ package sha256
 
 import (
 	"crypto/sha256"
-	"fmt"
+	"crypto/subtle"
 
 	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -55,12 +55,12 @@ func (c *Sha256) Verify(hashed, password string) error {
 	}
 
 	if parts.Algorithm != types.TypeSha256 {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 
 	newHash := sha256.Sum256([]byte(password + string(parts.Salt)))
-	if string(newHash[:]) != string(parts.Hash) {
-		return fmt.Errorf("password not match")
+	if subtle.ConstantTimeCompare(newHash[:], parts.Hash) != 1 {
+		return core.ErrPasswordNotMatch
 	}
 
 	return nil

@@ -199,7 +199,7 @@ func (c *Argon2) Verify(hashed, password string) error {
 		return err
 	}
 	if parts.Algorithm != types.TypeArgon2 {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters
 	params, err := parseParams(parts.Params)

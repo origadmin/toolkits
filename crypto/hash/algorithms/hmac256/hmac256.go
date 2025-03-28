@@ -82,14 +82,14 @@ func (c *HMAC256) Verify(hashed, password string) error {
 	}
 
 	if parts.Algorithm != types.TypeHMAC256 {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 
 	h := hmac.New(sha256.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)
 	if string(newHash) != string(parts.Hash) {
-		return fmt.Errorf("password not match")
+		return core.ErrPasswordNotMatch
 	}
 
 	return nil

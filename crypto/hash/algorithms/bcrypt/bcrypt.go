@@ -85,11 +85,11 @@ func (c *Bcrypt) Verify(hashed, password string) error {
 		return err
 	}
 	if parts.Algorithm != types.TypeBcrypt {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 	err = bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt)))
 	if err != nil {
-		return fmt.Errorf("password not match")
+		return core.ErrPasswordNotMatch
 	}
 	return nil
 }
