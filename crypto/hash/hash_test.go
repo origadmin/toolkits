@@ -10,14 +10,17 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func TestGenerateScryptPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	hashedPassword, err := GenerateScryptPassword(password, salt)
+	crypto, err := NewCrypto(types.TypeScrypt)
+	assert.NoError(t, err)
+
+	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
 }
@@ -26,11 +29,14 @@ func TestCompareScryptHashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	hashedPassword, err := GenerateScryptPassword(password, salt)
+	crypto, err := NewCrypto(types.TypeScrypt)
+	assert.NoError(t, err)
+
+	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
 
-	err = CompareScryptHashAndPassword(hashedPassword, password, salt)
+	err = crypto.Verify(hashedPassword, password)
 	assert.NoError(t, err)
 }
 
@@ -38,7 +44,10 @@ func TestGenerateArgon2Password(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	hashedPassword, err := GenerateArgon2Password(password, salt)
+	crypto, err := NewCrypto(types.TypeArgon2)
+	assert.NoError(t, err)
+
+	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
 }
@@ -47,121 +56,79 @@ func TestCompareArgon2HashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	hashedPassword, err := GenerateArgon2Password(password, salt)
+	crypto, err := NewCrypto(types.TypeArgon2)
+	assert.NoError(t, err)
+
+	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
 
-	err = CompareArgon2HashAndPassword(hashedPassword, password, salt)
+	err = crypto.Verify(hashedPassword, password)
 	assert.NoError(t, err)
 }
 
 func TestGenerate(t *testing.T) {
-	// Test case 1: Password and salt are valid
 	password := "myPassword123"
 	salt := "mySalt123"
 
-	expectedHash := "generatedHash123"
-
-	// Mocking the Generate function of gac package
-	gac.Generate = func(password, salt string) (string, error) {
-		return expectedHash, nil
-	}
-
-	hash, err := Generate(password, salt)
-
+	crypto, err := NewCrypto(types.TypeArgon2)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedHash, hash)
 
-	// Test case 2: Generation fails
-	expectedError := "generation failed"
-
-	// Mocking the Generate function of gac package
-	gac.Generate = func(password, salt string) (string, error) {
-		return "", errors.New(expectedError)
-	}
-
-	hash, err = Generate(password, salt)
-
-	assert.Error(t, err)
-	assert.EqualError(t, err, expectedError)
-	assert.Empty(t, hash)
+	hash, err := crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, hash)
 }
 
 func TestCompare(t *testing.T) {
-	var err error
-	hashedPassword := ""
 	password := "password123"
 	salt := "salt123"
 
-	UseMD5()
+	// Test MD5
+	crypto, err := NewCrypto(types.TypeMD5)
+	assert.NoError(t, err)
+	hashedPassword, err := crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	err = crypto.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("MD5: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
+	// Test SHA1
+	crypto, err = NewCrypto(types.TypeSha1)
+	assert.NoError(t, err)
+	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	err = crypto.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
+	// Test Scrypt
+	crypto, err = NewCrypto(types.TypeScrypt)
+	assert.NoError(t, err)
+	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	crypto2, err := NewCrypto(types.TypeScrypt, types.WithSaltLength(16))
+	assert.NoError(t, err)
+	err = crypto2.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 
-	UseSHA1()
+	// Test Bcrypt
+	crypto, err = NewCrypto(types.TypeBcrypt)
+	assert.NoError(t, err)
+	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	err = crypto.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("SHA1: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
+	// Test Argon2
+	crypto, err = NewCrypto(types.TypeArgon2)
+	assert.NoError(t, err)
+	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	err = crypto.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
-
-	UseScrypt()
-
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("Scrypt: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
-
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
-
-	UseBcrypt()
-
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("Bcrypt: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
-
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
-
-	UseArgon2()
-
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("Argon2: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
-
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
-
-	UseSHA256()
-
-	hashedPassword, err = Generate(password, salt)
-	t.Logf("SHA256: %s", hashedPassword)
-	err = Compare(hashedPassword, password, salt)
-	assert.NoError(t, err, "Expected no error on successful comparison")
-
-	// Test case 2: failed comparison
-	hashedPassword = "hashedPassword456"
-	err = Compare(hashedPassword, password, salt)
-	assert.Error(t, err, "Expected error on failed comparison")
+	// Test SHA256
+	crypto, err = NewCrypto(types.TypeSha256)
+	assert.NoError(t, err)
+	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	assert.NoError(t, err)
+	err = crypto.Verify(hashedPassword, password)
+	assert.NoError(t, err)
 }

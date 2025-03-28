@@ -4,11 +4,12 @@ go 1.23.1
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/goexts/generic v0.2.3
-	github.com/origadmin/toolkits/codec v0.2.10
-	github.com/origadmin/toolkits/errors v0.2.10
-	github.com/origadmin/toolkits/idgen v0.2.10
-	github.com/origadmin/toolkits/sloge v0.2.10
+	github.com/goexts/generic v0.2.4
+	github.com/hashicorp/golang-lru/v2 v2.0.7
+	github.com/origadmin/toolkits/codec v0.2.11
+	github.com/origadmin/toolkits/errors v0.2.11
+	github.com/origadmin/toolkits/idgen v0.2.11
+	github.com/origadmin/toolkits/sloge v0.2.11
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
 )
