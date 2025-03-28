@@ -50,6 +50,9 @@ func TestGenerateArgon2Password(t *testing.T) {
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
+
+	err = UseCrypto(types.TypeArgon2, types.WithSaltLength(16))
+	assert.NoError(t, err)
 }
 
 func TestCompareArgon2HashAndPassword(t *testing.T) {
