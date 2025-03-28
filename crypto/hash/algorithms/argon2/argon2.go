@@ -209,7 +209,7 @@ func (c *Argon2) Verify(hashed, password string) error {
 	slog.Info("Verify", "params", params)
 	hash := argon2.IDKey(
 		[]byte(password),
-		parts.Salt,
+		[]byte(parts.Salt),
 		params.TimeCost,
 		params.MemoryCost,
 		params.Threads,

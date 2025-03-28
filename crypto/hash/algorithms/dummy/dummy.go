@@ -37,3 +37,7 @@ func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
 func (c *Crypto) Verify(hashed, password string) error {
 	return fmt.Errorf("dummy algorithm not implemented")
 }
+
+func DefaultConfig() *types.Config {
+	return &types.Config{}
+}

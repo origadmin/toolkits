@@ -52,7 +52,12 @@ func init() {
 // UseCrypto updates the default cryptographic instance
 func UseCrypto(t types.Type, opts ...types.ConfigOption) error {
 	if alg, ok := algorithms[t]; ok {
-		crypto, err := alg.creator(settings.Apply(alg.defaultConfig, opts))
+		cfg := &types.Config{}
+		if alg.defaultConfig != nil {
+			cfg = alg.defaultConfig()
+		}
+		cfg = settings.Apply(cfg, opts)
+		crypto, err := alg.creator(cfg)
 		if err != nil {
 			return err
 		}

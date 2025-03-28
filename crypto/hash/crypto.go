@@ -23,9 +23,14 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
+type (
+	AlgorithmCreator func(*types.Config) (interfaces.Cryptographic, error)
+	AlgorithmConfig  func() *types.Config
+)
+
 type algorithm struct {
-	creator       func(*types.Config) (interfaces.Cryptographic, error)
-	defaultConfig *types.Config
+	creator       AlgorithmCreator
+	defaultConfig AlgorithmConfig
 }
 
 var (
@@ -33,113 +38,104 @@ var (
 	algorithms = map[types.Type]algorithm{
 		types.TypeArgon2: {
 			creator:       argon2.NewArgon2Crypto,
-			defaultConfig: argon2.DefaultConfig(),
+			defaultConfig: argon2.DefaultConfig,
 		},
 		types.TypeBcrypt: {
-			creator: bcrypt.NewBcryptCrypto,
-			defaultConfig: &types.Config{
-				TimeCost:   10,
-				SaltLength: 16,
-			},
+			creator:       bcrypt.NewBcryptCrypto,
+			defaultConfig: bcrypt.DefaultConfig,
 		},
 		types.TypeHMAC256: {
-			creator: hmac256.NewHMAC256Crypto,
-			defaultConfig: &types.Config{
-				KeyLength: 32,
-			},
+			creator:       hmac256.NewHMAC256Crypto,
+			defaultConfig: hmac256.DefaultConfig,
 		},
 		types.TypeMD5: {
-			creator: md5.NewMD5Crypto,
-			defaultConfig: &types.Config{
-				SaltLength: 16,
-			},
+			creator:       md5.NewMD5Crypto,
+			defaultConfig: md5.DefaultConfig,
 		},
 		types.TypeScrypt: {
-			creator: scrypt.NewScryptCrypto,
-			defaultConfig: &types.Config{
-				TimeCost:   3,
-				MemoryCost: 64 * 1024,
-				Threads:    2,
-				SaltLength: 16,
-				KeyLength:  32,
-			},
+			creator:       scrypt.NewScryptCrypto,
+			defaultConfig: scrypt.DefaultConfig,
 		},
 		types.TypeSha1: {
 			creator: sha1.NewSHA1Crypto,
-			defaultConfig: &types.Config{
-				SaltLength: 16,
+			defaultConfig: func() *types.Config {
+				return &types.Config{
+					SaltLength: 16,
+				}
 			},
 		},
 		types.TypeSha256: {
 			creator: sha256.NewSHA256Crypto,
-			defaultConfig: &types.Config{
-				SaltLength: 16,
+			defaultConfig: func() *types.Config {
+				return &types.Config{
+					SaltLength: 16,
+				}
 			},
 		},
 		// Unimplemented cryptos use dummy implementation
 		types.TypeCustom: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypeSha512: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypeSha384: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypeSha3256: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypeHMAC512: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA256: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA512: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA384: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3256: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3224: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3384: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3512224: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3512256: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3512384: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 		types.TypePBKDF2SHA3512512: {
 			creator:       dummy.NewDummyCrypto,
-			defaultConfig: &types.Config{},
+			defaultConfig: dummy.DefaultConfig,
 		},
 	}
 )
@@ -176,7 +172,11 @@ func (c crypto) Verify(hashed, password string) error {
 
 		// Create cryptographic instance and cache it
 		var err error
-		crypto, err = algorithm.creator(algorithm.defaultConfig)
+		cfg := &types.Config{}
+		if algorithm.defaultConfig != nil {
+			cfg = algorithm.defaultConfig()
+		}
+		crypto, err = algorithm.creator(cfg)
 		if err != nil {
 			return err
 		}
@@ -193,8 +193,12 @@ func NewCrypto(alg types.Type, opts ...types.ConfigOption) (interfaces.Cryptogra
 	if !exists {
 		return nil, fmt.Errorf("unsupported algorithm: %s", alg)
 	}
+	cfg := &types.Config{}
+	if algorithm.defaultConfig != nil {
+		cfg = algorithm.defaultConfig()
+	}
 	// Apply default config if not set
-	cfg := settings.Apply(algorithm.defaultConfig, opts)
+	cfg = settings.Apply(cfg, opts)
 	cryptographic, err := algorithm.creator(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cryptographic instance: %v", err)
@@ -209,11 +213,8 @@ func NewCrypto(alg types.Type, opts ...types.ConfigOption) (interfaces.Cryptogra
 }
 
 // RegisterAlgorithm registers a new hash algorithm
-func RegisterAlgorithm(t types.Type, creator func(*types.Config) (interfaces.Cryptographic, error), defaultConfig *types.Config) {
-	algorithms[t] = struct {
-		creator       func(*types.Config) (interfaces.Cryptographic, error)
-		defaultConfig *types.Config
-	}{
+func RegisterAlgorithm(t types.Type, creator AlgorithmCreator, defaultConfig AlgorithmConfig) {
+	algorithms[t] = algorithm{
 		creator:       creator,
 		defaultConfig: defaultConfig,
 	}

@@ -103,8 +103,9 @@ func TestCompare(t *testing.T) {
 	crypto, err = NewCrypto(types.TypeScrypt)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
+	crypto2, err := NewCrypto(types.TypeScrypt, types.WithSaltLength(16))
 	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
+	err = crypto2.Verify(hashedPassword, password)
 	assert.NoError(t, err)
 
 	// Test Bcrypt

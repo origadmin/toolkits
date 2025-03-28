@@ -35,7 +35,7 @@ func (v ConfigValidator) Validate(config *types.Config) interface{} {
 // NewMD5Crypto creates a new MD5 crypto instance
 func NewMD5Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
-		config = types.DefaultConfig()
+		config = DefaultConfig()
 	}
 	validator := &ConfigValidator{}
 	if err := validator.Validate(config); err != nil {
@@ -78,4 +78,10 @@ func (c *MD5) Verify(hashed, password string) error {
 		return fmt.Errorf("password not match")
 	}
 	return nil
+}
+
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		SaltLength: 16,
+	}
 }

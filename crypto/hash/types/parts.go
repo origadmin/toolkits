@@ -9,6 +9,6 @@ type HashParts struct {
 	Algorithm Type
 	Version   string
 	Params    string
-	Salt      []byte
 	Hash      []byte
+	Salt      string
 }

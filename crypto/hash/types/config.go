@@ -6,10 +6,9 @@ package types
 
 // ScryptConfig represents the configuration for Scrypt algorithm
 type ScryptConfig struct {
-	N      int `env:"HASH_SCRYPT_N"`
-	R      int `env:"HASH_SCRYPT_R"`
-	P      int `env:"HASH_SCRYPT_P"`
-	KeyLen int `env:"HASH_SCRYPT_KEYLEN"`
+	N int `env:"HASH_SCRYPT_N"`
+	R int `env:"HASH_SCRYPT_R"`
+	P int `env:"HASH_SCRYPT_P"`
 }
 
 // Config represents the configuration for hash algorithms
@@ -18,10 +17,10 @@ type Config struct {
 	MemoryCost uint32 `env:"HASH_MEMORYCOST"`
 	Threads    uint8  `env:"HASH_THREADS"`
 	SaltLength int    `env:"HASH_SALTLENGTH"`
+	KeyLength  uint32 `env:"HASH_KEYLENGTH"`
 	Cost       int    `env:"HASH_COST"` // Cost parameter (for bcrypt)
 	Salt       string `env:"HASH_SALT"` // Salt for HMAC
 	Scrypt     ScryptConfig
-	KeyLength  uint32 // 密钥长度
 }
 
 // ConfigOption is a function that modifies a Config
