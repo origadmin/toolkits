@@ -62,6 +62,7 @@ func UseCrypto(t types.Type, opts ...types.ConfigOption) error {
 			return err
 		}
 		defaultCrypto = crypto
+		return nil
 	}
 	return errors.Errorf("unsupported hash type: %s", t)
 }
