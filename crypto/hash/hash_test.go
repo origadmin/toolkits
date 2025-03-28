@@ -8,15 +8,16 @@ package hash
 import (
 	"testing"
 
-	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func TestGenerateScryptPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeScrypt))
+	crypto, err := NewCrypto(types.TypeScrypt)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
@@ -28,7 +29,7 @@ func TestCompareScryptHashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeScrypt))
+	crypto, err := NewCrypto(types.TypeScrypt)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
@@ -43,7 +44,7 @@ func TestGenerateArgon2Password(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeArgon2))
+	crypto, err := NewCrypto(types.TypeArgon2)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
@@ -55,7 +56,7 @@ func TestCompareArgon2HashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeArgon2))
+	crypto, err := NewCrypto(types.TypeArgon2)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
@@ -70,7 +71,7 @@ func TestGenerate(t *testing.T) {
 	password := "myPassword123"
 	salt := "mySalt123"
 
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeArgon2))
+	crypto, err := NewCrypto(types.TypeArgon2)
 	assert.NoError(t, err)
 
 	hash, err := crypto.HashWithSalt(password, salt)
@@ -83,7 +84,7 @@ func TestCompare(t *testing.T) {
 	salt := "salt123"
 
 	// Test MD5
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeMD5))
+	crypto, err := NewCrypto(types.TypeMD5)
 	assert.NoError(t, err)
 	hashedPassword, err := crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
@@ -91,7 +92,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test SHA1
-	crypto, err = NewCrypto(types.WithAlgorithm(types.TypeSHA1))
+	crypto, err = NewCrypto(types.TypeSha1)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
@@ -99,7 +100,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test Scrypt
-	crypto, err = NewCrypto(types.WithAlgorithm(types.TypeScrypt))
+	crypto, err = NewCrypto(types.TypeScrypt)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
@@ -107,7 +108,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test Bcrypt
-	crypto, err = NewCrypto(types.WithAlgorithm(types.TypeBcrypt))
+	crypto, err = NewCrypto(types.TypeBcrypt)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
@@ -115,7 +116,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test Argon2
-	crypto, err = NewCrypto(types.WithAlgorithm(types.TypeArgon2))
+	crypto, err = NewCrypto(types.TypeArgon2)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)
@@ -123,7 +124,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test SHA256
-	crypto, err = NewCrypto(types.WithAlgorithm(types.TypeSHA256))
+	crypto, err = NewCrypto(types.TypeSha256)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, salt)
 	assert.NoError(t, err)

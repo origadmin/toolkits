@@ -12,16 +12,16 @@ const (
 	TypeCustom Type = "custom"
 	// TypeMD5 md5 type
 	TypeMD5 Type = "md5"
-	// TypeSHA1 sha1 type
-	TypeSHA1 Type = "sha1"
-	// TypeSHA256 sha256 type
-	TypeSHA256 Type = "sha256"
-	// TypeSHA512 sha512 type
-	TypeSHA512 Type = "sha512"
-	// TypeSHA384 sha384 type
-	TypeSHA384 Type = "sha384"
-	// TypeSHA3256 sha3-256 type
-	TypeSHA3256 Type = "sha3-256"
+	// TypeSha1 sha1 type
+	TypeSha1 Type = "sha1"
+	// TypeSha256 sha256 type
+	TypeSha256 Type = "sha256"
+	// TypeSha512 sha512 type
+	TypeSha512 Type = "sha512"
+	// TypeSha384 sha384 type
+	TypeSha384 Type = "sha384"
+	// TypeSha3256 sha3-256 type
+	TypeSha3256 Type = "sha3-256"
 	// TypeArgon2 argon2 type
 	TypeArgon2 Type = "argon2"
 	// TypeScrypt scrypt type
@@ -54,6 +54,8 @@ const (
 	TypePBKDF2SHA3512384 Type = "pbkdf2-sha3-512-384"
 	// TypePBKDF2SHA3512512 pbkdf2 sha3-512-512 type
 	TypePBKDF2SHA3512512 Type = "pbkdf2-sha3-512-512"
+	// TypeUnknown unknown type
+	TypeUnknown Type = "unknown"
 )
 
 // String returns the string representation of the type

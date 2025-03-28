@@ -8,6 +8,8 @@ package hash
 import (
 	"fmt"
 
+	"github.com/goexts/generic/settings"
+
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/dummy"
@@ -16,100 +18,216 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha1"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha256"
-	"github.com/origadmin/toolkits/crypto/hash/base"
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
+type algorithm struct {
+	creator       func(*types.Config) (interfaces.Cryptographic, error)
+	defaultConfig *types.Config
+}
+
 var (
-	// algorithms 存储所有支持的哈希算法
-	algorithms = map[types.Type]func(*types.Config) (interfaces.Cryptographic, error){
-		types.TypeArgon2:  argon2.NewArgon2Crypto,
-		types.TypeBcrypt:  bcrypt.NewBcryptCrypto,
-		types.TypeHMAC256: hmac256.NewHMAC256Crypto,
-		types.TypeMD5:     md5.NewMD5Crypto,
-		types.TypeScrypt:  scrypt.NewScryptCrypto,
-		types.TypeSHA1:    sha1.NewSHA1Crypto,
-		types.TypeSHA256:  sha256.NewSHA256Crypto,
-		// 未实现的算法使用dummy实现
-		types.TypeCustom:           dummy.NewDummyCrypto,
-		types.TypeSHA512:           dummy.NewDummyCrypto,
-		types.TypeSHA384:           dummy.NewDummyCrypto,
-		types.TypeSHA3256:          dummy.NewDummyCrypto,
-		types.TypeHMAC512:          dummy.NewDummyCrypto,
-		types.TypePBKDF2:           dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA256:     dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA512:     dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA384:     dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3256:    dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3224:    dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3384:    dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3512224: dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3512256: dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3512384: dummy.NewDummyCrypto,
-		types.TypePBKDF2SHA3512512: dummy.NewDummyCrypto,
+	// algorithms stores all supported hash algorithms
+	algorithms = map[types.Type]algorithm{
+		types.TypeArgon2: {
+			creator:       argon2.NewArgon2Crypto,
+			defaultConfig: argon2.DefaultConfig(),
+		},
+		types.TypeBcrypt: {
+			creator: bcrypt.NewBcryptCrypto,
+			defaultConfig: &types.Config{
+				TimeCost:   10,
+				SaltLength: 16,
+			},
+		},
+		types.TypeHMAC256: {
+			creator: hmac256.NewHMAC256Crypto,
+			defaultConfig: &types.Config{
+				KeyLength: 32,
+			},
+		},
+		types.TypeMD5: {
+			creator: md5.NewMD5Crypto,
+			defaultConfig: &types.Config{
+				SaltLength: 16,
+			},
+		},
+		types.TypeScrypt: {
+			creator: scrypt.NewScryptCrypto,
+			defaultConfig: &types.Config{
+				TimeCost:   3,
+				MemoryCost: 64 * 1024,
+				Threads:    2,
+				SaltLength: 16,
+				KeyLength:  32,
+			},
+		},
+		types.TypeSha1: {
+			creator: sha1.NewSHA1Crypto,
+			defaultConfig: &types.Config{
+				SaltLength: 16,
+			},
+		},
+		types.TypeSha256: {
+			creator: sha256.NewSHA256Crypto,
+			defaultConfig: &types.Config{
+				SaltLength: 16,
+			},
+		},
+		// Unimplemented cryptos use dummy implementation
+		types.TypeCustom: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypeSha512: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypeSha384: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypeSha3256: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypeHMAC512: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA256: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA512: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA384: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3256: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3224: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3384: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3512224: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3512256: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3512384: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
+		types.TypePBKDF2SHA3512512: {
+			creator:       dummy.NewDummyCrypto,
+			defaultConfig: &types.Config{},
+		},
 	}
 )
 
-// NewCrypto 创建一个新的加密实例
-func NewCrypto(opts ...types.ConfigOption) (interfaces.Cryptographic, error) {
-	// 创建默认配置
-	cfg := &types.Config{
-		Algorithm:  types.TypeArgon2,
-		TimeCost:   3,
-		MemoryCost: 64 * 1024, // 64MB
-		Threads:    2,
-		SaltLength: 16,
-	}
-
-	// 应用配置选项
-	for _, opt := range opts {
-		opt(cfg)
-	}
-
-	// 获取算法创建器
-	creator, exists := algorithms[cfg.Algorithm]
-	if !exists {
-		return nil, fmt.Errorf("unsupported algorithm: %s", cfg.Algorithm)
-	}
-
-	// 创建加密实例
-	return creator(cfg)
+type crypto struct {
+	algorithm types.Type
+	codec     interfaces.Codec
+	crypto    interfaces.Cryptographic
+	cryptos   map[types.Type]interfaces.Cryptographic
 }
 
-// RegisterAlgorithm 注册新的哈希算法
-func RegisterAlgorithm(t types.Type, creator func(*types.Config) (interfaces.Cryptographic, error)) {
-	algorithms[t] = creator
+func (c crypto) Hash(password string) (string, error) {
+	return c.crypto.Hash(password)
 }
 
-// DecodeHash 解码哈希值
-func DecodeHash(hashed string) (*types.HashParts, error) {
-	// 使用通用编解码器解码密码
-	codec := base.GetCodec(types.TypeCustom) // 使用通用编解码器
-	return codec.Decode(hashed)
+func (c crypto) HashWithSalt(password, salt string) (string, error) {
+	return c.crypto.HashWithSalt(password, salt)
 }
 
-// Verify 验证密码
-func Verify(hashed, password string) error {
-	// 解码哈希值
-	parts, err := DecodeHash(hashed)
+func (c crypto) Verify(hashed, password string) error {
+	// Decode the hash value
+	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
 
-	// 获取算法创建器
-	creator, exists := algorithms[parts.Algorithm]
+	// Get algorithm instance from cache or create new one
+	crypto, exists := c.cryptos[parts.Algorithm]
 	if !exists {
-		return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm)
-	}
+		algorithm, exists := algorithms[parts.Algorithm]
+		if !exists {
+			return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm)
+		}
 
-	// 创建加密实例并验证
-	crypto, err := creator(&types.Config{
-		Algorithm: parts.Algorithm,
-	})
-	if err != nil {
-		return err
+		// Create cryptographic instance and cache it
+		var err error
+		crypto, err = algorithm.creator(algorithm.defaultConfig)
+		if err != nil {
+			return err
+		}
+		c.cryptos[parts.Algorithm] = crypto
 	}
 
 	return crypto.Verify(hashed, password)
+}
+
+// NewCrypto creates a new cryptographic instance
+func NewCrypto(alg types.Type, opts ...types.ConfigOption) (interfaces.Cryptographic, error) {
+	// Get algorithm creator and default config
+	algorithm, exists := algorithms[alg]
+	if !exists {
+		return nil, fmt.Errorf("unsupported algorithm: %s", alg)
+	}
+	// Apply default config if not set
+	cfg := settings.Apply(algorithm.defaultConfig, opts)
+	cryptographic, err := algorithm.creator(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cryptographic instance: %v", err)
+	}
+	// Create cryptographic instance
+	return &crypto{
+		algorithm: alg,
+		crypto:    cryptographic,
+		codec:     core.NewCodec(alg),
+		cryptos:   make(map[types.Type]interfaces.Cryptographic),
+	}, nil
+}
+
+// RegisterAlgorithm registers a new hash algorithm
+func RegisterAlgorithm(t types.Type, creator func(*types.Config) (interfaces.Cryptographic, error), defaultConfig *types.Config) {
+	algorithms[t] = struct {
+		creator       func(*types.Config) (interfaces.Cryptographic, error)
+		defaultConfig *types.Config
+	}{
+		creator:       creator,
+		defaultConfig: defaultConfig,
+	}
+}
+
+// Verify verifies a password
+func Verify(hashed, password string) error {
+	return defaultCrypto.Verify(hashed, password)
+}
+
+func Generate(password string) (string, error) {
+	return defaultCrypto.Hash(password)
+}
+
+func GenerateWithSalt(password, salt string) (string, error) {
+	return defaultCrypto.HashWithSalt(password, salt)
 }

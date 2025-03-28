@@ -7,6 +7,7 @@ package argon2
 import (
 	"crypto/subtle"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -101,8 +102,8 @@ func (p *Params) String() string {
 	return strings.Join(parts, ",")
 }
 
-// Crypto implements the Argon2 hashing algorithm
-type Crypto struct {
+// Argon2 implements the Argon2 hashing algorithm
+type Argon2 struct {
 	params *Params
 	config *types.Config
 	codec  interfaces.Codec
@@ -122,8 +123,8 @@ func (v *ConfigValidator) Validate(config *types.Config) error {
 	if config.Threads < 1 {
 		return fmt.Errorf("invalid threads: %d", config.Threads)
 	}
-	if config.SaltLength < 1 {
-		return fmt.Errorf("invalid salt length: %d", config.SaltLength)
+	if config.SaltLength < 8 {
+		return core.ErrSaltLengthTooShort
 	}
 	if config.KeyLength < 4 || config.KeyLength > 1024 {
 		return fmt.Errorf("invalid key length: %d, must be between 4 and 1024", config.KeyLength)
@@ -134,7 +135,6 @@ func (v *ConfigValidator) Validate(config *types.Config) error {
 // DefaultConfig returns the default configuration for Argon2
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		Algorithm:  types.TypeArgon2,
 		TimeCost:   3,         // Default time cost
 		MemoryCost: 64 * 1024, // Default memory cost (64MB)
 		Threads:    4,         // Default threads
@@ -159,7 +159,7 @@ func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 		Threads:    config.Threads,
 		KeyLength:  config.KeyLength,
 	}
-	return &Crypto{
+	return &Argon2{
 		params: params,
 		config: config,
 		codec:  core.NewCodec(types.TypeArgon2),
@@ -167,7 +167,7 @@ func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 }
 
 // Hash implements the hash method
-func (c *Crypto) Hash(password string) (string, error) {
+func (c *Argon2) Hash(password string) (string, error) {
 	salt, err := utils.GenerateSalt(c.config.SaltLength)
 	if err != nil {
 		return "", err
@@ -176,8 +176,7 @@ func (c *Crypto) Hash(password string) (string, error) {
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
-
+func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 	hash := argon2.IDKey(
 		[]byte(password),
 		[]byte(salt),
@@ -191,22 +190,23 @@ func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Crypto) Verify(hashed, password string) error {
+func (c *Argon2) Verify(hashed, password string) error {
+	slog.Info("Verify", "hashed", hashed, "password", password)
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
-
+	slog.Info("Verify", "parts", parts)
 	if parts.Algorithm != types.TypeArgon2 {
 		return fmt.Errorf("algorithm mismatch")
 	}
-
+	slog.Info("Verify", "parts.Params", parts.Params)
 	// Parse parameters
 	params, err := parseParams(parts.Params)
 	if err != nil {
 		return err
 	}
-
+	slog.Info("Verify", "params", params)
 	hash := argon2.IDKey(
 		[]byte(password),
 		parts.Salt,
@@ -217,7 +217,7 @@ func (c *Crypto) Verify(hashed, password string) error {
 	)
 
 	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
-		return fmt.Errorf("password not match")
+		return core.ErrPasswordNotMatch
 	}
 
 	return nil

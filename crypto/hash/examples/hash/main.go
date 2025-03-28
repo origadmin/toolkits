@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/origadmin/toolkits/crypto/hash/base"
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	// 创建加密实例
-	crypto, err := base.NewCrypto(config)
+	crypto, err := core.NewCrypto(config)
 	if err != nil {
 		log.Fatal(err)
 	}

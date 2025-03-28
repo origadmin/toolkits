@@ -17,7 +17,7 @@ const (
 )
 
 func TestGeneratePassword(t *testing.T) {
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeBcrypt))
+	crypto, err := NewCrypto(types.TypeBcrypt)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -35,7 +35,7 @@ func TestGeneratePassword(t *testing.T) {
 }
 
 func TestMD5(t *testing.T) {
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeMD5))
+	crypto, err := NewCrypto(types.TypeMD5)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -53,7 +53,7 @@ func TestMD5(t *testing.T) {
 }
 
 func TestSHA1(t *testing.T) {
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeSHA1))
+	crypto, err := NewCrypto(types.TypeSha1)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -71,7 +71,7 @@ func TestSHA1(t *testing.T) {
 }
 
 func TestSHA256(t *testing.T) {
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeSHA256))
+	crypto, err := NewCrypto(types.TypeSha256)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -89,7 +89,7 @@ func TestSHA256(t *testing.T) {
 }
 
 func TestHMAC256(t *testing.T) {
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeHMAC256))
+	crypto, err := NewCrypto(types.TypeHMAC256)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return

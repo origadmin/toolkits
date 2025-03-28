@@ -7,6 +7,8 @@ package core
 const (
 	// ENV environment variable name
 	ENV = "ORIGADMIN_HASH_TYPE"
+	// DefaultType default hash type
+	DefaultType = "argon2"
 	// DefaultVersion default hash version
 	DefaultVersion = "v1"
 	// DefaultSaltLength default salt length

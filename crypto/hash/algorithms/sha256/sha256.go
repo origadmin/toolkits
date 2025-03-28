@@ -8,7 +8,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/base"
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/utils"
@@ -17,12 +17,14 @@ import (
 // SHA256Crypto implements the SHA256 hashing algorithm
 type SHA256Crypto struct {
 	config *types.Config
+	codec  interfaces.Codec
 }
 
 // NewSHA256Crypto creates a new SHA256 crypto instance
 func NewSHA256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &SHA256Crypto{
 		config: config,
+		codec:  core.NewCodec(types.TypeSha256),
 	}, nil
 }
 
@@ -38,19 +40,17 @@ func (c *SHA256Crypto) Hash(password string) (string, error) {
 // HashWithSalt implements the hash with salt method
 func (c *SHA256Crypto) HashWithSalt(password, salt string) (string, error) {
 	hash := sha256.Sum256([]byte(password + salt))
-	encoder := NewSHA256HashEncoder()
-	return encoder.Encode([]byte(salt), hash[:]), nil
+	return c.codec.Encode([]byte(salt), hash[:]), nil
 }
 
 // Verify implements the verify method
 func (c *SHA256Crypto) Verify(hashed, password string) error {
-	encoder := NewSHA256HashEncoder()
-	parts, err := encoder.Decode(hashed)
+	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
 
-	if parts.Algorithm != types.TypeSHA256 {
+	if parts.Algorithm != types.TypeSha256 {
 		return fmt.Errorf("algorithm mismatch")
 	}
 
@@ -60,16 +60,4 @@ func (c *SHA256Crypto) Verify(hashed, password string) error {
 	}
 
 	return nil
-}
-
-// SHA256HashEncoder implements the hash encoder interface
-type SHA256HashEncoder struct {
-	*base.BaseHashCodec
-}
-
-// NewSHA256HashEncoder creates a new SHA256 hash encoder
-func NewSHA256HashEncoder() interfaces.HashCodec {
-	return &SHA256HashEncoder{
-		BaseHashCodec: base.NewBaseHashCodec(types.TypeSHA256).(*base.BaseHashCodec),
-	}
 }

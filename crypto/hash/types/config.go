@@ -14,7 +14,6 @@ type ScryptConfig struct {
 
 // Config represents the configuration for hash algorithms
 type Config struct {
-	Algorithm  Type   `env:"HASH_ALGORITHM"`
 	TimeCost   uint32 `env:"HASH_TIMECOST"`
 	MemoryCost uint32 `env:"HASH_MEMORYCOST"`
 	Threads    uint8  `env:"HASH_THREADS"`
@@ -22,17 +21,11 @@ type Config struct {
 	Cost       int    `env:"HASH_COST"` // Cost parameter (for bcrypt)
 	Salt       string `env:"HASH_SALT"` // Salt for HMAC
 	Scrypt     ScryptConfig
+	KeyLength  uint32 // 密钥长度
 }
 
 // ConfigOption is a function that modifies a Config
 type ConfigOption func(*Config)
-
-// WithAlgorithm sets the algorithm type
-func WithAlgorithm(t Type) ConfigOption {
-	return func(cfg *Config) {
-		cfg.Algorithm = t
-	}
-}
 
 // WithTimeCost sets the time cost
 func WithTimeCost(cost uint32) ConfigOption {
@@ -80,5 +73,16 @@ func WithSalt(salt string) ConfigOption {
 func WithScryptConfig(scrypt ScryptConfig) ConfigOption {
 	return func(cfg *Config) {
 		cfg.Scrypt = scrypt
+	}
+}
+
+// DefaultConfig 返回默认配置
+func DefaultConfig() *Config {
+	return &Config{
+		TimeCost:   3,     // 默认时间成本
+		MemoryCost: 65536, // 默认内存成本 (64MB)
+		Threads:    4,     // 默认线程数
+		SaltLength: 16,    // 默认盐长度
+		KeyLength:  32,    // 默认密钥长度
 	}
 }

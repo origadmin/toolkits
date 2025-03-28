@@ -8,9 +8,12 @@ package hash
 import (
 	"os"
 
+	"github.com/goexts/generic/settings"
+	"github.com/origadmin/toolkits/errors"
+
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/errors"
 )
 
 const (
@@ -26,44 +29,34 @@ var (
 )
 
 func init() {
-	// Use Argon2 as default algorithm
-	crypto, err := NewCrypto(types.WithAlgorithm(types.TypeArgon2))
-	if err != nil {
-		panic(err)
+	alg := os.Getenv(ENV)
+	if alg == "" {
+		alg = core.DefaultType
 	}
-	defaultCrypto = crypto
-
-	env := os.Getenv(ENV)
-	if env == "" {
-		return
-	}
-	t := types.ParseType(env)
-	if creator, ok := algorithms[t]; ok {
-		cfg := &types.Config{}
-		crypto, err := creator(cfg)
+	t := types.ParseType(alg)
+	if t != types.TypeUnknown {
+		crypto, err := NewCrypto(t)
 		if err == nil {
 			defaultCrypto = crypto
 		}
+	}
+	if defaultCrypto == nil {
+		cryptographic, err := NewCrypto(core.DefaultType)
+		if err != nil {
+			panic(err)
+		}
+		defaultCrypto = cryptographic
 	}
 }
 
 // UseCrypto updates the default cryptographic instance
-func UseCrypto(t types.Type) {
-	if creator, ok := algorithms[t]; ok {
-		cfg := &types.Config{}
-		crypto, err := creator(cfg)
-		if err == nil {
-			defaultCrypto = crypto
+func UseCrypto(t types.Type, opts ...types.ConfigOption) error {
+	if alg, ok := algorithms[t]; ok {
+		crypto, err := alg.creator(settings.Apply(alg.defaultConfig, opts))
+		if err != nil {
+			return err
 		}
+		defaultCrypto = crypto
 	}
-}
-
-// Generate generates a password hash using the default cryptographic instance
-func Generate(password string, salt string) (string, error) {
-	return defaultCrypto.HashWithSalt(password, salt)
-}
-
-// Compare compares the given hashed password with the plaintext password using the default cryptographic instance
-func Compare(hashpass, password, salt string) error {
-	return defaultCrypto.Verify(hashpass, password)
+	return errors.Errorf("unsupported hash type: %s", t)
 }

@@ -9,26 +9,52 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/base"
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/utils"
 )
 
-// HMAC256Crypto implements the HMAC-SHA256 hashing algorithm
-type HMAC256Crypto struct {
+// HMAC256 implements the HMAC-SHA256 hashing algorithm
+type HMAC256 struct {
 	config *types.Config
+	codec  interfaces.Codec
+}
+
+type ConfigValidator struct {
+	SaltLength int
+}
+
+func (v ConfigValidator) Validate(config *types.Config) error {
+	if config.SaltLength < 8 {
+		return fmt.Errorf("salt length must be at least 8 bytes")
+	}
+	return nil
 }
 
 // NewHMAC256Crypto creates a new HMAC256 crypto instance
 func NewHMAC256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return &HMAC256Crypto{
+	if config == nil {
+		config = DefaultConfig()
+	}
+	validator := &ConfigValidator{}
+	if err := validator.Validate(config); err != nil {
+		return nil, fmt.Errorf("invalid hmac256 config: %v", err)
+	}
+	return &HMAC256{
 		config: config,
+		codec:  core.NewCodec(types.TypeHMAC256),
 	}, nil
 }
 
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		SaltLength: 16,
+	}
+}
+
 // Hash implements the hash method
-func (c *HMAC256Crypto) Hash(password string) (string, error) {
+func (c *HMAC256) Hash(password string) (string, error) {
 	salt, err := utils.GenerateSalt(c.config.SaltLength)
 	if err != nil {
 		return "", err
@@ -37,18 +63,16 @@ func (c *HMAC256Crypto) Hash(password string) (string, error) {
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *HMAC256Crypto) HashWithSalt(password, salt string) (string, error) {
+func (c *HMAC256) HashWithSalt(password, salt string) (string, error) {
 	h := hmac.New(sha256.New, []byte(salt))
 	h.Write([]byte(password))
 	hash := h.Sum(nil)
-	encoder := NewHMAC256HashEncoder()
-	return encoder.Encode([]byte(salt), hash), nil
+	return c.codec.Encode([]byte(salt), hash, ""), nil
 }
 
 // Verify implements the verify method
-func (c *HMAC256Crypto) Verify(hashed, password string) error {
-	encoder := NewHMAC256HashEncoder()
-	parts, err := encoder.Decode(hashed)
+func (c *HMAC256) Verify(hashed, password string) error {
+	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
@@ -65,16 +89,4 @@ func (c *HMAC256Crypto) Verify(hashed, password string) error {
 	}
 
 	return nil
-}
-
-// HMAC256HashEncoder implements the hash encoder interface
-type HMAC256HashEncoder struct {
-	*base.BaseHashCodec
-}
-
-// NewHMAC256HashEncoder creates a new HMAC256 hash encoder
-func NewHMAC256HashEncoder() interfaces.HashCodec {
-	return &HMAC256HashEncoder{
-		BaseHashCodec: base.NewBaseHashCodec(types.TypeHMAC256).(*base.BaseHashCodec),
-	}
 }
