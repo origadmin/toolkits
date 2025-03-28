@@ -20,6 +20,8 @@ type Config struct {
 	KeyLength  uint32 `env:"HASH_KEYLENGTH"`
 	Cost       int    `env:"HASH_COST"` // Cost parameter (for bcrypt)
 	Salt       string `env:"HASH_SALT"` // Salt for HMAC
+	Iterations int    `env:"HASH_ITERATIONS"`
+	HashType   string `env:"HASH_TYPE"` // used for pbkdf2
 	Scrypt     ScryptConfig
 }
 
@@ -75,16 +77,32 @@ func WithScryptConfig(scrypt ScryptConfig) ConfigOption {
 	}
 }
 
+// WithIterations sets the number of iterations for pbkdf2
+func WithIterations(iterations int) ConfigOption {
+	return func(cfg *Config) {
+		cfg.Iterations = iterations
+	}
+}
+
+// WithHashType sets the hash type for pbkdf2
+func WithHashType(hashType string) ConfigOption {
+	return func(cfg *Config) {
+		cfg.HashType = hashType
+	}
+}
+
 // DefaultConfig 返回默认配置
 func DefaultConfig() *Config {
 	return &Config{
-		TimeCost:   3,     // Default time cost
-		MemoryCost: 65536, // Default memory cost (64MB)
-		Threads:    4,     // Default number of threads
-		SaltLength: 16,    // Default salt length
-		KeyLength:  32,    // Default key length
-		Cost:       10,    // Default cost parameter
-		Salt:       "",    // Default salt
+		TimeCost:   3,        // Default time cost
+		MemoryCost: 65536,    // Default memory cost (64MB)
+		Threads:    4,        // Default number of threads
+		SaltLength: 16,       // Default salt length
+		KeyLength:  32,       // Default key length
+		Cost:       10,       // Default cost parameter
+		Salt:       "",       // Default salt
+		Iterations: 100000,   // Default iterations for pbkdf2
+		HashType:   "sha256", // Default hash type for pbkdf2
 		Scrypt: ScryptConfig{
 			N: 16384, // Default N value
 			R: 8,     // Default R value

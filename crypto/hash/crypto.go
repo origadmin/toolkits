@@ -14,6 +14,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac256"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
 	"github.com/origadmin/toolkits/crypto/hash/core"
@@ -66,6 +67,10 @@ var (
 			creator:       sha.NewSha512Crypto,
 			defaultConfig: sha.DefaultConfig,
 		},
+		types.TypePBKDF2: {
+			creator:       pbkdf2.NewPBKDF2Crypto,
+			defaultConfig: pbkdf2.DefaultConfig,
+		},
 		// Unimplemented cryptos use dummy implementation
 		//types.TypeCustom: {
 		//	creator:       dummy.NewDummyCrypto,
@@ -84,10 +89,6 @@ var (
 		//	defaultConfig: dummy.DefaultConfig,
 		//},
 		//types.TypeHMAC512: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2: {
 		//	creator:       dummy.NewDummyCrypto,
 		//	defaultConfig: dummy.DefaultConfig,
 		//},
