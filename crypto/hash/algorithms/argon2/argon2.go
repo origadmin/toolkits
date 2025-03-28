@@ -5,33 +5,114 @@
 package argon2
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
 
-	"github.com/origadmin/toolkits/crypto/hash/base"
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/utils"
 )
 
-func init() {
-	base.RegisterAlgorithm(types.TypeArgon2, NewArgon2Crypto)
+// Params represents parameters for Argon2 algorithm
+type Params struct {
+	TimeCost   uint32
+	MemoryCost uint32
+	Threads    uint8
+	KeyLength  uint32
 }
 
-// Argon2Crypto implements the Argon2 hashing algorithm
-type Argon2Crypto struct {
+// parseParams parses Argon2 parameters from string
+func parseParams(params string) (*Params, error) {
+	result := &Params{}
+
+	// Handle empty string case
+	if params == "" {
+		return result, nil
+	}
+
+	kv := make(map[string]string)
+	for _, param := range strings.Split(params, ",") {
+		parts := strings.Split(param, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid argon2 param format: %s", param)
+		}
+		kv[parts[0]] = parts[1]
+	}
+
+	// Parse time cost
+	if v, ok := kv["t"]; ok {
+		timeCost, err := strconv.ParseUint(v, 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("invalid time cost: %v", err)
+		}
+		result.TimeCost = uint32(timeCost)
+	}
+
+	// Parse memory cost
+	if v, ok := kv["m"]; ok {
+		memoryCost, err := strconv.ParseUint(v, 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("invalid memory cost: %v", err)
+		}
+		result.MemoryCost = uint32(memoryCost)
+	}
+
+	// Parse threads
+	if v, ok := kv["p"]; ok {
+		threads, err := strconv.ParseUint(v, 10, 8)
+		if err != nil {
+			return nil, fmt.Errorf("invalid threads: %v", err)
+		}
+		result.Threads = uint8(threads)
+	}
+
+	// Parse key length
+	if v, ok := kv["k"]; ok {
+		keyLength, err := strconv.ParseUint(v, 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("invalid key length: %v", err)
+		}
+		result.KeyLength = uint32(keyLength)
+	}
+
+	return result, nil
+}
+
+// String returns the string representation of parameters
+func (p *Params) String() string {
+	var parts []string
+	if p.TimeCost > 0 {
+		parts = append(parts, fmt.Sprintf("t:%d", p.TimeCost))
+	}
+	if p.MemoryCost > 0 {
+		parts = append(parts, fmt.Sprintf("m:%d", p.MemoryCost))
+	}
+	if p.Threads > 0 {
+		parts = append(parts, fmt.Sprintf("p:%d", p.Threads))
+	}
+	if p.KeyLength > 0 {
+		parts = append(parts, fmt.Sprintf("k:%d", p.KeyLength))
+	}
+	return strings.Join(parts, ",")
+}
+
+// Crypto implements the Argon2 hashing algorithm
+type Crypto struct {
+	params *Params
 	config *types.Config
-	codec  interfaces.HashCodec
+	codec  interfaces.Codec
 }
 
-// Argon2ConfigValidator implements the config validator for Argon2
-type Argon2ConfigValidator struct{}
+// ConfigValidator implements the config validator for Argon2
+type ConfigValidator struct{}
 
 // Validate validates the Argon2 configuration
-func (v *Argon2ConfigValidator) Validate(config *types.Config) error {
+func (v *ConfigValidator) Validate(config *types.Config) error {
 	if config.TimeCost < 1 {
 		return fmt.Errorf("invalid time cost: %d", config.TimeCost)
 	}
@@ -44,23 +125,49 @@ func (v *Argon2ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 1 {
 		return fmt.Errorf("invalid salt length: %d", config.SaltLength)
 	}
+	if config.KeyLength < 4 || config.KeyLength > 1024 {
+		return fmt.Errorf("invalid key length: %d, must be between 4 and 1024", config.KeyLength)
+	}
 	return nil
+}
+
+// DefaultConfig returns the default configuration for Argon2
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		Algorithm:  types.TypeArgon2,
+		TimeCost:   3,         // Default time cost
+		MemoryCost: 64 * 1024, // Default memory cost (64MB)
+		Threads:    4,         // Default threads
+		SaltLength: 16,        // Default salt length
+		KeyLength:  32,        // Default key length
+	}
 }
 
 // NewArgon2Crypto creates a new Argon2 crypto instance
 func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	validator := &Argon2ConfigValidator{}
+	// Use default config if provided config is nil
+	if config == nil {
+		config = DefaultConfig()
+	}
+	validator := &ConfigValidator{}
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
-	return &Argon2Crypto{
+	params := &Params{
+		TimeCost:   config.TimeCost,
+		MemoryCost: config.MemoryCost,
+		Threads:    config.Threads,
+		KeyLength:  config.KeyLength,
+	}
+	return &Crypto{
+		params: params,
 		config: config,
-		codec:  base.GetCodec(types.TypeArgon2),
+		codec:  core.NewCodec(types.TypeArgon2),
 	}, nil
 }
 
 // Hash implements the hash method
-func (c *Argon2Crypto) Hash(password string) (string, error) {
+func (c *Crypto) Hash(password string) (string, error) {
 	salt, err := utils.GenerateSalt(c.config.SaltLength)
 	if err != nil {
 		return "", err
@@ -69,23 +176,22 @@ func (c *Argon2Crypto) Hash(password string) (string, error) {
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *Argon2Crypto) HashWithSalt(password, salt string) (string, error) {
+func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
+
 	hash := argon2.IDKey(
 		[]byte(password),
 		[]byte(salt),
-		c.config.TimeCost,
-		c.config.MemoryCost,
-		c.config.Threads,
-		32, // Key length
+		c.params.TimeCost,
+		c.params.MemoryCost,
+		c.params.Threads,
+		c.params.KeyLength,
 	)
 
-	// 将配置参数编码到密码中
-	params := fmt.Sprintf("%d,%d,%d", c.config.TimeCost, c.config.MemoryCost, c.config.Threads)
-	return c.codec.Encode([]byte(salt), hash, params), nil
+	return c.codec.Encode([]byte(salt), hash, c.params.String()), nil
 }
 
 // Verify implements the verify method
-func (c *Argon2Crypto) Verify(hashed, password string) error {
+func (c *Crypto) Verify(hashed, password string) error {
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
@@ -95,51 +201,24 @@ func (c *Argon2Crypto) Verify(hashed, password string) error {
 		return fmt.Errorf("algorithm mismatch")
 	}
 
-	// 从密码中解码配置参数
-	params := strings.Split(parts.Params, ",")
-	if len(params) != 3 {
-		return fmt.Errorf("invalid argon2 params")
-	}
-
-	timeCost, err := strconv.ParseUint(params[0], 10, 32)
+	// Parse parameters
+	params, err := parseParams(parts.Params)
 	if err != nil {
-		return fmt.Errorf("invalid time cost: %v", err)
-	}
-
-	memoryCost, err := strconv.ParseUint(params[1], 10, 32)
-	if err != nil {
-		return fmt.Errorf("invalid memory cost: %v", err)
-	}
-
-	threads, err := strconv.ParseUint(params[2], 10, 8)
-	if err != nil {
-		return fmt.Errorf("invalid threads: %v", err)
+		return err
 	}
 
 	hash := argon2.IDKey(
 		[]byte(password),
 		parts.Salt,
-		uint32(timeCost),
-		uint32(memoryCost),
-		uint8(threads),
-		32, // Key length
+		params.TimeCost,
+		params.MemoryCost,
+		params.Threads,
+		params.KeyLength,
 	)
 
-	if string(hash) != string(parts.Hash) {
+	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
 		return fmt.Errorf("password not match")
 	}
 
 	return nil
-}
-
-// Argon2HashEncoder implements the hash encoder interface
-type Argon2HashEncoder struct {
-	*base.BaseHashCodec
-}
-
-// NewArgon2HashEncoder creates a new Argon2 hash encoder
-func NewArgon2HashEncoder() interfaces.HashCodec {
-	return &Argon2HashEncoder{
-		BaseHashCodec: base.NewBaseHashCodec(types.TypeArgon2).(*base.BaseHashCodec),
-	}
 }
