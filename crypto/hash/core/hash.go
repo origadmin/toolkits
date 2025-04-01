@@ -237,6 +237,16 @@ func UpdateHashFunc(hash Hash, hashFunc func() hash.Hash) {
 	hashes[hash] = hashFunc
 }
 
+// RegisterOrUpdateHashFunc registers a new hash.Hash function if it does not exist,
+// otherwise updates it
+func RegisterOrUpdateHashFunc(name string, hashFunc func() hash.Hash) {
+	if h, err := ParseHash(name); err == nil {
+		UpdateHashFunc(h, hashFunc)
+	} else {
+		RegisterHashFunc(name, hashFunc)
+	}
+}
+
 func ParseHash(s string) (Hash, error) {
 	if h, ok := ParseCryptoHash(s); ok {
 		return h, nil
@@ -338,4 +348,8 @@ func ParseCustomHash(s string) (Hash, bool) {
 		return h, ok
 	}
 	return 0, false
+}
+
+func IsCustomHash(h Hash) bool {
+	return h >= maxHash && h < hashEnd
 }
