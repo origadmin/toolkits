@@ -2,12 +2,12 @@ module github.com/origadmin/toolkits/codec
 
 go 1.23.1
 
-toolchain go1.23.2
+toolchain go1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/bytedance/sonic v1.13.2
-	github.com/goexts/generic v0.1.6
+	github.com/goexts/generic v0.2.4
 	github.com/json-iterator/go v1.1.12
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
