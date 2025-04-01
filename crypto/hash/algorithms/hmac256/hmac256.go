@@ -7,6 +7,7 @@ package hmac256
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/subtle"
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/core"
@@ -88,7 +89,7 @@ func (c *HMAC256) Verify(hashed, password string) error {
 	h := hmac.New(sha256.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)
-	if string(newHash) != string(parts.Hash) {
+	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
 		return core.ErrPasswordNotMatch
 	}
 

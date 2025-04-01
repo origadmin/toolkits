@@ -18,12 +18,11 @@ import (
 type SHA struct {
 	config   *types.Config
 	codec    interfaces.Codec
-	hashType types.Type
 	hashHash core.Hash
 }
 
 func (c *SHA) Type() string {
-	return c.hashType.String()
+	return c.hashHash.String()
 }
 
 type ConfigValidator struct {
@@ -54,7 +53,6 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 		config:   config,
 		codec:    core.NewCodec(hashType),
 		hashHash: hashHash,
-		hashType: hashType,
 	}, nil
 }
 

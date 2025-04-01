@@ -5,6 +5,7 @@
 package pbkdf2
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"hash"
 	"strconv"
@@ -77,7 +78,6 @@ func NewPBKDF2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 		params: params,
 		config: config,
 		codec:  core.NewCodec(types.TypePBKDF2),
-		//hash:   hashHash,
 	}, nil
 }
 
@@ -105,7 +105,7 @@ func (c *PBKDF2) Hash(password string) (string, error) {
 	return c.HashWithSalt(password, string(salt))
 }
 
-func (c *PBKDF2) HashFromName(name string) (func() hash.Hash, error) {
+func (c *PBKDF2) hashFromName(name string) (func() hash.Hash, error) {
 	parseHash, err := core.ParseHash(name)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (c *PBKDF2) HashFromName(name string) (func() hash.Hash, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
-	hashHash, err := c.HashFromName(c.params.HashType)
+	hashHash, err := c.hashFromName(c.params.HashType)
 	if err != nil {
 		return "", err
 	}
@@ -140,13 +140,13 @@ func (c *PBKDF2) Verify(hashed, password string) error {
 	}
 
 	// The hash function is recreated based on the hash type being parsed
-	hashHash, err := c.HashFromName(params.HashType)
+	hashHash, err := c.hashFromName(params.HashType)
 	if err != nil {
 		return err
 	}
 
 	newHash := pbkdf2.Key([]byte(password), parts.Salt, params.Iterations, int(params.KeyLength), hashHash)
-	if string(newHash) != string(parts.Hash) {
+	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
 		return core.ErrPasswordNotMatch
 	}
 	return nil
