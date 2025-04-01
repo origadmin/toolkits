@@ -18,6 +18,7 @@ import (
 	"hash/crc64"
 	"hash/fnv"
 	"hash/maphash"
+	"strings"
 
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
@@ -222,10 +223,11 @@ func RegisterHashFunc(name string, hashFunc func() hash.Hash) {
 	if _, err := ParseHash(name); err == nil {
 		panic(fmt.Sprintf("hash function %s already registered", name))
 	}
+	name = strings.ToLower(name)
 	old := hashEnd
 	hashEnd++
-	customHashNames[name] = Hash(old)
-	customNameHashes[Hash(old)] = name
+	customHashNames[name] = old
+	customNameHashes[old] = name
 	hashes = append(hashes, hashFunc)
 }
 
@@ -248,6 +250,7 @@ func RegisterOrUpdateHashFunc(name string, hashFunc func() hash.Hash) {
 }
 
 func ParseHash(s string) (Hash, error) {
+	s = strings.ToLower(s)
 	if h, ok := ParseCryptoHash(s); ok {
 		return h, nil
 	}

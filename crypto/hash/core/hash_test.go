@@ -115,7 +115,6 @@ func TestHashAlgorithms(t *testing.T) {
 		{"FNV64A", FNV64A, "hello", "a430d84680aabd0b", false},
 		{"FNV128", FNV128, "hello", "f14b58486483d94f708038798c29697f", false},
 		{"FNV128A", FNV128A, "hello", "e3e1efd54283d94f7081314b599d31b3", false},
-		// 添加自定义哈希算法的测试用例
 		{"CUSTOM", 0, "hello", "mock_custom_hash", false},
 		{
 			name:        "CUSTOM",

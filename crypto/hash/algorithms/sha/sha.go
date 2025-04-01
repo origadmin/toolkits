@@ -5,12 +5,8 @@
 package sha
 
 import (
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"crypto/subtle"
 	"fmt"
-	"hash"
 
 	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -23,7 +19,7 @@ type SHA struct {
 	config   *types.Config
 	codec    interfaces.Codec
 	hashType types.Type
-	hashHash hash.Hash
+	hashHash core.Hash
 }
 
 func (c *SHA) Type() string {
@@ -49,17 +45,11 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
-	var hashHash hash.Hash
-	switch hashType {
-	case types.TypeSha1:
-		hashHash = sha1.New()
-	case types.TypeSha256:
-		hashHash = sha256.New()
-	case types.TypeSha512:
-		hashHash = sha512.New()
-	default:
-		return nil, fmt.Errorf("unsupported hash type: %s", hashType)
+	hashHash, err := core.ParseHash(hashType.String())
+	if err != nil {
+		return nil, err
 	}
+
 	return &SHA{
 		config:   config,
 		codec:    core.NewCodec(hashType),
@@ -97,7 +87,7 @@ func (c *SHA) Hash(password string) (string, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *SHA) HashWithSalt(password, salt string) (string, error) {
-	newHash := c.hashHash.Sum([]byte(password + salt))
+	newHash := c.hashHash.New().Sum([]byte(password + salt))
 	return c.codec.Encode([]byte(salt), newHash[:]), nil
 }
 
@@ -108,10 +98,10 @@ func (c *SHA) Verify(hashed, password string) error {
 		return err
 	}
 
-	if parts.Algorithm != c.hashType {
+	if parts.Algorithm.String() != c.hashHash.String() {
 		return core.ErrAlgorithmMismatch
 	}
-	newHash := c.hashHash.Sum([]byte(password + string(parts.Salt)))
+	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))
 	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
 		return core.ErrPasswordNotMatch
 	}
