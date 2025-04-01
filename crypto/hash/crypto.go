@@ -49,7 +49,7 @@ var (
 		},
 		types.TypeMD5: {
 			creator:       md5.NewMD5Crypto,
-			defaultConfig: md5.DefaultConfig,
+			defaultConfig: types.DefaultConfig,
 		},
 		types.TypeScrypt: {
 			creator:       scrypt.NewScryptCrypto,

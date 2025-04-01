@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/origadmin/toolkits/crypto/hash"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -16,10 +17,8 @@ func main() {
 
 	// reate cryptographic instance
 	crypto, err := hash.NewCrypto(types.TypeArgon2, func(config *types.Config) {
-		config.TimeCost = 3
-		config.MemoryCost = 64 * 1024
-		config.Threads = 4
 		config.SaltLength = 16
+		config.ParamConfig = argon2.DefaultParams().String()
 	})
 	if err != nil {
 		log.Fatal(err)

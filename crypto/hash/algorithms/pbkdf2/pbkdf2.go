@@ -5,9 +5,6 @@
 package pbkdf2
 
 import (
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"fmt"
 	"hash"
 	"strconv"
@@ -26,7 +23,6 @@ type PBKDF2 struct {
 	params *Params
 	config *types.Config
 	codec  interfaces.Codec
-	hash   func() hash.Hash
 }
 
 func (c *PBKDF2) Type() string {
@@ -34,14 +30,25 @@ func (c *PBKDF2) Type() string {
 }
 
 type ConfigValidator struct {
+	params *Params
 }
 
 func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
 		return fmt.Errorf("salt length must be at least 8 bytes")
 	}
-	if config.Iterations < 1000 {
+	if v.params.Iterations < 1000 {
 		return fmt.Errorf("iterations must be at least 1000")
+	}
+	if v.params.KeyLength < 8 {
+		return fmt.Errorf("key length must be at least 8 bytes")
+	}
+	if v.params.HashType == "" {
+		return fmt.Errorf("hash type must be specified")
+	}
+	_, err := core.ParseHash(v.params.HashType)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -51,39 +58,41 @@ func NewPBKDF2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
+
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	params, err := parseParams(config.ParamConfig)
+	if err != nil {
+		return nil, fmt.Errorf("invalid pbkdf2 param config: %v", err)
+	}
+
+	validator := &ConfigValidator{
+		params: params,
+	}
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid pbkdf2 config: %v", err)
 	}
-	//var hashHash func() hash.Hash
-	hashType := types.ParseType(config.HashType)
-	//switch hashType {
-	//case types.TypeSha1:
-	//	hashHash = sha1.New
-	//case types.TypeSha256:
-	//	hashHash = sha256.New
-	//case types.TypeSha512:
-	//	hashHash = sha512.New
-	//default:
-	//	return nil, fmt.Errorf("unsupported hashHash type: %s", config.HashType)
-	//}
 	return &PBKDF2{
-		params: &Params{
-			Iterations: config.Iterations,
-			KeyLength:  config.KeyLength,
-			HashType:   hashType,
-		},
+		params: params,
 		config: config,
 		codec:  core.NewCodec(types.TypePBKDF2),
 		//hash:   hashHash,
 	}, nil
 }
 
+func DefaultParams() *Params {
+	return &Params{
+		Iterations: 10000,
+		KeyLength:  32,
+		HashType:   core.SHA256.String(),
+	}
+}
+
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
-		Iterations: 10000,
-		HashType:   types.TypeSha256.String(),
+		SaltLength:  16,
+		ParamConfig: DefaultParams().String(),
 	}
 }
 
@@ -96,22 +105,17 @@ func (c *PBKDF2) Hash(password string) (string, error) {
 	return c.HashWithSalt(password, string(salt))
 }
 
-func (c *PBKDF2) HashFromType(hashType types.Type) (func() hash.Hash, error) {
-	switch hashType {
-	case types.TypeSha1:
-		return sha1.New, nil
-	case types.TypeSha256:
-		return sha256.New, nil
-	case types.TypeSha512:
-		return sha512.New, nil
-	default:
-		return nil, fmt.Errorf("unsupported hash type: %s", hashType)
+func (c *PBKDF2) HashFromName(name string) (func() hash.Hash, error) {
+	parseHash, err := core.ParseHash(name)
+	if err != nil {
+		return nil, err
 	}
+	return parseHash.New, nil
 }
 
 // HashWithSalt implements the hash with salt method
 func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
-	hashHash, err := c.HashFromType(c.params.HashType)
+	hashHash, err := c.HashFromName(c.params.HashType)
 	if err != nil {
 		return "", err
 	}
@@ -136,7 +140,7 @@ func (c *PBKDF2) Verify(hashed, password string) error {
 	}
 
 	// The hash function is recreated based on the hash type being parsed
-	hashHash, err := c.HashFromType(params.HashType)
+	hashHash, err := c.HashFromName(params.HashType)
 	if err != nil {
 		return err
 	}
@@ -152,7 +156,7 @@ func (c *PBKDF2) Verify(hashed, password string) error {
 type Params struct {
 	Iterations int
 	KeyLength  uint32
-	HashType   types.Type
+	HashType   string
 }
 
 // String returns the string representation of parameters
@@ -164,8 +168,9 @@ func (p *Params) String() string {
 	if p.KeyLength > 0 {
 		parts = append(parts, fmt.Sprintf("k:%d", p.KeyLength))
 	}
-	if p.HashType != types.TypeUnknown {
-		parts = append(parts, fmt.Sprintf("h:%s", p.HashType.String()))
+	_, err := core.ParseHash(p.HashType)
+	if err == nil {
+		parts = append(parts, fmt.Sprintf("h:%s", p.HashType))
 	}
 	return strings.Join(parts, ",")
 }
@@ -208,7 +213,10 @@ func parseParams(params string) (*Params, error) {
 
 	// Parse hash type
 	if v, ok := kv["h"]; ok {
-		result.HashType = types.ParseType(v)
+		_, err := core.ParseHash(v)
+		if err == nil {
+			result.HashType = v
+		}
 	}
 
 	return result, nil

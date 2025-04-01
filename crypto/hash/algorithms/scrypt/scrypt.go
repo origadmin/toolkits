@@ -30,14 +30,15 @@ func (c *Scrypt) Type() string {
 }
 
 type ConfigValidator struct {
+	params *Params
 }
 
-func (v ConfigValidator) Validate(config *types.Config) interface{} {
+func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
 		return fmt.Errorf("salt length must be at least 8 bytes")
 	}
 	// N must be > 1 and a power of 2
-	if config.Scrypt.N <= 1 || config.Scrypt.N&(config.Scrypt.N-1) != 0 {
+	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
 		return fmt.Errorf("N must be > 1 and a power of 2")
 	}
 
@@ -49,31 +50,41 @@ func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
+
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	params, err := parseParams(config.ParamConfig)
+	if err != nil {
+		return nil, fmt.Errorf("invalid scrypt param config: %v", err)
+	}
+
+	validator := &ConfigValidator{
+		params: params,
+	}
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid scrypt config: %v", err)
 	}
 	return &Scrypt{
-		params: &Params{
-			N:      config.Scrypt.N,
-			R:      config.Scrypt.R,
-			P:      config.Scrypt.P,
-			KeyLen: int(config.KeyLength),
-		},
+		params: params,
 		config: config,
 		codec:  core.NewCodec(types.TypeScrypt),
 	}, nil
 }
 
+func DefaultParams() *Params {
+	return &Params{
+		N:      16384,
+		R:      8,
+		P:      1,
+		KeyLen: 32,
+	}
+}
+
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
-		KeyLength:  32,
-		Scrypt: types.ScryptConfig{
-			N: 16384,
-			R: 8,
-			P: 1,
-		},
+		SaltLength:  16,
+		ParamConfig: DefaultParams().String(),
 	}
 }
 
