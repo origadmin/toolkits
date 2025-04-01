@@ -12,12 +12,11 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/dummy"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac256"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha1"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha256"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
 	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -50,93 +49,89 @@ var (
 		},
 		types.TypeMD5: {
 			creator:       md5.NewMD5Crypto,
-			defaultConfig: md5.DefaultConfig,
+			defaultConfig: types.DefaultConfig,
 		},
 		types.TypeScrypt: {
 			creator:       scrypt.NewScryptCrypto,
 			defaultConfig: scrypt.DefaultConfig,
 		},
 		types.TypeSha1: {
-			creator: sha1.NewSHA1Crypto,
-			defaultConfig: func() *types.Config {
-				return &types.Config{
-					SaltLength: 16,
-				}
-			},
+			creator:       sha.NewSha1Crypto,
+			defaultConfig: sha.DefaultConfig,
 		},
 		types.TypeSha256: {
-			creator: sha256.NewSHA256Crypto,
-			defaultConfig: func() *types.Config {
-				return &types.Config{
-					SaltLength: 16,
-				}
-			},
-		},
-		// Unimplemented cryptos use dummy implementation
-		types.TypeCustom: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
+			creator:       sha.NewSha256Crypto,
+			defaultConfig: sha.DefaultConfig,
 		},
 		types.TypeSha512: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypeSha384: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypeSha3256: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypeHMAC512: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
+			creator:       sha.NewSha512Crypto,
+			defaultConfig: sha.DefaultConfig,
 		},
 		types.TypePBKDF2: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
+			creator:       pbkdf2.NewPBKDF2Crypto,
+			defaultConfig: pbkdf2.DefaultConfig,
 		},
-		types.TypePBKDF2SHA256: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA512: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA384: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3256: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3224: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3384: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3512224: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3512256: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3512384: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
-		types.TypePBKDF2SHA3512512: {
-			creator:       dummy.NewDummyCrypto,
-			defaultConfig: dummy.DefaultConfig,
-		},
+		// Unimplemented cryptos use dummy implementation
+		//types.TypeCustom: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypeSha512: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypeSha384: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypeSha3256: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypeHMAC512: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA256: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA512: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA384: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3256: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3224: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3384: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3512224: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3512256: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3512384: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
+		//types.TypePBKDF2SHA3512512: {
+		//	creator:       dummy.NewDummyCrypto,
+		//	defaultConfig: dummy.DefaultConfig,
+		//},
 	}
 )
 
@@ -145,6 +140,10 @@ type crypto struct {
 	codec     interfaces.Codec
 	crypto    interfaces.Cryptographic
 	cryptos   map[types.Type]interfaces.Cryptographic
+}
+
+func (c crypto) Type() string {
+	return string(c.algorithm)
 }
 
 func (c crypto) Hash(password string) (string, error) {

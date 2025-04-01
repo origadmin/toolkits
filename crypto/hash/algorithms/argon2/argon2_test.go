@@ -197,7 +197,7 @@ func TestParams_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.params.String(); got != tt.want {
-				t.Errorf("Params.String() = %v, want %v", got, tt.want)
+				t.Errorf("params.String() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -217,22 +217,26 @@ func TestNewArgon2Crypto(t *testing.T) {
 		{
 			name: "Custom config",
 			config: &types.Config{
-				TimeCost:   3,
-				MemoryCost: 64 * 1024,
-				Threads:    4,
 				SaltLength: 16,
-				KeyLength:  32,
+				ParamConfig: (&Params{
+					TimeCost:   3,
+					MemoryCost: 64 * 1024,
+					Threads:    4,
+					KeyLength:  32,
+				}).String(),
 			},
 			wantErr: false,
 		},
 		{
 			name: "Invalid config - zero time cost",
 			config: &types.Config{
-				TimeCost:   0,
-				MemoryCost: 64 * 1024,
-				Threads:    4,
 				SaltLength: 16,
-				KeyLength:  32,
+				ParamConfig: (&Params{
+					TimeCost:   0,
+					MemoryCost: 64 * 1024,
+					Threads:    4,
+					KeyLength:  32,
+				}).String(),
 			},
 			wantErr: true,
 		},

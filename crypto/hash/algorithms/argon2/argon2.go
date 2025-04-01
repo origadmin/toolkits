@@ -108,25 +108,31 @@ type Argon2 struct {
 	codec  interfaces.Codec
 }
 
+func (c *Argon2) Type() string {
+	return types.TypeArgon2.String()
+}
+
 // ConfigValidator implements the config validator for Argon2
-type ConfigValidator struct{}
+type ConfigValidator struct {
+	params *Params
+}
 
 // Validate validates the Argon2 configuration
 func (v *ConfigValidator) Validate(config *types.Config) error {
-	if config.TimeCost < 1 {
-		return fmt.Errorf("invalid time cost: %d", config.TimeCost)
-	}
-	if config.MemoryCost < 1 {
-		return fmt.Errorf("invalid memory cost: %d", config.MemoryCost)
-	}
-	if config.Threads < 1 {
-		return fmt.Errorf("invalid threads: %d", config.Threads)
-	}
 	if config.SaltLength < 8 {
 		return core.ErrSaltLengthTooShort
 	}
-	if config.KeyLength < 4 || config.KeyLength > 1024 {
-		return fmt.Errorf("invalid key length: %d, must be between 4 and 1024", config.KeyLength)
+	if v.params.TimeCost < 1 {
+		return fmt.Errorf("invalid time cost: %d", v.params.TimeCost)
+	}
+	if v.params.MemoryCost < 1 {
+		return fmt.Errorf("invalid memory cost: %d", v.params.MemoryCost)
+	}
+	if v.params.Threads < 1 {
+		return fmt.Errorf("invalid threads: %d", v.params.Threads)
+	}
+	if v.params.KeyLength < 4 || v.params.KeyLength > 1024 {
+		return fmt.Errorf("invalid key length: %d, must be between 4 and 1024", v.params.KeyLength)
 	}
 	return nil
 }
@@ -134,11 +140,17 @@ func (v *ConfigValidator) Validate(config *types.Config) error {
 // DefaultConfig returns the default configuration for Argon2
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		TimeCost:   3,         // Default time cost
-		MemoryCost: 64 * 1024, // Default memory cost (64MB)
-		Threads:    4,         // Default threads
-		SaltLength: 16,        // Default salt length
-		KeyLength:  32,        // Default key length
+		SaltLength:  16, // Default salt length
+		ParamConfig: DefaultParams().String(),
+	}
+}
+
+func DefaultParams() *Params {
+	return &Params{
+		TimeCost:   3,     // Default time cost
+		MemoryCost: 65536, // Default memory cost (64MB)
+		Threads:    4,     // Default threads
+		KeyLength:  32,    // Default key length
 	}
 }
 
@@ -148,16 +160,22 @@ func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
+
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	params, err := parseParams(config.ParamConfig)
+	if err != nil {
+		return nil, fmt.Errorf("invalid argon2 param config: %v", err)
+	}
+
+	validator := &ConfigValidator{
+		params: params,
+	}
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
-	params := &Params{
-		TimeCost:   config.TimeCost,
-		MemoryCost: config.MemoryCost,
-		Threads:    config.Threads,
-		KeyLength:  config.KeyLength,
-	}
+
 	return &Argon2{
 		params: params,
 		config: config,
@@ -195,7 +213,7 @@ func (c *Argon2) Verify(hashed, password string) error {
 		return err
 	}
 	if parts.Algorithm != types.TypeArgon2 {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters
 	params, err := parseParams(parts.Params)

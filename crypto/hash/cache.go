@@ -18,6 +18,10 @@ type cachedCrypto struct {
 	cache  sync.Map
 }
 
+func (c *cachedCrypto) Type() string {
+	return c.crypto.Type()
+}
+
 type cacheItem struct {
 	hash      string
 	expiresAt time.Time

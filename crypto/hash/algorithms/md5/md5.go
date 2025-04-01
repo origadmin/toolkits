@@ -21,6 +21,10 @@ type MD5 struct {
 	codec  interfaces.Codec
 }
 
+func (c *MD5) Type() string {
+	return types.TypeMD5.String()
+}
+
 type ConfigValidator struct {
 	SaltLength int
 }
@@ -35,7 +39,7 @@ func (v ConfigValidator) Validate(config *types.Config) interface{} {
 // NewMD5Crypto creates a new MD5 crypto instance
 func NewMD5Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
-		config = DefaultConfig()
+		config = types.DefaultConfig()
 	}
 	validator := &ConfigValidator{}
 	if err := validator.Validate(config); err != nil {
@@ -70,18 +74,12 @@ func (c *MD5) Verify(hashed, password string) error {
 	}
 
 	if parts.Algorithm != types.TypeMD5 {
-		return fmt.Errorf("algorithm mismatch")
+		return core.ErrAlgorithmMismatch
 	}
 
 	newHash := md5.Sum([]byte(password + string(parts.Salt)))
 	if subtle.ConstantTimeCompare(newHash[:], parts.Hash) != 1 {
-		return fmt.Errorf("password not match")
+		return core.ErrPasswordNotMatch
 	}
 	return nil
-}
-
-func DefaultConfig() *types.Config {
-	return &types.Config{
-		SaltLength: 16,
-	}
 }

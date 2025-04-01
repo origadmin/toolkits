@@ -20,19 +20,25 @@ import (
 
 // Scrypt implements the Scrypt hashing algorithm
 type Scrypt struct {
+	params *Params
 	config *types.Config
 	codec  interfaces.Codec
 }
 
-type ConfigValidator struct {
+func (c *Scrypt) Type() string {
+	return types.TypeScrypt.String()
 }
 
-func (v ConfigValidator) Validate(config *types.Config) interface{} {
+type ConfigValidator struct {
+	params *Params
+}
+
+func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
 		return fmt.Errorf("salt length must be at least 8 bytes")
 	}
 	// N must be > 1 and a power of 2
-	if config.Scrypt.N <= 1 || config.Scrypt.N&(config.Scrypt.N-1) != 0 {
+	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
 		return fmt.Errorf("N must be > 1 and a power of 2")
 	}
 
@@ -44,25 +50,41 @@ func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
+
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	params, err := parseParams(config.ParamConfig)
+	if err != nil {
+		return nil, fmt.Errorf("invalid scrypt param config: %v", err)
+	}
+
+	validator := &ConfigValidator{
+		params: params,
+	}
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid scrypt config: %v", err)
 	}
 	return &Scrypt{
+		params: params,
 		config: config,
 		codec:  core.NewCodec(types.TypeScrypt),
 	}, nil
 }
 
+func DefaultParams() *Params {
+	return &Params{
+		N:      16384,
+		R:      8,
+		P:      1,
+		KeyLen: 32,
+	}
+}
+
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
-		KeyLength:  32,
-		Scrypt: types.ScryptConfig{
-			N: 16384,
-			R: 8,
-			P: 1,
-		},
+		SaltLength:  16,
+		ParamConfig: DefaultParams().String(),
 	}
 }
 
@@ -160,17 +182,11 @@ func (c *Scrypt) Hash(password string) (string, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
-	params := &Params{
-		N:      c.config.Scrypt.N,
-		R:      c.config.Scrypt.R,
-		P:      c.config.Scrypt.P,
-		KeyLen: int(c.config.KeyLength),
-	}
-	hash, err := scrypt.Key([]byte(password), []byte(salt), params.N, params.R, params.P, params.KeyLen)
+	hash, err := scrypt.Key([]byte(password), []byte(salt), c.params.N, c.params.R, c.params.P, c.params.KeyLen)
 	if err != nil {
 		return "", err
 	}
-	return c.codec.Encode([]byte(salt), hash, params.String()), nil
+	return c.codec.Encode([]byte(salt), hash, c.params.String()), nil
 }
 
 // Verify implements the verify method
