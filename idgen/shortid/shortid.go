@@ -20,7 +20,7 @@ var (
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New()
-	idgen.Register(s)
+	idgen.RegisterStringIdentifier(s)
 }
 
 type ShortID struct {
@@ -32,8 +32,8 @@ func (s ShortID) Name() string {
 	return "shortid"
 }
 
-// Gen generates a new ShortID ID as a string.
-func (s ShortID) Gen() string {
+// String generates a new ShortID ID as a string.
+func (s ShortID) String() string {
 	ret, err := s.generator.Generate()
 	if err != nil {
 		return ""
@@ -41,8 +41,8 @@ func (s ShortID) Gen() string {
 	return ret
 }
 
-// Validate checks if the provided ID is a valid ShortID ID.
-func (s ShortID) Validate(id string) bool {
+// ValidateString checks if the provided ID is a valid ShortID ID.
+func (s ShortID) ValidateString(id string) bool {
 	return len(id) == bitSize
 }
 

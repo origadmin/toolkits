@@ -21,7 +21,7 @@ var (
 
 // init registers the XID identifier with the ident package.
 func init() {
-	idgen.Register(New())
+	idgen.RegisterStringIdentifier(New())
 }
 
 // Name returns the name of the identifier.
@@ -29,13 +29,13 @@ func (x XID) Name() string {
 	return "xid"
 }
 
-// Gen generates a new unique identifier.
-func (x XID) Gen() string {
+// String generates a new unique identifier.
+func (x XID) String() string {
 	return xid.New().String()
 }
 
-// Validate checks if the provided id is a valid xid.
-func (x XID) Validate(id string) bool {
+// ValidateString checks if the provided id is a valid xid.
+func (x XID) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}

@@ -6,7 +6,6 @@ package shortid
 
 import (
 	"cmp"
-	"strconv"
 
 	"github.com/sony/sonyflake"
 
@@ -20,31 +19,28 @@ const (
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New()
-	idgen.Register(s)
+	idgen.RegisterNumberIdentifier(s)
 }
 
 type Sonyflake struct {
 	generator *sonyflake.Sonyflake
 }
 
+func (s Sonyflake) Number() int64 {
+	id, err := s.generator.NextID()
+	if err != nil {
+		return 0
+	}
+	return int64(id)
+}
+
+func (s Sonyflake) ValidateNumber(id int64) bool {
+	return id != 0
+}
+
 // Name returns the name of the generator.
 func (s Sonyflake) Name() string {
 	return "sonyflake"
-}
-
-// Gen generates a new Sonyflake ID as a string.
-func (s Sonyflake) Gen() string {
-	id, err := s.generator.NextID()
-	if err != nil {
-		return ""
-	}
-	return strconv.FormatUint(id, 10)
-}
-
-// Validate checks if the provided ID is a valid Sonyflake ID.
-func (s Sonyflake) Validate(id string) bool {
-	num, err := strconv.ParseUint(id, 10, 64)
-	return err == nil && num != 0
 }
 
 // Size returns the bit size of the generated Sonyflake ID.

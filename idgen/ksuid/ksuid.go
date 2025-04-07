@@ -16,8 +16,7 @@ var (
 
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
-	s := New()
-	idgen.Register(s)
+	idgen.RegisterStringIdentifier(New())
 }
 
 type KSUID struct {
@@ -30,12 +29,12 @@ func (s KSUID) Name() string {
 }
 
 // Gen generates a new KSUID ID as a string.
-func (s KSUID) Gen() string {
+func (s KSUID) String() string {
 	return s.generator.String()
 }
 
-// Validate checks if the provided ID is a valid KSUID ID.
-func (s KSUID) Validate(id string) bool {
+// ValidateString checks if the provided ID is a valid KSUID ID.
+func (s KSUID) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}
@@ -53,7 +52,6 @@ type Setting struct {
 
 // New creates a new KSUID generator with a unique node.
 func New(_ ...Setting) *KSUID {
-
 	generator, err := ksuid.NewRandom()
 	if err != nil {
 		panic(err)
