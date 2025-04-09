@@ -12,7 +12,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 )
 
-// 内存缓存优化
+// Memory cache optimization
 type cachedCrypto struct {
 	crypto interfaces.Cryptographic
 	cache  sync.Map
@@ -38,7 +38,7 @@ func (c *cachedCrypto) HashWithSalt(password, salt string) (string, error) {
 }
 
 func (c *cachedCrypto) Verify(hashed, password string) error {
-	// 从缓存中获取
+	// Retrieve from cache
 	if item, ok := c.cache.Load(password); ok {
 		cached := item.(cacheItem)
 		if time.Now().Before(cached.expiresAt) {
@@ -49,13 +49,13 @@ func (c *cachedCrypto) Verify(hashed, password string) error {
 		}
 	}
 
-	// 验证密码
+	// Verify password
 	err := c.crypto.Verify(hashed, password)
 	if err != nil {
 		return err
 	}
 
-	// 缓存结果
+	// Cache the result
 	c.cache.Store(password, cacheItem{
 		hash:      hashed,
 		expiresAt: time.Now().Add(5 * time.Minute),

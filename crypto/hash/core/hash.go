@@ -20,6 +20,7 @@ import (
 	"hash/maphash"
 	"strings"
 
+	"github.com/goexts/generic"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/md4"
@@ -95,22 +96,17 @@ func init() {
 	}
 	UpdateHashFunc(BLAKE2s_256, newBlake2sHash256)
 	newBlake2bHash256 := func() hash.Hash {
-		h, _ := blake2b.New256(nil)
-		return h
-	}
-	newBlake2bHash384 := func() hash.Hash {
-		h, _ := blake2b.New384(nil)
-		return h
-	}
-
-	newBlake2bHash512 := func() hash.Hash {
-		h, _ := blake2b.New512(nil)
-		return h
+		return generic.Must(blake2b.New256(nil))
 	}
 	UpdateHashFunc(BLAKE2b_256, newBlake2bHash256)
+	newBlake2bHash384 := func() hash.Hash {
+		return generic.Must(blake2b.New384(nil))
+	}
 	UpdateHashFunc(BLAKE2b_384, newBlake2bHash384)
+	newBlake2bHash512 := func() hash.Hash {
+		return generic.Must(blake2b.New512(nil))
+	}
 	UpdateHashFunc(BLAKE2b_512, newBlake2bHash512)
-
 	UpdateHashFunc(ADLER32, func() hash.Hash { return adler32.New() })
 	UpdateHashFunc(CRC32, func() hash.Hash { return crc32.NewIEEE() })
 	UpdateHashFunc(CRC32_ISO, func() hash.Hash { return crc32.New(crc32.MakeTable(crc32.IEEE)) })
