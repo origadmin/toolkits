@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -168,7 +169,12 @@ func TestAllHashTypes(t *testing.T) {
 			hashType: types.TypeScrypt,
 			password: "scryptPass2",
 			salt:     "scryptSalt2",
-			options:  []types.Option{types.WithSaltLength(16)},
+			options: []types.Option{types.WithSaltLength(16), types.WithParams(&scrypt.Params{
+				N:      2,
+				R:      1,
+				P:      1,
+				KeyLen: 16,
+			})},
 		},
 		{
 			name:     "Bcrypt",
@@ -230,11 +236,11 @@ func TestAllHashTypes(t *testing.T) {
 	hashed, err := argonCrypto.Hash("passwordWithoutSalt")
 	assert.NoError(t, err)
 	for i, tt := range tests {
-		t.Run("HashWithoutSalt", func(t *testing.T) {
+		t.Run(tt.name+"_VerifyWithCrypto", func(t *testing.T) {
 			err = tt.crypto.Verify(hashed, "passwordWithoutSalt")
 			assert.NoError(t, err, "Should verify hash without explicit salt")
 		})
-		t.Run("HashCommon", func(t *testing.T) {
+		t.Run(tt.name+"_VerifyWithCommon", func(t *testing.T) {
 			t.Logf("hash details: %s", hashes[i])
 			err := Verify(hashes[i], tt.password)
 			assert.NoError(t, err, "Should verify hash without explicit salt")

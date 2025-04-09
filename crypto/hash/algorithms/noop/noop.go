@@ -12,12 +12,12 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// noop implements a dummy hashing algorithm
+// noop implements a noop hashing algorithm
 type noop struct {
 }
 
 func (n *noop) Type() string {
-	return "dummy"
+	return "noop"
 }
 
 // NewNoopCrypto creates a new noop crypto instance
@@ -32,7 +32,7 @@ func (n *noop) Hash(password string) (string, error) {
 
 // HashWithSalt implements the hash with salt method
 func (n *noop) HashWithSalt(password, salt string) (string, error) {
-	return "", fmt.Errorf("dummy algorithm not implemented")
+	return "", fmt.Errorf("noop algorithm not implemented")
 }
 
 // Verify implements the verify method

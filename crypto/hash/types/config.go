@@ -33,7 +33,13 @@ func WithParams(paramConfig ParamConfig) Option {
 	}
 }
 
-// DefaultConfig 返回默认配置
+func WithParamsString(paramConfig string) Option {
+	return func(cfg *Config) {
+		cfg.ParamConfig = paramConfig
+	}
+}
+
+// DefaultConfig return to the default configuration
 func DefaultConfig() *Config {
 	return &Config{
 		SaltLength: 16, // Default salt length

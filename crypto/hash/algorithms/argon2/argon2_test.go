@@ -3,8 +3,11 @@ package argon2
 import (
 	"testing"
 
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
+
+var codec = core.NewCodec(types.TypeArgon2)
 
 func TestParams_ParseAndString(t *testing.T) {
 	tests := []struct {
@@ -294,15 +297,18 @@ func TestCrypto_Verify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Hash() error = %v", err)
 	}
-
-	err = crypto.Verify(hash, password)
+	decoded, err := codec.Decode(hash)
+	if err != nil {
+		t.Errorf("Decode() error = %v", err)
+	}
+	err = crypto.Verify(decoded, password)
 	if err != nil {
 		t.Errorf("Verify() error = %v", err)
 	}
 
 	// Test with wrong password
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(hash, wrongPassword)
+	err = crypto.Verify(decoded, wrongPassword)
 	if err == nil {
 		t.Error("Verify() should return error for wrong password")
 	}
@@ -319,12 +325,16 @@ func TestCrypto_VerifyWithSalt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("HashWithSalt() error = %v", err)
 	}
-	err = crypto.Verify(hash, password)
+	decoded, err := codec.Decode(hash)
+	if err != nil {
+		t.Errorf("Decode() error = %v", err)
+	}
+	err = crypto.Verify(decoded, password)
 	if err != nil {
 		t.Errorf("VerifyWithSalt() error = %v", err)
 	}
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(hash, wrongPassword)
+	err = crypto.Verify(decoded, wrongPassword)
 	if err == nil {
 		t.Error("VerifyWithSalt() should return error for wrong password")
 	}

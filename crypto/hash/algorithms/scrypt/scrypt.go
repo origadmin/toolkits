@@ -41,6 +41,15 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
 		return fmt.Errorf("N must be > 1 and a power of 2")
 	}
+	if v.params.R <= 0 {
+		return fmt.Errorf("R must be > 0")
+	}
+	if v.params.P <= 0 {
+		return fmt.Errorf("P must be > 0")
+	}
+	if v.params.KeyLen <= 0 {
+		return fmt.Errorf("key length must be > 0")
+	}
 
 	return nil
 }

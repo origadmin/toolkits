@@ -47,7 +47,12 @@ func (c *crypto) Verify(hashed, password string) error {
 	if err != nil {
 		return err
 	}
-
+	switch parts.Algorithm {
+	case "hmac-sha256":
+		parts.Algorithm = types.TypeHMAC256
+	case "hmac-sha512":
+		parts.Algorithm = types.TypeHMAC512
+	}
 	// Get algorithm instance from cache or create new one
 	alg, exists := c.cryptos[parts.Algorithm]
 	if !exists {
