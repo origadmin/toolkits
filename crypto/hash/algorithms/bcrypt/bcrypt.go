@@ -7,7 +7,6 @@ package bcrypt
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -19,7 +18,7 @@ import (
 
 // Bcrypt implements the Bcrypt hashing algorithm
 type Bcrypt struct {
-	params *Params
+	params Params
 	config *types.Config
 	codec  interfaces.Codec
 }
@@ -32,35 +31,31 @@ type Params struct {
 	Cost int
 }
 
-func (p *Params) String() string {
+func (p Params) String() string {
 	return fmt.Sprintf("c:%d", p.Cost)
 }
 
-func parseParams(params string) (*Params, error) {
-	result := &Params{}
-
+func parseParams(params string) (result Params, err error) {
 	if params == "" {
 		return result, nil
 	}
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid bcrypt param format: %s", param)
+
+	kv, err := core.ParseParams(params)
+	if err != nil {
+		return Params{}, err
+	}
+	if v, ok := kv["c"]; ok {
+		cost, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return result, fmt.Errorf("invalid cost: %v", err)
 		}
-		switch parts[0] {
-		case "c":
-			cost, err := strconv.ParseInt(parts[1], 10, 32)
-			if err != nil {
-				return nil, fmt.Errorf("invalid cost: %v", err)
-			}
-			result.Cost = int(cost)
-		}
+		result.Cost = int(cost)
 	}
 	return result, nil
 }
 
 type ConfigValidator struct {
-	params *Params
+	params Params
 }
 
 func (v ConfigValidator) Validate(config *types.Config) interface{} {
@@ -106,8 +101,8 @@ func DefaultConfig() *types.Config {
 	}
 }
 
-func DefaultParams() *Params {
-	return &Params{
+func DefaultParams() Params {
+	return Params{
 		Cost: bcrypt.DefaultCost,
 	}
 }

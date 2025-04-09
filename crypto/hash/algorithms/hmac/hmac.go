@@ -24,7 +24,7 @@ type HMAC struct {
 }
 
 func (c *HMAC) Type() string {
-	return fmt.Sprintf("hmac-%s", c.hashHash.String())
+	return c.codec.Type().String()
 }
 
 type ConfigValidator struct {
@@ -47,9 +47,7 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid hmac256 config: %v", err)
 	}
-	if !strings.HasPrefix(hashType.String(), "hmac") {
-		return nil, fmt.Errorf("unsupported hash type: %s", hashType.String())
-	}
+
 	switch hashType {
 	case types.TypeHMAC256:
 		hashType = "hmac-sha256"

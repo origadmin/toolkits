@@ -114,13 +114,9 @@ func parseParams(params string) (*Params, error) {
 		return result, nil
 	}
 
-	kv := make(map[string]string)
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid scrypt param format: %s", param)
-		}
-		kv[parts[0]] = parts[1]
+	kv, err := core.ParseParams(params)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse N
@@ -208,7 +204,7 @@ func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	hash, err := scrypt.Key([]byte(password), []byte(parts.Salt), params.N, params.R, params.P, params.KeyLen)
+	hash, err := scrypt.Key([]byte(password), parts.Salt, params.N, params.R, params.P, params.KeyLen)
 	if err != nil {
 		return err
 	}

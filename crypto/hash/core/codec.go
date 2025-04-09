@@ -19,37 +19,27 @@ import (
 type Codec struct {
 	algorithm types.Type
 	version   string
+	params    string
 }
 
-// NewCodec creates a new codec
-func NewCodec(algorithm types.Type, opts ...CodecOption) interfaces.Codec {
-	return settings.Apply(
-		&Codec{
-			algorithm: algorithm,
-			version:   DefaultVersion,
-		}, opts)
+func (c *Codec) Type() types.Type {
+	return c.algorithm
 }
 
-// CodecOption defines configuration options for the codec
-type CodecOption func(*Codec)
-
-// WithVersion sets the version number
-func WithVersion(version string) CodecOption {
-	return func(c *Codec) {
-		c.version = version
-	}
+func (c *Codec) Version() string {
+	return c.version
 }
 
 // Encode implements the core encoding method
-func (e *Codec) Encode(salt []byte, hash []byte, params ...string) string {
+func (c *Codec) Encode(salt []byte, hash []byte, params ...string) string {
 	var paramStr string
 	if len(params) > 0 {
 		paramStr = params[0]
 	}
 	return fmt.Sprintf(
 		"$%s$%s$%s$%s$%s",
-		e.algorithm.String(),
-		e.version,
+		c.algorithm.String(),
+		c.version,
 		paramStr,
 		hex.EncodeToString(hash),
 		hex.EncodeToString(salt),
@@ -57,7 +47,7 @@ func (e *Codec) Encode(salt []byte, hash []byte, params ...string) string {
 }
 
 // Decode implements the core decoding method
-func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
+func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 6 {
 		return nil, ErrInvalidHashFormat
@@ -82,6 +72,25 @@ func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
 		Hash:      hash,
 		Salt:      salt,
 	}, nil
+}
+
+// NewCodec creates a new codec
+func NewCodec(algorithm types.Type, opts ...CodecOption) interfaces.Codec {
+	return settings.Apply(
+		&Codec{
+			algorithm: algorithm,
+			version:   DefaultVersion,
+		}, opts)
+}
+
+// CodecOption defines configuration options for the codec
+type CodecOption func(*Codec)
+
+// WithVersion sets the version number
+func WithVersion(version string) CodecOption {
+	return func(c *Codec) {
+		c.version = version
+	}
 }
 
 func ParseParams(params string) (map[string]string, error) {

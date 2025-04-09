@@ -22,7 +22,7 @@ type SHA struct {
 }
 
 func (c *SHA) Type() string {
-	return c.hashHash.String()
+	return c.codec.Type().String()
 }
 
 type ConfigValidator struct {
@@ -122,7 +122,7 @@ func (c *SHA) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.String() != c.hashHash.String() {
+	if parts.Algorithm.String() != c.codec.Type().String() {
 		return core.ErrAlgorithmMismatch
 	}
 	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))

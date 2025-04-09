@@ -14,13 +14,13 @@ func TestParams_ParseAndString(t *testing.T) {
 		name     string
 		params   string
 		wantErr  bool
-		validate func(*testing.T, *Params)
+		validate func(*testing.T, Params)
 	}{
 		{
 			name:    "Complete parameters",
 			params:  "t:3,m:65536,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -39,7 +39,7 @@ func TestParams_ParseAndString(t *testing.T) {
 			name:    "Partial parameters",
 			params:  "t:3,m:65536",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -58,7 +58,7 @@ func TestParams_ParseAndString(t *testing.T) {
 			name:    "Empty parameters",
 			params:  "",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 0 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 0)
 				}
@@ -77,7 +77,7 @@ func TestParams_ParseAndString(t *testing.T) {
 			name:    "Boundary test - Maximum memory cost",
 			params:  "t:3,m:4294967295,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -96,7 +96,7 @@ func TestParams_ParseAndString(t *testing.T) {
 			name:    "Boundary test - Minimum memory cost",
 			params:  "t:3,m:1,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
