@@ -48,17 +48,27 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		return nil, fmt.Errorf("invalid hmac256 config: %v", err)
 	}
 
+	hashName := strings.TrimLeft(hashType.String(), "hmac-")
 	switch hashType {
 	case types.TypeHMAC256:
 		hashType = "hmac-sha256"
+		hashName = "sha256"
 	case types.TypeHMAC512:
 		hashType = "hmac-sha512"
+		hashName = "sha512"
+	case types.TypeHMAC:
+		hashType = types.Type(fmt.Sprintf("hmac-%s", config.Name))
+		if config.Name == "" {
+			config.Name = "sha256"
+		}
+		hashName = config.Name
 	}
-	hash := strings.TrimLeft(hashType.String(), "hmac-")
-	hashHash, err := core.ParseHash(hash)
+
+	hashHash, err := core.ParseHash(hashName)
 	if err != nil {
 		return nil, err
 	}
+
 	return &HMAC{
 		config:   config,
 		codec:    core.NewCodec(hashType),
@@ -75,6 +85,7 @@ func NewHMAC512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
+		Name:       "sha256",
 		SaltLength: 16,
 	}
 }
@@ -101,14 +112,17 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 	if !strings.HasPrefix(parts.Algorithm.String(), types.TypeHMAC.String()) {
 		return core.ErrAlgorithmMismatch
 	}
+
+	hash := strings.TrimLeft(parts.Algorithm.String(), "hmac-")
 	switch parts.Algorithm {
 	case types.TypeHMAC256:
 		parts.Algorithm = "hmac-sha256"
 	case types.TypeHMAC512:
 		parts.Algorithm = "hmac-sha512"
+	case types.TypeHMAC:
+		hash = "sha256"
 	}
 
-	hash := strings.TrimLeft(parts.Algorithm.String(), "hmac-")
 	hashHash, err := core.ParseHash(hash)
 	if err != nil {
 		return err

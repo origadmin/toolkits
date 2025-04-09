@@ -10,6 +10,7 @@ type ParamConfig interface {
 
 // Config represents the configuration for hash algorithms
 type Config struct {
+	Name        string `env:"HASH_NAME"`
 	SaltLength  int    `env:"HASH_SALTLENGTH"`
 	ParamConfig string `env:"HASH_PARAM_CONFIG"`
 }
@@ -21,6 +22,12 @@ type Option func(*Config)
 func WithSaltLength(length int) Option {
 	return func(cfg *Config) {
 		cfg.SaltLength = length
+	}
+}
+
+func WithName(name string) Option {
+	return func(cfg *Config) {
+		cfg.Name = name
 	}
 }
 
