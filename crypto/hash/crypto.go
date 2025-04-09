@@ -10,162 +10,17 @@ import (
 
 	"github.com/goexts/generic/settings"
 
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
 	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-type (
-	AlgorithmCreator func(*types.Config) (interfaces.Cryptographic, error)
-	AlgorithmConfig  func() *types.Config
-)
-
-type algorithm struct {
-	creator       AlgorithmCreator
-	defaultConfig AlgorithmConfig
+type Crypto interface {
+	Type() types.Type
+	Hash(password string) (string, error)
+	HashWithSalt(password, salt string) (string, error)
+	Verify(hashed, password string) error
 }
-
-var (
-	// algorithms stores all supported hash algorithms
-	algorithms = map[types.Type]algorithm{
-		types.TypeArgon2: {
-			creator:       argon2.NewArgon2Crypto,
-			defaultConfig: argon2.DefaultConfig,
-		},
-		types.TypeBcrypt: {
-			creator:       bcrypt.NewBcryptCrypto,
-			defaultConfig: bcrypt.DefaultConfig,
-		},
-		types.TypeHMAC256: {
-			creator:       hmac.NewHMAC256Crypto,
-			defaultConfig: hmac.DefaultConfig,
-		},
-		types.TypeHMAC512: {
-			creator:       hmac.NewHMAC512Crypto,
-			defaultConfig: hmac.DefaultConfig,
-		},
-		types.TypeMD5: {
-			creator:       md5.NewMD5Crypto,
-			defaultConfig: types.DefaultConfig,
-		},
-		types.TypeScrypt: {
-			creator:       scrypt.NewScryptCrypto,
-			defaultConfig: scrypt.DefaultConfig,
-		},
-		types.TypeSha1: {
-			creator:       sha.NewSha1Crypto,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha224: {
-			creator:       sha.NewSha224Crypto,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha256: {
-			creator:       sha.NewSha256Crypto,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha512: {
-			creator:       sha.NewSha512Crypto,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha3224: {
-			creator:       sha.NewSha3224,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha3256: {
-			creator:       sha.NewSha3256,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha384: {
-			creator:       sha.NewSha384Crypto,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha3512: {
-			creator:       sha.NewSha3512,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha3512224: {
-			creator:       sha.NewSha3512224,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypeSha3512256: {
-			creator:       sha.NewSha3512256,
-			defaultConfig: sha.DefaultConfig,
-		},
-		types.TypePBKDF2: {
-			creator:       pbkdf2.NewPBKDF2Crypto,
-			defaultConfig: pbkdf2.DefaultConfig,
-		},
-		// Unimplemented cryptos use dummy implementation
-		//types.TypeCustom: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypeSha512: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypeSha384: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypeSha3256: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypeHMAC512: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA256: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA512: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA384: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3256: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3224: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3384: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3512224: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3512256: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3512384: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-		//types.TypePBKDF2SHA3512512: {
-		//	creator:       dummy.NewDummyCrypto,
-		//	defaultConfig: dummy.DefaultConfig,
-		//},
-	}
-)
 
 type crypto struct {
 	algorithm types.Type
@@ -174,19 +29,19 @@ type crypto struct {
 	cryptos   map[types.Type]interfaces.Cryptographic
 }
 
-func (c crypto) Type() string {
-	return string(c.algorithm)
+func (c *crypto) Type() types.Type {
+	return c.algorithm
 }
 
-func (c crypto) Hash(password string) (string, error) {
+func (c *crypto) Hash(password string) (string, error) {
 	return c.crypto.Hash(password)
 }
 
-func (c crypto) HashWithSalt(password, salt string) (string, error) {
+func (c *crypto) HashWithSalt(password, salt string) (string, error) {
 	return c.crypto.HashWithSalt(password, salt)
 }
 
-func (c crypto) Verify(hashed, password string) error {
+func (c *crypto) Verify(hashed, password string) error {
 	// Decode the hash value
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
@@ -194,7 +49,7 @@ func (c crypto) Verify(hashed, password string) error {
 	}
 
 	// Get algorithm instance from cache or create new one
-	crypto, exists := c.cryptos[parts.Algorithm]
+	alg, exists := c.cryptos[parts.Algorithm]
 	if !exists {
 		algorithm, exists := algorithms[parts.Algorithm]
 		if !exists {
@@ -207,18 +62,18 @@ func (c crypto) Verify(hashed, password string) error {
 		if algorithm.defaultConfig != nil {
 			cfg = algorithm.defaultConfig()
 		}
-		crypto, err = algorithm.creator(cfg)
+		alg, err = algorithm.creator(cfg)
 		if err != nil {
 			return err
 		}
-		c.cryptos[parts.Algorithm] = crypto
+		c.cryptos[parts.Algorithm] = alg
 	}
 
-	return crypto.Verify(hashed, password)
+	return alg.Verify(parts, password)
 }
 
 // NewCrypto creates a new cryptographic instance
-func NewCrypto(alg types.Type, opts ...types.ConfigOption) (interfaces.Cryptographic, error) {
+func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
 	// Get algorithm creator and default config
 	algorithm, exists := algorithms[alg]
 	if !exists {
@@ -228,6 +83,7 @@ func NewCrypto(alg types.Type, opts ...types.ConfigOption) (interfaces.Cryptogra
 	if algorithm.defaultConfig != nil {
 		cfg = algorithm.defaultConfig()
 	}
+
 	// Apply default config if not set
 	cfg = settings.Apply(cfg, opts)
 	cryptographic, err := algorithm.creator(cfg)

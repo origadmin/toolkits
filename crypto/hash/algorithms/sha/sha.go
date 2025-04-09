@@ -121,12 +121,7 @@ func (c *SHA) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *SHA) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-
+func (c *SHA) Verify(parts *types.HashParts, password string) error {
 	if parts.Algorithm.String() != c.hashHash.String() {
 		return core.ErrAlgorithmMismatch
 	}

@@ -21,4 +21,7 @@ const (
 	DefaultThreads = 4
 	// DefaultCost default cost for bcrypt
 	DefaultCost = 10
+
+	ParamSeparator      = ","
+	ParamValueSeparator = ":"
 )

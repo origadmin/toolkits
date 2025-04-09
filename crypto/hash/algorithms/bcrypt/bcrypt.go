@@ -131,16 +131,11 @@ func (c *Bcrypt) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Bcrypt) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
+func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	if parts.Algorithm != types.TypeBcrypt {
 		return core.ErrAlgorithmMismatch
 	}
-	err = bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt)))
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt))); err != nil {
 		return core.ErrPasswordNotMatch
 	}
 	return nil

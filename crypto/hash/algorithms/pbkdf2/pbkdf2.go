@@ -124,12 +124,8 @@ func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *PBKDF2) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-	if parts.Algorithm != types.TypePBKDF2 {
+func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
+	if !strings.HasPrefix(parts.Algorithm.String(), types.TypePBKDF2.String()) {
 		return core.ErrAlgorithmMismatch
 	}
 

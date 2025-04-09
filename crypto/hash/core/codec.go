@@ -66,6 +66,7 @@ func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
 	algorithm := types.Type(parts[1])
 	varsion := parts[2]
 	params := parts[3]
+
 	hash, err := hex.DecodeString(parts[4])
 	if err != nil {
 		return nil, fmt.Errorf("invalid hash: %v", err)
@@ -81,4 +82,19 @@ func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
 		Hash:      hash,
 		Salt:      salt,
 	}, nil
+}
+
+func ParseParams(params string) (map[string]string, error) {
+	kv := make(map[string]string)
+	if params == "" {
+		return kv, nil
+	}
+	for _, param := range strings.Split(params, ParamSeparator) {
+		parts := strings.Split(param, ParamValueSeparator)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid param format: %s", param)
+		}
+		kv[parts[0]] = parts[1]
+	}
+	return kv, nil
 }

@@ -67,12 +67,7 @@ func (c *MD5) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *MD5) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-
+func (c *MD5) Verify(parts *types.HashParts, password string) error {
 	if parts.Algorithm != types.TypeMD5 {
 		return core.ErrAlgorithmMismatch
 	}

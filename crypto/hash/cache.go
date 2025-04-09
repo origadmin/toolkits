@@ -9,16 +9,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 // Memory cache optimization
 type cachedCrypto struct {
-	crypto interfaces.Cryptographic
+	crypto Crypto
 	cache  sync.Map
 }
 
-func (c *cachedCrypto) Type() string {
+func (c *cachedCrypto) Type() types.Type {
 	return c.crypto.Type()
 }
 
@@ -37,7 +37,7 @@ func (c *cachedCrypto) HashWithSalt(password, salt string) (string, error) {
 	return c.crypto.HashWithSalt(password, salt)
 }
 
-func (c *cachedCrypto) Verify(hashed, password string) error {
+func (c *cachedCrypto) Verify(hashed string, password string) error {
 	// Retrieve from cache
 	if item, ok := c.cache.Load(password); ok {
 		cached := item.(cacheItem)
@@ -64,7 +64,7 @@ func (c *cachedCrypto) Verify(hashed, password string) error {
 	return nil
 }
 
-func NewCachedCrypto(crypto interfaces.Cryptographic) interfaces.Cryptographic {
+func Cached(crypto Crypto) Crypto {
 	return &cachedCrypto{
 		crypto: crypto,
 	}

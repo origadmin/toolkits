@@ -35,15 +35,10 @@ func parseParams(params string) (*Params, error) {
 		return result, nil
 	}
 
-	kv := make(map[string]string)
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid argon2 param format: %s", param)
-		}
-		kv[parts[0]] = parts[1]
+	kv, err := core.ParseParams(params)
+	if err != nil {
+		return nil, err
 	}
-
 	// Parse time cost
 	if v, ok := kv["t"]; ok {
 		timeCost, err := strconv.ParseUint(v, 10, 32)
@@ -207,11 +202,7 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Argon2) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
+func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 	if parts.Algorithm != types.TypeArgon2 {
 		return core.ErrAlgorithmMismatch
 	}

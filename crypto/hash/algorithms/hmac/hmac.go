@@ -99,21 +99,17 @@ func (c *HMAC) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *HMAC) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-	if !strings.HasPrefix(parts.Algorithm.String(), "hmac") {
+func (c *HMAC) Verify(parts *types.HashParts, password string) error {
+	if !strings.HasPrefix(parts.Algorithm.String(), types.TypeHMAC.String()) {
 		return core.ErrAlgorithmMismatch
 	}
-
 	switch parts.Algorithm {
 	case types.TypeHMAC256:
 		parts.Algorithm = "hmac-sha256"
 	case types.TypeHMAC512:
 		parts.Algorithm = "hmac-sha512"
 	}
+
 	hash := strings.TrimLeft(parts.Algorithm.String(), "hmac-")
 	hashHash, err := core.ParseHash(hash)
 	if err != nil {

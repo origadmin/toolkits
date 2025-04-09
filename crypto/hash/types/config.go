@@ -14,17 +14,17 @@ type Config struct {
 	ParamConfig string `env:"HASH_PARAM_CONFIG"`
 }
 
-// ConfigOption is a function that modifies a Config
-type ConfigOption func(*Config)
+// Option is a function that modifies a Config
+type Option func(*Config)
 
 // WithSaltLength sets the salt length
-func WithSaltLength(length int) ConfigOption {
+func WithSaltLength(length int) Option {
 	return func(cfg *Config) {
 		cfg.SaltLength = length
 	}
 }
 
-func WithParams(paramConfig ParamConfig) ConfigOption {
+func WithParams(paramConfig ParamConfig) Option {
 	return func(cfg *Config) {
 		if paramConfig == nil {
 			return

@@ -36,7 +36,7 @@ func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Crypto) Verify(hashed, password string) error {
+func (c *Crypto) Verify(parts *types.HashParts, password string) error {
 	return fmt.Errorf("algorithm not implemented")
 }
 
