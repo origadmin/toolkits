@@ -64,9 +64,6 @@ func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
 	}
 
 	algorithm := types.Type(parts[1])
-	if algorithm != e.algorithm {
-		return nil, ErrAlgorithmMismatch
-	}
 	varsion := parts[2]
 	params := parts[3]
 	hash, err := hex.DecodeString(parts[4])
