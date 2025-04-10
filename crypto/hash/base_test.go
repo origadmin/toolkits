@@ -7,6 +7,7 @@ package hash
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/origadmin/toolkits/crypto/hash/core"
@@ -96,10 +97,7 @@ func TestHMAC(t *testing.T) {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
 	}
-	for i := core.Hash(1); i < core.MAPHASH+1; i++ {
-		if i == core.MD5SHA1 {
-			continue
-		}
+	for i := core.Hash(1); i < core.MAPHASH; i++ {
 		t.Logf("test hash:%s starting", i.String())
 		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", i.String())))
 		if err != nil {
@@ -128,6 +126,36 @@ func TestHMAC(t *testing.T) {
 			t.Logf("hashPwd:%s", hashPwd)
 			if err := global.Verify(hashPwd, origin); err != nil {
 				t.Error("Verify Failed: ", err.Error())
+			}
+		})
+	}
+}
+
+func TestUnsupportedAlgorithms(t *testing.T) {
+	tests := []struct {
+		name        string
+		algorithm   string
+		expectedErr string
+	}{
+		{"MapHash", "maphash", "cannot compare hash with maphash"},
+	}
+
+	for _, tt := range tests {
+		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", tt.algorithm)))
+		if err != nil {
+			t.Error("NewCrypto Failed: ", err.Error())
+			return
+		}
+		crypto = CachedCrypto(crypto)
+		t.Run("HashWithSalt", func(t *testing.T) {
+			hashPwd, err := crypto.HashWithSalt(origin, slatKey)
+			if err != nil {
+				t.Error("HashWithSalt Failed: ", err.Error())
+				return
+			}
+			t.Logf("hashPwd:%s", hashPwd)
+			if err := crypto.Verify(hashPwd, origin); err == nil || !strings.Contains(err.Error(), tt.expectedErr) {
+				t.Errorf("expected error: %s, but got %v", tt.expectedErr, err)
 			}
 		})
 	}

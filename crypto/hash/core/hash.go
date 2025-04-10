@@ -6,7 +6,6 @@
 package core
 
 import (
-	"crypto"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -82,7 +81,7 @@ func init() {
 	UpdateHashFunc(SHA256, sha256.New)
 	UpdateHashFunc(SHA384, sha512.New384)
 	UpdateHashFunc(SHA512, sha512.New)
-	UpdateHashFunc(MD5SHA1, crypto.MD5SHA1.New)
+	UpdateHashFunc(MD5SHA1, NewMD5SHA1)
 	UpdateHashFunc(RIPEMD160, ripemd160.New)
 	UpdateHashFunc(SHA3_224, sha3.New224)
 	UpdateHashFunc(SHA3_256, sha3.New256)

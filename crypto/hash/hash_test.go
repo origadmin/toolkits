@@ -159,13 +159,13 @@ func TestAllHashTypes(t *testing.T) {
 			salt:     "pepper456",
 		},
 		{
-			name:     "Scrypt-Default",
+			name:     "ScryptDefault",
 			hashType: types.TypeScrypt,
 			password: "scryptPass",
 			salt:     "scryptSalt",
 		},
 		{
-			name:     "Scrypt-Custom",
+			name:     "ScryptCustom",
 			hashType: types.TypeScrypt,
 			password: "scryptPass2",
 			salt:     "scryptSalt2",
