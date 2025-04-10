@@ -31,6 +31,7 @@ The Toolkit currently offers the following packages:
 2. [**errors**](errors): Enhanced error handling utilities, such as error wrapping, context propagation, and error
    inspection.
 3. [**idgen**](idgen): A package for generating unique identifiers.
+4. [**crypto**](crypto): A powerful library designed to provide cryptographic functionalities, including hashing, encryption, and decryption. This toolkit is built with performance and security in mind, making it an essential component for any application that requires secure data handling.
 
 ## Getting Started
 
