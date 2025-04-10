@@ -63,7 +63,6 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		}
 		hashName = config.Name
 	}
-
 	hashHash, err := core.ParseHash(hashName)
 	if err != nil {
 		return nil, err
@@ -74,6 +73,11 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		codec:    core.NewCodec(hashType),
 		hashHash: hashHash,
 	}, nil
+}
+
+// NewDefaultHMACCrypto creates a new HMAC crypto instance
+func NewDefaultHMACCrypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewHMACCrypto(types.TypeHMAC, config)
 }
 
 func NewHMAC256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
@@ -109,17 +113,12 @@ func (c *HMAC) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	if !strings.HasPrefix(parts.Algorithm.String(), types.TypeHMAC.String()) {
+	if !parts.Algorithm.Is(types.TypeHMAC) {
 		return core.ErrAlgorithmMismatch
 	}
 
-	hash := strings.TrimLeft(parts.Algorithm.String(), "hmac-")
-	switch parts.Algorithm {
-	case types.TypeHMAC256:
-		parts.Algorithm = "hmac-sha256"
-	case types.TypeHMAC512:
-		parts.Algorithm = "hmac-sha512"
-	case types.TypeHMAC:
+	algType, hash := core.AlgorithmTypeHash(parts.Algorithm)
+	if algType == types.TypeHMAC && hash == "" {
 		hash = "sha256"
 	}
 
@@ -127,7 +126,6 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-
 	h := hmac.New(hashHash.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)

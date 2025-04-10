@@ -6,6 +6,8 @@
 package hash
 
 import (
+	"crypto/subtle"
+	"fmt"
 	"sync"
 	"time"
 
@@ -39,13 +41,14 @@ func (c *cachedCrypto) HashWithSalt(password, salt string) (string, error) {
 
 func (c *cachedCrypto) Verify(hashed string, password string) error {
 	// Retrieve from cache
-	if item, ok := c.cache.Load(password); ok {
+	if item, ok := c.cache.Load(hashed); ok {
 		cached := item.(cacheItem)
 		if time.Now().Before(cached.expiresAt) {
-			if cached.hash == hashed {
-				return nil
+			if subtle.ConstantTimeCompare([]byte(cached.hash), []byte(hashed)) != 1 {
+				fmt.Printf("compare: %s | %s\n", cached.hash, hashed)
+				return ErrPasswordNotMatch
 			}
-			return ErrPasswordNotMatch
+			return nil
 		}
 	}
 
@@ -56,7 +59,7 @@ func (c *cachedCrypto) Verify(hashed string, password string) error {
 	}
 
 	// Cache the result
-	c.cache.Store(password, cacheItem{
+	c.cache.Store(hashed, cacheItem{
 		hash:      hashed,
 		expiresAt: time.Now().Add(5 * time.Minute),
 	})
@@ -64,7 +67,7 @@ func (c *cachedCrypto) Verify(hashed string, password string) error {
 	return nil
 }
 
-func Cached(crypto Crypto) Crypto {
+func CachedCrypto(crypto Crypto) Crypto {
 	return &cachedCrypto{
 		crypto: crypto,
 	}

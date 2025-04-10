@@ -201,7 +201,7 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm != types.TypeArgon2 {
+	if !parts.Algorithm.Is(types.TypeArgon2) {
 		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters

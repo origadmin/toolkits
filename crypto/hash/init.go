@@ -38,14 +38,18 @@ var (
 			creator:       bcrypt.NewBcryptCrypto,
 			defaultConfig: bcrypt.DefaultConfig,
 		},
-		types.TypeHMAC256: {
-			creator:       hmac.NewHMAC256Crypto,
+		types.TypeHMAC: {
+			creator:       hmac.NewDefaultHMACCrypto,
 			defaultConfig: hmac.DefaultConfig,
 		},
-		types.TypeHMAC512: {
-			creator:       hmac.NewHMAC512Crypto,
-			defaultConfig: hmac.DefaultConfig,
-		},
+		//types.TypeHMAC256: {
+		//	creator:       hmac.NewHMAC256Crypto,
+		//	defaultConfig: hmac.DefaultConfig,
+		//},
+		//types.TypeHMAC512: {
+		//	creator:       hmac.NewHMAC512Crypto,
+		//	defaultConfig: hmac.DefaultConfig,
+		//},
 		types.TypeMD5: {
 			creator:       md5.NewMD5Crypto,
 			defaultConfig: types.DefaultConfig,

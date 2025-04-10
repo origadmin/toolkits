@@ -4,12 +4,14 @@
 
 package types
 
+import (
+	"strings"
+)
+
 // Type represents the hash algorithm type
 type Type string
 
 const (
-	// TypeCustom custom type
-	TypeCustom Type = "custom"
 	// TypeMD5 md5 type
 	TypeMD5 Type = "md5"
 	// TypeSha1 sha1 type
@@ -77,7 +79,21 @@ func (t Type) String() string {
 	return string(t)
 }
 
+func (t Type) Is(t2 Type) bool {
+	return TypeIs(t, t2)
+}
+
 // ParseType parses a string into a Type
 func ParseType(s string) Type {
 	return Type(s)
+}
+
+func TypeIs(t Type, t2 Type) bool {
+	if t == t2 {
+		return true
+	}
+	if t == TypeUnknown || t2 == TypeUnknown {
+		return false
+	}
+	return len(t) >= len(t2) && strings.HasPrefix(t.String(), t2.String())
 }

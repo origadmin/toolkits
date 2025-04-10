@@ -6,10 +6,6 @@
 package hash
 
 import (
-	"fmt"
-
-	"github.com/goexts/generic/settings"
-
 	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -23,14 +19,13 @@ type Crypto interface {
 }
 
 type crypto struct {
-	algorithm types.Type
-	codec     interfaces.Codec
-	crypto    interfaces.Cryptographic
-	cryptos   map[types.Type]interfaces.Cryptographic
+	codec   interfaces.Codec
+	crypto  interfaces.Cryptographic
+	factory internalFactory
 }
 
 func (c *crypto) Type() types.Type {
-	return c.algorithm
+	return c.codec.Type()
 }
 
 func (c *crypto) Hash(password string) (string, error) {
@@ -47,60 +42,37 @@ func (c *crypto) Verify(hashed, password string) error {
 	if err != nil {
 		return err
 	}
-	switch parts.Algorithm {
-	case "hmac-sha256":
-		parts.Algorithm = types.TypeHMAC256
-	case "hmac-sha512":
-		parts.Algorithm = types.TypeHMAC512
-	}
+
+	algType, configName := core.AlgorithmTypeHash(parts.Algorithm)
 	// Get algorithm instance from cache or create new one
-	alg, exists := c.cryptos[parts.Algorithm]
-	if !exists {
-		algorithm, exists := algorithms[parts.Algorithm]
-		if !exists {
-			return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm)
-		}
-
-		// Create cryptographic instance and cache it
-		var err error
-		cfg := &types.Config{}
-		if algorithm.defaultConfig != nil {
-			cfg = algorithm.defaultConfig()
-		}
-		alg, err = algorithm.creator(cfg)
-		if err != nil {
-			return err
-		}
-		c.cryptos[parts.Algorithm] = alg
+	cryptographic, err := c.factory.create(algType, types.WithName(configName))
+	if err != nil {
+		return err
 	}
-
-	return alg.Verify(parts, password)
+	return cryptographic.Verify(parts, password)
 }
 
 // NewCrypto creates a new cryptographic instance
 func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
-	// Get algorithm creator and default config
-	algorithm, exists := algorithms[alg]
-	if !exists {
-		return nil, fmt.Errorf("unsupported algorithm: %s", alg)
+	algType, configName := core.AlgorithmTypeHash(alg)
+
+	factory := &algorithmFactory{
+		cryptos: make(map[types.Type]interfaces.Cryptographic),
 	}
-	cfg := &types.Config{}
-	if algorithm.defaultConfig != nil {
-		cfg = algorithm.defaultConfig()
+	if configName != "" {
+		opts = append(opts, types.WithName(configName))
 	}
 
-	// Apply default config if not set
-	cfg = settings.Apply(cfg, opts)
-	cryptographic, err := algorithm.creator(cfg)
+	cryptographic, err := factory.create(algType, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create cryptographic instance: %v", err)
+		return nil, err
 	}
+
 	// Create cryptographic instance
 	return &crypto{
-		algorithm: alg,
-		crypto:    cryptographic,
-		codec:     core.NewCodec(alg),
-		cryptos:   make(map[types.Type]interfaces.Cryptographic),
+		crypto:  cryptographic,
+		codec:   core.NewCodec(alg),
+		factory: factory,
 	}, nil
 }
 

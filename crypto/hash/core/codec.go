@@ -107,3 +107,14 @@ func ParseParams(params string) (map[string]string, error) {
 	}
 	return kv, nil
 }
+
+func AlgorithmTypeHash(algorithm types.Type) (types.Type, string) {
+	configName := ""
+	algNew := algorithm
+	switch {
+	case strings.HasPrefix(algorithm.String(), "hmac-"):
+		configName = strings.TrimPrefix(algorithm.String(), "hmac-")
+		algNew = types.TypeHMAC
+	}
+	return algNew, configName
+}

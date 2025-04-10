@@ -196,7 +196,7 @@ func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm != types.TypeScrypt {
+	if !parts.Algorithm.Is(types.TypeScrypt) {
 		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters

@@ -187,6 +187,8 @@ func (h Hash) String() string {
 			return "crc32-iso"
 		case CRC32_CAST:
 			return "crc32-cast"
+		case CRC32_KOOP:
+			return "crc32-koop"
 		case CRC64_ISO:
 			return "crc64-iso"
 		case CRC64_ECMA:
@@ -322,17 +324,17 @@ func ParseInternalHash(s string) (Hash, bool) {
 		return CRC64_ISO, true
 	case "crc64-ecma":
 		return CRC64_ECMA, true
-	case "fnv-32":
+	case "fnv32":
 		return FNV32, true
-	case "fnv-32a":
+	case "fnv32a":
 		return FNV32A, true
-	case "fnv-64":
+	case "fnv64":
 		return FNV64, true
-	case "fnv-64a":
+	case "fnv64a":
 		return FNV64A, true
-	case "fnv-128":
+	case "fnv128":
 		return FNV128, true
-	case "fnv-128a":
+	case "fnv128a":
 		return FNV128A, true
 	case "maphash":
 		return MAPHASH, true

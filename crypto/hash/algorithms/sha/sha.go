@@ -122,7 +122,7 @@ func (c *SHA) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.String() != c.codec.Type().String() {
+	if !parts.Algorithm.Is(c.codec.Type()) {
 		return core.ErrAlgorithmMismatch
 	}
 	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))
