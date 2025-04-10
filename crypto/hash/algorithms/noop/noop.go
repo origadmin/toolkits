@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package dummy
+package noop
 
 import (
 	"errors"
@@ -12,31 +12,31 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// Crypto implements a dummy hashing algorithm
-type Crypto struct {
+// noop implements a noop hashing algorithm
+type noop struct {
 }
 
-func (c *Crypto) Type() string {
-	return "dummy"
+func (n *noop) Type() string {
+	return "noop"
 }
 
-// NewDummyCrypto creates a new dummy crypto instance
-func NewDummyCrypto(config *types.Config) (interfaces.Cryptographic, error) {
+// NewNoopCrypto creates a new noop crypto instance
+func NewNoopCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return nil, errors.New("algorithm not implemented")
 }
 
 // Hash implements the hash method
-func (c *Crypto) Hash(password string) (string, error) {
+func (n *noop) Hash(password string) (string, error) {
 	return "", fmt.Errorf("algorithm not implemented")
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *Crypto) HashWithSalt(password, salt string) (string, error) {
-	return "", fmt.Errorf("dummy algorithm not implemented")
+func (n *noop) HashWithSalt(password, salt string) (string, error) {
+	return "", fmt.Errorf("noop algorithm not implemented")
 }
 
 // Verify implements the verify method
-func (c *Crypto) Verify(hashed, password string) error {
+func (n *noop) Verify(parts *types.HashParts, password string) error {
 	return fmt.Errorf("algorithm not implemented")
 }
 

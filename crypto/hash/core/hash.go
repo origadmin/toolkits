@@ -6,7 +6,6 @@
 package core
 
 import (
-	"crypto"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -20,6 +19,7 @@ import (
 	"hash/maphash"
 	"strings"
 
+	"github.com/goexts/generic"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/md4"
@@ -81,7 +81,7 @@ func init() {
 	UpdateHashFunc(SHA256, sha256.New)
 	UpdateHashFunc(SHA384, sha512.New384)
 	UpdateHashFunc(SHA512, sha512.New)
-	UpdateHashFunc(MD5SHA1, crypto.MD5SHA1.New)
+	UpdateHashFunc(MD5SHA1, NewMD5SHA1)
 	UpdateHashFunc(RIPEMD160, ripemd160.New)
 	UpdateHashFunc(SHA3_224, sha3.New224)
 	UpdateHashFunc(SHA3_256, sha3.New256)
@@ -95,22 +95,17 @@ func init() {
 	}
 	UpdateHashFunc(BLAKE2s_256, newBlake2sHash256)
 	newBlake2bHash256 := func() hash.Hash {
-		h, _ := blake2b.New256(nil)
-		return h
-	}
-	newBlake2bHash384 := func() hash.Hash {
-		h, _ := blake2b.New384(nil)
-		return h
-	}
-
-	newBlake2bHash512 := func() hash.Hash {
-		h, _ := blake2b.New512(nil)
-		return h
+		return generic.Must(blake2b.New256(nil))
 	}
 	UpdateHashFunc(BLAKE2b_256, newBlake2bHash256)
+	newBlake2bHash384 := func() hash.Hash {
+		return generic.Must(blake2b.New384(nil))
+	}
 	UpdateHashFunc(BLAKE2b_384, newBlake2bHash384)
+	newBlake2bHash512 := func() hash.Hash {
+		return generic.Must(blake2b.New512(nil))
+	}
 	UpdateHashFunc(BLAKE2b_512, newBlake2bHash512)
-
 	UpdateHashFunc(ADLER32, func() hash.Hash { return adler32.New() })
 	UpdateHashFunc(CRC32, func() hash.Hash { return crc32.NewIEEE() })
 	UpdateHashFunc(CRC32_ISO, func() hash.Hash { return crc32.New(crc32.MakeTable(crc32.IEEE)) })
@@ -191,6 +186,8 @@ func (h Hash) String() string {
 			return "crc32-iso"
 		case CRC32_CAST:
 			return "crc32-cast"
+		case CRC32_KOOP:
+			return "crc32-koop"
 		case CRC64_ISO:
 			return "crc64-iso"
 		case CRC64_ECMA:
@@ -326,17 +323,17 @@ func ParseInternalHash(s string) (Hash, bool) {
 		return CRC64_ISO, true
 	case "crc64-ecma":
 		return CRC64_ECMA, true
-	case "fnv-32":
+	case "fnv32":
 		return FNV32, true
-	case "fnv-32a":
+	case "fnv32a":
 		return FNV32A, true
-	case "fnv-64":
+	case "fnv64":
 		return FNV64, true
-	case "fnv-64a":
+	case "fnv64a":
 		return FNV64A, true
-	case "fnv-128":
+	case "fnv128":
 		return FNV128, true
-	case "fnv-128a":
+	case "fnv128a":
 		return FNV128A, true
 	case "maphash":
 		return MAPHASH, true

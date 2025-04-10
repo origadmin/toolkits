@@ -19,6 +19,59 @@ import (
 type Codec struct {
 	algorithm types.Type
 	version   string
+	params    string
+}
+
+func (c *Codec) Type() types.Type {
+	return c.algorithm
+}
+
+func (c *Codec) Version() string {
+	return c.version
+}
+
+// Encode implements the core encoding method
+func (c *Codec) Encode(salt []byte, hash []byte, params ...string) string {
+	var paramStr string
+	if len(params) > 0 {
+		paramStr = params[0]
+	}
+	return fmt.Sprintf(
+		"$%s$%s$%s$%s$%s",
+		c.algorithm.String(),
+		c.version,
+		paramStr,
+		hex.EncodeToString(hash),
+		hex.EncodeToString(salt),
+	)
+}
+
+// Decode implements the core decoding method
+func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
+	parts := strings.Split(encoded, "$")
+	if len(parts) != 6 {
+		return nil, ErrInvalidHashFormat
+	}
+
+	algorithm := types.Type(parts[1])
+	varsion := parts[2]
+	params := parts[3]
+
+	hash, err := hex.DecodeString(parts[4])
+	if err != nil {
+		return nil, fmt.Errorf("invalid hash: %v", err)
+	}
+	salt, err := hex.DecodeString(parts[5])
+	if err != nil {
+		return nil, fmt.Errorf("invalid salt: %v", err)
+	}
+	return &types.HashParts{
+		Algorithm: algorithm,
+		Version:   varsion,
+		Params:    params,
+		Hash:      hash,
+		Salt:      salt,
+	}, nil
 }
 
 // NewCodec creates a new codec
@@ -40,48 +93,28 @@ func WithVersion(version string) CodecOption {
 	}
 }
 
-// Encode implements the core encoding method
-func (e *Codec) Encode(salt []byte, hash []byte, params ...string) string {
-	var paramStr string
-	if len(params) > 0 {
-		paramStr = params[0]
+func ParseParams(params string) (map[string]string, error) {
+	kv := make(map[string]string)
+	if params == "" {
+		return kv, nil
 	}
-	return fmt.Sprintf(
-		"$%s$%s$%s$%s$%s",
-		e.algorithm.String(),
-		e.version,
-		paramStr,
-		hex.EncodeToString(hash),
-		hex.EncodeToString(salt),
-	)
+	for _, param := range strings.Split(params, ParamSeparator) {
+		parts := strings.Split(param, ParamValueSeparator)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid param format: %s", param)
+		}
+		kv[parts[0]] = parts[1]
+	}
+	return kv, nil
 }
 
-// Decode implements the core decoding method
-func (e *Codec) Decode(encoded string) (*types.HashParts, error) {
-	parts := strings.Split(encoded, "$")
-	if len(parts) != 6 {
-		return nil, ErrInvalidHashFormat
+func AlgorithmTypeHash(algorithm types.Type) (types.Type, string) {
+	configName := ""
+	algNew := algorithm
+	switch {
+	case strings.HasPrefix(algorithm.String(), "hmac-"):
+		configName = strings.TrimPrefix(algorithm.String(), "hmac-")
+		algNew = types.TypeHMAC
 	}
-
-	algorithm := types.Type(parts[1])
-	if algorithm != e.algorithm {
-		return nil, ErrAlgorithmMismatch
-	}
-	varsion := parts[2]
-	params := parts[3]
-	hash, err := hex.DecodeString(parts[4])
-	if err != nil {
-		return nil, fmt.Errorf("invalid hash: %v", err)
-	}
-	salt, err := hex.DecodeString(parts[5])
-	if err != nil {
-		return nil, fmt.Errorf("invalid salt: %v", err)
-	}
-	return &types.HashParts{
-		Algorithm: algorithm,
-		Version:   varsion,
-		Params:    params,
-		Hash:      hash,
-		Salt:      salt,
-	}, nil
+	return algNew, configName
 }

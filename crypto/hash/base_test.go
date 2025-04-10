@@ -6,8 +6,11 @@
 package hash
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -88,20 +91,72 @@ func TestSHA256(t *testing.T) {
 	}
 }
 
-func TestHMAC256(t *testing.T) {
-	crypto, err := NewCrypto(types.TypeHMAC256)
+func TestHMAC(t *testing.T) {
+	global, err := NewCrypto("hmac")
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
 	}
+	for i := core.Hash(1); i < core.MAPHASH; i++ {
+		t.Logf("test hash:%s starting", i.String())
+		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", i.String())))
+		if err != nil {
+			t.Error("NewCrypto Failed: ", err.Error())
+			return
+		}
+		crypto = CachedCrypto(crypto)
+		t.Run("HashWithSalt", func(t *testing.T) {
+			hashPwd, err := crypto.HashWithSalt(origin, slatKey)
+			if err != nil {
+				t.Error("HashWithSalt Failed: ", err.Error())
+				return
+			}
+			t.Logf("hashPwd:%s", hashPwd)
+			if err := global.Verify(hashPwd, origin); err != nil {
+				t.Error("Verify Failed: ", err.Error())
+			}
+		})
 
-	hashPwd, err := crypto.HashWithSalt(origin, slatKey)
-	if err != nil {
-		t.Error("HashWithSalt Failed: ", err.Error())
-		return
+		t.Run("Hash", func(t *testing.T) {
+			hashPwd, err := crypto.Hash(origin)
+			if err != nil {
+				t.Error("Hash Failed: ", err.Error())
+				return
+			}
+			t.Logf("hashPwd:%s", hashPwd)
+			if err := global.Verify(hashPwd, origin); err != nil {
+				t.Error("Verify Failed: ", err.Error())
+			}
+		})
+	}
+}
+
+func TestUnsupportedAlgorithms(t *testing.T) {
+	tests := []struct {
+		name        string
+		algorithm   string
+		expectedErr string
+	}{
+		{"MapHash", "maphash", "cannot compare hash with maphash"},
 	}
 
-	if err := crypto.Verify(hashPwd, origin); err != nil {
-		t.Error("Verify Failed: ", err.Error())
+	for _, tt := range tests {
+		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", tt.algorithm)))
+		if err != nil {
+			t.Error("NewCrypto Failed: ", err.Error())
+			return
+		}
+		crypto = CachedCrypto(crypto)
+		t.Run("HashWithSalt", func(t *testing.T) {
+			hashPwd, err := crypto.HashWithSalt(origin, slatKey)
+			if err != nil {
+				t.Error("HashWithSalt Failed: ", err.Error())
+				return
+			}
+			t.Logf("hashPwd:%s", hashPwd)
+			if err := crypto.Verify(hashPwd, origin); err == nil || !strings.Contains(err.Error(), tt.expectedErr) {
+				t.Errorf("expected error: %s, but got %v", tt.expectedErr, err)
+			}
+		})
 	}
 }

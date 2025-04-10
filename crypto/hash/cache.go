@@ -6,19 +6,21 @@
 package hash
 
 import (
+	"crypto/subtle"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// 内存缓存优化
+// Memory cache optimization
 type cachedCrypto struct {
-	crypto interfaces.Cryptographic
+	crypto Crypto
 	cache  sync.Map
 }
 
-func (c *cachedCrypto) Type() string {
+func (c *cachedCrypto) Type() types.Type {
 	return c.crypto.Type()
 }
 
@@ -37,26 +39,27 @@ func (c *cachedCrypto) HashWithSalt(password, salt string) (string, error) {
 	return c.crypto.HashWithSalt(password, salt)
 }
 
-func (c *cachedCrypto) Verify(hashed, password string) error {
-	// 从缓存中获取
-	if item, ok := c.cache.Load(password); ok {
+func (c *cachedCrypto) Verify(hashed string, password string) error {
+	// Retrieve from cache
+	if item, ok := c.cache.Load(hashed); ok {
 		cached := item.(cacheItem)
 		if time.Now().Before(cached.expiresAt) {
-			if cached.hash == hashed {
-				return nil
+			if subtle.ConstantTimeCompare([]byte(cached.hash), []byte(hashed)) != 1 {
+				fmt.Printf("compare: %s | %s\n", cached.hash, hashed)
+				return ErrPasswordNotMatch
 			}
-			return ErrPasswordNotMatch
+			return nil
 		}
 	}
 
-	// 验证密码
+	// Verify password
 	err := c.crypto.Verify(hashed, password)
 	if err != nil {
 		return err
 	}
 
-	// 缓存结果
-	c.cache.Store(password, cacheItem{
+	// Cache the result
+	c.cache.Store(hashed, cacheItem{
 		hash:      hashed,
 		expiresAt: time.Now().Add(5 * time.Minute),
 	})
@@ -64,7 +67,7 @@ func (c *cachedCrypto) Verify(hashed, password string) error {
 	return nil
 }
 
-func NewCachedCrypto(crypto interfaces.Cryptographic) interfaces.Cryptographic {
+func CachedCrypto(crypto Crypto) Crypto {
 	return &cachedCrypto{
 		crypto: crypto,
 	}

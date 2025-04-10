@@ -19,7 +19,7 @@ var bitSize = len(ulid.Make().String())
 
 // init registers the ULID implementation with ident.
 func init() {
-	idgen.Register(New())
+	idgen.RegisterStringIdentifier(New())
 }
 
 // Name returns the name of the ULID implementation.
@@ -28,15 +28,15 @@ func (U ULID) Name() string {
 	return "ulid"
 }
 
-// Gen generates a new ULID string.
+// String generates a new ULID string.
 // It implements the ident.Identifier interface.
-func (U ULID) Gen() string {
+func (U ULID) String() string {
 	return ulid.Make().String()
 }
 
-// Validate checks if the given ID is a valid ULID.
+// ValidateString checks if the given ID is a valid ULID.
 // It implements the ident.Identifier interface.
-func (U ULID) Validate(id string) bool {
+func (U ULID) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}

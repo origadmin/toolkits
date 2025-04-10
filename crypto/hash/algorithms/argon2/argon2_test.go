@@ -3,21 +3,24 @@ package argon2
 import (
 	"testing"
 
+	"github.com/origadmin/toolkits/crypto/hash/core"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
+
+var codec = core.NewCodec(types.TypeArgon2)
 
 func TestParams_ParseAndString(t *testing.T) {
 	tests := []struct {
 		name     string
 		params   string
 		wantErr  bool
-		validate func(*testing.T, *Params)
+		validate func(*testing.T, Params)
 	}{
 		{
-			name:    "Complete parameters",
+			name:    "CompleteParameters",
 			params:  "t:3,m:65536,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -33,10 +36,10 @@ func TestParams_ParseAndString(t *testing.T) {
 			},
 		},
 		{
-			name:    "Partial parameters",
+			name:    "PartialParameters",
 			params:  "t:3,m:65536",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -52,10 +55,10 @@ func TestParams_ParseAndString(t *testing.T) {
 			},
 		},
 		{
-			name:    "Empty parameters",
+			name:    "EmptyParameters",
 			params:  "",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 0 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 0)
 				}
@@ -71,10 +74,10 @@ func TestParams_ParseAndString(t *testing.T) {
 			},
 		},
 		{
-			name:    "Boundary test - Maximum memory cost",
+			name:    "BoundaryTestMaximumMemoryCost",
 			params:  "t:3,m:4294967295,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -90,10 +93,10 @@ func TestParams_ParseAndString(t *testing.T) {
 			},
 		},
 		{
-			name:    "Boundary test - Minimum memory cost",
+			name:    "BoundaryTestMinimumMemoryCost",
 			params:  "t:3,m:1,p:4,k:32",
 			wantErr: false,
-			validate: func(t *testing.T, p *Params) {
+			validate: func(t *testing.T, p Params) {
 				if p.TimeCost != 3 {
 					t.Errorf("TimeCost = %v, want %v", p.TimeCost, 3)
 				}
@@ -109,12 +112,12 @@ func TestParams_ParseAndString(t *testing.T) {
 			},
 		},
 		{
-			name:    "Invalid parameter format",
+			name:    "InvalidParameterFormat",
 			params:  "t:3,m:65536,p:4,k:32,invalid",
 			wantErr: true,
 		},
 		{
-			name:    "Invalid parameter value",
+			name:    "InvalidParameterValue",
 			params:  "t:invalid,m:65536",
 			wantErr: true,
 		},
@@ -150,7 +153,7 @@ func TestParams_String(t *testing.T) {
 		want   string
 	}{
 		{
-			name: "Complete parameters",
+			name: "CompleteParameters",
 			params: &Params{
 				TimeCost:   3,
 				MemoryCost: 65536,
@@ -160,7 +163,7 @@ func TestParams_String(t *testing.T) {
 			want: "t:3,m:65536,p:4,k:32",
 		},
 		{
-			name: "Partial parameters",
+			name: "PartialParameters",
 			params: &Params{
 				TimeCost:   3,
 				MemoryCost: 65536,
@@ -168,12 +171,12 @@ func TestParams_String(t *testing.T) {
 			want: "t:3,m:65536",
 		},
 		{
-			name:   "Zero value parameters",
+			name:   "ZeroValueParameters",
 			params: &Params{},
 			want:   "",
 		},
 		{
-			name: "Boundary test - Maximum threads",
+			name: "BoundaryTestMaximumThreads",
 			params: &Params{
 				TimeCost:   3,
 				MemoryCost: 65536,
@@ -183,7 +186,7 @@ func TestParams_String(t *testing.T) {
 			want: "t:3,m:65536,p:255,k:32",
 		},
 		{
-			name: "Boundary test - Minimum threads",
+			name: "BoundaryTestMinimumThreads",
 			params: &Params{
 				TimeCost:   3,
 				MemoryCost: 65536,
@@ -294,15 +297,18 @@ func TestCrypto_Verify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Hash() error = %v", err)
 	}
-
-	err = crypto.Verify(hash, password)
+	decoded, err := codec.Decode(hash)
+	if err != nil {
+		t.Errorf("Decode() error = %v", err)
+	}
+	err = crypto.Verify(decoded, password)
 	if err != nil {
 		t.Errorf("Verify() error = %v", err)
 	}
 
 	// Test with wrong password
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(hash, wrongPassword)
+	err = crypto.Verify(decoded, wrongPassword)
 	if err == nil {
 		t.Error("Verify() should return error for wrong password")
 	}
@@ -319,12 +325,16 @@ func TestCrypto_VerifyWithSalt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("HashWithSalt() error = %v", err)
 	}
-	err = crypto.Verify(hash, password)
+	decoded, err := codec.Decode(hash)
+	if err != nil {
+		t.Errorf("Decode() error = %v", err)
+	}
+	err = crypto.Verify(decoded, password)
 	if err != nil {
 		t.Errorf("VerifyWithSalt() error = %v", err)
 	}
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(hash, wrongPassword)
+	err = crypto.Verify(decoded, wrongPassword)
 	if err == nil {
 		t.Error("VerifyWithSalt() should return error for wrong password")
 	}

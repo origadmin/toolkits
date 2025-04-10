@@ -22,4 +22,6 @@ type Decoder interface {
 type Codec interface {
 	Encoder
 	Decoder
+	Type() types.Type
+	Version() string
 }

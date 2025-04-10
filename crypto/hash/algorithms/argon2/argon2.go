@@ -27,28 +27,21 @@ type Params struct {
 }
 
 // parseParams parses Argon2 parameters from string
-func parseParams(params string) (*Params, error) {
-	result := &Params{}
-
+func parseParams(params string) (result Params, err error) {
 	// Handle empty string case
 	if params == "" {
 		return result, nil
 	}
 
-	kv := make(map[string]string)
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid argon2 param format: %s", param)
-		}
-		kv[parts[0]] = parts[1]
+	kv, err := core.ParseParams(params)
+	if err != nil {
+		return result, err
 	}
-
 	// Parse time cost
 	if v, ok := kv["t"]; ok {
 		timeCost, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
-			return nil, fmt.Errorf("invalid time cost: %v", err)
+			return result, fmt.Errorf("invalid time cost: %v", err)
 		}
 		result.TimeCost = uint32(timeCost)
 	}
@@ -57,7 +50,7 @@ func parseParams(params string) (*Params, error) {
 	if v, ok := kv["m"]; ok {
 		memoryCost, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
-			return nil, fmt.Errorf("invalid memory cost: %v", err)
+			return result, fmt.Errorf("invalid memory cost: %v", err)
 		}
 		result.MemoryCost = uint32(memoryCost)
 	}
@@ -66,7 +59,7 @@ func parseParams(params string) (*Params, error) {
 	if v, ok := kv["p"]; ok {
 		threads, err := strconv.ParseUint(v, 10, 8)
 		if err != nil {
-			return nil, fmt.Errorf("invalid threads: %v", err)
+			return result, fmt.Errorf("invalid threads: %v", err)
 		}
 		result.Threads = uint8(threads)
 	}
@@ -75,7 +68,7 @@ func parseParams(params string) (*Params, error) {
 	if v, ok := kv["k"]; ok {
 		keyLength, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
-			return nil, fmt.Errorf("invalid key length: %v", err)
+			return result, fmt.Errorf("invalid key length: %v", err)
 		}
 		result.KeyLength = uint32(keyLength)
 	}
@@ -84,7 +77,7 @@ func parseParams(params string) (*Params, error) {
 }
 
 // String returns the string representation of parameters
-func (p *Params) String() string {
+func (p Params) String() string {
 	var parts []string
 	if p.TimeCost > 0 {
 		parts = append(parts, fmt.Sprintf("t:%d", p.TimeCost))
@@ -103,7 +96,7 @@ func (p *Params) String() string {
 
 // Argon2 implements the Argon2 hashing algorithm
 type Argon2 struct {
-	params *Params
+	params Params
 	config *types.Config
 	codec  interfaces.Codec
 }
@@ -114,7 +107,7 @@ func (c *Argon2) Type() string {
 
 // ConfigValidator implements the config validator for Argon2
 type ConfigValidator struct {
-	params *Params
+	params Params
 }
 
 // Validate validates the Argon2 configuration
@@ -145,8 +138,8 @@ func DefaultConfig() *types.Config {
 	}
 }
 
-func DefaultParams() *Params {
-	return &Params{
+func DefaultParams() Params {
+	return Params{
 		TimeCost:   3,     // Default time cost
 		MemoryCost: 65536, // Default memory cost (64MB)
 		Threads:    4,     // Default threads
@@ -207,12 +200,8 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Argon2) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-	if parts.Algorithm != types.TypeArgon2 {
+func (c *Argon2) Verify(parts *types.HashParts, password string) error {
+	if !parts.Algorithm.Is(types.TypeArgon2) {
 		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters

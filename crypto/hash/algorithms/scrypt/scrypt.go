@@ -41,6 +41,15 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
 		return fmt.Errorf("N must be > 1 and a power of 2")
 	}
+	if v.params.R <= 0 {
+		return fmt.Errorf("R must be > 0")
+	}
+	if v.params.P <= 0 {
+		return fmt.Errorf("P must be > 0")
+	}
+	if v.params.KeyLen <= 0 {
+		return fmt.Errorf("key length must be > 0")
+	}
 
 	return nil
 }
@@ -105,13 +114,9 @@ func parseParams(params string) (*Params, error) {
 		return result, nil
 	}
 
-	kv := make(map[string]string)
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid scrypt param format: %s", param)
-		}
-		kv[parts[0]] = parts[1]
+	kv, err := core.ParseParams(params)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse N
@@ -190,12 +195,8 @@ func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *Scrypt) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-	if parts.Algorithm != types.TypeScrypt {
+func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
+	if !parts.Algorithm.Is(types.TypeScrypt) {
 		return core.ErrAlgorithmMismatch
 	}
 	// Parse parameters
@@ -203,7 +204,7 @@ func (c *Scrypt) Verify(hashed, password string) error {
 	if err != nil {
 		return err
 	}
-	hash, err := scrypt.Key([]byte(password), []byte(parts.Salt), params.N, params.R, params.P, params.KeyLen)
+	hash, err := scrypt.Key([]byte(password), parts.Salt, params.N, params.R, params.P, params.KeyLen)
 	if err != nil {
 		return err
 	}

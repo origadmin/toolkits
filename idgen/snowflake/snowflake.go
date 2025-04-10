@@ -27,8 +27,9 @@ type Snowflake struct {
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New()
-	bitSize = len(s.Gen())
-	idgen.Register(s)
+	bitSize = len(s.String())
+	idgen.RegisterStringIdentifier(s)
+	idgen.RegisterNumberIdentifier(s)
 }
 
 // Name returns the name of the generator.
@@ -37,17 +38,25 @@ func (s Snowflake) Name() string {
 }
 
 // Gen generates a new Snowflake ID as a string.
-func (s Snowflake) Gen() string {
+func (s Snowflake) String() string {
 	return s.generator.Generate().String()
 }
 
-// Validate checks if the provided ID is a valid Snowflake ID.
-func (s Snowflake) Validate(id string) bool {
+// ValidateString checks if the provided ID is a valid Snowflake ID.
+func (s Snowflake) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}
 	_, err := snowflake.ParseString(id)
 	return err == nil
+}
+
+func (s Snowflake) Number() int64 {
+	return s.generator.Generate().Int64()
+}
+
+func (s Snowflake) ValidateNumber(id int64) bool {
+	return id > 0
 }
 
 // Size returns the bit size of the generated Snowflake ID.

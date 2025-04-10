@@ -22,7 +22,7 @@ type SHA struct {
 }
 
 func (c *SHA) Type() string {
-	return c.hashHash.String()
+	return c.codec.Type().String()
 }
 
 type ConfigValidator struct {
@@ -60,12 +60,43 @@ func NewSha1Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return NewSHACrypto(types.TypeSha1, config)
 }
 
+func NewSha224Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha224, config)
+}
+
 func NewSha256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return NewSHACrypto(types.TypeSha256, config)
 }
 
 func NewSha512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return NewSHACrypto(types.TypeSha512, config)
+}
+
+func NewSha3224(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3224, config)
+}
+
+func NewSha3256(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3256, config)
+}
+
+func NewSha384Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha384, config)
+}
+
+func NewTypeSha3512(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3512, config)
+}
+
+func NewSha3512(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3512, config)
+}
+func NewSha3512224(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3512224, config)
+}
+
+func NewSha3512256(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHACrypto(types.TypeSha3512256, config)
 }
 
 func DefaultConfig() *types.Config {
@@ -90,13 +121,8 @@ func (c *SHA) HashWithSalt(password, salt string) (string, error) {
 }
 
 // Verify implements the verify method
-func (c *SHA) Verify(hashed, password string) error {
-	parts, err := c.codec.Decode(hashed)
-	if err != nil {
-		return err
-	}
-
-	if parts.Algorithm.String() != c.hashHash.String() {
+func (c *SHA) Verify(parts *types.HashParts, password string) error {
+	if !parts.Algorithm.Is(c.codec.Type()) {
 		return core.ErrAlgorithmMismatch
 	}
 	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))
