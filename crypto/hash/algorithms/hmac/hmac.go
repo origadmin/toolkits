@@ -126,6 +126,9 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
+	if hashHash == core.MAPHASH {
+		return fmt.Errorf("cannot compare hash with maphash")
+	}
 	h := hmac.New(hashHash.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)
