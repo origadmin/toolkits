@@ -50,3 +50,19 @@ type MultiTypeIdentifier interface {
 	StringIdentifier
 	NumberIdentifier
 }
+
+type TypedIdentifier[T ~int64 | ~string] interface {
+	Identifier
+	Generate() T
+	Validate(T) bool
+}
+
+// SetDefaultIdentifier sets the default identifier generator.
+func SetDefaultIdentifier(gen Identifier) {
+	switch v := gen.(type) {
+	case StringIdentifier:
+		registry.SetDefaultString(v)
+	case NumberIdentifier:
+		registry.SetDefaultNumber(v)
+	}
+}
