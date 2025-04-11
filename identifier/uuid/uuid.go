@@ -17,6 +17,14 @@ type UUID struct {
 	generator func() (uuid.UUID, error)
 }
 
+func (u UUID) Generate() string {
+	return u.GenerateString()
+}
+
+func (u UUID) Validate(id string) bool {
+	return u.ValidateString(id)
+}
+
 var (
 	bitSize = len(uuid.New().String())
 )
@@ -96,3 +104,5 @@ func New(opts ...Option) *UUID {
 		generator: generator,
 	}
 }
+
+var _ identifier.TypedIdentifier[string] = &UUID{}

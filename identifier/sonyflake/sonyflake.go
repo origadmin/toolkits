@@ -25,6 +25,14 @@ type Sonyflake struct {
 	generator *sonyflake.Sonyflake
 }
 
+func (s Sonyflake) Generate() int64 {
+	return s.GenerateNumber()
+}
+
+func (s Sonyflake) Validate(id int64) bool {
+	return s.ValidateNumber(id)
+}
+
 // Name returns the name of the generator.
 func (s Sonyflake) Name() string {
 	return "sonyflake"
@@ -64,3 +72,5 @@ func New(opts ...Option) *Sonyflake {
 		generator: generator,
 	}
 }
+
+var _ identifier.TypedIdentifier[int64] = &Sonyflake{}

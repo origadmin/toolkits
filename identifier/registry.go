@@ -5,7 +5,9 @@
 // Package identifier provides a unified interface for generating and validating unique identifiers.
 package identifier
 
-import "sync"
+import (
+	"sync"
+)
 
 // Registry manages the registration and retrieval of string and number identifier generators.
 type Registry struct {
@@ -94,4 +96,20 @@ func RegisterNumberIdentifier(gen NumberIdentifier) {
 func RegisterMultiTypeIdentifier(gen MultiTypeIdentifier) {
 	RegisterStringIdentifier(gen)
 	RegisterNumberIdentifier(gen)
+}
+
+func SetDefaultString(identifier StringIdentifier) {
+	registry.SetDefaultString(identifier)
+}
+
+func SetDefaultNumber(identifier NumberIdentifier) {
+	registry.SetDefaultNumber(identifier)
+}
+
+func DefaultString() StringIdentifier {
+	return registry.DefaultString()
+}
+
+func DefaultNumber() NumberIdentifier {
+	return registry.DefaultNumber()
 }

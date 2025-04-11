@@ -52,7 +52,7 @@ func (s ShortID) GenerateString() string {
 
 // ValidateString checks if the provided ID is a valid ShortID ID.
 func (s ShortID) ValidateString(id string) bool {
-	return len(id) == bitSize
+	return id != ""
 }
 
 // Size returns the bit size of the generated ShortID ID.

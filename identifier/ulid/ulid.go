@@ -14,18 +14,26 @@ import (
 // ULID is a struct that implements the ident.Identifier interface.
 type ULID struct{}
 
+func (u ULID) Generate() string {
+	return u.GenerateString()
+}
+
+func (u ULID) Validate(id string) bool {
+	return u.ValidateString(id)
+}
+
 // Name returns the name of the ULID implementation.
-func (U ULID) Name() string {
+func (u ULID) Name() string {
 	return "ulid"
 }
 
 // GenerateString generates a new ULID string.
-func (U ULID) GenerateString() string {
+func (u ULID) GenerateString() string {
 	return ulid.Make().String()
 }
 
 // ValidateString checks if the given ID is a valid ULID.
-func (U ULID) ValidateString(id string) bool {
+func (u ULID) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}
@@ -37,7 +45,7 @@ func (U ULID) ValidateString(id string) bool {
 var bitSize = len(ulid.Make().String())
 
 // Size returns the size of a ULID string in bits.
-func (U ULID) Size() int {
+func (u ULID) Size() int {
 	return bitSize
 }
 
@@ -53,3 +61,5 @@ type Options struct {
 func New(_ ...Options) *ULID {
 	return &ULID{}
 }
+
+var _ identifier.TypedIdentifier[string] = &ULID{}

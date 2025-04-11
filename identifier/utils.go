@@ -7,6 +7,7 @@ package identifier
 
 import (
 	"math/rand/v2"
+	"sync/atomic"
 )
 
 var (
@@ -73,7 +74,7 @@ func NewStringGenerate(size int) *StringGenerate {
 
 // Name returns the name of the string generator.
 func (s *StringGenerate) Name() string {
-	return "string_generate"
+	return "random_string"
 }
 
 // Size returns the size of the generated string identifier.
@@ -93,6 +94,9 @@ func (s *StringGenerate) ValidateString(id string) bool {
 	return len(id) == s.size
 }
 
+// StartNumber is the start number of the randNumber.
+var StartNumber = int64(rand.Int32()) << 32
+
 // NumberGenerate is a simple number identifier generator.
 type NumberGenerate struct {
 	seed int64
@@ -105,7 +109,7 @@ func NewNumberGenerate(seed int64) *NumberGenerate {
 
 // Name returns the name of the number generator.
 func (n *NumberGenerate) Name() string {
-	return "number_generate"
+	return "random_number"
 }
 
 // Size returns the size of the generated number identifier.
@@ -116,7 +120,7 @@ func (n *NumberGenerate) Size() int {
 // GenerateNumber generates a new number identifier.
 func (n *NumberGenerate) GenerateNumber() int64 {
 	// Implementation for generating a number identifier.
-	return n.seed
+	return atomic.AddInt64(&n.seed, 1)
 }
 
 // ValidateNumber validates a number identifier.
