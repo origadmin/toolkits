@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/idgen
+module github.com/origadmin/toolkits/identifier
 
 go 1.22.5
 
