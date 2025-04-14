@@ -1,9 +1,12 @@
-module github.com/origadmin/toolkits/idgen
+module github.com/origadmin/toolkits/identifier
 
-go 1.22.5
+go 1.23.1
+
+toolchain go1.23.7
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/goexts/generic v0.2.4
 	github.com/google/uuid v1.6.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/rs/xid v1.6.0

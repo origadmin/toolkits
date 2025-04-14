@@ -8,35 +8,32 @@ package ulid
 import (
 	"github.com/oklog/ulid/v2"
 
-	"github.com/origadmin/toolkits/idgen"
+	"github.com/origadmin/toolkits/identifier"
 )
 
 // ULID is a struct that implements the ident.Identifier interface.
 type ULID struct{}
 
-// bitSize is the size of a ULID string in bits.
-var bitSize = len(ulid.Make().String())
+func (u ULID) Generate() string {
+	return u.GenerateString()
+}
 
-// init registers the ULID implementation with ident.
-func init() {
-	idgen.RegisterStringIdentifier(New())
+func (u ULID) Validate(id string) bool {
+	return u.ValidateString(id)
 }
 
 // Name returns the name of the ULID implementation.
-// It implements the ident.Identifier interface.
-func (U ULID) Name() string {
+func (u ULID) Name() string {
 	return "ulid"
 }
 
-// String generates a new ULID string.
-// It implements the ident.Identifier interface.
-func (U ULID) String() string {
+// GenerateString generates a new ULID string.
+func (u ULID) GenerateString() string {
 	return ulid.Make().String()
 }
 
 // ValidateString checks if the given ID is a valid ULID.
-// It implements the ident.Identifier interface.
-func (U ULID) ValidateString(id string) bool {
+func (u ULID) ValidateString(id string) bool {
 	if len(id) != bitSize {
 		return false
 	}
@@ -44,16 +41,25 @@ func (U ULID) ValidateString(id string) bool {
 	return err == nil
 }
 
+// bitSize is the size of a ULID string in bits.
+var bitSize = len(ulid.Make().String())
+
 // Size returns the size of a ULID string in bits.
-// It implements the ident.Identifier interface.
-func (U ULID) Size() int {
+func (u ULID) Size() int {
 	return bitSize
 }
 
-type Setting struct {
+// init registers the ULID implementation with ident.
+func init() {
+	identifier.RegisterStringIdentifier(New())
+}
+
+type Options struct {
 }
 
 // New creates a new ULID implementation.
-func New(_ ...Setting) *ULID {
+func New(_ ...Options) *ULID {
 	return &ULID{}
 }
+
+var _ identifier.TypedIdentifier[string] = &ULID{}

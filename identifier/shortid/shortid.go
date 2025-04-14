@@ -10,21 +10,30 @@ import (
 
 	"github.com/teris-io/shortid"
 
-	"github.com/origadmin/toolkits/idgen"
+	"github.com/origadmin/toolkits/identifier"
 )
 
 var (
-	bitSize = 9 // bitSize is used to store the length of generated ID.
+	bitSize = 0 // bitSize is used to store the length of generated ID.
 )
 
 // init registers the Snowflake generator with the ident package and initializes bitSize.
 func init() {
 	s := New()
-	idgen.RegisterStringIdentifier(s)
+	bitSize = len(s.GenerateString())
+	identifier.RegisterStringIdentifier(s)
 }
 
 type ShortID struct {
 	generator *shortid.Shortid
+}
+
+func (s ShortID) Generate() string {
+	return s.GenerateString()
+}
+
+func (s ShortID) Validate(id string) bool {
+	return s.ValidateString(id)
 }
 
 // Name returns the name of the generator.
@@ -32,8 +41,8 @@ func (s ShortID) Name() string {
 	return "shortid"
 }
 
-// String generates a new ShortID ID as a string.
-func (s ShortID) String() string {
+// GenerateString generates a new ShortID ID as a string.
+func (s ShortID) GenerateString() string {
 	ret, err := s.generator.Generate()
 	if err != nil {
 		return ""
@@ -43,7 +52,7 @@ func (s ShortID) String() string {
 
 // ValidateString checks if the provided ID is a valid ShortID ID.
 func (s ShortID) ValidateString(id string) bool {
-	return len(id) == bitSize
+	return id != ""
 }
 
 // Size returns the bit size of the generated ShortID ID.
@@ -51,15 +60,15 @@ func (s ShortID) Size() int {
 	return bitSize
 }
 
-type Setting struct {
+type Options struct {
 	Worker   uint8
 	Alphabet string
 	Seed     uint64
 }
 
 // New creates a new ShortID generator with a unique node.
-func New(ss ...*Setting) *ShortID {
-	ss = append(ss, &Setting{})
+func New(ss ...*Options) *ShortID {
+	ss = append(ss, &Options{})
 	o := cmp.Or(ss...)
 	if o.Worker > 31 {
 		o.Worker = uint8(rand.Uint32N(31))
@@ -78,3 +87,5 @@ func New(ss ...*Setting) *ShortID {
 		generator: generator,
 	}
 }
+
+var _ identifier.TypedIdentifier[string] = &ShortID{}

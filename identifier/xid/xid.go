@@ -8,20 +8,26 @@ package xid
 import (
 	"github.com/rs/xid"
 
-	"github.com/origadmin/toolkits/idgen"
+	"github.com/origadmin/toolkits/identifier"
 )
+
+var (
+	bitSize = len(xid.New().String()) // bitSize is used to store the length of generated ID.
+)
+
+func init() {
+	identifier.RegisterStringIdentifier(New())
+}
 
 // XID represents a unique identifier generator.
 type XID struct{}
 
-var (
-	// bitSize represents the size of the xid in bits.
-	bitSize = len(xid.New().String())
-)
+func (x XID) Generate() string {
+	return x.GenerateString()
+}
 
-// init registers the XID identifier with the ident package.
-func init() {
-	idgen.RegisterStringIdentifier(New())
+func (x XID) Validate(id string) bool {
+	return x.ValidateString(id)
 }
 
 // Name returns the name of the identifier.
@@ -29,8 +35,8 @@ func (x XID) Name() string {
 	return "xid"
 }
 
-// String generates a new unique identifier.
-func (x XID) String() string {
+// GenerateString generates a new unique identifier.
+func (x XID) GenerateString() string {
 	return xid.New().String()
 }
 
@@ -48,10 +54,12 @@ func (x XID) Size() int {
 	return bitSize
 }
 
-type Setting struct {
+type Options struct {
 }
 
 // New creates a new instance of the XID identifier.
-func New(_ ...Setting) *XID {
+func New(_ ...Options) *XID {
 	return &XID{}
 }
+
+var _ identifier.TypedIdentifier[string] = &XID{}
