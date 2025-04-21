@@ -4,11 +4,11 @@ go 1.23.1
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/goexts/generic v0.2.4
-	github.com/origadmin/toolkits/codec v0.2.18
-	github.com/origadmin/toolkits/errors v0.2.18
-	github.com/origadmin/toolkits/identifier v0.2.18
-	github.com/origadmin/toolkits/sloge v0.2.18
+	github.com/goexts/generic v0.2.5
+	github.com/origadmin/toolkits/codec v0.3.1
+	github.com/origadmin/toolkits/errors v0.3.1
+	github.com/origadmin/toolkits/identifier v0.3.1
+	github.com/origadmin/toolkits/sloge v0.3.1
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -32,9 +32,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
-	golang.org/x/arch v0.15.0 // indirect
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/arch v0.16.0 // indirect
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
