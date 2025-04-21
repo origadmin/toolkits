@@ -2,8 +2,6 @@ module github.com/origadmin/toolkits/identifier
 
 go 1.23.1
 
-toolchain go1.23.7
-
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/goexts/generic v0.2.4

@@ -109,12 +109,12 @@ func ParseParams(params string) (map[string]string, error) {
 }
 
 func AlgorithmTypeHash(algorithm types.Type) (types.Type, string) {
-	configName := ""
+	hash := ""
 	algNew := algorithm
 	switch {
 	case strings.HasPrefix(algorithm.String(), "hmac-"):
-		configName = strings.TrimPrefix(algorithm.String(), "hmac-")
+		hash = strings.TrimPrefix(algorithm.String(), "hmac-")
 		algNew = types.TypeHMAC
 	}
-	return algNew, configName
+	return algNew, hash
 }

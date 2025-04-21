@@ -2,8 +2,6 @@ module github.com/origadmin/toolkits/codec
 
 go 1.23.1
 
-toolchain go1.24.1
-
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/bytedance/sonic v1.13.2

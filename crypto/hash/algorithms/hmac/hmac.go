@@ -48,7 +48,7 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		return nil, fmt.Errorf("invalid hmac256 config: %v", err)
 	}
 
-	hashName := strings.TrimLeft(hashType.String(), "hmac-")
+	hashName := strings.TrimPrefix(hashType.String(), "hmac-")
 	switch hashType {
 	case types.TypeHMAC256:
 		hashType = "hmac-sha256"
@@ -57,11 +57,15 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		hashType = "hmac-sha512"
 		hashName = "sha512"
 	case types.TypeHMAC:
-		hashType = types.Type(fmt.Sprintf("hmac-%s", config.Name))
-		if config.Name == "" {
-			config.Name = "sha256"
+		params, err := parseParams(config.ParamConfig)
+		if err != nil {
+			return nil, err
 		}
-		hashName = config.Name
+		if params.Type == "" {
+			params.Type = "sha256"
+		}
+		hashType = types.Type(fmt.Sprintf("hmac-%s", params.Type))
+		hashName = params.Type
 	}
 	hashHash, err := core.ParseHash(hashName)
 	if err != nil {
@@ -89,7 +93,6 @@ func NewHMAC512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		Name:       "sha256",
 		SaltLength: 16,
 	}
 }

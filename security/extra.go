@@ -64,6 +64,9 @@ func (e extraData) GetPolicy() (Policy, bool) {
 	return e.Policy, e.Policy != nil
 }
 
+func (e extraData) HasExtra() bool {
+	return e.Extra != nil
+}
 func (e extraData) GetExtra() map[string]string {
 	if e.Extra == nil {
 		return make(map[string]string)
@@ -80,7 +83,7 @@ func (e extraData) Get(key string) (string, bool) {
 
 func (e extraData) Set(key string, value string) {
 	if e.Extra == nil {
-		e.Extra = &extra{}
+		e.Extra = make(extra)
 	}
 	e.Extra.Set(key, value)
 }
@@ -98,6 +101,26 @@ func DataWithExtra(claims Claims, policy Policy, ext map[string]string) ExtraDat
 		Claims: claims,
 		Policy: policy,
 		Extra:  (extra)(ext),
+	}
+}
+
+func Claims2Extra(claims Claims, ext map[string]string) ExtraData {
+	return &extraData{
+		Claims: claims,
+		Extra:  (extra)(ext),
+	}
+}
+
+func Policy2Extra(policy Policy, ext map[string]string) ExtraData {
+	return &extraData{
+		Policy: policy,
+		Extra:  (extra)(ext),
+	}
+}
+
+func WithExtraData(ext map[string]string) ExtraData {
+	return &extraData{
+		Extra: (extra)(ext),
 	}
 }
 

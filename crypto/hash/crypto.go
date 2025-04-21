@@ -43,9 +43,9 @@ func (c *crypto) Verify(hashed, password string) error {
 		return err
 	}
 
-	algType, configName := core.AlgorithmTypeHash(parts.Algorithm)
+	algType, _ := core.AlgorithmTypeHash(parts.Algorithm)
 	// Get algorithm instance from cache or create new one
-	cryptographic, err := c.factory.create(algType, types.WithName(configName))
+	cryptographic, err := c.factory.create(algType)
 	if err != nil {
 		return err
 	}
@@ -54,13 +54,10 @@ func (c *crypto) Verify(hashed, password string) error {
 
 // NewCrypto creates a new cryptographic instance
 func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
-	algType, configName := core.AlgorithmTypeHash(alg)
+	algType, _ := core.AlgorithmTypeHash(alg)
 
 	factory := &algorithmFactory{
 		cryptos: make(map[types.Type]interfaces.Cryptographic),
-	}
-	if configName != "" {
-		opts = append(opts, types.WithName(configName))
 	}
 
 	cryptographic, err := factory.create(algType, opts...)
