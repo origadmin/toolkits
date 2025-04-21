@@ -1,6 +1,6 @@
 module github.com/origadmin/toolkits/crypto
 
-go 1.23.7
+go 1.23.1
 
 require (
 	github.com/goexts/generic v0.2.4
