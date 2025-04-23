@@ -13,3 +13,7 @@ import (
 func Int64ToDuration(seconds int64) time.Duration {
 	return time.Duration(seconds) * 1e6
 }
+
+func DurationToInt64(duration time.Duration) int64 {
+	return duration.Milliseconds()
+}
