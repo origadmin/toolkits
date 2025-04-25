@@ -18,12 +18,13 @@ const (
 	defaultDiscoveryPrefix = "discovery:///"
 )
 
-// ServiceDiscoveryName ...
-// Deprecated: use ServiceName
-func ServiceDiscoveryName(serviceName string) string {
+// ServiceDiscovery ...
+func ServiceDiscovery(serviceName string) string {
 	return defaultDiscoveryPrefix + serviceName
 }
 
+// ServiceName ...
+// Deprecated: use ServiceDiscovery
 func ServiceName(serviceName string) string {
 	return defaultDiscoveryPrefix + serviceName
 }
