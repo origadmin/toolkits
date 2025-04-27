@@ -29,8 +29,8 @@ const (
 	ErrFileRead       = errors.String("file read error")
 	ErrFileWrite      = errors.String("file write error")
 	ErrFileNotExist   = errors.String("file not exist")
-	ErrFileName       = errors.String("file Path is empty")
-	ErrSizeNotMatch   = errors.String("file Size not match")
+	ErrFileName       = errors.String("file path is empty")
+	ErrSizeNotMatch   = errors.String("file size not match")
 )
 
 var (
@@ -82,6 +82,9 @@ type (
 	ReadWriteSeeker = io.ReadWriteSeeker
 	ReadSeeker      = io.ReadSeeker
 	ReadSeekCloser  = io.ReadSeekCloser
+	StringWriter    = io.StringWriter
+	ReadDirFile     = fs.ReadDirFile
+	DirEntry        = fs.DirEntry
 	FileInfo        = fs.FileInfo
 )
 
