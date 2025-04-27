@@ -26,42 +26,42 @@ const (
 )
 
 // NewDebug create a new slog.Logger with debug level
-func NewDebug(ss ...Setting) *Logger {
-	return New(append(ss, WithLevel(LevelDebug))...)
+func NewDebug(options ...Option) *Logger {
+	return New(append(options, WithLevel(LevelDebug))...)
 }
 
 // New create a new slog.Logger
-func New(ss ...Setting) *Logger {
-	opt := settings.Apply(defaultOption, ss)
+func New(options ...Option) *Logger {
+	cfg := settings.ApplyDefault(defaultOptions, options)
 
 	defaultLogger := Default()
 	var outputs []io.Writer
-	if opt.Console {
+	if cfg.Console {
 		outputs = append(outputs, os.Stderr)
 	}
-	if opt.Output != "" || opt.LumberjackConfig != nil {
-		pathname := opt.Output
+	if cfg.Output != "" || cfg.LumberjackConfig != nil {
+		pathname := cfg.Output
 		if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
 			if err := os.Rename(pathname, backupLog(pathname)); err != nil {
 				return defaultLogger
 			}
 		}
 
-		if opt.LumberjackConfig != nil {
-			if opt.LumberjackConfig.Filename != "" {
-				pathname = opt.LumberjackConfig.Filename
+		if cfg.LumberjackConfig != nil {
+			if cfg.LumberjackConfig.Filename != "" {
+				pathname = cfg.LumberjackConfig.Filename
 				if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
 					if err := os.Rename(pathname, backupLog(pathname)); err != nil {
 						return defaultLogger
 					}
 				}
 			} else {
-				opt.LumberjackConfig.Filename = pathname
+				cfg.LumberjackConfig.Filename = pathname
 			}
-			outputs = append(outputs, opt.LumberjackConfig)
+			outputs = append(outputs, cfg.LumberjackConfig)
 		} else {
-			if _, err := os.Stat(filepath.Dir(opt.Output)); os.IsNotExist(err) {
-				if err := os.Mkdir(opt.Output, 0766); err != nil {
+			if _, err := os.Stat(filepath.Dir(cfg.Output)); os.IsNotExist(err) {
+				if err := os.Mkdir(cfg.Output, 0766); err != nil {
 					return defaultLogger
 				}
 			}
@@ -78,22 +78,22 @@ func New(ss ...Setting) *Logger {
 		multiOutput = io.MultiWriter(outputs...)
 	}
 	//var handler Handler = NewTextHandler(output, &HandlerOptions{
-	//	Level:       opt.Level,
-	//	ReplaceAttr: opt.ReplaceAttr,
-	//	AddSource:   opt.AddSource,
+	//	Level:       cfg.Level,
+	//	ReplaceAttr: cfg.ReplaceAttr,
+	//	AddSource:   cfg.AddSource,
 	//})
-	handler := createHandler(opt, multiOutput)
+	handler := createHandler(cfg, multiOutput)
 
 	defaultLogger = slog.New(handler)
-	if opt.Default {
+	if cfg.Default {
 		slog.SetDefault(defaultLogger)
-		slog.SetLogLoggerLevel(opt.Level.Level())
+		slog.SetLogLoggerLevel(cfg.Level.Level())
 	}
 
 	return defaultLogger
 }
 
-func createHandler(opt *Option, output io.Writer) slog.Handler {
+func createHandler(opt *Options, output io.Writer) slog.Handler {
 	switch opt.Format {
 	case FormatJSON:
 		handler := &HandlerOptions{
