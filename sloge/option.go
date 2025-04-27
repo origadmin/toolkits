@@ -5,10 +5,10 @@
 // Package sloge implements the functions, types, and interfaces for the module.
 package sloge
 
-type Setting = func(*Option)
+type Option = func(*Options)
 
-// Option custom setup config
-type Option struct {
+// Options custom setup config
+type Options struct {
 	Output           string
 	Format           Format
 	TimeLayout       string
@@ -23,7 +23,7 @@ type Option struct {
 }
 
 var (
-	defaultOption = &Option{
+	defaultOptions = Options{
 		Output:     "output.log",
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
@@ -32,86 +32,86 @@ var (
 )
 
 // WithFile write log to some File
-func WithFile(file string) Setting {
-	return func(opt *Option) {
+func WithFile(file string) Option {
+	return func(opt *Options) {
 		opt.Output = file
 	}
 }
 
 // WithLumberjack write log to some File with rotation
-func WithLumberjack(config *LumberjackLogger) Setting {
-	return func(opt *Option) {
+func WithLumberjack(config *LumberjackLogger) Option {
+	return func(opt *Options) {
 		opt.LumberjackConfig = config
 	}
 }
 
 // WithTimeLayout custom time format
-func WithTimeLayout(timeLayout string) Setting {
-	return func(opt *Option) {
+func WithTimeLayout(timeLayout string) Option {
+	return func(opt *Options) {
 		opt.TimeLayout = timeLayout
 	}
 }
 
 // WithConsole set the log to console or /dev/null
-func WithConsole(set bool) Setting {
-	return func(opt *Option) {
+func WithConsole(set bool) Option {
+	return func(opt *Options) {
 		opt.Console = set
 	}
 }
 
 // WithConsoleOnly set the log to console only
-func WithConsoleOnly() Setting {
-	return func(opt *Option) {
+func WithConsoleOnly() Option {
+	return func(opt *Options) {
 		opt.Console = true
 		opt.Output = ""
 	}
 }
 
 // WithLevel custom log level
-func WithLevel(level Leveler) Setting {
-	return func(opt *Option) {
+func WithLevel(level Leveler) Option {
+	return func(opt *Options) {
 		opt.Level = level
 	}
 }
 
 // WithReplaceAttr custom replaceAttr
-func WithReplaceAttr(replaceAttr func(groups []string, attr Attr) Attr) Setting {
-	return func(opt *Option) {
+func WithReplaceAttr(replaceAttr func(groups []string, attr Attr) Attr) Option {
+	return func(opt *Options) {
 		opt.ReplaceAttr = replaceAttr
 	}
 }
 
 // WithFormat custom format
-func WithFormat(format Format) Setting {
-	return func(opt *Option) {
+func WithFormat(format Format) Option {
+	return func(opt *Options) {
 		opt.Format = format
 	}
 }
 
 // WithAddSource add source info to log
-func WithAddSource() Setting {
-	return func(opt *Option) {
+func WithAddSource() Option {
+	return func(opt *Options) {
 		opt.AddSource = true
 	}
 }
 
 // WithNoColor disable color
-func WithNoColor() Setting {
-	return func(opt *Option) {
+func WithNoColor() Option {
+	return func(opt *Options) {
 		opt.NoColor = true
 	}
 }
 
 // WithDefault use output as slog.Default()
-func WithDefault(set bool) Setting {
-	return func(opt *Option) {
+func WithDefault(set bool) Option {
+	return func(opt *Options) {
 		opt.Default = set
 	}
 }
 
 // WithDevConfig set dev config
-func WithDevConfig(config *DevConfig) Setting {
-	return func(opt *Option) {
+func WithDevConfig(config *DevConfig) Option {
+	return func(opt *Options) {
 		opt.DevConfig = config
 	}
 }
