@@ -2,8 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package sloge implements the functions, types, and interfaces for the module.
-package sloge
+// Package slogx implements enhanced logging functions for slog
+package slogx
 
 type Option = func(*Options)
 
@@ -28,6 +28,9 @@ var (
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
 		Level:      LevelInfo,
+		DevConfig: &DevConfig{ // 预设默认配置
+			HandlerOptions: &HandlerOptions{},
+		},
 	}
 )
 

@@ -2,8 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package sloge implements the functions, types, and interfaces for the module.
-package sloge
+// Package slogx implements enhanced logging functions for slog
+package slogx
 
 import (
 	"log/slog"

@@ -2,8 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package sloge implements the functions, types, and interfaces for the module.
-package sloge
+// Package slogx implements enhanced logging functions for slog
+package slogx
 
 import (
 	"fmt"
@@ -39,7 +39,9 @@ func New(options ...Option) *Logger {
 	if cfg.Console {
 		outputs = append(outputs, os.Stderr)
 	}
-	if cfg.Output != "" || cfg.LumberjackConfig != nil {
+	if cfg.LumberjackConfig != nil {
+		outputs = append(outputs, cfg.LumberjackConfig)
+	} else if cfg.Output != "" {
 		pathname := cfg.Output
 		if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
 			if err := os.Rename(pathname, backupLog(pathname)); err != nil {
@@ -47,75 +49,47 @@ func New(options ...Option) *Logger {
 			}
 		}
 
-		if cfg.LumberjackConfig != nil {
-			if cfg.LumberjackConfig.Filename != "" {
-				pathname = cfg.LumberjackConfig.Filename
-				if stat, err := os.Stat(pathname); err == nil && !stat.IsDir() {
-					if err := os.Rename(pathname, backupLog(pathname)); err != nil {
-						return defaultLogger
-					}
-				}
-			} else {
-				cfg.LumberjackConfig.Filename = pathname
-			}
-			outputs = append(outputs, cfg.LumberjackConfig)
-		} else {
-			if _, err := os.Stat(filepath.Dir(cfg.Output)); os.IsNotExist(err) {
-				if err := os.Mkdir(cfg.Output, 0766); err != nil {
-					return defaultLogger
-				}
-			}
-			file, err := os.OpenFile(pathname, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
-			if err != nil {
-				return defaultLogger
-			}
-			outputs = append(outputs, file)
+		dir := filepath.Dir(cfg.Output)
+		if err := os.MkdirAll(dir, 0766); err != nil {
+			return defaultLogger
 		}
+		file, err := os.OpenFile(pathname, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+		if err != nil {
+			return defaultLogger
+		}
+		outputs = append(outputs, file)
 	}
 
 	multiOutput := io.Discard
 	if len(outputs) > 0 {
 		multiOutput = io.MultiWriter(outputs...)
 	}
-	//var handler Handler = NewTextHandler(output, &HandlerOptions{
-	//	Level:       cfg.Level,
-	//	ReplaceAttr: cfg.ReplaceAttr,
-	//	AddSource:   cfg.AddSource,
-	//})
 	handler := createHandler(cfg, multiOutput)
-
 	defaultLogger = slog.New(handler)
 	if cfg.Default {
 		slog.SetDefault(defaultLogger)
-		slog.SetLogLoggerLevel(cfg.Level.Level())
 	}
-
 	return defaultLogger
 }
 
 func createHandler(opt *Options, output io.Writer) slog.Handler {
 	switch opt.Format {
-	case FormatJSON:
-		handler := &HandlerOptions{
-			Level:       opt.Level,
-			ReplaceAttr: opt.ReplaceAttr,
-			AddSource:   opt.AddSource,
-		}
-		return NewJSONHandler(output, handler)
-	case FormatTint:
-		return NewTintHandler(output, &TintOptions{
-			AddSource:   opt.AddSource,
-			Level:       opt.Level,
-			ReplaceAttr: opt.ReplaceAttr,
-			TimeFormat:  opt.TimeLayout,
-			NoColor:     opt.NoColor,
-		})
 	case FormatDev:
 		timeFormat := DefaultTimeLayout
 		if opt.TimeLayout != "" {
 			timeFormat = opt.TimeLayout
 		}
-		if opt.DevConfig != nil {
+		if opt.DevConfig == nil {
+			opt.DevConfig = &DevConfig{
+				HandlerOptions: &HandlerOptions{
+					Level:       opt.Level,
+					ReplaceAttr: opt.ReplaceAttr,
+					AddSource:   opt.AddSource,
+				},
+				TimeFormat: timeFormat,
+				NoColor:    opt.NoColor,
+			}
+		} else {
 			if opt.DevConfig.HandlerOptions == nil {
 				opt.DevConfig.HandlerOptions = &HandlerOptions{
 					Level:       opt.Level,
@@ -131,13 +105,26 @@ func createHandler(opt *Options, output io.Writer) slog.Handler {
 			}
 		}
 		return NewDevSlogHandler(output, opt.DevConfig)
-	default:
-		handler := &HandlerOptions{
+	case FormatTint:
+		handler := &TintOptions{
+			Level:       opt.Level,
+			ReplaceAttr: opt.ReplaceAttr,
+			AddSource:   opt.AddSource,
+			NoColor:     opt.NoColor,
+		}
+		return NewTintHandler(output, handler)
+	case FormatJSON:
+		handler := &slog.HandlerOptions{
 			Level:       opt.Level,
 			ReplaceAttr: opt.ReplaceAttr,
 			AddSource:   opt.AddSource,
 		}
-		return slog.NewTextHandler(output, handler)
+		return NewJSONHandler(output, handler)
+	default:
+		handler := &slog.HandlerOptions{
+			Level: opt.Level,
+		}
+		return NewTextHandler(output, handler)
 	}
 }
 
