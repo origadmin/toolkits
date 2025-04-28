@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/sloge
+module github.com/origadmin/toolkits/slogx
 
 go 1.23.1
 

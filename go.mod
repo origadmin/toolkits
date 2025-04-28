@@ -4,11 +4,11 @@ go 1.23.1
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/goexts/generic v0.2.5
-	github.com/origadmin/toolkits/codec v0.3.1
-	github.com/origadmin/toolkits/errors v0.3.1
-	github.com/origadmin/toolkits/identifier v0.3.1
-	github.com/origadmin/toolkits/sloge v0.3.1
+	github.com/goexts/generic v0.2.6
+	github.com/origadmin/toolkits/codec v0.3.2
+	github.com/origadmin/toolkits/errors v0.3.2
+	github.com/origadmin/toolkits/identifier v0.3.2
+	github.com/origadmin/toolkits/sloge v0.3.2
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -19,7 +19,7 @@ require (
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/golang-cz/devslog v0.0.12 // indirect
+	github.com/golang-cz/devslog v0.0.13 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
