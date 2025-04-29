@@ -27,6 +27,10 @@ type Decoder interface {
 	Decode(any) error
 }
 
+type DecodeReader interface {
+	DecodeReader(io.Reader, any) error
+}
+
 // DecodeJSONFile Decodes the given JSON file
 func DecodeJSONFile(name string, obj any) error {
 	f, err := os.Open(name)

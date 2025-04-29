@@ -27,6 +27,10 @@ type Encoder interface {
 	Encode(obj any) error
 }
 
+type EncodeWriter interface {
+	EncodeWriter(io.Writer, any) error
+}
+
 // EncodeJSONFile Encodes the given JSON file
 func EncodeJSONFile(name string, obj any) error {
 	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
