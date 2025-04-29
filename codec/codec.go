@@ -10,3 +10,5 @@ type Codec interface {
 	Unmarshal(data []byte, v interface{}) error
 	Name() string
 }
+
+type Hooker func(data []byte) ([]byte, error)

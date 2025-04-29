@@ -120,3 +120,31 @@ func Encode(w io.Writer, obj any, st Type) error {
 		return ErrUnsupportedEncodeType
 	}
 }
+
+type fileEncoder struct {
+	decoder Type
+	hooks   []Hooker
+}
+
+func (f fileEncoder) EncodeWriter(writer io.Writer, v any) error {
+	rd, err := f.decoder.Marshal(v)
+	if err != nil {
+		return err
+	}
+	for _, hook := range f.hooks {
+		rd, err = hook(rd)
+	}
+	_, err = writer.Write(rd)
+	return err
+}
+
+func FileEncoder(name string, hooks ...Hooker) (EncodeWriter, error) {
+	dec := TypeFromPath(name)
+	if !dec.IsSupported() {
+		return nil, ErrUnsupportedDecodeType
+	}
+	return &fileEncoder{
+		decoder: dec,
+		hooks:   hooks,
+	}, nil
+}

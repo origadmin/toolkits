@@ -6,6 +6,7 @@
 package codec
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"os"
@@ -127,4 +128,31 @@ func Decode(rd io.Reader, obj any, ext string) error {
 	default:
 		return ErrUnsupportedDecodeType
 	}
+}
+
+type fileDecoder struct {
+	decoder Type
+	hooks   []Hooker
+}
+
+func (f fileDecoder) DecodeReader(reader io.Reader, v any) error {
+	rd, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	for _, hook := range f.hooks {
+		rd, err = hook(rd)
+	}
+	return f.decoder.NewDecoder(bytes.NewReader(rd)).Decode(v)
+}
+
+func FileDecoder(name string, hooks ...Hooker) (DecodeReader, error) {
+	dec := TypeFromPath(name)
+	if !dec.IsSupported() {
+		return nil, ErrUnsupportedDecodeType
+	}
+	return &fileDecoder{
+		decoder: dec,
+		hooks:   hooks,
+	}, nil
 }
