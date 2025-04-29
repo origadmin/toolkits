@@ -43,9 +43,6 @@ func (s Type) Marshal(v interface{}) ([]byte, error) {
 		return nil, ErrUnsupportedEncodeType
 	}
 	return codecs[s].Marshal(v)
-	//buf := &bytes.Buffer{}
-	//err := s.NewEncoder(buf).Encode(v)
-	//return buf.Bytes(), err
 }
 
 func (s Type) Unmarshal(data []byte, v interface{}) error {
@@ -158,4 +155,9 @@ func TypeFromExt(ext string) Type {
 // TypeFromPath returns the codec type from the file path.
 func TypeFromPath(path string) Type {
 	return TypeFromExt(filepath.Ext(path))
+}
+
+// IsSupported returns true if the codec type is supported.
+func IsSupported(s string) bool {
+	return TypeFromString(s).IsSupported()
 }
