@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/goexts/generic v0.2.6
+	github.com/goexts/generic v0.3.0
 	github.com/origadmin/toolkits/codec v0.3.2
 	github.com/origadmin/toolkits/errors v0.3.2
 	github.com/origadmin/toolkits/identifier v0.3.2
