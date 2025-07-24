@@ -10,17 +10,19 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // HMAC implements the HMAC hashing algorithm
 type HMAC struct {
 	config   *types.Config
 	codec    interfaces.Codec
-	hashHash core.Hash
+	hashHash stdhash.Hash
 }
 
 func (c *HMAC) Type() string {
@@ -67,14 +69,14 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		hashType = types.Type(fmt.Sprintf("hmac-%s", params.Type))
 		hashName = params.Type
 	}
-	hashHash, err := core.ParseHash(hashName)
+	hashHash, err := stdhash.ParseHash(hashName)
 	if err != nil {
 		return nil, err
 	}
 
 	return &HMAC{
 		config:   config,
-		codec:    core.NewCodec(hashType),
+		codec:    codec.NewCodec(hashType),
 		hashHash: hashHash,
 	}, nil
 }
@@ -99,7 +101,7 @@ func DefaultConfig() *types.Config {
 
 // Hash implements the hash method
 func (c *HMAC) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -117,26 +119,26 @@ func (c *HMAC) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(types.TypeHMAC) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 
-	algType, hash := core.AlgorithmTypeHash(parts.Algorithm)
+	algType, hash := codec.AlgorithmTypeHash(parts.Algorithm)
 	if algType == types.TypeHMAC && hash == "" {
 		hash = "sha256"
 	}
 
-	hashHash, err := core.ParseHash(hash)
+	hashHash, err := stdhash.ParseHash(hash)
 	if err != nil {
 		return err
 	}
-	if hashHash == core.MAPHASH {
+	if hashHash == stdhash.MAPHASH {
 		return fmt.Errorf("cannot compare hash with maphash")
 	}
 	h := hmac.New(hashHash.New, parts.Salt)
 	h.Write([]byte(password))
 	newHash := h.Sum(nil)
 	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 
 	return nil

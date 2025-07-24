@@ -6,7 +6,7 @@
 package hash
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -43,7 +43,7 @@ func (c *crypto) Verify(hashed, password string) error {
 		return err
 	}
 
-	algType, _ := core.AlgorithmTypeHash(parts.Algorithm)
+	algType, _ := codec.AlgorithmTypeHash(parts.Algorithm)
 	// Get algorithm instance from cache or create new one
 	cryptographic, err := c.factory.create(algType)
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *crypto) Verify(hashed, password string) error {
 
 // NewCrypto creates a new cryptographic instance
 func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
-	algType, _ := core.AlgorithmTypeHash(alg)
+	algType, _ := codec.AlgorithmTypeHash(alg)
 
 	factory := &algorithmFactory{
 		cryptos: make(map[types.Type]interfaces.Cryptographic),
@@ -68,7 +68,7 @@ func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
 	// Create cryptographic instance
 	return &crypto{
 		crypto:  cryptographic,
-		codec:   core.NewCodec(alg),
+		codec:   codec.NewCodec(alg),
 		factory: factory,
 	}, nil
 }
@@ -81,15 +81,4 @@ func RegisterAlgorithm(t types.Type, creator AlgorithmCreator, defaultConfig Alg
 	}
 }
 
-// Verify verifies a password
-func Verify(hashed, password string) error {
-	return defaultCrypto.Verify(hashed, password)
-}
 
-func Generate(password string) (string, error) {
-	return defaultCrypto.Hash(password)
-}
-
-func GenerateWithSalt(password, salt string) (string, error) {
-	return defaultCrypto.HashWithSalt(password, salt)
-}

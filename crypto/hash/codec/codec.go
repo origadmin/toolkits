@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package core
+package codec
 
 import (
 	"encoding/hex"
@@ -11,6 +11,8 @@ import (
 
 	"github.com/goexts/generic/settings"
 
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -50,7 +52,7 @@ func (c *Codec) Encode(salt []byte, hash []byte, params ...string) string {
 func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 6 {
-		return nil, ErrInvalidHashFormat
+		return nil, errors.ErrInvalidHashFormat
 	}
 
 	algorithm := types.Type(parts[1])
@@ -75,19 +77,19 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 }
 
 // NewCodec creates a new codec
-func NewCodec(algorithm types.Type, opts ...CodecOption) interfaces.Codec {
+func NewCodec(algorithm types.Type, opts ...Option) interfaces.Codec {
 	return settings.Apply(
 		&Codec{
 			algorithm: algorithm,
-			version:   DefaultVersion,
+			version:   constants.DefaultVersion,
 		}, opts)
 }
 
-// CodecOption defines configuration options for the codec
-type CodecOption func(*Codec)
+// Option defines configuration options for the codec
+type Option func(*Codec)
 
 // WithVersion sets the version number
-func WithVersion(version string) CodecOption {
+func WithVersion(version string) Option {
 	return func(c *Codec) {
 		c.version = version
 	}
@@ -98,8 +100,8 @@ func ParseParams(params string) (map[string]string, error) {
 	if params == "" {
 		return kv, nil
 	}
-	for _, param := range strings.Split(params, ParamSeparator) {
-		parts := strings.Split(param, ParamValueSeparator)
+	for _, param := range strings.Split(params, constants.ParamSeparator) {
+		parts := strings.Split(param, constants.ParamValueSeparator)
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid param format: %s", param)
 		}

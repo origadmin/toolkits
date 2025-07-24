@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 )
 
 // Params represents parameters for Argon2 algorithm
@@ -24,7 +25,7 @@ func parseParams(params string) (result Params, err error) {
 		return result, nil
 	}
 
-	kv, err := core.ParseParams(params)
+	kv, err := codec.ParseParams(params)
 	if err != nil {
 		return result, err
 	}
@@ -43,5 +44,5 @@ func (p Params) String() string {
 		parts = append(parts, fmt.Sprintf("t:%s", p.Type))
 	}
 
-	return strings.Join(parts, ",")
+	return strings.Join(parts, constants.ParamSeparator)
 }

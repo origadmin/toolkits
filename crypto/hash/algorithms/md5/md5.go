@@ -9,10 +9,11 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // MD5 implements the MD5 hashing algorithm
@@ -47,13 +48,13 @@ func NewMD5Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	}
 	return &MD5{
 		config: config,
-		codec:  core.NewCodec(types.TypeMD5),
+		codec:  codec.NewCodec(types.TypeMD5),
 	}, nil
 }
 
 // Hash implements the hash method
 func (c *MD5) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -69,12 +70,12 @@ func (c *MD5) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
 	if parts.Algorithm != types.TypeMD5 {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 
 	newHash := md5.Sum([]byte(password + string(parts.Salt)))
 	if subtle.ConstantTimeCompare(newHash[:], parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 	return nil
 }

@@ -8,17 +8,19 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // SHA implements the SHA hashing algorithm
 type SHA struct {
 	config   *types.Config
 	codec    interfaces.Codec
-	hashHash core.Hash
+	hashHash stdhash.Hash
 }
 
 func (c *SHA) Type() string {
@@ -30,7 +32,7 @@ type ConfigValidator struct {
 
 func (v ConfigValidator) Validate(config *types.Config) interface{} {
 	if config.SaltLength < 8 {
-		return core.ErrSaltLengthTooShort
+		return errors.ErrSaltLengthTooShort
 	}
 	return nil
 }
@@ -44,14 +46,14 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
-	hashHash, err := core.ParseHash(hashType.String())
+	hashHash, err := stdhash.ParseHash(hashType.String())
 	if err != nil {
 		return nil, err
 	}
 
 	return &SHA{
 		config:   config,
-		codec:    core.NewCodec(hashType),
+		codec:    codec.NewCodec(hashType),
 		hashHash: hashHash,
 	}, nil
 }
@@ -107,7 +109,7 @@ func DefaultConfig() *types.Config {
 
 // Hash implements the hash method
 func (c *SHA) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -123,11 +125,11 @@ func (c *SHA) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(c.codec.Type()) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))
 	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 
 	return nil

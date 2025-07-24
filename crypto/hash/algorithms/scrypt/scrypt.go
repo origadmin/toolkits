@@ -12,10 +12,11 @@ import (
 
 	"golang.org/x/crypto/scrypt"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // Scrypt implements the Scrypt hashing algorithm
@@ -35,7 +36,7 @@ type ConfigValidator struct {
 
 func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
-		return fmt.Errorf("salt length must be at least 8 bytes")
+		return errors.ErrSaltLengthTooShort
 	}
 	// N must be > 1 and a power of 2
 	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
@@ -77,7 +78,7 @@ func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Scrypt{
 		params: params,
 		config: config,
-		codec:  core.NewCodec(types.TypeScrypt),
+		codec:  codec.NewCodec(types.TypeScrypt),
 	}, nil
 }
 
@@ -114,7 +115,7 @@ func parseParams(params string) (*Params, error) {
 		return result, nil
 	}
 
-	kv, err := core.ParseParams(params)
+	kv, err := codec.ParseParams(params)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +179,7 @@ func (p *Params) String() string {
 
 // Hash implements the hash method
 func (c *Scrypt) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSaltString(c.config.SaltLength)
+	salt, err := rand.RandomString(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -197,7 +198,7 @@ func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(types.TypeScrypt) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters
 	params, err := parseParams(parts.Params)
@@ -209,7 +210,7 @@ func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 
 	return nil

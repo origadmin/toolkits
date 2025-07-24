@@ -3,11 +3,12 @@ package bcrypt
 import (
 	"testing"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var codec = core.NewCodec(types.TypeBcrypt)
+var codec = codecPkg.NewCodec(types.TypeBcrypt)
 
 func TestNewBcryptCrypto(t *testing.T) {
 	tests := []struct {
@@ -25,7 +26,7 @@ func TestNewBcryptCrypto(t *testing.T) {
 			config: &types.Config{
 				SaltLength: 16,
 				ParamConfig: (&Params{
-					Cost: 10,
+					Cost: constants.DefaultCost,
 				}).String(),
 			},
 			wantErr: false,

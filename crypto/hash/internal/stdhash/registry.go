@@ -2,8 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package core implements the functions, types, and interfaces for the module.
-package core
+package stdhash
 
 import (
 	"crypto/md5"
@@ -255,8 +254,7 @@ func ParseHash(s string) (Hash, error) {
 		return h, nil
 	}
 	if h, ok := ParseCustomHash(s); ok {
-		return h, nil
-	}
+		return h, nil	}
 	return 0, fmt.Errorf("unknown hash function: %s", s)
 }
 

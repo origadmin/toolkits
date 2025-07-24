@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package core
+package errors
 
 import "github.com/origadmin/toolkits/errors"
 

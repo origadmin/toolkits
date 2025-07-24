@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package core
+package constants
 
 const (
 	// ENV environment variable name

@@ -10,10 +10,12 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // Bcrypt implements the Bcrypt hashing algorithm
@@ -40,7 +42,7 @@ func parseParams(params string) (result Params, err error) {
 		return result, nil
 	}
 
-	kv, err := core.ParseParams(params)
+	kv, err := codecPkg.ParseParams(params)
 	if err != nil {
 		return Params{}, err
 	}
@@ -60,10 +62,10 @@ type ConfigValidator struct {
 
 func (v ConfigValidator) Validate(config *types.Config) interface{} {
 	if config.SaltLength < 8 {
-		return core.ErrSaltLengthTooShort
+		return errors.ErrSaltLengthTooShort
 	}
 	if v.params.Cost < 4 || v.params.Cost > 31 {
-		return core.ErrCostOutOfRange
+		return errors.ErrCostOutOfRange
 	}
 	return nil
 }
@@ -90,7 +92,7 @@ func NewBcryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Bcrypt{
 		config: config,
 		params: params,
-		codec:  core.NewCodec(types.TypeBcrypt),
+		codec:  codecPkg.NewCodec(types.TypeBcrypt),
 	}, nil
 }
 
@@ -103,13 +105,13 @@ func DefaultConfig() *types.Config {
 
 func DefaultParams() Params {
 	return Params{
-		Cost: bcrypt.DefaultCost,
+		Cost: constants.DefaultCost,
 	}
 }
 
 // Hash implements the hash method
 func (c *Bcrypt) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -128,10 +130,10 @@ func (c *Bcrypt) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(types.TypeBcrypt) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt))); err != nil {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 	return nil
 }

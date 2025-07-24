@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -46,7 +47,7 @@ func (c *cachedCrypto) Verify(hashed string, password string) error {
 		if time.Now().Before(cached.expiresAt) {
 			if subtle.ConstantTimeCompare([]byte(cached.hash), []byte(hashed)) != 1 {
 				fmt.Printf("compare: %s | %s\n", cached.hash, hashed)
-				return ErrPasswordNotMatch
+				return errors.ErrPasswordNotMatch
 			}
 			return nil
 		}

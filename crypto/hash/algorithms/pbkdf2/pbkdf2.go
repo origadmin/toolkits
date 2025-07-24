@@ -13,10 +13,12 @@ import (
 
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // PBKDF2 implements the PBKDF2 hashing algorithm
@@ -36,7 +38,7 @@ type ConfigValidator struct {
 
 func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
-		return fmt.Errorf("salt length must be at least 8 bytes")
+		return errors.ErrSaltLengthTooShort
 	}
 	if v.params.Iterations < 1000 {
 		return fmt.Errorf("iterations must be at least 1000")
@@ -47,7 +49,7 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	if v.params.HashType == "" {
 		return fmt.Errorf("hash type must be specified")
 	}
-	_, err := core.ParseHash(v.params.HashType)
+	_, err := stdhash.ParseHash(v.params.HashType)
 	if err != nil {
 		return err
 	}
@@ -77,7 +79,7 @@ func NewPBKDF2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &PBKDF2{
 		params: params,
 		config: config,
-		codec:  core.NewCodec(types.TypePBKDF2),
+		codec:  codec.NewCodec(types.TypePBKDF2),
 	}, nil
 }
 
@@ -85,7 +87,7 @@ func DefaultParams() *Params {
 	return &Params{
 		Iterations: 10000,
 		KeyLength:  32,
-		HashType:   core.SHA256.String(),
+		HashType:   stdhash.SHA256.String(),
 	}
 }
 
@@ -98,7 +100,7 @@ func DefaultConfig() *types.Config {
 
 // Hash implements the hash method
 func (c *PBKDF2) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +108,7 @@ func (c *PBKDF2) Hash(password string) (string, error) {
 }
 
 func (c *PBKDF2) hashFromName(name string) (func() hash.Hash, error) {
-	parseHash, err := core.ParseHash(name)
+	parseHash, err := stdhash.ParseHash(name)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +128,7 @@ func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(types.TypePBKDF2) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 
 	// Parse parameters
@@ -143,7 +145,7 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 
 	newHash := pbkdf2.Key([]byte(password), parts.Salt, params.Iterations, int(params.KeyLength), hashHash)
 	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 	return nil
 }
@@ -164,7 +166,7 @@ func (p *Params) String() string {
 	if p.KeyLength > 0 {
 		parts = append(parts, fmt.Sprintf("k:%d", p.KeyLength))
 	}
-	_, err := core.ParseHash(p.HashType)
+	_, err := stdhash.ParseHash(p.HashType)
 	if err == nil {
 		parts = append(parts, fmt.Sprintf("h:%s", p.HashType))
 	}
@@ -209,7 +211,7 @@ func parseParams(params string) (*Params, error) {
 
 	// Parse hash type
 	if v, ok := kv["h"]; ok {
-		_, err := core.ParseHash(v)
+		_, err := stdhash.ParseHash(v)
 		if err == nil {
 			result.HashType = v
 		}

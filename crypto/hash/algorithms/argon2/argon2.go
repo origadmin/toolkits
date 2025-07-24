@@ -12,10 +12,12 @@ import (
 
 	"golang.org/x/crypto/argon2"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
-	"github.com/origadmin/toolkits/crypto/hash/utils"
+	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // Params represents parameters for Argon2 algorithm
@@ -33,7 +35,7 @@ func parseParams(params string) (result Params, err error) {
 		return result, nil
 	}
 
-	kv, err := core.ParseParams(params)
+	kv, err := codecPkg.ParseParams(params)
 	if err != nil {
 		return result, err
 	}
@@ -113,7 +115,7 @@ type ConfigValidator struct {
 // Validate validates the Argon2 configuration
 func (v *ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
-		return core.ErrSaltLengthTooShort
+		return errors.ErrSaltLengthTooShort
 	}
 	if v.params.TimeCost < 1 {
 		return fmt.Errorf("invalid time cost: %d", v.params.TimeCost)
@@ -140,10 +142,10 @@ func DefaultConfig() *types.Config {
 
 func DefaultParams() Params {
 	return Params{
-		TimeCost:   3,     // Default time cost
-		MemoryCost: 65536, // Default memory cost (64MB)
-		Threads:    4,     // Default threads
-		KeyLength:  32,    // Default key length
+		TimeCost:   constants.DefaultTimeCost,   // Default time cost
+		MemoryCost: constants.DefaultMemoryCost, // Default memory cost (64MB)
+		Threads:    constants.DefaultThreads,    // Default threads
+		KeyLength:  32,                          // Default key length
 	}
 }
 
@@ -172,13 +174,13 @@ func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Argon2{
 		params: params,
 		config: config,
-		codec:  core.NewCodec(types.TypeArgon2),
+		codec:  codecPkg.NewCodec(types.TypeArgon2),
 	}, nil
 }
 
 // Hash implements the hash method
 func (c *Argon2) Hash(password string) (string, error) {
-	salt, err := utils.GenerateSalt(c.config.SaltLength)
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -202,7 +204,7 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 	if !parts.Algorithm.Is(types.TypeArgon2) {
-		return core.ErrAlgorithmMismatch
+		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters
 	params, err := parseParams(parts.Params)
@@ -219,7 +221,7 @@ func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 	)
 
 	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
-		return core.ErrPasswordNotMatch
+		return errors.ErrPasswordNotMatch
 	}
 
 	return nil

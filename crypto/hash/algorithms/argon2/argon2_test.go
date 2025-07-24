@@ -3,11 +3,12 @@ package argon2
 import (
 	"testing"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var codec = core.NewCodec(types.TypeArgon2)
+var codec = codecPkg.NewCodec(types.TypeArgon2)
 
 func TestParams_ParseAndString(t *testing.T) {
 	tests := []struct {
@@ -220,11 +221,11 @@ func TestNewArgon2Crypto(t *testing.T) {
 		{
 			name: "Custom config",
 			config: &types.Config{
-				SaltLength: 16,
+				SaltLength: constants.DefaultSaltLength,
 				ParamConfig: (&Params{
-					TimeCost:   3,
-					MemoryCost: 64 * 1024,
-					Threads:    4,
+					TimeCost:   constants.DefaultTimeCost,
+					MemoryCost: constants.DefaultMemoryCost,
+					Threads:    constants.DefaultThreads,
 					KeyLength:  32,
 				}).String(),
 			},
@@ -233,11 +234,11 @@ func TestNewArgon2Crypto(t *testing.T) {
 		{
 			name: "Invalid config - zero time cost",
 			config: &types.Config{
-				SaltLength: 16,
+				SaltLength: constants.DefaultSaltLength,
 				ParamConfig: (&Params{
 					TimeCost:   0,
-					MemoryCost: 64 * 1024,
-					Threads:    4,
+					MemoryCost: constants.DefaultMemoryCost,
+					Threads:    constants.DefaultThreads,
 					KeyLength:  32,
 				}).String(),
 			},

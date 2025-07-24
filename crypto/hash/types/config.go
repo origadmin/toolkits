@@ -4,6 +4,10 @@
 
 package types
 
+import (
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+)
+
 type ParamConfig interface {
 	String() string
 }
@@ -48,6 +52,6 @@ func WithParamConfig(fn func(string) string) Option {
 // DefaultConfig return to the default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		SaltLength: 16, // Default salt length
+		SaltLength: constants.DefaultSaltLength, // Default salt length
 	}
 }

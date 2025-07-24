@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/origadmin/toolkits/crypto/hash/core"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -97,7 +97,7 @@ func TestHMAC(t *testing.T) {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
 	}
-	for i := core.Hash(1); i < core.MAPHASH; i++ {
+	for i := stdhash.Hash(1); i < stdhash.MAPHASH; i++ {
 		t.Logf("test hash:%s starting", i.String())
 		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", i.String())))
 		if err != nil {
