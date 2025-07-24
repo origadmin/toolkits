@@ -74,6 +74,16 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 		return nil, err
 	}
 
+	// Explicitly check for unsuitable hash types for HMAC
+	// MAPHASH, ADLER32, CRC32, FNV are not cryptographically secure and should not be used with HMAC
+	switch hashHash {
+	case stdhash.MAPHASH, stdhash.ADLER32, stdhash.CRC32, stdhash.CRC32_ISO, stdhash.CRC32_CAST, stdhash.CRC32_KOOP,
+		stdhash.CRC64_ISO, stdhash.CRC64_ECMA, stdhash.FNV32, stdhash.FNV32A, stdhash.FNV64, stdhash.FNV64A,
+		stdhash.FNV128, stdhash.FNV128A:
+		return nil, errors.ErrUnsupportedHashForHMAC
+	default:
+	}
+
 	return &HMAC{
 		config:   config,
 		codec:    codec.NewCodec(hashType),
@@ -132,7 +142,7 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 	if hashHash == stdhash.MAPHASH {
-		return fmt.Errorf("cannot compare hash with maphash")
+		return errors.ErrUnsupportedHashForHMAC
 	}
 	h := hmac.New(hashHash.New, parts.Salt)
 	h.Write([]byte(password))

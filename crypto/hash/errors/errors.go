@@ -17,4 +17,8 @@ var (
 	ErrSaltLengthTooShort = errors.String("salt length must be at least 8 bytes")
 	// ErrCostOutOfRange error when cost out of range
 	ErrCostOutOfRange = errors.String("cost must be between 4 and 31")
+	// ErrHashModuleNotInitialized is returned when the hash module fails to initialize.
+	ErrHashModuleNotInitialized = errors.String("hash module not initialized")
+	// ErrUnsupportedHashForHMAC is returned when an unsupported hash type is used for HMAC.
+	ErrUnsupportedHashForHMAC = errors.String("unsupported hash type for HMAC")
 )

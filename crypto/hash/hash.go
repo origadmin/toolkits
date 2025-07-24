@@ -6,11 +6,11 @@
 package hash
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,7 +23,7 @@ var (
 	// defaultCrypto default cryptographic instance
 	defaultCrypto Crypto
 	// ErrHashModuleNotInitialized is returned when the hash module fails to initialize.
-	ErrHashModuleNotInitialized = fmt.Errorf("hash module not initialized")
+	ErrHashModuleNotInitialized = errors.ErrHashModuleNotInitialized
 )
 
 // uninitializedCrypto is a no-op Crypto implementation used when the module fails to initialize.
@@ -59,7 +59,7 @@ func init() {
 			defaultCrypto = crypto
 			initialized = true
 		} else {
-			log.Printf("hash: failed to initialize default crypto with type %s: %v", t, err)
+			slog.Error("hash: failed to initialize default crypto", "type", t, "error", err)
 		}
 	}
 
@@ -67,7 +67,7 @@ func init() {
 		// Try to initialize with the hardcoded default type if the environment variable type failed or was unknown.
 		cryptographic, err := NewCrypto(constants.DefaultType)
 		if err != nil {
-			log.Printf("hash: failed to initialize default crypto with hardcoded default type %s: %v", constants.DefaultType, err)
+			slog.Error("hash: failed to initialize default crypto with hardcoded default type", "type", constants.DefaultType, "error", err)
 			// If even the hardcoded default fails, set to uninitializedCrypto to prevent panics.
 			defaultCrypto = &uninitializedCrypto{}
 		} else {

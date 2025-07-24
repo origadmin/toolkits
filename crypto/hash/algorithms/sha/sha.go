@@ -32,7 +32,7 @@ type ConfigValidator struct {
 
 func (v ConfigValidator) Validate(config *types.Config) interface{} {
 	if config.SaltLength < 8 {
-		return errors.ErrSaltLengthTooShort
+		return fmt.Errorf("salt length must be at least 8 bytes")
 	}
 	return nil
 }

@@ -186,7 +186,7 @@ func parseParams(params string) (*Params, error) {
 	for _, param := range strings.Split(params, ",") {
 		parts := strings.Split(param, ":")
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid pbkdf2 param format: %s", param)
+			return nil, errors.ErrInvalidHashFormat
 		}
 		kv[parts[0]] = parts[1]
 	}
