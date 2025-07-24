@@ -87,8 +87,8 @@ Initialization Vector (IV). This is a critical vulnerability in CBC mode.
 
 ### 2. `crypto/rand` Package
 
-- [ ] **Status: In Progress (Current Task)**
-- [ ] **Issue: Multiple design flaws including security risks, poor performance,
+- [x] **Status: Completed**
+- [x] **Issue: Multiple design flaws including security risks, poor performance,
   and a mutable API.**
 
 **Analysis:**
@@ -167,10 +167,170 @@ The original `rand` package suffered from several critical issues:
 
 ### 3. `crypto/hash` Package
 
-- [ ] **Status: To Do**
+- [ ] **Status: To Do (Current Task)**
 - [ ] **Issue 1: Lack of Thread Safety (Concurrency Bug)**
+
+**Analysis:**
+The `algorithmFactory` in `factory.go` uses a `cryptos` map to cache hash algorithm instances. Access to this map (read and write) is not protected by any concurrency control mechanism. In a multi-goroutine environment, concurrent access to this map can lead to data races, resulting in program crashes or unpredictable behavior.
+
+**Current State Analysis:**
+*   **Relevant File:** `factory.go`
+*   **Relevant Code Snippet:**
+    ```go
+    type algorithmFactory struct {
+    	cryptos map[types.Type]interfaces.Cryptographic
+    }
+
+    func (f *algorithmFactory) create(algType types.Type, opts ...types.Option) (interfaces.Cryptographic, error) {
+    	if alg, exists := f.cryptos[algType]; exists { // Read operation
+    		return alg, nil
+    	}
+        // ...
+    	f.cryptos[algType] = alg // Write operation
+    	return alg, nil
+    }
+    ```
+*   **Observation:** The `cryptos` map is a non-concurrent-safe type. The `exists` check and the subsequent assignment (`f.cryptos[algType] = alg`) are not atomic, making them vulnerable to data races under concurrent access.
+
+**Proposed Solution(s):**
+Use `sync.RWMutex` to protect the `cryptos` map. Read operations will acquire a read lock, and write operations will acquire a write lock.
+
+**Alternative Solutions Considered:**
+*   **`sync.Mutex`:** Simpler to implement, but less performant in read-heavy scenarios as it blocks all other reads during a read operation. `RWMutex` is preferred for read-mostly caches.
+*   **`sync.Once` + Lazy Initialization:** Not suitable here as `algorithmFactory` manages multiple distinct algorithm instances, not just a single one. Each instance might be requested at different times.
+
+**Comparison & Evaluation of Alternatives:**
+
+| Feature           | `sync.Mutex` | `sync.RWMutex` (Chosen) |
+| :---------------- | :----------- | :---------------------- |
+| **Concurrency**   | Read-blocking| Concurrent reads allowed|
+| **Performance**   | Lower        | Higher (read-heavy)     |
+| **Complexity**    | Simple       | Slightly more complex   |
+
+**Chosen Solution Details:**
+*   **File:** `factory.go`
+*   **Modification:**
+    1.  Add `mu sync.RWMutex` field to `algorithmFactory` struct.
+    2.  In `create` method, acquire `f.mu.RLock()` before reading `f.cryptos` and `f.mu.RUnlock()` after.
+    3.  Acquire `f.mu.Lock()` before writing to `f.cryptos` and `f.mu.Unlock()` after.
+
+**Expected Impact:**
+*   **Thread Safety:** Resolves data race issues in `algorithmFactory`, ensuring stability and correctness under concurrent access.
+*   **Performance:** Improves concurrency performance in read-heavy scenarios compared to `sync.Mutex`.
+
+**Verification Plan:**
+*   **Unit Tests:** Add concurrent tests for `algorithmFactory.create` to verify no data races occur under heavy load.
+
 - [ ] **Issue 2: Panicking in `init()` (Robustness Issue)**
 
-**Analysis & Plan:** See original analysis. The plan remains to add a
-`sync.Mutex` to the factory and to replace the `panic` in the `init` function
-with graceful error handling.
+**Analysis:**
+The `init()` function in `hash.go` panics if `NewCrypto` fails during the initialization of the `defaultCrypto` global instance. While `panic` terminates the program immediately, a more robust library should log errors and allow for graceful failure or recovery if possible. Furthermore, public functions relying on `defaultCrypto` (e.g., `Generate`, `Verify`) might attempt to dereference a `nil` pointer if initialization fails, leading to runtime errors.
+
+**Current State Analysis:**
+*   **Relevant File:** `hash.go`
+*   **Relevant Code Snippet:**
+    ```go
+    var (
+    	defaultCrypto Crypto
+    )
+
+    func init() {
+    	// ... initialization logic ...
+    	if defaultCrypto == nil {
+    		cryptographic, err := NewCrypto(core.DefaultType)
+    		if err != nil {
+    			panic(err) // Panics here if NewCrypto fails
+    		}
+    		defaultCrypto = cryptographic
+    	}
+    }
+
+    func Verify(hashed, password string) error {
+    	return defaultCrypto.Verify(hashed, password) // Potential nil pointer dereference
+    }
+
+    func Generate(password string) (string, error) {
+    	return defaultCrypto.Hash(password) // Potential nil pointer dereference
+    }
+    ```
+*   **Observation:** The `init()` function's `panic` behavior is brittle. Public functions do not check for a `nil` `defaultCrypto` before use.
+
+**Proposed Solution(s):**
+1.  Modify `init()` to log errors instead of panicking when `NewCrypto` fails.
+2.  Modify public functions (`Generate`, `Verify`, `GenerateWithSalt`) to explicitly check if `defaultCrypto` is `nil` and return an error if it is, guiding the user to handle initialization failures.
+
+**Alternative Solutions Considered:**
+*   **Force User Initialization:** Remove `defaultCrypto` initialization from `init()` and require users to explicitly call an initialization function. This increases user burden and might lead to forgotten initialization. The current `init()` provides convenience that should be preserved while improving robustness.
+
+**Comparison & Evaluation of Alternatives:**
+
+| Feature           | `panic` (Current) | Log Error & Return Error (Chosen) |
+| :---------------- | :---------------- | :-------------------------------- |
+| **Program Behavior**| Immediate crash   | Logs error, program continues     |
+| **Robustness**    | Poor              | Good                              |
+| **User Experience**| Poor              | Good (errors can be caught)       |
+| **API Clarity**   | Poor (implicit crash) | Good (explicit error return)      |
+
+**Chosen Solution Details:**
+*   **File:** `hash.go`
+*   **Modification:**
+    1.  Import `log` package.
+    2.  Modify `init()` function:
+        ```go
+        func init() {
+            alg := os.Getenv(ENV)
+            if alg == "" {
+                alg = core.DefaultType
+            }
+            t := types.ParseType(alg)
+            var err error
+            if t != types.TypeUnknown {
+                defaultCrypto, err = NewCrypto(t)
+            }
+            if defaultCrypto == nil || err != nil { // Check both defaultCrypto and potential error from NewCrypto
+                if err != nil {
+                    log.Printf("Failed to initialize default crypto with type %s: %v", t, err)
+                }
+                // Try to initialize with default type if previous attempt failed or was unknown
+                defaultCrypto, err = NewCrypto(core.DefaultType)
+                if err != nil {
+                    log.Printf("Failed to initialize default crypto with default type %s: %v", core.DefaultType, err)
+                    // At this point, defaultCrypto will remain nil.
+                    // Public functions will handle this by returning an error.
+                }
+            }
+        }
+        ```
+    3.  Modify `Verify`, `Generate`, `GenerateWithSalt` functions:
+        ```go
+        func Verify(hashed, password string) error {
+            if defaultCrypto == nil {
+                return errors.New("hash: default crypto not initialized")
+            }
+            return defaultCrypto.Verify(hashed, password)
+        }
+
+        func Generate(password string) (string, error) {
+            if defaultCrypto == nil {
+                return "", errors.New("hash: default crypto not initialized")
+            }
+            return defaultCrypto.Hash(password)
+        }
+
+        func GenerateWithSalt(password, salt string) (string, error) {
+            if defaultCrypto == nil {
+                return "", errors.New("hash: default crypto not initialized")
+            }
+            return defaultCrypto.HashWithSalt(password, salt)
+        }
+        ```
+
+**Expected Impact:**
+*   **Robustness:** Improves the library's fault tolerance, preventing program crashes due to initialization failures.
+*   **Maintainability:** Clear error return mechanisms allow callers to better handle initialization failures.
+*   **User Experience:** Provides explicit errors instead of panics, making debugging and error handling easier for users.
+
+**Verification Plan:**
+*   **Unit Tests:**
+    *   Write test cases to simulate `NewCrypto` initialization failures and verify that `init()` correctly logs errors without panicking.
+    *   Write test cases to verify that calling `Generate`, `Verify`, and `GenerateWithSalt` when `defaultCrypto` is uninitialized returns the expected error.

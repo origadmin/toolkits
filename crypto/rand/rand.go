@@ -42,28 +42,42 @@ func init() {
 	charsets[KindAllWithSymbols] = Digits + Lowercase + Uppercase + Symbols
 }
 
-// Rand is a generator for random data based on a specified character set.
-type Rand struct {
+// RandGenerator defines the interface for generating cryptographically secure random data.
+type RandGenerator interface {
+	// RandBytes generates a random byte slice of the specified size using the generator's character set.
+	RandBytes(size int) ([]byte, error)
+	// RandString generates a random string of the specified size using the generator's character set.
+	RandString(size int) (string, error)
+	// Read populates the given byte slice with random bytes from the generator's character set.
+	// It implements the the io.Reader interface.
+	Read(p []byte) (n int, err error)
+}
+
+// randGenerator is the concrete implementation of RandGenerator.
+// It is unexported to hide implementation details.
+type randGenerator struct {
 	charset string
 	length  int
 }
 
 // NewRand creates a new random data generator for the given kind of character set.
-func NewRand(kind Kind) *Rand {
+// It returns the RandGenerator interface.
+func NewRand(kind Kind) RandGenerator {
 	charset, ok := charsets[kind]
 	if !ok {
 		// Fallback to a safe default if the kind is not pre-built.
 		charset = charsets[KindAlphanumeric]
 	}
-	return &Rand{
+	return &randGenerator{
 		charset: charset,
 		length:  len(charset),
 	}
 }
 
 // CustomRand creates a new random data generator with a custom character set.
-func CustomRand(charset string) *Rand {
-	return &Rand{
+// It returns the RandGenerator interface.
+func CustomRand(charset string) RandGenerator {
+	return &randGenerator{
 		charset: charset,
 		length:  len(charset),
 	}
@@ -72,7 +86,7 @@ func CustomRand(charset string) *Rand {
 // RandBytes generates a random byte slice of a given size using the generator's character set.
 // It uses a cryptographically secure random number generator.
 // Note: This method has a slight modulo bias, which is acceptable for most non-uniformity-critical applications (like salt generation).
-func (r *Rand) RandBytes(size int) ([]byte, error) {
+func (r *randGenerator) RandBytes(size int) ([]byte, error) {
 	if r.length == 0 {
 		return nil, nil
 	}
@@ -90,12 +104,31 @@ func (r *Rand) RandBytes(size int) ([]byte, error) {
 }
 
 // RandString generates a random string of a given size using the generator's character set.
-func (r *Rand) RandString(size int) (string, error) {
+func (r *randGenerator) RandString(size int) (string, error) {
 	b, err := r.RandBytes(size)
 	if err != nil {
 		return "", err
 	}
 	return string(b), nil
+}
+
+// Read populates the given byte slice with random bytes from the generator's character set.
+// It implements the io.Reader interface.
+func (r *randGenerator) Read(p []byte) (n int, err error) {
+	if r.length == 0 {
+		return 0, nil
+	}
+	n = len(p)
+	randomBytes := make([]byte, n)
+	_, err = io.ReadFull(rand.Reader, randomBytes)
+	if err != nil {
+		return 0, err
+	}
+
+	for i := 0; i < n; i++ {
+		p[i] = r.charset[randomBytes[i]%byte(r.length)]
+	}
+	return n, nil
 }
 
 // RandomBytes generates n cryptographically secure random bytes using the default alphanumeric character set.
