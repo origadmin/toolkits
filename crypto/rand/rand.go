@@ -20,7 +20,7 @@ const (
 	KindSymbol    Kind = 1 << iota // KindSymbol represents common symbol characters.
 
 	KindAlphanumeric   = KindDigit | KindLowerCase | KindUpperCase // KindAlphanumeric represents a combination of digits, lowercase, and uppercase letters.
-	KindAllWithSymbols = KindAlphanumeric | KindSymbol // KindAllWithSymbols represents a combination of digits, lowercase, uppercase letters, and symbols.
+	KindAllWithSymbols = KindAlphanumeric | KindSymbol             // KindAllWithSymbols represents a combination of digits, lowercase, uppercase letters, and symbols.
 )
 
 const (
@@ -48,7 +48,7 @@ type Generator interface {
 	// RandString generates a random string of the specified size using the generator's character set.
 	RandString(size int) (string, error)
 	// Read populates the given byte slice with random bytes from the generator's character set.
-	// It implements the the io.Reader interface.
+	// It implements the io.Reader interface.
 	Read(p []byte) (n int, err error)
 }
 
