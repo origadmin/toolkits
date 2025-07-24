@@ -4,6 +4,36 @@ This document serves as a central tracker for planned improvements, refactoring 
 
 ---
 
+## Standard Template for Optimization Analysis
+
+When proposing or documenting an optimization or significant refactoring, please use the following structure to ensure clarity, completeness, and traceability of decisions.
+
+### 1. Problem Description
+Clearly state the issue or area identified for improvement. What is the current limitation, bug, or inefficiency?
+
+### 2. Current State Analysis
+Describe how the system or component currently works. Detail the existing implementation, relevant code snippets, and specific observations that highlight the problem.
+
+### 3. Proposed Solution(s)
+Outline the primary approach(es) to address the problem. Provide a high-level overview of the intended changes.
+
+### 4. Alternative Solutions Considered
+List and briefly describe other approaches that were evaluated but not chosen. This section is crucial for documenting the thought process and avoiding revisiting discarded ideas.
+
+### 5. Comparison & Evaluation of Alternatives
+Provide a detailed comparison of the proposed solution against the alternatives. This is where quantitative (e.g., performance metrics, memory usage) and qualitative (e.g., maintainability, complexity, security implications) arguments should be made. A comparison table is highly recommended for clarity.
+
+### 6. Chosen Solution Details
+Provide a detailed plan for the selected solution, including specific code changes, new components, or refactoring steps.
+
+### 7. Expected Impact
+Describe the anticipated benefits of the implemented solution (e.g., performance improvement, security enhancement, reduced memory footprint, improved maintainability, clearer API).
+
+### 8. Verification Plan
+Outline how the changes will be tested and verified to ensure correctness, performance gains, and absence of regressions.
+
+---
+
 ## Crypto Module
 
 This section outlines critical security vulnerabilities and areas for improvement found in the `crypto` toolkit. It covers the `aes`, `rand`, and `hash` sub-packages.
@@ -14,43 +44,55 @@ This section outlines critical security vulnerabilities and areas for improvemen
 - [x] **Issue: Predictable IV in AES CBC Mode (Critical Security Vulnerability)**
 
 **Analysis:**
-The original `EncryptCBC` implementation used a static and predictable Initialization Vector (IV), derived directly from the encryption key (`key[:blockSize]`). In CBC mode, the IV must be random and unpredictable for each encryption. Using a static IV means that identical plaintext blocks will produce identical ciphertext blocks, leaking information about the data's structure and making the encryption vulnerable to chosen-plaintext attacks.
+The original `EncryptCBC` implementation used a static and predictable Initialization Vector (IV). This is a critical vulnerability in CBC mode.
 
 **Remediation Plan:**
-1.  **Preserve Compatibility:** The existing `EncryptCBC` and `DecryptCBC` functions will be preserved to maintain compatibility with external services like WeChat Pay, which rely on this specific, non-standard implementation.
-2.  **Add Security Warnings:** The documentation for the legacy CBC functions has been updated with `Deprecated` tags and clear warnings, advising against their use in any new development due to the security risks.
-3.  **Introduce Secure Alternative:** New, secure encryption functions (`EncryptGCM`, `DecryptGCM`) have been added. These functions use the AES-GCM (Galois/Counter Mode), which is a modern, authenticated encryption (AEAD) mode. It provides strong confidentiality and, crucially, integrity protection, and it correctly manages random nonces.
-4.  **Recommendation:** All new cryptographic requirements within the project should use the new `EncryptGCM` and `DecryptGCM` functions.
+1.  **Preserve Compatibility:** The existing `EncryptCBC` and `DecryptCBC` functions were preserved for compatibility with external services (e.g., WeChat Pay).
+2.  **Add Security Warnings:** The legacy functions were marked as `Deprecated` with clear warnings against their use in new development.
+3.  **Introduce Secure Alternative:** New, secure functions (`EncryptGCM`, `DecryptGCM`) using the modern AES-GCM mode were added as the recommended standard for all new encryption needs.
 
 ### 2. `crypto/rand` Package
 
 - [ ] **Status: In Progress (Current Task)**
-- [ ] **Issue: Use of Non-Cryptographically Secure Random Number Generator (Critical Security Vulnerability)**
+- [ ] **Issue: Multiple design flaws including security risks, poor performance, and a mutable API.**
 
 **Analysis:**
-The `rand` package currently uses `math/rand/v2` for generating random data, including for the `GenerateSalt` function. `math/rand` is a pseudo-random number generator (PRNG) and is **not** suitable for security-sensitive contexts. Its output is predictable, meaning that salts or other values generated with it are not truly random, undermining the security of password hashing and other cryptographic operations.
+The original `rand` package suffered from several critical issues:
+1.  **Security:** It used the non-cryptographically secure `math/rand` package.
+2.  **API Design:** It exposed mutable global variables (e.g., `rand.All`), allowing external packages to change their state, leading to unpredictable behavior. It also used a `sync.Pool` for small objects, which added unnecessary complexity.
+3.  **Performance:** The initial plan to fix the security issue involved repeated calls to `crypto/rand`, which is inefficient. The character set construction was also happening at runtime.
 
-**Remediation Plan:**
-1.  **Replace RNG:** Replace all calls to `math/rand/v2` with `crypto/rand`. The `crypto/rand` package is specifically designed for cryptographic operations and sources entropy from the underlying operating system.
-2.  **Refactor `Rand` struct:** Update the `RandBytes`, `RandString`, and `Read` methods to use `crypto/rand` for generating random values from the specified character sets.
+**Remediation Plan (Final Design):**
+
+1.  **Adopt a Secure & Immutable API (Constructor Pattern):**
+    *   **Decision:** Eliminate all mutable global state. The final design uses the **Constructor Pattern**.
+    *   **Rationale:** Initial ideas of using public variables (`rand.All`) or getters for private instances (`rand.All()`) were rejected because they still exposed a modifiable global object, which is not thread-safe and leads to unpredictable behavior. The chosen pattern ensures complete safety and encapsulation.
+    *   **Implementation:** The public API is based on immutable `const` values of type `Kind` (e.g., `rand.KindAlphanumeric`). These act as safe configurations for the `NewRand(Kind)` constructor, which returns a new, safe, local `*Rand` instance every time.
+
+2.  **Implement High-Performance Generation:**
+    *   **Decision:** Pre-compute all character set variations via an `init()` function and cache them in a private `map`.
+    *   **Rationale & Alternatives Considered:** The goal was to minimize runtime memory allocations.
+
+        | Feature           | `switch` Statement | `array/slice` Lookup | `init()` + `map` (Chosen) |
+        | :---------------- | :----------------- | :------------------- | :------------------------ |
+        | **Lookup Speed**  | Extremely Fast     | Extremely Fast       | Very Fast                 |
+        | **Memory Alloc.** | Per-call allocation| Per-call allocation  | Only at startup           |
+        | **Maintainability**| Complex logic, error-prone for new kinds | Brittle, hard to extend | Clean, easy to extend     |
+        | **Robustness**    | Risk of runtime errors if not exhaustive | Risk of index out of bounds | Highly robust             |
+
+        *   **`switch` statement:** This was rejected. While a `switch` has a very fast lookup, it would require **runtime string concatenation** for combined sets (e.g., `KindAlphanumeric`). This repeated memory allocation makes it significantly slower overall than a one-time computation.
+        *   **`array/slice` lookup:** This was rejected. While offering the fastest lookup, it is too **brittle and hard to maintain**. The array size would need to be hardcoded, and adding a new `Kind` could easily cause an index-out-of-bounds panic.
+        *   **Winning Approach (`init` + `map`):** This approach has zero runtime allocation when creating a new generator, making it the highest-performance and most robust solution.
+    *   **Implementation:** The core `RandBytes` method was rewritten to read all required random bytes from `crypto/rand` in a single call, then use efficient modulo arithmetic to map bytes to the chosen character set.
+
+3.  **Simplify and Clarify:**
+    *   **Decision:** Delete the `generate.go` file and provide clean, top-level convenience functions.
+    *   **Implementation:** New functions `RandomString(n int)` and `RandomBytes(n int)` are provided for the most common use cases, using a safe default (Alphanumeric).
 
 ### 3. `crypto/hash` Package
 
 - [ ] **Status: To Do**
 - [ ] **Issue 1: Lack of Thread Safety (Concurrency Bug)**
-
-**Analysis:**
-The `algorithmFactory` uses a map `cryptos` to cache algorithm instances. This map is read from and written to in the `create` method without any synchronization mechanism. If multiple goroutines call a hash function concurrently, it can lead to a race condition when they all try to initialize and cache an algorithm instance at the same time, potentially causing a panic or data corruption.
-
-**Remediation Plan:**
-1.  **Add a Mutex:** Introduce a `sync.Mutex` to the `algorithmFactory` struct.
-2.  **Protect Map Access:** Lock the mutex before checking for or writing to the `cryptos` map and unlock it immediately after.
-
 - [ ] **Issue 2: Panicking in `init()` (Robustness Issue)**
 
-**Analysis:**
-The package's `init()` function will `panic` if it fails to create a default crypto instance. While this ensures the default instance is always valid, it can make the library fragile and cause an entire application to crash if there's a configuration issue.
-
-**Remediation Plan:**
-1.  **Graceful Error Handling:** Modify the `init` function to handle the error without panicking. It can log the error and leave the `defaultCrypto` instance as `nil`.
-2.  **Check at Usage Time:** Update the functions that use `defaultCrypto` (e.g., `Verify`, `Generate`) to check if it is `nil` and return an error if it hasn't been initialized, guiding the user to properly configure the package.
+**Analysis & Plan:** See original analysis. The plan remains to add a `sync.Mutex` to the factory and to replace the `panic` in the `init` function with graceful error handling.
