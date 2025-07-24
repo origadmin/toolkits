@@ -7,7 +7,9 @@ package rand
 
 import (
 	"bytes"
-	"math/rand/v2"
+	"crypto/rand"
+	"math/big"
+	mathrand "math/rand/v2"
 	"strings"
 	"sync"
 )
@@ -121,8 +123,14 @@ func (r *Rand) RandBytes(size int) []byte {
 		return nil
 	}
 	ret := make([]byte, size)
-	for ; size > 0; size-- {
-		ret[size-1] = r.charset[rand.IntN(r.length)]
+	for i := 0; i < size; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(r.length)))
+		if err != nil {
+			// Fallback to pseudo-random number generator in case of error
+			ret[i] = r.charset[mathrand.IntN(r.length)]
+			continue
+		}
+		ret[i] = r.charset[num.Int64()]
 	}
 	return ret
 }
@@ -153,7 +161,7 @@ func (r *Rand) Read(p []byte) (n int, err error) {
 	n = len(p) // Set n to the length of p, indicating the number of bytes to populate.
 	for i := 0; i < n; i++ {
 		// Randomly select a character for each position in p.
-		p[i] = r.charset[rand.IntN(r.length)]
+		p[i] = r.charset[mathrand.IntN(r.length)]
 	}
 	return n, nil // Return the populated byte count and a nil error.
 }
