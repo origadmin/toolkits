@@ -334,3 +334,19 @@ The `init()` function in `hash.go` panics if `NewCrypto` fails during the initia
 *   **Unit Tests:**
     *   Write test cases to simulate `NewCrypto` initialization failures and verify that `init()` correctly logs errors without panicking.
     *   Write test cases to verify that calling `Generate`, `Verify`, and `GenerateWithSalt` when `defaultCrypto` is uninitialized returns the expected error.
+
+- [ ] **Feature: Add BLAKE2b and BLAKE2s independent implementations**
+    *   **Reason**: Modern, high-performance cryptographic hashes, faster than SHA-3 while maintaining high security. Provide fine-grained configuration (e.g., key, output length).
+    *   **Target Location**: `algorithms/blake2b` and `algorithms/blake2s`.
+
+- [ ] **Feature: Add RIPEMD-160 independent implementation**
+    *   **Reason**: Support for legacy systems or specific standards where RIPEMD-160 is used.
+    *   **Target Location**: `algorithms/ripemd160`.
+
+- [ ] **Improvement: Provide more explicit PBKDF2 variants**
+    *   **Reason**: Enhance API clarity and ease of use by offering direct factory functions for specific PBKDF2-HMAC-SHA variants (e.g., PBKDF2-HMAC-SHA256, PBKDF2-HMAC-SHA512).
+    *   **Target Location**: `algorithms/pbkdf2`.
+
+- [ ] **(Optional) Feature: Encapsulate general purpose checksum algorithms (e.g., CRC32/CRC64)**
+    *   **Reason**: If there's a need for non-security-sensitive data integrity checks through a unified `hash` module interface.
+    *   **Target Location**: `algorithms/crc32` (or similar).
