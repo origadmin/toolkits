@@ -70,6 +70,10 @@ const (
 	TypePBKDF2SHA3512384 Type = "pbkdf2-sha3-512-384"
 	// TypePBKDF2SHA3512512 pbkdf2 sha3-512-512 type
 	TypePBKDF2SHA3512512 Type = "pbkdf2-sha3-512-512"
+	// TypeBlake2b blake2b type
+	TypeBlake2b Type = "blake2b"
+	// TypeBlake2s blake2s type
+	TypeBlake2s Type = "blake2s"
 	// TypeUnknown unknown type
 	TypeUnknown Type = "unknown"
 )

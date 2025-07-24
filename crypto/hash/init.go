@@ -8,6 +8,7 @@ package hash
 import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
@@ -37,6 +38,14 @@ var (
 		types.TypeBcrypt: {
 			creator:       bcrypt.NewBcryptCrypto,
 			defaultConfig: bcrypt.DefaultConfig,
+		},
+		types.TypeBlake2b: {
+			creator:       blake2.NewBlake2bCrypto,
+			defaultConfig: blake2.DefaultConfig,
+		},
+		types.TypeBlake2s: {
+			creator:       blake2.NewBlake2sCrypto,
+			defaultConfig: blake2.DefaultConfig,
 		},
 		types.TypeHMAC: {
 			creator:       hmac.NewDefaultHMACCrypto,
