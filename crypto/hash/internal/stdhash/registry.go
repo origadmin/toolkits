@@ -44,6 +44,7 @@ const (
 	SHA3_512                    // import golang.org/x/crypto/sha3
 	SHA512_224                  // import crypto/sha512
 	SHA512_256                  // import crypto/sha512
+	BLAKE2s_128                 // import golang.org/x/crypto/blake2s
 	BLAKE2s_256                 // import golang.org/x/crypto/blake2s
 	BLAKE2b_256                 // import golang.org/x/crypto/blake2b
 	BLAKE2b_384                 // import golang.org/x/crypto/blake2b
@@ -88,9 +89,12 @@ func init() {
 	UpdateHashFunc(SHA3_512, sha3.New512)
 	UpdateHashFunc(SHA512_224, sha512.New512_224)
 	UpdateHashFunc(SHA512_256, sha512.New512_256)
+	newBlake2sHash128 := func() hash.Hash {
+		return generic.Must(blake2s.New128(nil))
+	}
+	UpdateHashFunc(BLAKE2s_128, newBlake2sHash128)
 	newBlake2sHash256 := func() hash.Hash {
-		h, _ := blake2s.New256(nil)
-		return h
+		return generic.Must(blake2s.New256(nil))
 	}
 	UpdateHashFunc(BLAKE2s_256, newBlake2sHash256)
 	newBlake2bHash256 := func() hash.Hash {
@@ -254,7 +258,8 @@ func ParseHash(s string) (Hash, error) {
 		return h, nil
 	}
 	if h, ok := ParseCustomHash(s); ok {
-		return h, nil	}
+		return h, nil
+	}
 	return 0, fmt.Errorf("unknown hash function: %s", s)
 }
 
