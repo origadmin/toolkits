@@ -46,17 +46,6 @@ func (t Type) Is(t2 Type) bool {
 func ParseAlgorithm(typedAlgorithm string) (Type, error) {
 	typedAlgorithm = strings.ToLower(typedAlgorithm)
 
-	// Handle common aliases first
-	switch typedAlgorithm {
-	case "hmac":
-		typedAlgorithm = constants.DEFAULT_HMAC
-	case "hmac256":
-		typedAlgorithm = constants.HMAC_SHA256
-	case "hmac512":
-		typedAlgorithm = constants.HMAC_SHA512
-		// Add other aliases here if needed
-	}
-
 	parts := strings.SplitN(typedAlgorithm, "-", 2)
 	if len(parts) == 2 {
 		// This is a composite algorithm like "hmac-sha256" or "pbkdf2-sha512"
@@ -95,5 +84,5 @@ func Blake2s() Type {
 }
 
 func Scrypt() Type {
-	return Type{Name: "scrypt"}
+	return Type{Name: constants.SCRYPT}
 }

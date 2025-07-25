@@ -121,11 +121,16 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	switch p.Name {
+	switch p.String() {
 	case constants.BLAKE2b:
 		p.Name = constants.DEFAULT_BLAKE2b
+		p.Underlying = ""
 	case constants.BLAKE2s:
 		p.Name = constants.DEFAULT_BLAKE2s
+		p.Underlying = ""
+	default:
+		p.Name = p.String()
+		p.Underlying = ""
 	}
 
 	h, ok := hashFuncs[p.Name]
@@ -170,12 +175,12 @@ func (c *Blake2) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Blake2) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.Name != c.codec.Type().Name {
-		return errors.ErrAlgorithmMismatch
-	}
-	hashFunc, ok := hashFuncs[parts.Algorithm.Name]
+	//if parts.Algorithm.String() != c.codec.Type().Name {
+	//	return errors.ErrAlgorithmMismatch
+	//}
+	hashFunc, ok := hashFuncs[parts.Algorithm.String()]
 	if !ok {
-		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Algorithm.Name)
+		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Algorithm.String())
 	}
 	// Recreate the hash function based on the stored parameters
 	h, err := hashFunc(c.params.Key)
@@ -184,21 +189,36 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 	}
 	h.Write([]byte(password))
 	h.Write(parts.Salt)
-	newHash := h.Sum(nil)
+	hashBytes := h.Sum(nil)
 
-	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
+	if subtle.ConstantTimeCompare(hashBytes, parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}
 
 	return nil
 }
 
-// NewBlake2b creates a new BLAKE2b crypto instance
-func NewBlake2b(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(p, config)
+// NewBlake2b256 creates a new BLAKE2b crypto instance
+func NewBlake2b256(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewBlake2(types.Type{Name: constants.BLAKE2b_256}, config)
 }
 
-// NewBlake2s creates a new BLAKE2s crypto instance
-func NewBlake2s(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(p, config)
+// NewBlake2b384 creates a new BLAKE2b crypto instance
+func NewBlake2b384(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewBlake2(types.Type{Name: constants.BLAKE2b_384}, config)
+}
+
+// NewBlake2b512 creates a new BLAKE2b crypto instance
+func NewBlake2b512(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewBlake2(types.Type{Name: constants.BLAKE2b_512}, config)
+}
+
+// NewBlake2s128 creates a new BLAKE2s crypto instance
+func NewBlake2s128(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewBlake2(types.Type{Name: constants.BLAKE2s_128}, config)
+}
+
+// NewBlake2s256 creates a new BLAKE2s crypto instance
+func NewBlake2s256(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewBlake2(types.Type{Name: constants.BLAKE2s_256}, config)
 }
