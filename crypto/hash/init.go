@@ -8,7 +8,6 @@ package hash
 import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
@@ -47,14 +46,14 @@ var (
 			creator:       wrapCreator(bcrypt.NewBcrypt),
 			defaultConfig: bcrypt.DefaultConfig,
 		},
-				constants.BLAKE2b_256: {
-			creator:       wrapCreator(blake2.NewBlake2b),
-			defaultConfig: blake2.DefaultConfig,
-		},
-		constants.BLAKE2s_256: {
-			creator:       wrapCreator(blake2.NewBlake2s),
-			defaultConfig: blake2.DefaultConfig,
-		},
+		//		constants.BLAKE2b_256: {
+		//	creator:       wrapCreator(blake2.NewBlake2b),
+		//	defaultConfig: blake2.DefaultConfig,
+		//},
+		//constants.BLAKE2s_256: {
+		//	creator:       wrapCreator(blake2.NewBlake2s),
+		//	defaultConfig: blake2.DefaultConfig,
+		//},
 		constants.MD5: {
 			creator:       wrapCreator(md5.NewMD5),
 			defaultConfig: md5.DefaultConfig,

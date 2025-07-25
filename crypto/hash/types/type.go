@@ -93,3 +93,7 @@ func Blake2b() Type {
 func Blake2s() Type {
 	return Type{Name: "blake2s"}
 }
+
+func Scrypt() Type {
+	return Type{Name: "scrypt"}
+}

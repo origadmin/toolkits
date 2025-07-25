@@ -56,8 +56,8 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	return nil
 }
 
-// NewScryptCrypto creates a new Scrypt crypto instance
-func NewScryptCrypto(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+// NewScrypt creates a new Scrypt crypto instance
+func NewScrypt(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -79,7 +79,7 @@ func NewScryptCrypto(algType types.Type, config *types.Config) (interfaces.Crypt
 	return &Scrypt{
 		params: params,
 		config: config,
-		codec:  codec.NewCodec(algType),
+		codec:  codec.NewCodec(types.Scrypt()),
 	}, nil
 }
 
