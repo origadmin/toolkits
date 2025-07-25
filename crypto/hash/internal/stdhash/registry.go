@@ -18,9 +18,6 @@ import (
 	"hash/maphash"
 	"strings"
 
-	"github.com/goexts/generic"
-	"golang.org/x/crypto/blake2b"
-	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/md4"
 	"golang.org/x/crypto/ripemd160"
 	"golang.org/x/crypto/sha3"
@@ -45,11 +42,6 @@ const (
 	SHA3_512                    // import golang.org/x/crypto/sha3
 	SHA512_224                  // import crypto/sha512
 	SHA512_256                  // import crypto/sha512
-	BLAKE2s_128                 // import golang.org/x/crypto/blake2s
-	BLAKE2s_256                 // import golang.org/x/crypto/blake2s
-	BLAKE2b_256                 // import golang.org/x/crypto/blake2b
-	BLAKE2b_384                 // import golang.org/x/crypto/blake2b
-	BLAKE2b_512                 // import golang.org/x/crypto/blake2b
 	cryptoHashEnd
 )
 
@@ -100,26 +92,9 @@ func init() {
 	registerHash(SHA3_512, "sha3-512", sha3.New512)
 	registerHash(SHA512_224, "sha512-224", sha512.New512_224)
 	registerHash(SHA512_256, "sha512-256", sha512.New512_256)
-	newBlake2sHash128 := func() hash.Hash {
-		return generic.Must(blake2s.New128(nil))
-	}
-	registerHash(BLAKE2s_128, "blake2s-128", newBlake2sHash128)
-	newBlake2sHash256 := func() hash.Hash {
-		return generic.Must(blake2s.New256(nil))
-	}
-	registerHash(BLAKE2s_256, "blake2s-256", newBlake2sHash256)
-	newBlake2bHash256 := func() hash.Hash {
-		return generic.Must(blake2b.New256(nil))
-	}
-	registerHash(BLAKE2b_256, "blake2b-256", newBlake2bHash256)
-	newBlake2bHash384 := func() hash.Hash {
-		return generic.Must(blake2b.New384(nil))
-	}
-	registerHash(BLAKE2b_384, "blake2b-384", newBlake2bHash384)
-	newBlake2bHash512 := func() hash.Hash {
-		return generic.Must(blake2b.New512(nil))
-	}
-	registerHash(BLAKE2b_512, "blake2b-512", newBlake2bHash512)
+	// BLAKE2 hashes are handled by the blake2 package directly
+	// and are not registered here with a New() function.
+	// Their Hash enum values are still defined for classification.
 	registerHash(ADLER32, "adler32", func() hash.Hash { return adler32.New() })
 	registerHash(CRC32, "crc32", func() hash.Hash { return crc32.NewIEEE() })
 	registerHash(CRC32_ISO, "crc32-iso", func() hash.Hash { return crc32.New(crc32.MakeTable(crc32.IEEE)) })

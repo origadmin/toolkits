@@ -8,9 +8,9 @@ import (
 	"crypto/hmac"
 	"crypto/subtle"
 	"fmt"
-	"strings"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -25,8 +25,8 @@ type HMAC struct {
 	hashHash stdhash.Hash
 }
 
-func (c *HMAC) Type() string {
-	return c.codec.Type().String()
+func (c *HMAC) Type() types.Type {
+	return c.codec.Type()
 }
 
 type ConfigValidator struct {
@@ -40,36 +40,17 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	return nil
 }
 
-// NewHMACCrypto creates a new HMAC crypto instance
-func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+// NewHMAC creates a new HMAC crypto instance
+func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
 	validator := &ConfigValidator{}
 	if err := validator.Validate(config); err != nil {
-		return nil, fmt.Errorf("invalid hmac256 config: %v", err)
+		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
 
-	hashName := strings.TrimPrefix(hashType.String(), "hmac-")
-	switch hashType {
-	case types.TypeHMAC256:
-		hashType = "hmac-sha256"
-		hashName = "sha256"
-	case types.TypeHMAC512:
-		hashType = "hmac-sha512"
-		hashName = "sha512"
-	case types.TypeHMAC:
-		params, err := parseParams(config.ParamConfig)
-		if err != nil {
-			return nil, err
-		}
-		if params.Type == "" {
-			params.Type = "sha256"
-		}
-		hashType = types.Type(fmt.Sprintf("hmac-%s", params.Type))
-		hashName = params.Type
-	}
-	hashHash, err := stdhash.ParseHash(hashName)
+	hashHash, err := types.AlgorithmTypeHash(p.Underlying)
 	if err != nil {
 		return nil, err
 	}
@@ -86,21 +67,9 @@ func NewHMACCrypto(hashType types.Type, config *types.Config) (interfaces.Crypto
 
 	return &HMAC{
 		config:   config,
-		codec:    codec.NewCodec(hashType),
+		codec:    codec.NewCodec(p),
 		hashHash: hashHash,
 	}, nil
-}
-
-// NewDefaultHMACCrypto creates a new HMAC crypto instance
-func NewDefaultHMACCrypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewHMACCrypto(types.TypeHMAC, config)
-}
-
-func NewHMAC256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewHMACCrypto(types.TypeHMAC256, config)
-}
-func NewHMAC512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewHMACCrypto(types.TypeHMAC512, config)
 }
 
 func DefaultConfig() *types.Config {
@@ -128,16 +97,11 @@ func (c *HMAC) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(types.TypeHMAC) {
+	if constants.HMAC != parts.Algorithm.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	algType, hash := codec.AlgorithmTypeHash(parts.Algorithm)
-	if algType == types.TypeHMAC && hash == "" {
-		hash = "sha256"
-	}
-
-	hashHash, err := stdhash.ParseHash(hash)
+	hashHash, err := types.AlgorithmTypeHash(parts.Algorithm.Underlying)
 	if err != nil {
 		return err
 	}

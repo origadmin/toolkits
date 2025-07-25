@@ -25,8 +25,8 @@ type Bcrypt struct {
 	codec  interfaces.Codec
 }
 
-func (c *Bcrypt) Type() string {
-	return types.TypeBcrypt.String()
+func (c *Bcrypt) Type() types.Type {
+	return c.codec.Type()
 }
 
 type Params struct {
@@ -70,8 +70,8 @@ func (v ConfigValidator) Validate(config *types.Config) interface{} {
 	return nil
 }
 
-// NewBcryptCrypto creates a new Bcrypt crypto instance
-func NewBcryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
+// NewBcrypt creates a new Bcrypt crypto instance
+func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -92,7 +92,7 @@ func NewBcryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Bcrypt{
 		config: config,
 		params: params,
-		codec:  codecPkg.NewCodec(types.TypeBcrypt),
+		codec:  codecPkg.NewCodec(types.Type{Name: constants.BCRYPT}),
 	}, nil
 }
 
@@ -129,7 +129,7 @@ func (c *Bcrypt) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(types.TypeBcrypt) {
+	if parts.Algorithm.Name != constants.BCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt))); err != nil {

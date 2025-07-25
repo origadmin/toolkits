@@ -13,6 +13,7 @@ import (
 	"golang.org/x/crypto/scrypt"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -26,8 +27,8 @@ type Scrypt struct {
 	codec  interfaces.Codec
 }
 
-func (c *Scrypt) Type() string {
-	return types.TypeScrypt.String()
+func (c *Scrypt) Type() types.Type {
+	return c.codec.Type()
 }
 
 type ConfigValidator struct {
@@ -56,7 +57,7 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 }
 
 // NewScryptCrypto creates a new Scrypt crypto instance
-func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
+func NewScryptCrypto(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -78,7 +79,7 @@ func NewScryptCrypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &Scrypt{
 		params: params,
 		config: config,
-		codec:  codec.NewCodec(types.TypeScrypt),
+		codec:  codec.NewCodec(algType),
 	}, nil
 }
 
@@ -197,7 +198,7 @@ func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(types.TypeScrypt) {
+	if parts.Algorithm.Name != constants.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

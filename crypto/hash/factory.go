@@ -27,13 +27,13 @@ func (f *algorithmFactory) create(algType types.Type, opts ...types.Option) (int
 		return alg, nil
 	}
 
-	algorithm, exists := algorithms[algType]
+	algorithm, exists := algorithms[algType.Name]
 	if !exists {
 		return nil, fmt.Errorf("unsupported algorithm: %s", algType)
 	}
 
 	cfg := f.createConfig(algorithm, opts...)
-	alg, err := algorithm.creator(cfg)
+	alg, err := algorithm.creator(algType, cfg)
 	if err != nil {
 		return nil, err
 	}

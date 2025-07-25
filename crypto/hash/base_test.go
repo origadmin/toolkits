@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 func TestGeneratePassword(t *testing.T) {
-	crypto, err := NewCrypto(types.TypeBcrypt)
+	crypto, err := NewCrypto(constants.MD5)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -38,7 +38,7 @@ func TestGeneratePassword(t *testing.T) {
 }
 
 func TestMD5(t *testing.T) {
-	crypto, err := NewCrypto(types.TypeMD5)
+	crypto, err := NewCrypto(constants.MD5)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -56,7 +56,7 @@ func TestMD5(t *testing.T) {
 }
 
 func TestSHA1(t *testing.T) {
-	crypto, err := NewCrypto(types.TypeSha1)
+	crypto, err := NewCrypto(constants.SHA1)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -74,7 +74,7 @@ func TestSHA1(t *testing.T) {
 }
 
 func TestSHA256(t *testing.T) {
-	crypto, err := NewCrypto(types.TypeSha256)
+	crypto, err := NewCrypto(constants.SHA256)
 	if err != nil {
 		t.Error("NewCrypto Failed: ", err.Error())
 		return
@@ -99,7 +99,7 @@ func TestHMAC(t *testing.T) {
 	}
 	for i := stdhash.Hash(1); i < stdhash.MAPHASH; i++ {
 		t.Logf("test hash:%s starting", i.String())
-		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", i.String())))
+		crypto, err := NewCrypto(fmt.Sprintf("hmac-%s", i.String()))
 		if err != nil {
 			t.Error("NewCrypto Failed: ", err.Error())
 			return
@@ -141,7 +141,7 @@ func TestUnsupportedAlgorithms(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		crypto, err := NewCrypto(types.Type(fmt.Sprintf("hmac-%s", tt.algorithm)))
+		crypto, err := NewCrypto(fmt.Sprintf("hmac-%s", tt.algorithm))
 		if err != nil {
 			t.Error("NewCrypto Failed: ", err.Error())
 			return

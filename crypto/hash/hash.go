@@ -20,8 +20,8 @@ const (
 )
 
 var (
-	// defaultCrypto default cryptographic instance
-	defaultCrypto Crypto
+	// activeCrypto is the currently active cryptographic instance
+	activeCrypto Crypto
 	// ErrHashModuleNotInitialized is returned when the hash module fails to initialize.
 	ErrHashModuleNotInitialized = errors.ErrHashModuleNotInitialized
 )
@@ -30,7 +30,7 @@ var (
 type uninitializedCrypto struct{}
 
 func (u *uninitializedCrypto) Type() types.Type {
-	return types.TypeUnknown
+	return types.Type{Name: constants.UNKNOWN}
 }
 
 func (u *uninitializedCrypto) Hash(password string) (string, error) {
@@ -46,60 +46,53 @@ func (u *uninitializedCrypto) Verify(hashed, password string) error {
 }
 
 func init() {
-	alg := os.Getenv(constants.ENV)
-	if alg == "" {
-		alg = constants.DefaultType
-	}
-	t := types.ParseType(alg)
-
-	var initialized bool
-	if t != types.TypeUnknown {
-		crypto, err := NewCrypto(t)
-		if err == nil {
-			defaultCrypto = crypto
-			initialized = true
-		} else {
-			slog.Error("hash: failed to initialize default crypto", "type", t, "error", err)
-		}
+	algStr := os.Getenv(constants.ENV)
+	if algStr == "" {
+		algStr = constants.DefaultType
 	}
 
-	if !initialized {
-		// Try to initialize with the hardcoded default type if the environment variable type failed or was unknown.
-		cryptographic, err := NewCrypto(constants.DefaultType)
-		if err != nil {
-			slog.Error("hash: failed to initialize default crypto with hardcoded default type", "type", constants.DefaultType, "error", err)
-			// If even the hardcoded default fails, set to uninitializedCrypto to prevent panics.
-			defaultCrypto = &uninitializedCrypto{}
-		} else {
-			defaultCrypto = cryptographic
-		}
+	// 尝试使用确定的算法类型创建加密实例
+	crypto, err := NewCrypto(algStr)
+	if err != nil {
+		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
+		// 如果创建失败，则设置为未初始化状态，防止后续操作 panic
+		activeCrypto = &uninitializedCrypto{}
+	} else {
+		activeCrypto = crypto
 	}
 }
 
-// UseCrypto updates the default cryptographic instance
-func UseCrypto(t types.Type, opts ...types.Option) error {
-	if defaultCrypto != nil && defaultCrypto.Type() == t {
+// UseCrypto updates the active cryptographic instance
+func UseCrypto(t string, opts ...types.Option) error {
+	if t == "" {
+		return errors.ErrInvalidAlgorithm
+	}
+	algType, err := types.ParseAlgorithm(t)
+	if err != nil {
+		return err
+	}
+	if activeCrypto != nil && activeCrypto.Type() == algType {
 		return nil
 	}
 	newCrypto, err := NewCrypto(t, opts...)
 	if err != nil {
 		return err
 	}
-	defaultCrypto = newCrypto
+	activeCrypto = newCrypto
 	return nil
 }
 
-// Verify verifies a password using the default cryptographic instance.
+// Verify verifies a password using the active cryptographic instance.
 func Verify(hashed, password string) error {
-	return defaultCrypto.Verify(hashed, password)
+	return activeCrypto.Verify(hashed, password)
 }
 
-// Generate generates a hash for the given password using the default cryptographic instance.
+// Generate generates a hash for the given password using the active cryptographic instance.
 func Generate(password string) (string, error) {
-	return defaultCrypto.Hash(password)
+	return activeCrypto.Hash(password)
 }
 
-// GenerateWithSalt generates a hash for the given password with the specified salt using the default cryptographic instance.
+// GenerateWithSalt generates a hash for the given password with the specified salt using the active cryptographic instance.
 func GenerateWithSalt(password, salt string) (string, error) {
-	return defaultCrypto.HashWithSalt(password, salt)
+	return activeCrypto.HashWithSalt(password, salt)
 }

@@ -28,8 +28,8 @@ type PBKDF2 struct {
 	codec  interfaces.Codec
 }
 
-func (c *PBKDF2) Type() string {
-	return types.TypePBKDF2.String()
+func (c *PBKDF2) Type() types.Type {
+	return c.codec.Type()
 }
 
 type ConfigValidator struct {
@@ -56,15 +56,24 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	return nil
 }
 
-// NewPBKDF2Crypto creates a new PBKDF2 crypto instance
-func NewPBKDF2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+// NewPBKDF2 creates a new PBKDF2 crypto instance
+func NewPBKDF2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
 
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
+	// If a specific underlying hash is requested (e.g., pbkdf2-sha256),
+	// ensure it's used in the params if not already set.
+	if p.Underlying != "" {
+		defaultParams := DefaultParams()
+		if defaultParams.HashType == "" || defaultParams.HashType == stdhash.SHA256.String() { // Default to SHA256 if not specified
+			defaultParams.HashType = p.Underlying
+		}
+		if config.ParamConfig == "" {
+			config.ParamConfig = defaultParams.String()
+		}
 	}
+
 	params, err := parseParams(config.ParamConfig)
 	if err != nil {
 		return nil, fmt.Errorf("invalid pbkdf2 param config: %v", err)
@@ -79,7 +88,7 @@ func NewPBKDF2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	return &PBKDF2{
 		params: params,
 		config: config,
-		codec:  codec.NewCodec(types.TypePBKDF2),
+		codec:  codec.NewCodec(p),
 	}, nil
 }
 
@@ -127,7 +136,7 @@ func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(types.TypePBKDF2) {
+	if !parts.Algorithm.Is(c.Type()) {
 		return errors.ErrAlgorithmMismatch
 	}
 

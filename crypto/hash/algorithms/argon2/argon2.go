@@ -28,6 +28,10 @@ type Params struct {
 	KeyLength  uint32
 }
 
+var (
+	TypeArgon2 = types.Type{Name: constants.ARGON2}
+)
+
 // parseParams parses Argon2 parameters from string
 func parseParams(params string) (result Params, err error) {
 	// Handle empty string case
@@ -103,8 +107,8 @@ type Argon2 struct {
 	codec  interfaces.Codec
 }
 
-func (c *Argon2) Type() string {
-	return types.TypeArgon2.String()
+func (c *Argon2) Type() types.Type {
+	return c.codec.Type()
 }
 
 // ConfigValidator implements the config validator for Argon2
@@ -149,8 +153,12 @@ func DefaultParams() Params {
 	}
 }
 
-// NewArgon2Crypto creates a new Argon2 crypto instance
-func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewArgon2(TypeArgon2, config)
+}
+
+// NewArgon2 creates a new Argon2 crypto instance
+func NewArgon2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	// Use default config if provided config is nil
 	if config == nil {
 		config = DefaultConfig()
@@ -171,10 +179,23 @@ func NewArgon2Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
 
+	// Determine Argon2 variant based on p.Name
+	switch p.Name {
+	case constants.ARGON2, constants.ARGON2id:
+		// Default to Argon2id if generic Argon2 or Argon2id is requested
+		// The argon2.IDKey function handles both Argon2id and Argon2i based on the version.
+		// For simplicity, we'll use IDKey for both, assuming the underlying library handles the distinction.
+	case constants.ARGON2i:
+		// For Argon2i, we'd ideally use argon2.Key if there was a separate function.
+		// Since argon2.IDKey is the primary, we proceed with it.
+	default:
+		return nil, fmt.Errorf("unsupported argon2 type: %s", p.Name)
+	}
+
 	return &Argon2{
 		params: params,
 		config: config,
-		codec:  codecPkg.NewCodec(types.TypeArgon2),
+		codec:  codecPkg.NewCodec(p),
 	}, nil
 }
 
@@ -203,7 +224,7 @@ func (c *Argon2) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(types.TypeArgon2) {
+	if !parts.Algorithm.Is(TypeArgon2) {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

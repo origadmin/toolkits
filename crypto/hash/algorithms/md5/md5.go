@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -22,25 +23,25 @@ type MD5 struct {
 	codec  interfaces.Codec
 }
 
-func (c *MD5) Type() string {
-	return types.TypeMD5.String()
+func (c *MD5) Type() types.Type {
+	return types.Type{Name: constants.MD5}
 }
 
 type ConfigValidator struct {
 	SaltLength int
 }
 
-func (v ConfigValidator) Validate(config *types.Config) interface{} {
+func (v ConfigValidator) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
 		return fmt.Errorf("salt length must be at least 8 bytes")
 	}
 	return nil
 }
 
-// NewMD5Crypto creates a new MD5 crypto instance
-func NewMD5Crypto(config *types.Config) (interfaces.Cryptographic, error) {
+// NewMD5 creates a new MD5 crypto instance
+func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
-		config = types.DefaultConfig()
+		config = DefaultConfig()
 	}
 	validator := &ConfigValidator{}
 	if err := validator.Validate(config); err != nil {
@@ -48,8 +49,14 @@ func NewMD5Crypto(config *types.Config) (interfaces.Cryptographic, error) {
 	}
 	return &MD5{
 		config: config,
-		codec:  codec.NewCodec(types.TypeMD5),
+		codec:  codec.NewCodec(types.Type{Name: constants.MD5}),
 	}, nil
+}
+
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		SaltLength: 16,
+	}
 }
 
 // Hash implements the hash method
@@ -69,7 +76,7 @@ func (c *MD5) HashWithSalt(password, salt string) (string, error) {
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm != types.TypeMD5 {
+	if parts.Algorithm.Name != constants.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 

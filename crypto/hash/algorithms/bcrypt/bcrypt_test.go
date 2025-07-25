@@ -8,7 +8,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var codec = codecPkg.NewCodec(types.TypeBcrypt)
+var codec = codecPkg.NewCodec(types.Bcrypt())
 
 func TestNewBcryptCrypto(t *testing.T) {
 	tests := []struct {
@@ -45,16 +45,16 @@ func TestNewBcryptCrypto(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewBcryptCrypto(tt.config)
+			_, err := NewBcrypt(tt.config)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewBcryptCrypto() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NewBcrypt() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
 func TestCrypto_Hash(t *testing.T) {
-	crypto, err := NewBcryptCrypto(DefaultConfig())
+	crypto, err := NewBcrypt(DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestCrypto_Hash(t *testing.T) {
 }
 
 func TestCrypto_HashWithSalt(t *testing.T) {
-	crypto, err := NewBcryptCrypto(DefaultConfig())
+	crypto, err := NewBcrypt(DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 }
 
 func TestCrypto_Verify(t *testing.T) {
-	crypto, err := NewBcryptCrypto(DefaultConfig())
+	crypto, err := NewBcrypt(DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestCrypto_Verify(t *testing.T) {
 }
 
 func TestCrypto_VerifyWithSalt(t *testing.T) {
-	crypto, err := NewBcryptCrypto(DefaultConfig())
+	crypto, err := NewBcrypt(DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}

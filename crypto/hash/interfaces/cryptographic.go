@@ -10,7 +10,7 @@ import (
 
 // Cryptographic defines the interface for cryptographic operations
 type Cryptographic interface {
-	Type() string
+	Type() types.Type
 	// Hash generates a hash for the given password
 	Hash(password string) (string, error)
 	// HashWithSalt generates a hash for the given password with the specified salt

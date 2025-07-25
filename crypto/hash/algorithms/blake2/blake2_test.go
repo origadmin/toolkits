@@ -11,9 +11,9 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var codec = codecPkg.NewCodec(types.TypeBlake2b) // Use Blake2b for testing codec
+var codec = codecPkg.NewCodec(types.Blake2b()) // Use Blake2b for testing codec
 
-func TestNewBlake2Crypto(t *testing.T) {
+func TestNewBlake2(t *testing.T) {
 	tests := []struct {
 		name     string
 		hashType types.Type
@@ -22,25 +22,25 @@ func TestNewBlake2Crypto(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Default Config",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			config:   DefaultConfig(),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Default Config",
-			hashType: types.TypeBlake2s,
+			hashType: types.Blake2s(),
 			config:   DefaultConfig(),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Custom SaltLength",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			config:   &types.Config{SaltLength: 32},
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Invalid SaltLength",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			config:   &types.Config{SaltLength: 4}, // Less than 8
 			wantErr:  true,
 		},
@@ -48,9 +48,9 @@ func TestNewBlake2Crypto(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewBlake2Crypto(tt.hashType, tt.config)
+			_, err := NewBlake2(tt.hashType, tt.config)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewBlake2Crypto() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NewBlake2() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -65,13 +65,13 @@ func TestCrypto_Hash(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Hash",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			password: "testpassword",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Hash",
-			hashType: types.TypeBlake2s,
+			hashType: types.Blake2s(),
 			password: "testpassword",
 			wantErr:  false,
 		},
@@ -79,7 +79,7 @@ func TestCrypto_Hash(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			crypto, err := NewBlake2Crypto(tt.hashType, DefaultConfig())
+			crypto, err := NewBlake2(tt.hashType, DefaultConfig())
 			if err != nil {
 				t.Fatalf("Failed to create crypto: %v", err)
 			}
@@ -104,14 +104,14 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b HashWithSalt",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			password: "testpassword",
 			salt:     "somesalt",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s HashWithSalt",
-			hashType: types.TypeBlake2s,
+			hashType: types.Blake2s(),
 			password: "testpassword",
 			salt:     "somesalt",
 			wantErr:  false,
@@ -120,7 +120,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			crypto, err := NewBlake2Crypto(tt.hashType, DefaultConfig())
+			crypto, err := NewBlake2(tt.hashType, DefaultConfig())
 			if err != nil {
 				t.Fatalf("Failed to create crypto: %v", err)
 			}
@@ -145,21 +145,21 @@ func TestCrypto_Verify(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Verify Correct",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			password: "testpassword",
 			salt:     "somesalt",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Verify Correct",
-			hashType: types.TypeBlake2s,
+			hashType: types.Blake2s(),
 			password: "testpassword",
 			salt:     "somesalt",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Verify Wrong Password",
-			hashType: types.TypeBlake2b,
+			hashType: types.Blake2b(),
 			password: "testpassword",
 			salt:     "somesalt",
 			wantErr:  true, // Expect error for wrong password
@@ -168,7 +168,7 @@ func TestCrypto_Verify(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			crypto, err := NewBlake2Crypto(tt.hashType, DefaultConfig())
+			crypto, err := NewBlake2(tt.hashType, DefaultConfig())
 			if err != nil {
 				t.Fatalf("Failed to create crypto: %v", err)
 			}

@@ -5,99 +5,91 @@
 package types
 
 import (
+	"fmt"
 	"strings"
+
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 )
 
-// Type represents the hash algorithm type
-type Type string
+// Type represents a structured hash algorithm definition.
+// It separates the main algorithm from its underlying hash function,
+// allowing for clear and extensible handling of composite algorithms
+// like HMAC and PBKDF2.
+type Type struct {
+	// Name is the main algorithm's name, e.g., "hmac", "pbkdf2", "sha256".
+	// This is the key field for logical dispatch.
+	Name string
 
-const (
-	// TypeMD5 md5 type
-	TypeMD5 Type = "md5"
-	// TypeSha1 sha1 type
-	TypeSha1 Type = "sha1"
-	// TypeSha224 sha224 type
-	TypeSha224 Type = "sha224"
-	// TypeSha256 sha256 type
-	TypeSha256 Type = "sha256"
-	// TypeSha384 sha384 type
-	TypeSha384 Type = "sha384"
-	// TypeSha512 sha512 type
-	TypeSha512 Type = "sha512"
-	// TypeSha3224 sha3-224 type
-	TypeSha3224 Type = "sha3-224"
-	// TypeSha3256 sha3-256 type
-	TypeSha3256 Type = "sha3-256"
-	// TypeSha3384 sha3-384 type
-	TypeSha3384 Type = "sha3-384"
-	// TypeSha3512 sha3-512 type
-	TypeSha3512 Type = "sha3-512"
-	// TypeSha3512224 sha3-512-224 type
-	TypeSha3512224 Type = "sha3-512-224"
-	// TypeSha3512256 sha3-512-256 type
-	TypeSha3512256 Type = "sha3-512-256"
-	// TypeArgon2 argon2 type
-	TypeArgon2 Type = "argon2"
-	// TypeScrypt scrypt type
-	TypeScrypt Type = "scrypt"
-	// TypeBcrypt bcrypt type
-	TypeBcrypt Type = "bcrypt"
-	// TypeHMAC hmac type
-	TypeHMAC Type = "hmac"
-	// TypeHMAC256 hmac sha256 type
-	TypeHMAC256 Type = "hmac256"
-	// TypeHMAC512 hmac sha512 type
-	TypeHMAC512 Type = "hmac512"
-	// TypePBKDF2 pbkdf2 type
-	TypePBKDF2 Type = "pbkdf2"
-	// TypePBKDF2SHA256 pbkdf2 sha256 type
-	TypePBKDF2SHA256 Type = "pbkdf2-sha256"
-	// TypePBKDF2SHA512 pbkdf2 sha512 type
-	TypePBKDF2SHA512 Type = "pbkdf2-sha512"
-	// TypePBKDF2SHA384 pbkdf2 sha384 type
-	TypePBKDF2SHA384 Type = "pbkdf2-sha384"
-	// TypePBKDF2SHA3256 pbkdf2 sha3-256 type
-	TypePBKDF2SHA3256 Type = "pbkdf2-sha3-256"
-	// TypePBKDF2SHA3224 pbkdf2 sha3-224 type
-	TypePBKDF2SHA3224 Type = "pbkdf2-sha3-224"
-	// TypePBKDF2SHA3384 pbkdf2 sha3-384 type
-	TypePBKDF2SHA3384 Type = "pbkdf2-sha3-384"
-	// TypePBKDF2SHA3512224 pbkdf2 sha3-512-224 type
-	TypePBKDF2SHA3512224 Type = "pbkdf2-sha3-512-224"
-	// TypePBKDF2SHA3512256 pbkdf2 sha3-512-256 type
-	TypePBKDF2SHA3512256 Type = "pbkdf2-sha3-512-256"
-	// TypePBKDF2SHA3512384 pbkdf2 sha3-512-384 type
-	TypePBKDF2SHA3512384 Type = "pbkdf2-sha3-512-384"
-	// TypePBKDF2SHA3512512 pbkdf2 sha3-512-512 type
-	TypePBKDF2SHA3512512 Type = "pbkdf2-sha3-512-512"
-	// TypeBlake2b blake2b type
-	TypeBlake2b Type = "blake2b"
-	// TypeBlake2s blake2s type
-	TypeBlake2s Type = "blake2s"
-	// TypeUnknown unknown type
-	TypeUnknown Type = "unknown"
-)
+	// Underlying is the full string representation of the underlying hash algorithm.
+	// For simple hashes, this field is empty.
+	// For composite hashes, it specifies the hash function to be used,
+	// e.g., "sha256" for "hmac-sha256", or "sha3-512" for "pbkdf2-sha3-512".
+	Underlying string
+}
 
 // String returns the string representation of the type
 func (t Type) String() string {
-	return string(t)
+	if t.Underlying != "" {
+		return t.Name + "-" + t.Underlying
+	}
+	return t.Name
 }
 
+// Is compares two Type instances for equality.
 func (t Type) Is(t2 Type) bool {
-	return TypeIs(t, t2)
+	return t.Name == t2.Name && t.Underlying == t2.Underlying
 }
 
-// ParseType parses a string into a Type
-func ParseType(s string) Type {
-	return Type(s)
+// ParseAlgorithm parses an algorithm string into its structured Type.
+// It handles common aliases and composite algorithm formats.
+func ParseAlgorithm(typedAlgorithm string) (Type, error) {
+	typedAlgorithm = strings.ToLower(typedAlgorithm)
+
+	// Handle common aliases first
+	switch typedAlgorithm {
+	case "hmac":
+		typedAlgorithm = constants.DEFAULT_HMAC
+	case "hmac256":
+		typedAlgorithm = constants.HMAC_SHA256
+	case "hmac512":
+		typedAlgorithm = constants.HMAC_SHA512
+		// Add other aliases here if needed
+	}
+
+	parts := strings.SplitN(typedAlgorithm, "-", 2)
+	if len(parts) == 2 {
+		// This is a composite algorithm like "hmac-sha256" or "pbkdf2-sha512"
+		return Type{Name: parts[0], Underlying: parts[1]}, nil
+	}
+
+	// This is a simple algorithm like "sha256"
+	return Type{Name: typedAlgorithm}, nil
 }
 
-func TypeIs(t Type, t2 Type) bool {
-	if t == t2 {
-		return true
+// AlgorithmTypeHash is a helper function that might need to be refactored
+// depending on how stdhash.ParseHash is updated to handle the new Type struct.
+// For now, it assumes subAlg is a simple string.
+func AlgorithmTypeHash(subAlg string) (stdhash.Hash, error) {
+	h, err := stdhash.ParseHash(subAlg)
+	if err != nil {
+		return 0, fmt.Errorf("unsupported hash type: %s", subAlg)
 	}
-	if t == TypeUnknown || t2 == TypeUnknown {
-		return false
-	}
-	return len(t) >= len(t2) && strings.HasPrefix(t.String(), t2.String())
+	return h, nil
+}
+
+func Argon2() Type {
+	return Type{Name: "argon2"}
+}
+
+func Bcrypt() Type {
+	return Type{Name: "bcrypt"}
+}
+
+func Blake2b() Type {
+	return Type{Name: "blake2b"}
+}
+
+func Blake2s() Type {
+	return Type{Name: "blake2s"}
 }

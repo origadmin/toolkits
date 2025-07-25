@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -23,8 +24,8 @@ type SHA struct {
 	hashHash stdhash.Hash
 }
 
-func (c *SHA) Type() string {
-	return c.codec.Type().String()
+func (c *SHA) Type() types.Type {
+	return c.codec.Type()
 }
 
 type ConfigValidator struct {
@@ -37,8 +38,8 @@ func (v ConfigValidator) Validate(config *types.Config) interface{} {
 	return nil
 }
 
-// NewSHACrypto creates a new SHA crypto instance
-func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+// NewSHA creates a new SHA crypto instance
+func NewSHA(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -46,59 +47,75 @@ func NewSHACrypto(hashType types.Type, config *types.Config) (interfaces.Cryptog
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
-	hashHash, err := stdhash.ParseHash(hashType.String())
+	hashHash, err := stdhash.ParseHash(p.String())
 	if err != nil {
 		return nil, err
 	}
 
 	return &SHA{
 		config:   config,
-		codec:    codec.NewCodec(hashType),
+		codec:    codec.NewCodec(p),
 		hashHash: hashHash,
 	}, nil
 }
 
-func NewSha1Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha1, config)
+func NewSha1(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHA(types.Type{
+		Name: constants.SHA1,
+	}, config)
 }
 
-func NewSha224Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha224, config)
+func NewSha224(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHA(types.Type{
+		Name: constants.SHA224,
+	}, config)
 }
 
-func NewSha256Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha256, config)
+func NewSha256(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHA(types.Type{
+		Name: constants.SHA256,
+	}, config)
 }
 
-func NewSha512Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha512, config)
+func NewSha512(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHA(types.Type{
+		Name: constants.SHA512,
+	}, config)
 }
 
 func NewSha3224(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3224, config)
+	return NewSHA(types.Type{
+		Name: constants.SHA3_224,
+	}, config)
 }
 
 func NewSha3256(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3256, config)
+	return NewSHA(types.Type{
+		Name: constants.SHA3_256,
+	}, config)
 }
 
-func NewSha384Crypto(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha384, config)
-}
-
-func NewTypeSha3512(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3512, config)
+func NewSha384(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewSHA(types.Type{
+		Name: constants.SHA384,
+	}, config)
 }
 
 func NewSha3512(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3512, config)
+	return NewSHA(types.Type{
+		Name: constants.SHA3_512,
+	}, config)
 }
 func NewSha3512224(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3512224, config)
+	return NewSHA(types.Type{
+		Name: constants.SHA3_224,
+	}, config)
 }
 
 func NewSha3512256(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewSHACrypto(types.TypeSha3512256, config)
+	return NewSHA(types.Type{
+		Name: constants.SHA3_512_256,
+	}, config)
 }
 
 func DefaultConfig() *types.Config {

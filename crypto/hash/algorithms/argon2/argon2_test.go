@@ -8,7 +8,9 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var codec = codecPkg.NewCodec(types.TypeArgon2)
+var codec = codecPkg.NewCodec(types.Type{
+	Name: "argon2",
+})
 
 func TestParams_ParseAndString(t *testing.T) {
 	tests := []struct {
@@ -207,7 +209,7 @@ func TestParams_String(t *testing.T) {
 	}
 }
 
-func TestNewArgon2Crypto(t *testing.T) {
+func TestNewArgon2(t *testing.T) {
 	tests := []struct {
 		name    string
 		config  *types.Config
@@ -248,16 +250,16 @@ func TestNewArgon2Crypto(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewArgon2Crypto(tt.config)
+			_, err := NewArgon2(types.Argon2(), tt.config)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewArgon2Crypto() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NewArgon2() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
 func TestCrypto_Hash(t *testing.T) {
-	crypto, err := NewArgon2Crypto(DefaultConfig())
+	crypto, err := NewArgon2(types.Argon2(), DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Argon2 crypto: %v", err)
 	}
@@ -272,7 +274,7 @@ func TestCrypto_Hash(t *testing.T) {
 }
 
 func TestCrypto_HashWithSalt(t *testing.T) {
-	crypto, err := NewArgon2Crypto(DefaultConfig())
+	crypto, err := NewArgon2(types.Argon2(), DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Argon2 crypto: %v", err)
 	}
@@ -288,7 +290,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 }
 
 func TestCrypto_Verify(t *testing.T) {
-	crypto, err := NewArgon2Crypto(DefaultConfig())
+	crypto, err := NewArgon2(types.Argon2(), DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Argon2 crypto: %v", err)
 	}
@@ -316,7 +318,7 @@ func TestCrypto_Verify(t *testing.T) {
 }
 
 func TestCrypto_VerifyWithSalt(t *testing.T) {
-	crypto, err := NewArgon2Crypto(DefaultConfig())
+	crypto, err := NewArgon2(types.Argon2(), DefaultConfig())
 	if err != nil {
 		t.Fatalf("Failed to create Argon2 crypto: %v", err)
 	}

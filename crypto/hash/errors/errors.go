@@ -21,4 +21,6 @@ var (
 	ErrHashModuleNotInitialized = errors.String("hash module not initialized")
 	// ErrUnsupportedHashForHMAC is returned when an unsupported hash type is used for HMAC.
 	ErrUnsupportedHashForHMAC = errors.String("unsupported hash type for HMAC")
+	// ErrInvalidAlgorithm is returned when an invalid algorithm is used.
+	ErrInvalidAlgorithm = errors.String("invalid algorithm")
 )

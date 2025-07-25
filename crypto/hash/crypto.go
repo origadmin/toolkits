@@ -43,9 +43,8 @@ func (c *crypto) Verify(hashed, password string) error {
 		return err
 	}
 
-	algType, _ := codec.AlgorithmTypeHash(parts.Algorithm)
 	// Get algorithm instance from cache or create new one
-	cryptographic, err := c.factory.create(algType)
+	cryptographic, err := c.factory.create(parts.Algorithm)
 	if err != nil {
 		return err
 	}
@@ -53,14 +52,16 @@ func (c *crypto) Verify(hashed, password string) error {
 }
 
 // NewCrypto creates a new cryptographic instance
-func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
-	algType, _ := codec.AlgorithmTypeHash(alg)
-
+func NewCrypto(alg string, opts ...types.Option) (Crypto, error) {
 	factory := &algorithmFactory{
 		cryptos: make(map[types.Type]interfaces.Cryptographic),
 	}
+	algorithm, err := types.ParseAlgorithm(alg)
+	if err != nil {
+		return nil, err
+	}
 
-	cryptographic, err := factory.create(algType, opts...)
+	cryptographic, err := factory.create(algorithm, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +69,15 @@ func NewCrypto(alg types.Type, opts ...types.Option) (Crypto, error) {
 	// Create cryptographic instance
 	return &crypto{
 		crypto:  cryptographic,
-		codec:   codec.NewCodec(alg),
+		codec:   codec.NewCodec(algorithm),
 		factory: factory,
 	}, nil
 }
 
 // RegisterAlgorithm registers a new hash algorithm
 func RegisterAlgorithm(t types.Type, creator AlgorithmCreator, defaultConfig AlgorithmConfig) {
-	algorithms[t] = algorithm{
+	algorithms[t.Name] = algorithm{
 		creator:       creator,
 		defaultConfig: defaultConfig,
 	}
 }
-
-

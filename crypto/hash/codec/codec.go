@@ -21,7 +21,10 @@ import (
 type Codec struct {
 	algorithm types.Type
 	version   string
-	params    string
+}
+
+func (c *Codec) String() string {
+	return c.algorithm.String()
 }
 
 func (c *Codec) Type() types.Type {
@@ -55,8 +58,11 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 		return nil, errors.ErrInvalidHashFormat
 	}
 
-	algorithm := types.Type(parts[1])
-	varsion := parts[2]
+	algorithm, err := types.ParseAlgorithm(parts[1])
+	if err != nil {
+		return nil, fmt.Errorf("invalid algorithm: %v", err)
+	}
+	version := parts[2]
 	params := parts[3]
 
 	hash, err := hex.DecodeString(parts[4])
@@ -69,7 +75,7 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 	}
 	return &types.HashParts{
 		Algorithm: algorithm,
-		Version:   varsion,
+		Version:   version,
 		Params:    params,
 		Hash:      hash,
 		Salt:      salt,
@@ -108,15 +114,4 @@ func ParseParams(params string) (map[string]string, error) {
 		kv[parts[0]] = parts[1]
 	}
 	return kv, nil
-}
-
-func AlgorithmTypeHash(algorithm types.Type) (types.Type, string) {
-	hash := ""
-	algNew := algorithm
-	switch {
-	case strings.HasPrefix(algorithm.String(), "hmac-"):
-		hash = strings.TrimPrefix(algorithm.String(), "hmac-")
-		algNew = types.TypeHMAC
-	}
-	return algNew, hash
 }
