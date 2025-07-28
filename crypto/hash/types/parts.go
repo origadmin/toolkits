@@ -6,9 +6,9 @@ package types
 
 // HashParts represents the parts of a hash
 type HashParts struct {
-	Algorithm Type
+	Algorithm string
 	Version   string
-	Params    string
+	Params    map[string]string
 	Hash      []byte
 	Salt      []byte
 }

@@ -5,12 +5,8 @@
 package bcrypt
 
 import (
-	"fmt"
-	"strconv"
-
 	"golang.org/x/crypto/bcrypt"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -22,118 +18,68 @@ import (
 type Bcrypt struct {
 	params Params
 	config *types.Config
-	codec  interfaces.Codec
 }
 
 func (c *Bcrypt) Type() types.Type {
-	return c.codec.Type()
+	return types.Type{Name: constants.BCRYPT}
 }
 
-type Params struct {
-	Cost int
-}
-
-func (p Params) String() string {
-	return fmt.Sprintf("c:%d", p.Cost)
-}
-
-func parseParams(params string) (result Params, err error) {
-	if params == "" {
-		return result, nil
-	}
-
-	kv, err := codecPkg.ParseParams(params)
+// Hash implements the hash method
+func (c *Bcrypt) Hash(password string) (*types.HashParts, error) {
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
-		return Params{}, err
+		return nil, err
 	}
-	if v, ok := kv["c"]; ok {
-		cost, err := strconv.ParseInt(v, 10, 32)
-		if err != nil {
-			return result, fmt.Errorf("invalid cost: %v", err)
-		}
-		result.Cost = int(cost)
-	}
-	return result, nil
+	return c.HashWithSalt(password, salt)
 }
 
-type ConfigValidator struct {
-	params Params
+// HashWithSalt implements the hash with salt method
+func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	newpass := password + string(salt)
+	hash, err := bcrypt.GenerateFromPassword([]byte(newpass), c.params.Cost)
+	if err != nil {
+		return nil, err
+	}
+	return types.NewHashPartsWithParams(c.Type(), salt, hash, c.params.ToMap()), nil
 }
 
-func (v ConfigValidator) Validate(config *types.Config) interface{} {
-	if config.SaltLength < 8 {
-		return errors.ErrSaltLengthTooShort
+// Verify implements the verify method
+func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
+	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
+	if err != nil {
+		return err
 	}
-	if v.params.Cost < 4 || v.params.Cost > 31 {
-		return errors.ErrCostOutOfRange
+	if constants.BCRYPT != algorithm.Name {
+		return errors.ErrAlgorithmMismatch
+	}
+	newpass := password + string(parts.Salt)
+	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(newpass)); err != nil {
+		return errors.ErrPasswordNotMatch
 	}
 	return nil
 }
 
-// NewBcrypt creates a new Bcrypt crypto instance
 func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-	params, err := parseParams(config.ParamConfig)
-	if err != nil {
-		return nil, fmt.Errorf("invalid bcrypt param config: %v", err)
+	validator := ConfigValidator{
+		config: config,
+		params: DefaultParams(),
 	}
 
-	validator := &ConfigValidator{
-		params: params,
-	}
-	if err := validator.Validate(config); err != nil {
-		return nil, fmt.Errorf("invalid bcrypt config: %v", err)
+	params, err := parseParams(config.ParamConfig)
+	if err != nil {
+		return nil, err
 	}
 	return &Bcrypt{
-		config: config,
 		params: params,
-		codec:  codecPkg.NewCodec(types.Type{Name: constants.BCRYPT}),
+		config: config,
 	}, nil
 }
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength:  16,
-		ParamConfig: DefaultParams().String(),
+		SaltLength: 16,
 	}
-}
-
-func DefaultParams() Params {
-	return Params{
-		Cost: constants.DefaultCost,
-	}
-}
-
-// Hash implements the hash method
-func (c *Bcrypt) Hash(password string) (string, error) {
-	salt, err := rand.RandomBytes(c.config.SaltLength)
-	if err != nil {
-		return "", err
-	}
-	return c.HashWithSalt(password, string(salt))
-}
-
-// HashWithSalt implements the hash with salt method
-func (c *Bcrypt) HashWithSalt(password, salt string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password+salt), c.params.Cost)
-	if err != nil {
-		return "", err
-	}
-	return c.codec.Encode([]byte(salt), hash), nil
-}
-
-// Verify implements the verify method
-func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.Name != constants.BCRYPT {
-		return errors.ErrAlgorithmMismatch
-	}
-	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(password+string(parts.Salt))); err != nil {
-		return errors.ErrPasswordNotMatch
-	}
-	return nil
 }

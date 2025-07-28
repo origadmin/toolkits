@@ -8,12 +8,9 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"hash"
-	"strconv"
-	"strings"
 
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -88,16 +85,7 @@ func NewPBKDF2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	return &PBKDF2{
 		params: params,
 		config: config,
-		codec:  codec.NewCodec(p),
 	}, nil
-}
-
-func DefaultParams() *Params {
-	return &Params{
-		Iterations: 10000,
-		KeyLength:  32,
-		HashType:   stdhash.SHA256.String(),
-	}
 }
 
 func DefaultConfig() *types.Config {
@@ -108,12 +96,12 @@ func DefaultConfig() *types.Config {
 }
 
 // Hash implements the hash method
-func (c *PBKDF2) Hash(password string) (string, error) {
+func (c *PBKDF2) Hash(password string) (*types.HashParts, error) {
 	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return c.HashWithSalt(password, string(salt))
+	return c.HashWithSalt(password, salt)
 }
 
 func (c *PBKDF2) hashFromName(name string) (func() hash.Hash, error) {
@@ -125,13 +113,13 @@ func (c *PBKDF2) hashFromName(name string) (func() hash.Hash, error) {
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *PBKDF2) HashWithSalt(password, salt string) (string, error) {
+func (c *PBKDF2) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
 	hashHash, err := c.hashFromName(c.params.HashType)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	newHash := pbkdf2.Key([]byte(password), []byte(salt), c.params.Iterations, int(c.params.KeyLength), hashHash)
-	return c.codec.Encode([]byte(salt), newHash, c.params.String()), nil
+	newHash := pbkdf2.Key([]byte(password), salt, c.params.Iterations, int(c.params.KeyLength), hashHash)
+	return types.NewHashPartsWithParams(c.Type(), salt, newHash, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
@@ -157,74 +145,4 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 		return errors.ErrPasswordNotMatch
 	}
 	return nil
-}
-
-// Params represents parameters for PBKDF2 algorithm
-type Params struct {
-	Iterations int
-	KeyLength  uint32
-	HashType   string
-}
-
-// String returns the string representation of parameters
-func (p *Params) String() string {
-	var parts []string
-	if p.Iterations > 0 {
-		parts = append(parts, fmt.Sprintf("i:%d", p.Iterations))
-	}
-	if p.KeyLength > 0 {
-		parts = append(parts, fmt.Sprintf("k:%d", p.KeyLength))
-	}
-	_, err := stdhash.ParseHash(p.HashType)
-	if err == nil {
-		parts = append(parts, fmt.Sprintf("h:%s", p.HashType))
-	}
-	return strings.Join(parts, ",")
-}
-
-// parseParams parses PBKDF2 parameters from string
-func parseParams(params string) (*Params, error) {
-	result := &Params{}
-
-	// Handle empty string case
-	if params == "" {
-		return result, nil
-	}
-
-	kv := make(map[string]string)
-	for _, param := range strings.Split(params, ",") {
-		parts := strings.Split(param, ":")
-		if len(parts) != 2 {
-			return nil, errors.ErrInvalidHashFormat
-		}
-		kv[parts[0]] = parts[1]
-	}
-
-	// Parse iterations
-	if v, ok := kv["i"]; ok {
-		iterations, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid iterations: %v", err)
-		}
-		result.Iterations = iterations
-	}
-
-	// Parse key length
-	if v, ok := kv["k"]; ok {
-		keyLength, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid key length: %v", err)
-		}
-		result.KeyLength = uint32(keyLength)
-	}
-
-	// Parse hash type
-	if v, ok := kv["h"]; ok {
-		_, err := stdhash.ParseHash(v)
-		if err == nil {
-			result.HashType = v
-		}
-	}
-
-	return result, nil
 }

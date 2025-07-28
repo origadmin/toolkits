@@ -86,3 +86,41 @@ func Blake2s() Type {
 func Scrypt() Type {
 	return Type{Name: constants.SCRYPT}
 }
+
+func NewHashParts(p Type, salt []byte, hash []byte) *HashParts {
+	return &HashParts{
+		Algorithm: p.String(),
+		Salt:      []byte(salt),
+		Hash:      hash,
+		Params:    map[string]string{},
+	}
+}
+
+func NewHashPartsWithParams(p Type, salt []byte, hash []byte, params map[string]string) *HashParts {
+	return &HashParts{
+		Algorithm: p.String(),
+		Salt:      []byte(salt),
+		Hash:      hash,
+		Params:    params,
+	}
+}
+
+func NewHashPartsFromUnderlying(name string, underlying string, salt []byte, hash []byte, ) *HashParts {
+	t := Type{Name: name, Underlying: underlying}
+	return &HashParts{
+		Algorithm: t.String(),
+		Salt:      salt,
+		Hash:      hash,
+		Params:    map[string]string{},
+	}
+}
+
+func NewHashPartsWithParamsFromUnderlying(name string, underlying string, salt []byte, hash []byte, params map[string]string) *HashParts {
+	t := Type{Name: name, Underlying: underlying}
+	return &HashParts{
+		Algorithm: t.String(),
+		Salt:      salt,
+		Hash:      hash,
+		Params:    params,
+	}
+}

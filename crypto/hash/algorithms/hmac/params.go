@@ -6,11 +6,7 @@
 package hmac
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/origadmin/toolkits/crypto/hash/codec"
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 )
 
 // Params represents parameters for Argon2 algorithm
@@ -19,18 +15,9 @@ type Params struct {
 }
 
 // parseParams parses Argon2 parameters from string
-func parseParams(params string) (result Params, err error) {
-	// Handle empty string case
-	if params == "" {
-		return result, nil
-	}
-
-	kv, err := codec.ParseParams(params)
-	if err != nil {
-		return result, err
-	}
+func parseParams(paramsMap map[string]string) (result Params, err error) {
 	// Parse time cost
-	if v, ok := kv["t"]; ok {
+	if v, ok := paramsMap["t"]; ok {
 		result.Type = v
 	}
 
@@ -39,10 +26,9 @@ func parseParams(params string) (result Params, err error) {
 
 // String returns the string representation of parameters
 func (p Params) String() string {
-	var parts []string
+	paramsMap := make(map[string]string)
 	if p.Type != "" {
-		parts = append(parts, fmt.Sprintf("t:%s", p.Type))
+		paramsMap["t"] = p.Type
 	}
-
-	return strings.Join(parts, constants.ParamSeparator)
+	return codec.EncodeParams(paramsMap)
 }

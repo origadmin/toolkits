@@ -11,10 +11,12 @@ import (
 // Cryptographic defines the interface for cryptographic operations
 type Cryptographic interface {
 	Type() types.Type
+	// Salt generates a random salt
+	Salt() ([]byte, error)
 	// Hash generates a hash for the given password
-	Hash(password string) (string, error)
+	Hash(password string) (*types.HashParts, error)
 	// HashWithSalt generates a hash for the given password with the specified salt
-	HashWithSalt(password, salt string) (string, error)
+	HashWithSalt(password string, salt []byte) (*types.HashParts, error)
 	// Verify checks if the given hashed password matches the plaintext password
-	Verify(parts *types.HashParts, password string) error
+	Verify(parts *types.HashParts, oldPassword string) error
 }

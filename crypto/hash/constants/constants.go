@@ -24,4 +24,5 @@ const (
 
 	ParamSeparator      = ","
 	ParamValueSeparator = ":"
+	CodecSeparator      = "$"
 )

@@ -7,11 +7,8 @@ package blake2
 import (
 	"testing"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
-
-var codec = codecPkg.NewCodec(types.Blake2b()) // Use Blake2b for testing codec
 
 func TestNewBlake2(t *testing.T) {
 	tests := []struct {
@@ -87,8 +84,11 @@ func TestCrypto_Hash(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Hash() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash == "" {
+			if !tt.wantErr && hash.Algorithm == "" {
 				t.Error("Hash() returned empty string")
+			}
+			if err := crypto.Verify(hash, tt.password); err != nil {
+				t.Errorf("Verify() error = %v", err)
 			}
 		})
 	}
@@ -128,7 +128,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HashWithSalt() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash == "" {
+			if !tt.wantErr && hash.Algorithm == "" {
 				t.Error("HashWithSalt() returned empty string")
 			}
 		})
@@ -178,18 +178,13 @@ func TestCrypto_Verify(t *testing.T) {
 				t.Fatalf("HashWithSalt() error = %v", err)
 			}
 
-			parts, err := codec.Decode(hashed)
-			if err != nil {
-				t.Fatalf("codec.Decode() error = %v", err)
-			}
-
 			// For wrong password test, change the password before verification
 			verifyPassword := tt.password
 			if tt.wantErr {
 				verifyPassword = "wrongpassword"
 			}
 
-			err = crypto.Verify(parts, verifyPassword)
+			err = crypto.Verify(hashed, verifyPassword)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Verify() error = %v, wantErr %v", err, tt.wantErr)
 			}

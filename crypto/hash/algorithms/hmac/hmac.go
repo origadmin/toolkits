@@ -9,7 +9,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -20,13 +19,13 @@ import (
 
 // HMAC implements the HMAC hashing algorithm
 type HMAC struct {
+	p        types.Type
 	config   *types.Config
-	codec    interfaces.Codec
 	hashHash stdhash.Hash
 }
 
 func (c *HMAC) Type() types.Type {
-	return c.codec.Type()
+	return c.p
 }
 
 type ConfigValidator struct {
@@ -49,7 +48,9 @@ func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, erro
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-
+	if p.Name == constants.HMAC && p.Underlying == "" {
+		p.Underlying = constants.SHA256
+	}
 	hashHash, err := types.AlgorithmTypeHash(p.Underlying)
 	if err != nil {
 		return nil, err
@@ -67,7 +68,6 @@ func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, erro
 
 	return &HMAC{
 		config:   config,
-		codec:    codec.NewCodec(p),
 		hashHash: hashHash,
 	}, nil
 }
@@ -79,29 +79,34 @@ func DefaultConfig() *types.Config {
 }
 
 // Hash implements the hash method
-func (c *HMAC) Hash(password string) (string, error) {
+func (c *HMAC) Hash(password string) (*types.HashParts, error) {
 	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return c.HashWithSalt(password, string(salt))
+	return c.HashWithSalt(password, salt)
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *HMAC) HashWithSalt(password, salt string) (string, error) {
-	h := hmac.New(c.hashHash.New, []byte(salt))
+func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	h := hmac.New(c.hashHash.New, salt)
 	h.Write([]byte(password))
 	hash := h.Sum(nil)
-	return c.codec.Encode([]byte(salt), hash, ""), nil
+	return types.NewHashParts(c.p, salt, hash), nil
 }
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	if constants.HMAC != parts.Algorithm.Name {
+	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
+	if err != nil {
+		return err
+	}
+
+	if constants.HMAC != algorithm.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.AlgorithmTypeHash(parts.Algorithm.Underlying)
+	hashHash, err := types.AlgorithmTypeHash(algorithm.Underlying)
 	if err != nil {
 		return err
 	}

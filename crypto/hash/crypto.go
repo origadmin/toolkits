@@ -12,9 +12,9 @@ import (
 )
 
 type Crypto interface {
-	Type() types.Type
 	Hash(password string) (string, error)
-	HashWithSalt(password, salt string) (string, error)
+	Salt() ([]byte, error)
+	HashWithSalt(password string, salt []byte) (string, error)
 	Verify(hashed, password string) error
 }
 
@@ -24,16 +24,28 @@ type crypto struct {
 	factory internalFactory
 }
 
-func (c *crypto) Type() types.Type {
-	return c.codec.Type()
+func (c *crypto) Salt() ([]byte, error) {
+	return c.crypto.Salt()
 }
 
 func (c *crypto) Hash(password string) (string, error) {
-	return c.crypto.Hash(password)
+	salt, err := c.crypto.Salt()
+	if err != nil {
+		return "", err
+	}
+	hashParts, err := c.crypto.HashWithSalt(password, salt)
+	if err != nil {
+		return "", err
+	}
+	return c.codec.Encode(hashParts)
 }
 
-func (c *crypto) HashWithSalt(password, salt string) (string, error) {
-	return c.crypto.HashWithSalt(password, salt)
+func (c *crypto) HashWithSalt(password string, salt []byte) (string, error) {
+	hashParts, err := c.crypto.HashWithSalt(password, salt)
+	if err != nil {
+		return "", err
+	}
+	return c.codec.Encode(hashParts)
 }
 
 func (c *crypto) Verify(hashed, password string) error {
@@ -52,16 +64,12 @@ func (c *crypto) Verify(hashed, password string) error {
 }
 
 // NewCrypto creates a new cryptographic instance
-func NewCrypto(alg string, opts ...types.Option) (Crypto, error) {
+func NewCrypto(cryptoType string, opts ...types.Option) (Crypto, error) {
 	factory := &algorithmFactory{
-		cryptos: make(map[types.Type]interfaces.Cryptographic),
-	}
-	algorithm, err := types.ParseAlgorithm(alg)
-	if err != nil {
-		return nil, err
+		cryptos: make(map[string]interfaces.Cryptographic),
 	}
 
-	cryptographic, err := factory.create(algorithm, opts...)
+	cryptographic, err := factory.create(cryptoType, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +77,7 @@ func NewCrypto(alg string, opts ...types.Option) (Crypto, error) {
 	// Create cryptographic instance
 	return &crypto{
 		crypto:  cryptographic,
-		codec:   codec.NewCodec(algorithm),
+		codec:   codec.NewCodec(),
 		factory: factory,
 	}, nil
 }

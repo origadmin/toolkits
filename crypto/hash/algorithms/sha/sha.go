@@ -8,7 +8,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -19,13 +18,13 @@ import (
 
 // SHA implements the SHA hashing algorithm
 type SHA struct {
+	p        types.Type
 	config   *types.Config
-	codec    interfaces.Codec
 	hashHash stdhash.Hash
 }
 
 func (c *SHA) Type() types.Type {
-	return c.codec.Type()
+	return c.p
 }
 
 type ConfigValidator struct {
@@ -47,14 +46,14 @@ func NewSHA(p types.Type, config *types.Config) (interfaces.Cryptographic, error
 	if err := validator.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
-	hashHash, err := stdhash.ParseHash(p.String())
+	hashHash, err := stdhash.ParseHash(p.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	return &SHA{
+		p:        p,
 		config:   config,
-		codec:    codec.NewCodec(p),
 		hashHash: hashHash,
 	}, nil
 }
@@ -125,29 +124,33 @@ func DefaultConfig() *types.Config {
 }
 
 // Hash implements the hash method
-func (c *SHA) Hash(password string) (string, error) {
+func (c *SHA) Hash(password string) (*types.HashParts, error) {
 	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return c.HashWithSalt(password, string(salt))
+	return c.HashWithSalt(password, salt)
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *SHA) HashWithSalt(password, salt string) (string, error) {
-	newHash := c.hashHash.New().Sum([]byte(password + salt))
-	return c.codec.Encode([]byte(salt), newHash[:]), nil
+func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	newHash := c.hashHash.New()
+	newHash.Write([]byte(password))
+	newHash.Write(salt)
+	return types.NewHashParts(c.p, salt, newHash.Sum(nil)), nil
 }
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	if !parts.Algorithm.Is(c.codec.Type()) {
-		return errors.ErrAlgorithmMismatch
+	hashHash, err := stdhash.ParseHash(parts.Algorithm)
+	if err != nil {
+		return err
 	}
-	newHash := c.hashHash.New().Sum([]byte(password + string(parts.Salt)))
-	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
+	newHash := hashHash.New()
+	newHash.Write([]byte(password))
+	newHash.Write(parts.Salt)
+	if subtle.ConstantTimeCompare(newHash.Sum(nil), parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}
-
 	return nil
 }

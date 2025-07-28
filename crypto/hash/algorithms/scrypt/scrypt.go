@@ -7,12 +7,9 @@ package scrypt
 import (
 	"crypto/subtle"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"golang.org/x/crypto/scrypt"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -22,13 +19,13 @@ import (
 
 // Scrypt implements the Scrypt hashing algorithm
 type Scrypt struct {
+	p      types.Type
 	params *Params
 	config *types.Config
-	codec  interfaces.Codec
 }
 
 func (c *Scrypt) Type() types.Type {
-	return c.codec.Type()
+	return c.p
 }
 
 type ConfigValidator struct {
@@ -77,19 +74,10 @@ func NewScrypt(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, fmt.Errorf("invalid scrypt config: %v", err)
 	}
 	return &Scrypt{
+		p:      types.Type{Name: constants.SCRYPT},
 		params: params,
 		config: config,
-		codec:  codec.NewCodec(types.Scrypt()),
 	}, nil
-}
-
-func DefaultParams() *Params {
-	return &Params{
-		N:      16384,
-		R:      8,
-		P:      1,
-		KeyLen: 32,
-	}
 }
 
 func DefaultConfig() *types.Config {
@@ -99,101 +87,22 @@ func DefaultConfig() *types.Config {
 	}
 }
 
-// Params represents parameters for Scrypt algorithm
-type Params struct {
-	N      int
-	R      int
-	P      int
-	KeyLen int
-}
-
-// parseParams parses Scrypt parameters from string
-func parseParams(params string) (*Params, error) {
-	result := &Params{}
-
-	// Handle empty string case
-	if params == "" {
-		return result, nil
-	}
-
-	kv, err := codec.ParseParams(params)
+// Hash implements the hash method
+func (c *Scrypt) Hash(password string) (*types.HashParts, error) {
+	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
 		return nil, err
-	}
-
-	// Parse N
-	if v, ok := kv["n"]; ok {
-		n, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid N: %v", err)
-		}
-		result.N = n
-	}
-
-	// Parse R
-	if v, ok := kv["r"]; ok {
-		r, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid R: %v", err)
-		}
-		result.R = r
-	}
-
-	// Parse P
-	if v, ok := kv["p"]; ok {
-		p, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid P: %v", err)
-		}
-		result.P = p
-	}
-
-	// Parse KeyLen
-	if v, ok := kv["k"]; ok {
-		keyLen, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid KeyLen: %v", err)
-		}
-		result.KeyLen = keyLen
-	}
-
-	return result, nil
-}
-
-// String returns the string representation of parameters
-func (p *Params) String() string {
-	var parts []string
-	if p.N > 0 {
-		parts = append(parts, fmt.Sprintf("n:%d", p.N))
-	}
-	if p.R > 0 {
-		parts = append(parts, fmt.Sprintf("r:%d", p.R))
-	}
-	if p.P > 0 {
-		parts = append(parts, fmt.Sprintf("p:%d", p.P))
-	}
-	if p.KeyLen > 0 {
-		parts = append(parts, fmt.Sprintf("k:%d", p.KeyLen))
-	}
-	return strings.Join(parts, ",")
-}
-
-// Hash implements the hash method
-func (c *Scrypt) Hash(password string) (string, error) {
-	salt, err := rand.RandomString(c.config.SaltLength)
-	if err != nil {
-		return "", err
 	}
 	return c.HashWithSalt(password, salt)
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *Scrypt) HashWithSalt(password, salt string) (string, error) {
-	hash, err := scrypt.Key([]byte(password), []byte(salt), c.params.N, c.params.R, c.params.P, c.params.KeyLen)
+func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	hash, err := scrypt.Key([]byte(password), salt, c.params.N, c.params.R, c.params.P, c.params.KeyLen)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return c.codec.Encode([]byte(salt), hash, c.params.String()), nil
+	return types.NewHashPartsWithParams(c.Type(), salt, hash, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method

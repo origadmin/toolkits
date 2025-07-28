@@ -7,6 +7,7 @@ package codec
 import (
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/goexts/generic/settings"
@@ -19,16 +20,7 @@ import (
 
 // Codec implements a generic hash codec
 type Codec struct {
-	algorithm types.Type
-	version   string
-}
-
-func (c *Codec) String() string {
-	return c.algorithm.String()
-}
-
-func (c *Codec) Type() types.Type {
-	return c.algorithm
+	version string
 }
 
 func (c *Codec) Version() string {
@@ -36,35 +28,39 @@ func (c *Codec) Version() string {
 }
 
 // Encode implements the core encoding method
-func (c *Codec) Encode(salt []byte, hash []byte, params ...string) string {
-	var paramStr string
-	if len(params) > 0 {
-		paramStr = params[0]
+func (c *Codec) Encode(parts *types.HashParts) (string, error) {
+	if parts.Version == "" {
+		parts.Version = c.version
 	}
 	return fmt.Sprintf(
 		"$%s$%s$%s$%s$%s",
-		c.algorithm.String(),
-		c.version,
-		paramStr,
-		hex.EncodeToString(hash),
-		hex.EncodeToString(salt),
-	)
+		parts.Algorithm,
+		parts.Version,
+		EncodeParams(parts.Params),
+		hex.EncodeToString(parts.Hash),
+		hex.EncodeToString(parts.Salt),
+	), nil
 }
 
 // Decode implements the core decoding method
 func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
-	parts := strings.Split(encoded, "$")
+	parts := strings.Split(encoded, constants.CodecSeparator)
 	if len(parts) != 6 {
 		return nil, errors.ErrInvalidHashFormat
 	}
 
-	algorithm, err := types.ParseAlgorithm(parts[1])
-	if err != nil {
-		return nil, fmt.Errorf("invalid algorithm: %v", err)
-	}
+	algorithm := parts[1]
 	version := parts[2]
-	params := parts[3]
 
+	// Add version checks
+	if version != c.version {
+		return nil, fmt.Errorf("unsupported codec version: %s, expected %s", version, c.version)
+	}
+	paramsStr := parts[3]
+	decodedParams, err := DecodeParams(paramsStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid params format: %v", err)
+	}
 	hash, err := hex.DecodeString(parts[4])
 	if err != nil {
 		return nil, fmt.Errorf("invalid hash: %v", err)
@@ -76,18 +72,17 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 	return &types.HashParts{
 		Algorithm: algorithm,
 		Version:   version,
-		Params:    params,
+		Params:    decodedParams,
 		Hash:      hash,
 		Salt:      salt,
 	}, nil
 }
 
 // NewCodec creates a new codec
-func NewCodec(algorithm types.Type, opts ...Option) interfaces.Codec {
+func NewCodec(opts ...Option) interfaces.Codec {
 	return settings.Apply(
 		&Codec{
-			algorithm: algorithm,
-			version:   constants.DefaultVersion,
+			version: constants.DefaultVersion,
 		}, opts)
 }
 
@@ -101,7 +96,7 @@ func WithVersion(version string) Option {
 	}
 }
 
-func ParseParams(params string) (map[string]string, error) {
+func DecodeParams(params string) (map[string]string, error) {
 	kv := make(map[string]string)
 	if params == "" {
 		return kv, nil
@@ -114,4 +109,24 @@ func ParseParams(params string) (map[string]string, error) {
 		kv[parts[0]] = parts[1]
 	}
 	return kv, nil
+}
+
+// EncodeParams encodes a map of parameters into a string.
+// It sorts the keys to ensure a consistent output string.
+func EncodeParams(params map[string]string) string {
+	if len(params) == 0 {
+		return ""
+	}
+
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var parts []string
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s%s%s", k, constants.ParamValueSeparator, params[k]))
+	}
+	return strings.Join(parts, constants.ParamSeparator)
 }
