@@ -27,13 +27,9 @@ var (
 // Argon2 implements the Argon2 hashing algorithm
 type Argon2 struct {
 	p       types.Type
-	params  *params
+	params  *Params
 	config  *types.Config
 	keyFunc func(password []byte, salt []byte, time uint32, memory uint32, threads uint8, keyLen uint32) []byte
-}
-
-func (c *Argon2) Salt() ([]byte, error) {
-	return rand.RandomBytes(c.config.SaltLength)
 }
 
 func (c *Argon2) Type() types.Type {
@@ -70,22 +66,14 @@ func NewArgon2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if config.ParamConfig == "" {
 		config.ParamConfig = DefaultParams().String()
 	}
-	//paramsMap, err := codecPkg.DecodeParams(config.ParamConfig)
-	//if err != nil {
-	//	return nil, fmt.Errorf("invalid argon2 param config: %v", err)
-	//}
-	//params, err := parseParams(paramsMap)
-	//if err != nil {
-	//	return nil, fmt.Errorf("invalid argon2 param config: %v", err)
-	//}
-	v := validator.WithParams(&params{})
+	v := validator.WithParams(&Params{})
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
 	keyFunc := KeyFunc(p)
 	p.Underlying = ""
 	if keyFunc == nil {
-		return nil, fmt.Errorf("unsupported argon2 type: %s", p.Name)
+		return nil, fmt.Errorf("unsupported argon2 type: %s", p.String())
 	}
 
 	return &Argon2{
@@ -125,19 +113,17 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm != c.p.Name {
-		return errors.ErrAlgorithmMismatch
-	}
 	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
 	if err != nil {
 		return err
 	}
 	keyFunc := KeyFunc(algorithm)
 	if keyFunc == nil {
-		return errors.ErrAlgorithmMismatch
+		return fmt.Errorf("unsupported argon2 type: %s", algorithm.String())
 	}
+
 	// Parse parameters
-	params, err := parseParams(parts.Params)
+	params, err := FromMap(parts.Params)
 	if err != nil {
 		return err
 	}

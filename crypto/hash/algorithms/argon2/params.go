@@ -9,15 +9,15 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// params represents parameters for Argon2 algorithm
-type params struct {
+// Params represents parameters for Argon2 algorithm
+type Params struct {
 	TimeCost   uint32
 	MemoryCost uint32
 	Threads    uint8
 	KeyLength  uint32
 }
 
-func (p *params) Validate(config *types.Config) error {
+func (p *Params) Validate(config *types.Config) error {
 	if config.SaltLength < 8 {
 		return fmt.Errorf("invalid salt length: %d, must be at least 8", config.SaltLength)
 	}
@@ -37,7 +37,7 @@ func (p *params) Validate(config *types.Config) error {
 	return nil
 }
 
-func (p *params) FromMap(params map[string]string) error {
+func (p *Params) FromMap(params map[string]string) error {
 	if params == nil {
 		return fmt.Errorf("params is nil")
 	}
@@ -80,55 +80,13 @@ func (p *params) FromMap(params map[string]string) error {
 	return nil
 }
 
-// parseParams parses Argon2 parameters from string
-func parseParams(m map[string]string) (p *params, err error) {
-	p = new(params)
-	// Parse time cost
-	if v, ok := m["t"]; ok {
-		timeCost, err := strconv.ParseUint(v, 10, 32)
-		if err != nil {
-			return p, fmt.Errorf("invalid time cost: %v", err)
-		}
-		p.TimeCost = uint32(timeCost)
-	}
-
-	// Parse memory cost
-	if v, ok := m["m"]; ok {
-		memoryCost, err := strconv.ParseUint(v, 10, 32)
-		if err != nil {
-			return p, fmt.Errorf("invalid memory cost: %v", err)
-		}
-		p.MemoryCost = uint32(memoryCost)
-	}
-
-	// Parse threads
-	if v, ok := m["p"]; ok {
-		threads, err := strconv.ParseUint(v, 10, 8)
-		if err != nil {
-			return p, fmt.Errorf("invalid threads: %v", err)
-		}
-		p.Threads = uint8(threads)
-	}
-
-	// Parse key length
-	if v, ok := m["k"]; ok {
-		keyLength, err := strconv.ParseUint(v, 10, 32)
-		if err != nil {
-			return p, fmt.Errorf("invalid key length: %v", err)
-		}
-		p.KeyLength = uint32(keyLength)
-	}
-
-	return p, nil
-}
-
 // String returns the string representation of parameters
-func (p *params) String() string {
+func (p *Params) String() string {
 	return codecPkg.EncodeParams(p.ToMap())
 }
 
-// ToMap converts params to a map[string]string
-func (p *params) ToMap() map[string]string {
+// ToMap converts Params to a map[string]string
+func (p *Params) ToMap() map[string]string {
 	params := make(map[string]string)
 	if p.TimeCost > 0 {
 		params["t"] = fmt.Sprintf("%d", p.TimeCost)
@@ -145,8 +103,17 @@ func (p *params) ToMap() map[string]string {
 	return params
 }
 
+// FromMap parses Argon2 parameters from string
+func FromMap(m map[string]string) (p *Params, err error) {
+	p = new(Params)
+	if err = p.FromMap(m); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func DefaultParams() types.Params {
-	return &params{
+	return &Params{
 		TimeCost:   constants.DefaultTimeCost,
 		MemoryCost: constants.DefaultMemoryCost,
 		Threads:    constants.DefaultThreads,

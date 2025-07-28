@@ -11,8 +11,6 @@ import (
 // Cryptographic defines the interface for cryptographic operations
 type Cryptographic interface {
 	Type() types.Type
-	// Salt generates a random salt
-	Salt() ([]byte, error)
 	// Hash generates a hash for the given password
 	Hash(password string) (*types.HashParts, error)
 	// HashWithSalt generates a hash for the given password with the specified salt

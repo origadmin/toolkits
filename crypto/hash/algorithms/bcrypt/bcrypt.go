@@ -10,13 +10,14 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // Bcrypt implements the Bcrypt hashing algorithm
 type Bcrypt struct {
-	params Params
+	params *Params
 	config *types.Config
 }
 
@@ -63,17 +64,16 @@ func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := ConfigValidator{
-		config: config,
-		params: DefaultParams(),
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
 	}
 
-	params, err := parseParams(config.ParamConfig)
-	if err != nil {
+	v := validator.WithParams(&Params{})
+	if err := v.Validate(config); err != nil {
 		return nil, err
 	}
 	return &Bcrypt{
-		params: params,
+		params: v.Params(),
 		config: config,
 	}, nil
 }
