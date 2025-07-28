@@ -15,6 +15,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -32,7 +33,7 @@ var hashFuncs = map[string]hashFunc{
 // Blake2 implements the BLAKE2 hashing algorithm
 type Blake2 struct {
 	p          types.Type
-	params     Params
+	params     *Params
 	config     *types.Config
 	hashFunc   func(key []byte) (hash.Hash, error)
 	outputSize int
@@ -86,9 +87,16 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 }
 
 func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	params, err := parseParams(config.ParamConfig)
-	if err != nil {
-		return nil, err
+	// Use default config if provided config is nil
+	if config == nil {
+		config = types.DefaultConfig()
+	}
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	v := validator.WithParams(&Params{})
+	if err := v.Validate(config); err != nil {
+		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
 	hashFunc, ok := hashFuncs[p.Name]
 	if !ok {
@@ -96,7 +104,7 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	}
 	return &Blake2{
 		p:        p,
-		params:   params,
+		params:   v.Params(),
 		config:   config,
 		hashFunc: hashFunc,
 	}, nil

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 const (
@@ -16,7 +17,28 @@ type Params struct {
 	Key []byte
 }
 
-func (p Params) String() string {
+func (p *Params) Validate(config *types.Config) error {
+	if config.SaltLength < 8 {
+		return fmt.Errorf("salt length must be at least 8 bytes")
+	}
+	if len(p.Key) < MinKeyLength || len(p.Key) > MaxKeyLength {
+		return fmt.Errorf("invalid key length: %d", len(p.Key))
+	}
+	return nil
+}
+
+func (p *Params) FromMap(params map[string]string) error {
+	if v, ok := params["k"]; ok {
+		key, err := base64.RawURLEncoding.DecodeString(v)
+		if err != nil {
+			return fmt.Errorf("invalid key: %w", err)
+		}
+		p.Key = key
+	}
+	return nil
+}
+
+func (p *Params) String() string {
 	paramsMap := make(map[string]string)
 	if len(p.Key) > 0 {
 		paramsMap["k"] = base64.RawURLEncoding.EncodeToString(p.Key)
@@ -24,23 +46,24 @@ func (p Params) String() string {
 	return codecPkg.EncodeParams(paramsMap)
 }
 
-func parseParams(paramsMap map[string]string) (result Params, err error) {
-	if v, ok := paramsMap["k"]; ok {
+func FromMap(m map[string]string) (params *Params, err error) {
+	params = &Params{}
+	if v, ok := m["k"]; ok {
 		key, err := base64.RawURLEncoding.DecodeString(v)
 		if err != nil {
-			return result, fmt.Errorf("invalid key: %w", err)
+			return nil, fmt.Errorf("invalid key: %w", err)
 		}
-		result.Key = key
+		params.Key = key
 	}
-	return result, nil
+	return params, nil
 }
 
-func DefaultParams() Params {
-	return Params{}
+func DefaultParams() types.Params {
+	return &Params{}
 }
 
 // ToMap converts Params to a map[string]string
-func (p Params) ToMap() map[string]string {
+func (p *Params) ToMap() map[string]string {
 	paramsMap := make(map[string]string)
 	if len(p.Key) > 0 {
 		paramsMap["k"] = base64.RawURLEncoding.EncodeToString(p.Key)

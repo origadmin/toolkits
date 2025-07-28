@@ -62,12 +62,12 @@ func (p *Params) ToMap() map[string]string {
 }
 
 // FromMap parses Argon2 parameters from string
-func FromMap(m map[string]string) (p *Params, err error) {
-	p = new(Params)
-	if err = p.FromMap(m); err != nil {
+func FromMap(m map[string]string) (params *Params, err error) {
+	params = &Params{}
+	if err = params.FromMap(m); err != nil {
 		return nil, err
 	}
-	return p, nil
+	return params, nil
 }
 
 func DefaultParams() types.Params {
