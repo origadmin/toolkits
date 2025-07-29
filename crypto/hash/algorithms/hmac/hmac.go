@@ -69,7 +69,7 @@ func NewHMAC(algType types.Type, config *types.Config) (interfaces.Cryptographic
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
+		SaltLength: 8,
 	}
 }
 

@@ -7,6 +7,7 @@ package hmac
 
 import (
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -15,6 +16,9 @@ type Params struct {
 }
 
 func (p *Params) Validate(config *types.Config) error {
+	if config.SaltLength < 8 {
+		return errors.ErrSaltLengthTooShort
+	}
 	return nil
 }
 

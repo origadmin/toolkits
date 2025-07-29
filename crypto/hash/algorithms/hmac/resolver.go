@@ -16,6 +16,15 @@ import (
 
 // ResolveType resolves the Type for HMAC, providing a default underlying hash if not specified.
 func ResolveType(p types.Type) (types.Type, error) {
+	if p.Name != constants.HMAC {
+		pp, err := types.ParseType(p.Name)
+		if err != nil {
+			return types.Type{}, err
+		}
+		p.Name = constants.HMAC
+		p.Underlying = pp.Underlying
+	}
+
 	if p.Underlying == "" {
 		p.Underlying = constants.SHA256 // Default to SHA256 for HMAC
 	}
