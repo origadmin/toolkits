@@ -35,7 +35,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC-SHA1",
-			algType:            types.NewType(constants.HMAC, constants.SHA1),
+			algType:            types.NewType(constants.HMAC_SHA1),
 			config:             DefaultConfig(),
 			expectedAlgName:    constants.HMAC,
 			expectedUnderlying: constants.SHA1,
@@ -44,7 +44,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC-SHA512",
-			algType:            types.NewType(constants.HMAC, constants.SHA512),
+			algType:            types.NewType(constants.HMAC_SHA512),
 			config:             DefaultConfig(),
 			expectedAlgName:    constants.HMAC,
 			expectedUnderlying: constants.SHA512,

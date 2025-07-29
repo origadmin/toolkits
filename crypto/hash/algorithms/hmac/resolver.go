@@ -7,6 +7,7 @@ package hmac
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
@@ -16,13 +17,15 @@ import (
 
 // ResolveType resolves the Type for HMAC, providing a default underlying hash if not specified.
 func ResolveType(p types.Type) (types.Type, error) {
-	if p.Name != constants.HMAC {
-		pp, err := types.ParseType(p.Name)
-		if err != nil {
-			return types.Type{}, err
-		}
+	// If the name is a composite HMAC type (e.g., "hmac-sha256"), parse it.
+	// This handles cases where types.NewType might not fully parse the composite name into Name and Underlying.
+	if strings.HasPrefix(p.Name, constants.HMAC_PREFIX) {
+		p.Underlying = strings.TrimPrefix(p.Name, constants.HMAC_PREFIX)
 		p.Name = constants.HMAC
-		p.Underlying = pp.Underlying
+	}
+
+	if p.Name != constants.HMAC {
+		return types.Type{}, fmt.Errorf("hmac: invalid algorithm name: %s", p.Name)
 	}
 
 	if p.Underlying == "" {
