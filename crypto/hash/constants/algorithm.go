@@ -27,8 +27,8 @@ const (
 
 // SHA512 Hashes
 const (
-	SHA512_224 = "sha512-224"
-	SHA512_256 = "sha512-256"
+	SHA512_224 = "sha512/224"
+	SHA512_256 = "sha512/256"
 )
 
 // BLAKE2 Hashes
@@ -89,4 +89,5 @@ const (
 	PBKDF2_SHA3_384 = PBKDF2 + "-" + SHA3_384
 	PBKDF2_SHA3_512 = PBKDF2 + "-" + SHA3_512
 	DEFAULT_PBKDF2  = PBKDF2_SHA256
+	PBKDF2_PREFIX   = PBKDF2 + "-"
 )

@@ -68,12 +68,12 @@ func TestNewHMAC(t *testing.T) {
 			wantErr:            true,
 		},
 		{
-			name:            "Invalid SaltLength",
-			algType:         types.NewType(constants.HMAC),
-			config:          &types.Config{SaltLength: 4}, // Less than 8
-			expectedAlgName: "",
+			name:               "Invalid SaltLength",
+			algType:            types.NewType(constants.HMAC),
+			config:             &types.Config{SaltLength: 4}, // Less than 8
+			expectedAlgName:    "",
 			expectedUnderlying: "",
-			wantErr:         true,
+			wantErr:            true,
 		},
 	}
 
@@ -125,13 +125,13 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			// Test Verify with incorrect password
 			err = hmac.Verify(hashedParts, "wrongpassword")
 			assert.Error(t, err)
-			assert.EqualError(t, err, "password not match")
+			assert.EqualError(t, err, "password does not match")
 
 			// Test Hash without salt (SaltLength 0) - should return error
 			cfg := DefaultConfig()
 			cfg.SaltLength = 0 // This should cause an error due to ConfigValidator
 			hmacNoSalt, err := NewHMAC(tt.algType, cfg)
-			assert.Error(t, err) // Expect an error here
+			assert.Error(t, err)      // Expect an error here
 			assert.Nil(t, hmacNoSalt) // Expect hmacNoSalt to be nil
 
 			// The following assertions are moved outside this block as hmacNoSalt will be nil
@@ -147,7 +147,7 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			// // Test Verify with incorrect password without salt
 			// err = hmacNoSalt.Verify(hashedPartsNoSalt, "wrongpassword")
 			// assert.Error(t, err)
-			// assert.EqualError(t, err, "password not match")
+			// assert.EqualError(t, err, "password does not match")
 		})
 	}
 }

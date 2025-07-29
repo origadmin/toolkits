@@ -16,26 +16,26 @@ import (
 )
 
 // ResolveType resolves the Type for HMAC, providing a default underlying hash if not specified.
-func ResolveType(p types.Type) (types.Type, error) {
+func ResolveType(algType types.Type) (types.Type, error) {
 	// If the name is a composite HMAC type (e.g., "hmac-sha256"), parse it.
 	// This handles cases where types.NewType might not fully parse the composite name into Name and Underlying.
-	if strings.HasPrefix(p.Name, constants.HMAC_PREFIX) {
-		p.Underlying = strings.TrimPrefix(p.Name, constants.HMAC_PREFIX)
-		p.Name = constants.HMAC
+	if strings.HasPrefix(algType.Name, constants.HMAC_PREFIX) {
+		algType.Underlying = strings.TrimPrefix(algType.Name, constants.HMAC_PREFIX)
+		algType.Name = constants.HMAC
 	}
 
-	if p.Name != constants.HMAC {
-		return types.Type{}, fmt.Errorf("hmac: invalid algorithm name: %s", p.Name)
+	if algType.Name != constants.HMAC {
+		return types.Type{}, fmt.Errorf("hmac: invalid algorithm name: %s", algType.Name)
 	}
 
-	if p.Underlying == "" {
-		p.Underlying = constants.SHA256 // Default to SHA256 for HMAC
+	if algType.Underlying == "" {
+		algType.Underlying = constants.SHA256 // Default to SHA256 for HMAC
 	}
 
 	// Validate the underlying hash algorithm
-	hashHash, err := stdhash.ParseHash(p.Underlying)
+	hashHash, err := stdhash.ParseHash(algType.Underlying)
 	if err != nil {
-		return types.Type{}, fmt.Errorf("unsupported underlying hash for HMAC: %s", p.Underlying)
+		return types.Type{}, fmt.Errorf("unsupported underlying hash for HMAC: %s", algType.Underlying)
 	}
 	// Explicitly check for unsuitable hash types for HMAC
 	// MAPHASH, ADLER32, CRC32, FNV are not cryptographically secure and should not be used with HMAC
@@ -47,5 +47,5 @@ func ResolveType(p types.Type) (types.Type, error) {
 	default:
 	}
 
-	return p, nil
+	return algType, nil
 }

@@ -11,7 +11,6 @@ import (
 	"hash"
 	"strings"
 
-	"github.com/goexts/generic"
 	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
@@ -25,10 +24,10 @@ import (
 
 // PBKDF2 implements the PBKDF2 hashing algorithm
 type PBKDF2 struct {
-	algType  types.Type
-	params   *Params
-	config   *types.Config
-	prf func() hash.Hash
+	algType types.Type
+	params  *Params
+	config  *types.Config
+	prf     func() hash.Hash
 }
 
 // Hash implements the hash method
@@ -113,7 +112,12 @@ func NewPBKDF2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid pbkdf2 config: %v", err)
 	}
-	algType = generic.Must(ResolveType(algType))
+
+	resolvedAlgType, err := ResolveType(algType)
+	if err != nil {
+		return nil, err
+	}
+	algType = resolvedAlgType
 
 	prf, err := getPRF(algType)
 	if err != nil {
@@ -121,10 +125,10 @@ func NewPBKDF2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	}
 
 	return &PBKDF2{
-		algType:  algType,
-		params:   v.Params(),
-		config:   config,
-		prf: prf,
+		algType: algType,
+		params:  v.Params(),
+		config:  config,
+		prf:     prf,
 	}, nil
 }
 

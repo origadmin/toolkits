@@ -7,8 +7,8 @@ package errors
 import "github.com/origadmin/toolkits/errors"
 
 var (
-	// ErrPasswordNotMatch error when password not match
-	ErrPasswordNotMatch = errors.String("password not match")
+	// ErrPasswordNotMatch error when password does not match
+	ErrPasswordNotMatch = errors.String("password does not match")
 	// ErrAlgorithmMismatch error when algorithm mismatch
 	ErrAlgorithmMismatch = errors.String("algorithm mismatch")
 	// ErrInvalidHashFormat error when invalid hash format
@@ -29,4 +29,8 @@ var (
 	ErrInvalidHash = errors.String("invalid hash string")
 	// ErrInvalidHashParts is returned when HashParts or its critical fields are invalid.
 	ErrInvalidHashParts = errors.String("invalid hash parts or missing hash/salt")
+	// ErrUnsupportedHashForPBKDF2 is returned when an unsupported hash type is used for PBKDF2.
+	ErrUnsupportedHashForPBKDF2 = errors.String("unsupported hash type for PBKDF2")
+	// ErrKeyLengthTooShort is returned when the key length is too short.
+	ErrKeyLengthTooShort = errors.String("key length must be at least 8 bytes")
 )

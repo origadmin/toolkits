@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -15,11 +16,14 @@ type Params struct {
 }
 
 func (p *Params) Validate(config *types.Config) error {
+	if config.SaltLength < 8 {
+		return errors.ErrSaltLengthTooShort
+	}
 	if p.Iterations < 1000 {
-		return fmt.Errorf("iterations must be at least 1000")
+		return errors.ErrCostOutOfRange
 	}
 	if p.KeyLength < 8 {
-		return fmt.Errorf("key length must be at least 8 bytes")
+		return errors.ErrKeyLengthTooShort
 	}
 	return nil
 }

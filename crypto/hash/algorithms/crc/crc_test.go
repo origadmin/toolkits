@@ -80,7 +80,7 @@ func TestCRCHashAndVerify(t *testing.T) {
 			// Test Verify with incorrect password
 			err = crc.Verify(hashedParts, "wrongpassword")
 			assert.Error(t, err)
-			assert.EqualError(t, err, "password not match")
+			assert.EqualError(t, err, "password does not match")
 
 			// Test Hash without salt (SaltLength 0)
 			cfg := DefaultConfig()
@@ -101,7 +101,7 @@ func TestCRCHashAndVerify(t *testing.T) {
 			// Test Verify with incorrect password without salt
 			err = crcNoSalt.Verify(hashedPartsNoSalt, "wrongpassword")
 			assert.Error(t, err)
-			assert.EqualError(t, err, "password not match")
+			assert.EqualError(t, err, "password does not match")
 		})
 	}
 }
@@ -125,5 +125,5 @@ func TestCRCHashWithSaltEmpty(t *testing.T) {
 
 	err = crc.Verify(hashedParts, "wrongpassword")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "password not match")
+	assert.EqualError(t, err, "password does not match")
 }

@@ -6,9 +6,9 @@ package ripemd160
 
 import (
 	"crypto/subtle"
-	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -52,7 +52,7 @@ func (r *RIPEMD160) Verify(parts *types.HashParts, password string) error {
 	newHash := h.Sum(nil)
 
 	if subtle.ConstantTimeCompare(newHash, parts.Hash) != 1 {
-		return fmt.Errorf("ripemd160: password does not match hash")
+		return errors.ErrPasswordNotMatch
 	}
 	return nil
 }
@@ -63,6 +63,13 @@ func (r *RIPEMD160) Type() types.Type {
 
 // NewRIPEMD160 creates a new RIPEMD-160 crypto instance
 func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
+	if config == nil {
+		config = DefaultConfig()
+	}
+	if config.SaltLength < 8 {
+		return nil, errors.ErrSaltLengthTooShort
+	}
+
 	hashHash, err := stdhash.ParseHash(ripemd160Type.Name)
 	if err != nil {
 		return nil, err
@@ -76,5 +83,7 @@ func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
 
 // DefaultConfig returns the default configuration for RIPEMD-160
 func DefaultConfig() *types.Config {
-	return &types.Config{}
+	return &types.Config{
+		SaltLength: 16,
+	}
 }
