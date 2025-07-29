@@ -25,6 +25,12 @@ const (
 	SHA3_512_256 = "sha3-512-256"
 )
 
+// SHA512 Hashes
+const (
+	SHA512_224 = "sha512-224"
+	SHA512_256 = "sha512-256"
+)
+
 // BLAKE2 Hashes
 const (
 	BLAKE2s_128     = "blake2s-128"

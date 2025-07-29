@@ -8,6 +8,7 @@ import (
 	"crypto/subtle"
 	"fmt"
 
+	"github.com/goexts/generic"
 	"golang.org/x/crypto/argon2"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
@@ -18,22 +19,24 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-var (
-	TypeArgon2 = types.Type{
-		Name: constants.ARGON2,
-	}
-)
+type KeyFunc func(password []byte, salt []byte, time uint32, memory uint32, threads uint8, keyLen uint32) []byte
 
 // Argon2 implements the Argon2 hashing algorithm
 type Argon2 struct {
 	p       types.Type
 	params  *Params
 	config  *types.Config
-	keyFunc func(password []byte, salt []byte, time uint32, memory uint32, threads uint8, keyLen uint32) []byte
+	keyFunc KeyFunc
 }
 
+var (
+	argon2Type = types.Type{Name: constants.ARGON2}
+	argon2i    = types.Type{Name: constants.ARGON2i}
+	argon2id   = types.Type{Name: constants.ARGON2id}
+)
+
 func (c *Argon2) Type() types.Type {
-	return TypeArgon2
+	return c.p
 }
 
 // DefaultConfig returns the default configuration for Argon2
@@ -50,38 +53,6 @@ func ConfigValidator(config *types.Config) error {
 		return errors.ErrSaltLengthTooShort
 	}
 	return nil
-}
-
-func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewArgon2(TypeArgon2, config)
-}
-
-// NewArgon2 creates a new Argon2 crypto instance
-func NewArgon2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	// Use default config if provided config is nil
-	if config == nil {
-		config = DefaultConfig()
-	}
-
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
-		return nil, fmt.Errorf("invalid argon2 config: %v", err)
-	}
-	keyFunc := KeyFunc(p)
-	p.Underlying = ""
-	if keyFunc == nil {
-		return nil, fmt.Errorf("unsupported argon2 type: %s", p.String())
-	}
-
-	return &Argon2{
-		p:       p,
-		params:  v.Params(),
-		keyFunc: keyFunc,
-		config:  config,
-	}, nil
 }
 
 // Hash implements the hash method
@@ -113,11 +84,11 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
+	algorithm, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	keyFunc := KeyFunc(algorithm)
+	keyFunc := ParseKeyFunc(algorithm)
 	if keyFunc == nil {
 		return fmt.Errorf("unsupported argon2 type: %s", algorithm.String())
 	}
@@ -143,13 +114,54 @@ func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func KeyFunc(p types.Type) func(password []byte, salt []byte, time uint32, memory uint32, threads uint8, keyLen uint32) []byte {
+func ParseKeyFunc(p types.Type) KeyFunc {
 	switch p.Name {
-	case constants.ARGON2, constants.ARGON2id:
+	case constants.ARGON2id:
 		return argon2.IDKey
 	case constants.ARGON2i:
 		return argon2.Key
 	default:
 		return nil
 	}
+}
+
+func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
+	return NewArgon2(argon2Type, config)
+}
+
+// NewArgon2 creates a new Argon2 crypto instance
+func NewArgon2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+	// Use default config if provided config is nil
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	if config.ParamConfig == "" {
+		config.ParamConfig = DefaultParams().String()
+	}
+	v := validator.WithParams(&Params{})
+	if err := v.Validate(config); err != nil {
+		return nil, fmt.Errorf("invalid argon2 config: %v", err)
+	}
+	p = generic.Must(ResolveType(p))
+	keyFunc := ParseKeyFunc(p)
+	p.Underlying = ""
+	if keyFunc == nil {
+		return nil, fmt.Errorf("unsupported argon2 type: %s", p.String())
+	}
+
+	return &Argon2{
+		p:       p,
+		params:  v.Params(),
+		keyFunc: keyFunc,
+		config:  config,
+	}, nil
+}
+
+func NewArgon2i(cfg *types.Config) (interfaces.Cryptographic, error) {
+	return NewArgon2(argon2i, cfg)
+}
+
+func NewArgon2id(cfg *types.Config) (interfaces.Cryptographic, error) {
+	return NewArgon2(argon2id, cfg)
 }

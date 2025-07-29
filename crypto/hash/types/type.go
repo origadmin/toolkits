@@ -8,9 +8,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 )
+
+// AlgorithmResolver defines an interface for resolving and normalizing algorithm types.
+type AlgorithmResolver interface {
+	ResolveType(t Type) (Type, error)
+}
 
 // Type represents a structured hash algorithm definition.
 // It separates the main algorithm from its underlying hash function,
@@ -41,86 +45,41 @@ func (t Type) Is(t2 Type) bool {
 	return t.Name == t2.Name && t.Underlying == t2.Underlying
 }
 
-// ParseAlgorithm parses an algorithm string into its structured Type.
+// ParseType parses an algorithm string into its structured Type.
 // It handles common aliases and composite algorithm formats.
-func ParseAlgorithm(typedAlgorithm string) (Type, error) {
-	typedAlgorithm = strings.ToLower(typedAlgorithm)
+func ParseType(algorithm string) (Type, error) {
+	algorithm = strings.ToLower(algorithm)
 
-	parts := strings.SplitN(typedAlgorithm, "-", 2)
+	parts := strings.SplitN(algorithm, "-", 2)
+	var t Type
 	if len(parts) == 2 {
 		// This is a composite algorithm like "hmac-sha256" or "pbkdf2-sha512"
-		return Type{Name: parts[0], Underlying: parts[1]}, nil
+		t = Type{Name: parts[0], Underlying: parts[1]}
+	} else {
+		// This is a simple algorithm like "sha256"
+		t = Type{Name: algorithm}
 	}
 
-	// This is a simple algorithm like "sha256"
-	return Type{Name: typedAlgorithm}, nil
+	// If no specific resolver is registered, return the parsed type as is.
+	return t, nil
 }
 
-// AlgorithmTypeHash is a helper function that might need to be refactored
+// NewType creates a new Type instance with the specified name and underlying hash.
+func NewType(name string, underlying ...string) Type {
+	t := Type{Name: name}
+	if len(underlying) > 0 {
+		t.Underlying = underlying[0]
+	}
+	return t
+}
+
+// TypeHash is a helper function that might need to be refactored
 // depending on how stdhash.ParseHash is updated to handle the new Type struct.
 // For now, it assumes subAlg is a simple string.
-func AlgorithmTypeHash(subAlg string) (stdhash.Hash, error) {
+func TypeHash(subAlg string) (stdhash.Hash, error) {
 	h, err := stdhash.ParseHash(subAlg)
 	if err != nil {
 		return 0, fmt.Errorf("unsupported hash type: %s", subAlg)
 	}
 	return h, nil
-}
-
-func Argon2() Type {
-	return Type{Name: "argon2"}
-}
-
-func Bcrypt() Type {
-	return Type{Name: "bcrypt"}
-}
-
-func Blake2b() Type {
-	return Type{Name: "blake2b"}
-}
-
-func Blake2s() Type {
-	return Type{Name: "blake2s"}
-}
-
-func Scrypt() Type {
-	return Type{Name: constants.SCRYPT}
-}
-
-func NewHashParts(p Type, salt []byte, hash []byte) *HashParts {
-	return &HashParts{
-		Algorithm: p.String(),
-		Salt:      []byte(salt),
-		Hash:      hash,
-		Params:    map[string]string{},
-	}
-}
-
-func NewHashPartsWithParams(p Type, salt []byte, hash []byte, params map[string]string) *HashParts {
-	return &HashParts{
-		Algorithm: p.String(),
-		Salt:      []byte(salt),
-		Hash:      hash,
-		Params:    params,
-	}
-}
-
-func NewHashPartsFromUnderlying(name string, underlying string, salt []byte, hash []byte, ) *HashParts {
-	t := Type{Name: name, Underlying: underlying}
-	return &HashParts{
-		Algorithm: t.String(),
-		Salt:      salt,
-		Hash:      hash,
-		Params:    map[string]string{},
-	}
-}
-
-func NewHashPartsWithParamsFromUnderlying(name string, underlying string, salt []byte, hash []byte, params map[string]string) *HashParts {
-	t := Type{Name: name, Underlying: underlying}
-	return &HashParts{
-		Algorithm: t.String(),
-		Salt:      salt,
-		Hash:      hash,
-		Params:    params,
-	}
 }

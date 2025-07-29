@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"hash"
 
+	"github.com/goexts/generic"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 
@@ -21,6 +22,14 @@ import (
 )
 
 type hashFunc func(key []byte) (hash.Hash, error)
+
+var (
+	blake2b512Type = types.Type{Name: constants.BLAKE2b_512}
+	blake2b384Type = types.Type{Name: constants.BLAKE2b_384}
+	blake2b256Type = types.Type{Name: constants.BLAKE2b_256}
+	blake2s256Type = types.Type{Name: constants.BLAKE2s_256}
+	blake2s128Type = types.Type{Name: constants.BLAKE2s_128}
+)
 
 var hashFuncs = map[string]hashFunc{
 	constants.BLAKE2b_512: blake2b.New512,
@@ -98,24 +107,10 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	switch p.Name {
-	case constants.BLAKE2b:
-		if p.Underlying == "" {
-			p.Name = constants.BLAKE2b_512
-		} else {
-			p.Name = p.String()
-		}
-	case constants.BLAKE2s:
-		if p.Underlying == "" {
-			p.Name = constants.BLAKE2s_256
-		} else {
-			p.Name = p.String()
-		}
-	}
-
-	hashFunc, ok := hashFuncs[p.String()]
+	p = generic.Must(ResolveType(p))
+	hashFunc, ok := hashFuncs[p.Name]
 	if !ok {
-		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", p.String())
+		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", p.Name)
 	}
 	return &Blake2{
 		p:        p,
@@ -127,43 +122,25 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 
 // NewBlake2b256 creates a new BLAKE2b crypto instance
 func NewBlake2b256(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(types.Type{Name: constants.BLAKE2b_256}, config)
+	return NewBlake2(blake2b256Type, config)
 }
 
 // NewBlake2b384 creates a new BLAKE2b crypto instance
 func NewBlake2b384(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(types.Type{Name: constants.BLAKE2b_384}, config)
+	return NewBlake2(blake2b384Type, config)
 }
 
 // NewBlake2b512 creates a new BLAKE2b crypto instance
 func NewBlake2b512(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(types.Type{Name: constants.BLAKE2b_512}, config)
+	return NewBlake2(blake2b512Type, config)
 }
 
 // NewBlake2s128 creates a new BLAKE2s crypto instance
 func NewBlake2s128(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(types.Type{Name: constants.BLAKE2s_128}, config)
+	return NewBlake2(blake2s128Type, config)
 }
 
 // NewBlake2s256 creates a new BLAKE2s crypto instance
 func NewBlake2s256(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewBlake2(types.Type{Name: constants.BLAKE2s_256}, config)
-}
-
-func fixType(p types.Type) types.Type {
-	switch p.Name {
-	case constants.BLAKE2b:
-		if p.Underlying == "" {
-			p.Name = constants.BLAKE2b_512
-		} else {
-			p.Name = p.String()
-		}
-	case constants.BLAKE2s:
-		if p.Underlying == "" {
-			p.Name = constants.BLAKE2s_256
-		} else {
-			p.Name = p.String()
-		}
-	}
-	return p
+	return NewBlake2(blake2s256Type, config)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -23,6 +24,8 @@ type HMAC struct {
 	config   *types.Config
 	hashHash stdhash.Hash
 }
+
+var hmacType = types.Type{Name: constants.HMAC, Underlying: constants.SHA256}
 
 func (c *HMAC) Type() types.Type {
 	return c.p
@@ -44,26 +47,17 @@ func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, erro
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
-	if err := validator.Validate(config); err != nil {
+	v := validator.WithParams(&Params{})
+	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-	if p.Name == constants.HMAC && p.Underlying == "" {
-		p.Underlying = constants.SHA256
-	}
-	hashHash, err := types.AlgorithmTypeHash(p.Underlying)
+	p, err := ResolveType(p)
 	if err != nil {
 		return nil, err
 	}
-
-	// Explicitly check for unsuitable hash types for HMAC
-	// MAPHASH, ADLER32, CRC32, FNV are not cryptographically secure and should not be used with HMAC
-	switch hashHash {
-	case stdhash.MAPHASH, stdhash.ADLER32, stdhash.CRC32, stdhash.CRC32_ISO, stdhash.CRC32_CAST, stdhash.CRC32_KOOP,
-		stdhash.CRC64_ISO, stdhash.CRC64_ECMA, stdhash.FNV32, stdhash.FNV32A, stdhash.FNV64, stdhash.FNV64A,
-		stdhash.FNV128, stdhash.FNV128A:
-		return nil, errors.ErrUnsupportedHashForHMAC
-	default:
+	hashHash, err := types.TypeHash(p.Underlying)
+	if err != nil {
+		return nil, err
 	}
 
 	return &HMAC{
@@ -97,21 +91,30 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
+	algorithm, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-
+	algorithm, err = ResolveType(algorithm)
+	if err != nil {
+		return err
+	}
 	if constants.HMAC != algorithm.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.AlgorithmTypeHash(algorithm.Underlying)
+	hashHash, err := types.TypeHash(algorithm.Underlying)
 	if err != nil {
 		return err
 	}
-	if hashHash == stdhash.MAPHASH {
+	// Explicitly check for unsuitable hash types for HMAC
+	// MAPHASH, ADLER32, CRC32, FNV are not cryptographically secure and should not be used with HMAC
+	switch hashHash {
+	case stdhash.MAPHASH, stdhash.ADLER32, stdhash.CRC32, stdhash.CRC32_ISO, stdhash.CRC32_CAST, stdhash.CRC32_KOOP,
+		stdhash.CRC64_ISO, stdhash.CRC64_ECMA, stdhash.FNV32, stdhash.FNV32A, stdhash.FNV64, stdhash.FNV64A,
+		stdhash.FNV128, stdhash.FNV128A:
 		return errors.ErrUnsupportedHashForHMAC
+	default:
 	}
 	h := hmac.New(hashHash.New, parts.Salt)
 	h.Write([]byte(password))

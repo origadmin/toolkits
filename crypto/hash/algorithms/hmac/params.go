@@ -6,29 +6,34 @@
 package hmac
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/codec"
+	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 // Params represents parameters for Argon2 algorithm
 type Params struct {
-	Type string `json:"type"`
 }
 
-// parseParams parses Argon2 parameters from string
-func parseParams(paramsMap map[string]string) (result Params, err error) {
-	// Parse time cost
-	if v, ok := paramsMap["t"]; ok {
-		result.Type = v
-	}
+func (p *Params) Validate(config *types.Config) error {
+	return nil
+}
 
-	return result, nil
+func (p *Params) ToMap() map[string]string {
+	m := make(map[string]string)
+	return m
+}
+
+func (p *Params) FromMap(params map[string]string) error {
+	return nil
 }
 
 // String returns the string representation of parameters
-func (p Params) String() string {
-	paramsMap := make(map[string]string)
-	if p.Type != "" {
-		paramsMap["t"] = p.Type
-	}
-	return codec.EncodeParams(paramsMap)
+func (p *Params) String() string {
+	return codecPkg.EncodeParams(p.ToMap())
+}
+
+// FromMap parses Argon2 parameters from string
+func FromMap(m map[string]string) (params *Params, err error) {
+	params = &Params{}
+	return params, nil
 }

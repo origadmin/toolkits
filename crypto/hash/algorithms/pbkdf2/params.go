@@ -5,74 +5,92 @@ import (
 	"strconv"
 
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
-	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 // Params represents parameters for PBKDF2 algorithm
 type Params struct {
 	Iterations int
 	KeyLength  uint32
-	HashType   string
+}
+
+func (p *Params) Validate(config *types.Config) error {
+	if p.Iterations < 1000 {
+		return fmt.Errorf("iterations must be at least 1000")
+	}
+	if p.KeyLength < 8 {
+		return fmt.Errorf("key length must be at least 8 bytes")
+	}
+	return nil
+}
+
+func (p *Params) FromMap(params map[string]string) error {
+	// Parse iterations
+	if v, ok := params["i"]; ok {
+		iterations, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("invalid iterations: %v", err)
+		}
+		p.Iterations = iterations
+	}
+
+	// Parse key length
+	if v, ok := params["k"]; ok {
+		keyLength, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("invalid key length: %v", err)
+		}
+		p.KeyLength = uint32(keyLength)
+	}
+
+	return nil
 }
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	paramsMap := p.ToMap()
-	return codecPkg.EncodeParams(paramsMap)
+	return codecPkg.EncodeParams(p.ToMap())
 }
 
 // ToMap converts Params to a map[string]string
 func (p *Params) ToMap() map[string]string {
-	paramsMap := make(map[string]string)
+	m := make(map[string]string)
 	if p.Iterations > 0 {
-		paramsMap["i"] = fmt.Sprintf("%d", p.Iterations)
+		m["i"] = fmt.Sprintf("%d", p.Iterations)
 	}
 	if p.KeyLength > 0 {
-		paramsMap["k"] = fmt.Sprintf("%d", p.KeyLength)
+		m["k"] = fmt.Sprintf("%d", p.KeyLength)
 	}
-	if p.HashType != "" {
-		paramsMap["h"] = p.HashType
-	}
-	return paramsMap
+	return m
 }
 
-// parseParams parses PBKDF2 parameters from a map[string]string.
-func parseParams(paramsMap map[string]string) (*Params, error) {
-	result := &Params{}
+// FromMap parses PBKDF2 parameters from a map[string]string.
+func FromMap(m map[string]string) (params *Params, err error) {
+	params = &Params{}
 
 	// Parse iterations
-	if v, ok := paramsMap["i"]; ok {
+	if v, ok := m["i"]; ok {
 		iterations, err := strconv.Atoi(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid iterations: %v", err)
 		}
-		result.Iterations = iterations
+		params.Iterations = iterations
 	}
 
 	// Parse key length
-	if v, ok := paramsMap["k"]; ok {
+	if v, ok := m["k"]; ok {
 		keyLength, err := strconv.Atoi(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid key length: %v", err)
 		}
-		result.KeyLength = uint32(keyLength)
+		params.KeyLength = uint32(keyLength)
 	}
 
-	// Parse hash type
-	if v, ok := paramsMap["h"]; ok {
-		_, err := stdhash.ParseHash(v)
-		if err == nil {
-			result.HashType = v
-		}
-	}
-
-	return result, nil
+	return params, nil
 }
 
 func DefaultParams() *Params {
 	return &Params{
 		Iterations: 10000,
 		KeyLength:  32,
-		HashType:   stdhash.SHA256.String(),
 	}
 }

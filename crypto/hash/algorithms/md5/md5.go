@@ -9,26 +9,31 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-// MD5 implements the MD5 hashing algorithm
-type MD5 struct {
-	config *types.Config
-	codec  interfaces.Codec
-}
-
-func (c *MD5) Type() types.Type {
-	return types.Type{Name: constants.MD5}
-}
+var md5Type = types.NewType(constants.MD5)
 
 type ConfigValidator struct {
 	SaltLength int
+}
+
+func (v ConfigValidator) String() string {
+	return ""
+}
+
+func (v ConfigValidator) ToMap() map[string]string {
+	return map[string]string{}
+}
+
+func (v ConfigValidator) FromMap(params map[string]string) error {
+	return nil
 }
 
 func (v ConfigValidator) Validate(config *types.Config) error {
@@ -38,18 +43,34 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 	return nil
 }
 
+// MD5 implements the MD5 hashing algorithm
+type MD5 struct {
+	config   *types.Config
+	hashHash stdhash.Hash
+}
+
+func (c *MD5) Type() types.Type {
+	return md5Type
+}
+
 // NewMD5 creates a new MD5 crypto instance
 func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	validator := &ConfigValidator{}
-	if err := validator.Validate(config); err != nil {
+	v := validator.WithParams(&ConfigValidator{})
+	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
+
+	hashHash, err := types.TypeHash(md5Type.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	return &MD5{
-		config: config,
-		codec:  codec.NewCodec(types.Type{Name: constants.MD5}),
+		config:   config,
+		hashHash: hashHash,
 	}, nil
 }
 
@@ -60,28 +81,45 @@ func DefaultConfig() *types.Config {
 }
 
 // Hash implements the hash method
-func (c *MD5) Hash(password string) (string, error) {
+func (c *MD5) Hash(password string) (*types.HashParts, error) {
 	salt, err := rand.RandomBytes(c.config.SaltLength)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return c.HashWithSalt(password, string(salt))
+	return c.HashWithSalt(password, salt)
 }
 
 // HashWithSalt implements the hash with salt method
-func (c *MD5) HashWithSalt(password, salt string) (string, error) {
-	hash := md5.Sum([]byte(password + salt))
-	return c.codec.Encode([]byte(salt), hash[:]), nil
+func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	hash := c.hashHash.New()
+	hash.Write([]byte(password))
+	hash.Write(salt)
+	hashBytes := md5.Sum(nil)
+	return &types.HashParts{
+		Algorithm: constants.MD5,
+		Version:   "1.0",
+		Params:    map[string]string{},
+		Hash:      hashBytes[:],
+		Salt:      salt,
+	}, nil
 }
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.Name != constants.MD5 {
+	algorithm, err := types.ParseType(parts.Algorithm)
+	if err != nil {
+		return err
+	}
+
+	if algorithm.Name != constants.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	newHash := md5.Sum([]byte(password + string(parts.Salt)))
-	if subtle.ConstantTimeCompare(newHash[:], parts.Hash) != 1 {
+	hash := c.hashHash.New()
+	hash.Write([]byte(password))
+	hash.Write(parts.Salt)
+	hashBytes := md5.Sum(nil)
+	if subtle.ConstantTimeCompare(hashBytes[:], parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}
 	return nil

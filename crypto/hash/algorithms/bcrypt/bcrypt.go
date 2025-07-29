@@ -21,8 +21,10 @@ type Bcrypt struct {
 	config *types.Config
 }
 
+var bcryptType = types.Type{Name: constants.BCRYPT}
+
 func (c *Bcrypt) Type() types.Type {
-	return types.Type{Name: constants.BCRYPT}
+	return bcryptType
 }
 
 // Hash implements the hash method
@@ -46,7 +48,7 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseAlgorithm(parts.Algorithm)
+	algorithm, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}

@@ -12,8 +12,8 @@ import (
 )
 
 type Crypto interface {
+	Type() types.Type
 	Hash(password string) (string, error)
-	Salt() ([]byte, error)
 	HashWithSalt(password string, salt []byte) (string, error)
 	Verify(hashed, password string) error
 }
@@ -24,16 +24,12 @@ type crypto struct {
 	factory internalFactory
 }
 
-func (c *crypto) Salt() ([]byte, error) {
-	return c.crypto.Salt()
+func (c *crypto) Type() types.Type {
+	return c.crypto.Type()
 }
 
 func (c *crypto) Hash(password string) (string, error) {
-	salt, err := c.crypto.Salt()
-	if err != nil {
-		return "", err
-	}
-	hashParts, err := c.crypto.HashWithSalt(password, salt)
+	hashParts, err := c.crypto.Hash(password)
 	if err != nil {
 		return "", err
 	}

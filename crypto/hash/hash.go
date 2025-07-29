@@ -37,7 +37,7 @@ func (u *uninitializedCrypto) Hash(password string) (string, error) {
 	return "", ErrHashModuleNotInitialized
 }
 
-func (u *uninitializedCrypto) HashWithSalt(password, salt string) (string, error) {
+func (u *uninitializedCrypto) HashWithSalt(password string, salt []byte) (string, error) {
 	return "", ErrHashModuleNotInitialized
 }
 
@@ -51,12 +51,12 @@ func init() {
 		algStr = constants.DefaultType
 	}
 
-	// 尝试使用确定的算法类型创建加密实例
+	// Try to create an encryption instance with the defined algorithm type
 	crypto, err := NewCrypto(algStr)
 	if err != nil {
 		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
-		// 如果创建失败，则设置为未初始化状态，防止后续操作 panic
-		activeCrypto = &uninitializedCrypto{}
+		// If the hash module fails to initialize, use a no-op implementation
+		activeCrypto = &noop{}
 	} else {
 		activeCrypto = crypto
 	}
@@ -67,7 +67,7 @@ func UseCrypto(t string, opts ...types.Option) error {
 	if t == "" {
 		return errors.ErrInvalidAlgorithm
 	}
-	algType, err := types.ParseAlgorithm(t)
+	algType, err := types.ParseType(t)
 	if err != nil {
 		return err
 	}

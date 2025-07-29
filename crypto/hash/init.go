@@ -42,6 +42,14 @@ var (
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
 		},
+		constants.ARGON2i: {
+			creator:       wrapCreator(argon2.NewArgon2i),
+			defaultConfig: argon2.DefaultConfig,
+		},
+		constants.ARGON2id: {
+			creator:       wrapCreator(argon2.NewArgon2id),
+			defaultConfig: argon2.DefaultConfig,
+		},
 		constants.BCRYPT: {
 			creator:       wrapCreator(bcrypt.NewBcrypt),
 			defaultConfig: bcrypt.DefaultConfig,
@@ -84,6 +92,10 @@ var (
 		},
 		constants.SHA3_256: {
 			creator:       wrapCreator(sha.NewSha3256),
+			defaultConfig: sha.DefaultConfig,
+		},
+		constants.SHA3_384: {
+			creator:       wrapCreator(sha.NewSha3384),
 			defaultConfig: sha.DefaultConfig,
 		},
 		constants.SHA384: {

@@ -39,12 +39,17 @@ func (p *Params) FromMap(params map[string]string) error {
 	return nil
 }
 
-func (p *Params) String() string {
+// ToMap converts Params to a map[string]string
+func (p *Params) ToMap() map[string]string {
 	m := make(map[string]string)
 	if len(p.Key) > 0 {
 		m["k"] = base64.RawURLEncoding.EncodeToString(p.Key)
 	}
-	return codecPkg.EncodeParams(m)
+	return m
+}
+
+func (p *Params) String() string {
+	return codecPkg.EncodeParams(p.ToMap())
 }
 
 func FromMap(m map[string]string) (params *Params, err error) {
@@ -61,13 +66,4 @@ func FromMap(m map[string]string) (params *Params, err error) {
 
 func DefaultParams() interfaces.Params {
 	return &Params{}
-}
-
-// ToMap converts Params to a map[string]string
-func (p *Params) ToMap() map[string]string {
-	m := make(map[string]string)
-	if len(p.Key) > 0 {
-		m["k"] = base64.RawURLEncoding.EncodeToString(p.Key)
-	}
-	return m
 }

@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 // Params represents parameters for Scrypt algorithm
@@ -15,55 +17,100 @@ type Params struct {
 	KeyLen int
 }
 
-// parseParams parses Scrypt parameters from a map[string]string.
-func parseParams(paramsMap map[string]string) (*Params, error) {
-	result := &Params{}
+func (p *Params) Validate(config *types.Config) error {
+	if config.SaltLength < 8 {
+		return errors.ErrSaltLengthTooShort
+	}
+	// N must be > 1 and a power of 2
+	if p.N <= 1 || p.N&(p.N-1) != 0 {
+		return fmt.Errorf("N must be > 1 and a power of 2")
+	}
+	if p.R <= 0 {
+		return fmt.Errorf("R must be > 0")
+	}
+	if p.P <= 0 {
+		return fmt.Errorf("P must be > 0")
+	}
+	if p.KeyLen <= 0 {
+		return fmt.Errorf("key length must be > 0")
+	}
+	return nil
+}
 
+func (p *Params) FromMap(params map[string]string) error {
 	// Parse N
-	if v, ok := paramsMap["n"]; ok {
+	if v, ok := params["n"]; ok {
 		n, err := strconv.Atoi(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid N: %v", err)
+			return fmt.Errorf("invalid N: %v", err)
 		}
-		result.N = n
+		p.N = n
 	}
 
 	// Parse R
-	if v, ok := paramsMap["r"]; ok {
+	if v, ok := params["r"]; ok {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid R: %v", err)
+			return fmt.Errorf("invalid R: %v", err)
 		}
-		result.R = r
+		p.R = r
 	}
 
 	// Parse P
-	if v, ok := paramsMap["p"]; ok {
-		p, err := strconv.Atoi(v)
+	if v, ok := params["p"]; ok {
+		pp, err := strconv.Atoi(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid P: %v", err)
+			return fmt.Errorf("invalid P: %v", err)
 		}
-		result.P = p
+		p.P = pp
 	}
 
 	// Parse KeyLen
-	if v, ok := paramsMap["k"]; ok {
+	if v, ok := params["k"]; ok {
 		keyLen, err := strconv.Atoi(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid KeyLen: %v", err)
+			return fmt.Errorf("invalid KeyLen: %v", err)
 		}
-		result.KeyLen = keyLen
+		p.KeyLen = keyLen
 	}
 
-	return result, nil
+	return nil
+}
+
+// FromParams parses Scrypt parameters from a map[string]string.
+func FromParams(m map[string]string) (params *Params, err error) {
+	params = &Params{}
+
+	err = params.FromMap(m)
+	if err != nil {
+		return nil, err
+	}
+
+	return params, nil
 }
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	paramsMap := p.ToMap()
-	return codecPkg.EncodeParams(paramsMap)
+	return codecPkg.EncodeParams(p.ToMap())
 }
 
+// ToMap converts Params to a map[string]string
+func (p *Params) ToMap() map[string]string {
+	m := make(map[string]string)
+	if p.N > 0 {
+		m["n"] = fmt.Sprintf("%d", p.N)
+	}
+	if p.R > 0 {
+		m["r"] = fmt.Sprintf("%d", p.R)
+	}
+	if p.P > 0 {
+		m["p"] = fmt.Sprintf("%d", p.P)
+	}
+	if p.KeyLen > 0 {
+		m["k"] = fmt.Sprintf("%d", p.KeyLen)
+	}
+	return m
+}
 func DefaultParams() *Params {
 	return &Params{
 		N:      16384,
@@ -71,22 +118,4 @@ func DefaultParams() *Params {
 		P:      1,
 		KeyLen: 32,
 	}
-}
-
-// ToMap converts Params to a map[string]string
-func (p *Params) ToMap() map[string]string {
-	paramsMap := make(map[string]string)
-	if p.N > 0 {
-		paramsMap["n"] = fmt.Sprintf("%d", p.N)
-	}
-	if p.R > 0 {
-		paramsMap["r"] = fmt.Sprintf("%d", p.R)
-	}
-	if p.P > 0 {
-		paramsMap["p"] = fmt.Sprintf("%d", p.P)
-	}
-	if p.KeyLen > 0 {
-		paramsMap["k"] = fmt.Sprintf("%d", p.KeyLen)
-	}
-	return paramsMap
 }

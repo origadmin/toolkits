@@ -13,44 +13,23 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
 // Scrypt implements the Scrypt hashing algorithm
 type Scrypt struct {
-	p      types.Type
 	params *Params
 	config *types.Config
 }
 
+var scryptType = types.Type{
+	Name: constants.SCRYPT,
+}
+
 func (c *Scrypt) Type() types.Type {
-	return c.p
-}
-
-type ConfigValidator struct {
-	params *Params
-}
-
-func (v ConfigValidator) Validate(config *types.Config) error {
-	if config.SaltLength < 8 {
-		return errors.ErrSaltLengthTooShort
-	}
-	// N must be > 1 and a power of 2
-	if v.params.N <= 1 || v.params.N&(v.params.N-1) != 0 {
-		return fmt.Errorf("N must be > 1 and a power of 2")
-	}
-	if v.params.R <= 0 {
-		return fmt.Errorf("R must be > 0")
-	}
-	if v.params.P <= 0 {
-		return fmt.Errorf("P must be > 0")
-	}
-	if v.params.KeyLen <= 0 {
-		return fmt.Errorf("key length must be > 0")
-	}
-
-	return nil
+	return scryptType
 }
 
 // NewScrypt creates a new Scrypt crypto instance
@@ -62,20 +41,13 @@ func NewScrypt(config *types.Config) (interfaces.Cryptographic, error) {
 	if config.ParamConfig == "" {
 		config.ParamConfig = DefaultParams().String()
 	}
-	params, err := parseParams(config.ParamConfig)
-	if err != nil {
+	v := validator.WithParams(&Params{})
+	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid scrypt param config: %v", err)
 	}
 
-	validator := &ConfigValidator{
-		params: params,
-	}
-	if err := validator.Validate(config); err != nil {
-		return nil, fmt.Errorf("invalid scrypt config: %v", err)
-	}
 	return &Scrypt{
-		p:      types.Type{Name: constants.SCRYPT},
-		params: params,
+		params: v.Params(),
 		config: config,
 	}, nil
 }
@@ -102,16 +74,20 @@ func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 	if err != nil {
 		return nil, err
 	}
-	return types.NewHashPartsWithParams(c.Type(), salt, hash, c.params.ToMap()), nil
+	return types.NewHashPartsFull(c.Type(), salt, hash, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	if parts.Algorithm.Name != constants.SCRYPT {
+	algorithm, err := types.ParseType(parts.Algorithm)
+	if err != nil {
+		return err
+	}
+	if algorithm.Name != constants.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters
-	params, err := parseParams(parts.Params)
+	params, err := FromParams(parts.Params)
 	if err != nil {
 		return err
 	}
@@ -119,7 +95,7 @@ func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	if subtle.ConstantTimeCompare(hash, parts.Hash) != 1 {
+	if subtle.ConstantTimeCompare(parts.Hash, hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}
 

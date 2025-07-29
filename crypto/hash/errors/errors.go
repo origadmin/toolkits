@@ -23,4 +23,6 @@ var (
 	ErrUnsupportedHashForHMAC = errors.String("unsupported hash type for HMAC")
 	// ErrInvalidAlgorithm is returned when an invalid algorithm is used.
 	ErrInvalidAlgorithm = errors.String("invalid algorithm")
+	// ErrResolverNotRegistered is returned when a resolver is not registered.
+	ErrResolverNotRegistered = errors.String("resolver not registered")
 )
