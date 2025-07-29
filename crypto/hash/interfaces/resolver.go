@@ -15,5 +15,5 @@ type TypeResolver interface {
 type AlgorithmResolver func(algType types.Type) (types.Type, error)
 
 func (r AlgorithmResolver) ResolveType(algType types.Type) (types.Type, error) {
-	return r(t)
+	return r(algType)
 }
