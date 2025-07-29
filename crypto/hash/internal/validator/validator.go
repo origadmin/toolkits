@@ -7,10 +7,11 @@ package validator
 
 import (
 	"github.com/origadmin/toolkits/crypto/hash/codec"
+	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-type Validator[T types.Params] struct {
+type Validator[T interfaces.Params] struct {
 	params T
 }
 
@@ -31,7 +32,7 @@ func (v Validator[T]) Validate(config *types.Config) error {
 func (v Validator[T]) Params() T {
 	return v.params
 }
-func WithParams[T types.Params](params T) *Validator[T] {
+func WithParams[T interfaces.Params](params T) *Validator[T] {
 	return &Validator[T]{
 		params: params,
 	}

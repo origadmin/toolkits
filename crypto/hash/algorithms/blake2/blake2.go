@@ -98,9 +98,24 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	hashFunc, ok := hashFuncs[p.Name]
+	switch p.Name {
+	case constants.BLAKE2b:
+		if p.Underlying == "" {
+			p.Name = constants.BLAKE2b_512
+		} else {
+			p.Name = p.String()
+		}
+	case constants.BLAKE2s:
+		if p.Underlying == "" {
+			p.Name = constants.BLAKE2s_256
+		} else {
+			p.Name = p.String()
+		}
+	}
+
+	hashFunc, ok := hashFuncs[p.String()]
 	if !ok {
-		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", p.Name)
+		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", p.String())
 	}
 	return &Blake2{
 		p:        p,
@@ -133,4 +148,22 @@ func NewBlake2s128(config *types.Config) (interfaces.Cryptographic, error) {
 // NewBlake2s256 creates a new BLAKE2s crypto instance
 func NewBlake2s256(config *types.Config) (interfaces.Cryptographic, error) {
 	return NewBlake2(types.Type{Name: constants.BLAKE2s_256}, config)
+}
+
+func fixType(p types.Type) types.Type {
+	switch p.Name {
+	case constants.BLAKE2b:
+		if p.Underlying == "" {
+			p.Name = constants.BLAKE2b_512
+		} else {
+			p.Name = p.String()
+		}
+	case constants.BLAKE2s:
+		if p.Underlying == "" {
+			p.Name = constants.BLAKE2s_256
+		} else {
+			p.Name = p.String()
+		}
+	}
+	return p
 }

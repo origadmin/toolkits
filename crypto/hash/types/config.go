@@ -8,7 +8,9 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 )
 
-type ParamConfig interface {
+// ParamStringer defines an interface for types that can be converted to a string
+// representation of parameters.
+type ParamStringer interface {
 	String() string
 }
 
@@ -28,12 +30,12 @@ func WithSaltLength(length int) Option {
 	}
 }
 
-func WithParams(paramConfig ParamConfig) Option {
+func WithParams(params ParamStringer) Option {
 	return func(cfg *Config) {
-		if paramConfig == nil {
+		if params == nil {
 			return
 		}
-		cfg.ParamConfig = paramConfig.String()
+		cfg.ParamConfig = params.String()
 	}
 }
 
