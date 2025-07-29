@@ -5,9 +5,11 @@
 package crc
 
 import (
-	"fmt"
-	"strings"
+	"crypto/subtle"
 
+	"github.com/goexts/generic"
+
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -16,58 +18,50 @@ import (
 
 // CRC implements CRC32 and CRC64 hashing algorithms
 type CRC struct {
-	algType types.Type
-	config  *types.Config
-	stdHash stdhash.Hash
+	algType  types.Type
+	config   *types.Config
+	hashHash stdhash.Hash
 }
 
 // Hash implements the hash method
 func (c *CRC) Hash(password string) (*types.HashParts, error) {
-	salt, err := rand.RandomBytes(c.config.SaltLength)
-	if err != nil {
-		return nil, err
+	var salt []byte
+	var err error
+	if c.config.SaltLength > 0 {
+		salt, err = rand.RandomBytes(c.config.SaltLength)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return c.HashWithSalt(password, salt)
 }
 
-// HashWithSalt is not applicable for simple checksum functions like CRC
+// HashWithSalt implements the hash with salt method
 func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	h := c.stdHash.New()
-	_, err := h.Write([]byte(password))
-	if err != nil {
-		return nil, fmt.Errorf("crc: failed to write password: %w", err)
-	}
+	h := c.hashHash.New()
+	_, _ = h.Write([]byte(password)) // Error is always nil for standard hash.Hash.Write
 	if len(salt) > 0 {
-		_, err = h.Write(salt)
-		if err != nil {
-			return nil, fmt.Errorf("crc: failed to write salt: %w", err)
-		}
+		_, _ = h.Write(salt) // Error is always nil for standard hash.Hash.Write
 	}
 	return types.NewHashPartsFull(c.Type(), h.Sum(nil), salt, nil), nil
 }
 
 // Verify implements the verify method
 func (c *CRC) Verify(parts *types.HashParts, password string) error {
-	if parts.Hash == nil || len(parts.Hash) == 0 {
-		return fmt.Errorf("crc: invalid hash parts: hash is nil or empty")
-	}
-
-	h := c.stdHash.New()
-	_, err := h.Write([]byte(password))
+	hashHash, err := types.TypeHash(parts.Algorithm)
 	if err != nil {
-		return fmt.Errorf("crc: failed to write password for verification: %w", err)
+		return err
 	}
-	if parts.Salt != nil && len(parts.Salt) > 0 {
-		_, err = h.Write(parts.Salt)
-		if err != nil {
-			return fmt.Errorf("crc: failed to write salt for verification: %w", err)
-		}
+	h := hashHash.New()
+	h.Write([]byte(password))
+	if len(parts.Salt) > 0 {
+		h.Write(parts.Salt)
 	}
-	newHash := h.Sum(nil)
+	hashBytes := h.Sum(nil)
+	if subtle.ConstantTimeCompare(hashBytes, parts.Hash) != 1 {
+		return errors.ErrPasswordNotMatch
+	}
 
-	if string(newHash) != string(parts.Hash) {
-		return fmt.Errorf("crc: checksum does not match")
-	}
 	return nil
 }
 
@@ -77,20 +71,26 @@ func (c *CRC) Type() types.Type {
 
 // NewCRC creates a new CRC crypto instance
 func NewCRC(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	var stdHashType stdhash.Hash
-	switch strings.ToLower(algType.Name) {
-	case "crc32":
-		stdHashType = stdhash.CRC32
-	case "crc64":
-		stdHashType = stdhash.CRC64
-	default:
-		return nil, fmt.Errorf("crc: unsupported algorithm type: %s", algType.Name)
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	// No validator needed here, as CRC doesn't have complex params beyond SaltLength
+	// which is handled by the main hash package's config validation.
+
+	// The algType.Underlying will contain the specific stdhash name after ResolveType
+	// We need to call ResolveType here to get the correct underlying hash.
+	algType = generic.Must(ResolveType(algType))
+
+	hashHash, err := stdhash.ParseHash(algType.Name)
+	if err != nil {
+		return nil, err
 	}
 
 	return &CRC{
-		algType: algType,
-		config:  config,
-		stdHash: stdHashType,
+		algType:  algType,
+		config:   config,
+		hashHash: hashHash,
 	}, nil
 }
 

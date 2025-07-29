@@ -27,21 +27,21 @@ type Hash uint32
 
 // crypto hashes
 const (
-	MD4         Hash = 1 + iota // import golang.org/x/crypto/md4
-	MD5                         // import crypto/md5
-	SHA1                        // import crypto/sha1
-	SHA224                      // import crypto/sha256
-	SHA256                      // import crypto/sha256
-	SHA384                      // import crypto/sha512
-	SHA512                      // import crypto/sha512
-	MD5SHA1                     // no implementation; MD5+SHA1 used for TLS RSA
-	RIPEMD160                   // import golang.org/x/crypto/ripemd160
-	SHA3_224                    // import golang.org/x/crypto/sha3
-	SHA3_256                    // import golang.org/x/crypto/sha3
-	SHA3_384                    // import golang.org/x/crypto/sha3
-	SHA3_512                    // import golang.org/x/crypto/sha3
-	SHA512_224                  // import crypto/sha512
-	SHA512_256                  // import crypto/sha512
+	MD4        Hash = 1 + iota // import golang.org/x/crypto/md4
+	MD5                        // import crypto/md5
+	SHA1                       // import crypto/sha1
+	SHA224                     // import crypto/sha256
+	SHA256                     // import crypto/sha256
+	SHA384                     // import crypto/sha512
+	SHA512                     // import crypto/sha512
+	MD5SHA1                    // no implementation; MD5+SHA1 used for TLS RSA
+	RIPEMD160                  // import golang.org/x/crypto/ripemd160
+	SHA3_224                   // import golang.org/x/crypto/sha3
+	SHA3_256                   // import golang.org/x/crypto/sha3
+	SHA3_384                   // import golang.org/x/crypto/sha3
+	SHA3_512                   // import golang.org/x/crypto/sha3
+	SHA512_224                 // import crypto/sha512
+	SHA512_256                 // import crypto/sha512
 	cryptoHashEnd
 )
 
@@ -84,14 +84,14 @@ func init() {
 	registerHash(SHA256, "sha256", sha256.New)
 	registerHash(SHA384, "sha384", sha512.New384)
 	registerHash(SHA512, "sha512", sha512.New)
-	registerHash(MD5SHA1, "md5sha1", NewMD5SHA1)
-	registerHash(RIPEMD160, "ripemd160", ripemd160.New)
+	registerHash(MD5SHA1, "md5+sha1", NewMD5SHA1)
+	registerHash(RIPEMD160, "ripemd-160", ripemd160.New)
 	registerHash(SHA3_224, "sha3-224", sha3.New224)
 	registerHash(SHA3_256, "sha3-256", sha3.New256)
 	registerHash(SHA3_384, "sha3-384", sha3.New384)
 	registerHash(SHA3_512, "sha3-512", sha3.New512)
-	registerHash(SHA512_224, "sha512-224", sha512.New512_224)
-	registerHash(SHA512_256, "sha512-256", sha512.New512_256)
+	registerHash(SHA512_224, "sha512/224", sha512.New512_224)
+	registerHash(SHA512_256, "sha512/256", sha512.New512_256)
 	// BLAKE2 hashes are handled by the blake2 package directly
 	// and are not registered here with a New() function.
 	// Their Hash enum values are still defined for classification.

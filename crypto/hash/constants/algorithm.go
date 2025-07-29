@@ -44,18 +44,24 @@ const (
 
 // Base Algorithm Names (for composite algorithms)
 const (
-	HMAC     = "hmac"
-	PBKDF2   = "pbkdf2"
-	SCRYPT   = "scrypt"
-	BCRYPT   = "bcrypt"
-	ARGON2   = "argon2"
-	ARGON2i  = "argon2i"
-	ARGON2id = "argon2id"
-	BLAKE2b  = "blake2b"
-	BLAKE2s  = "blake2s"
-	RIPEMD160 = "ripemd160"
-	CRC32    = "crc32"
-	CRC64    = "crc64"
+	HMAC       = "hmac"
+	PBKDF2     = "pbkdf2"
+	SCRYPT     = "scrypt"
+	BCRYPT     = "bcrypt"
+	ARGON2     = "argon2"
+	ARGON2i    = "argon2i"
+	ARGON2id   = "argon2id"
+	BLAKE2b    = "blake2b"
+	BLAKE2s    = "blake2s"
+	RIPEMD     = "ripemd"
+	RIPEMD160  = "ripemd-160"
+	CRC32      = "crc32"
+	CRC32_ISO  = "crc32-iso"
+	CRC32_CAST = "crc32-cast"
+	CRC32_KOOP = "crc32-koop"
+	CRC64      = "crc64"
+	CRC64_ISO  = "crc64-iso"
+	CRC64_ECMA = "crc64-ecma"
 )
 
 // Composite Algorithm Identifiers (HMAC)

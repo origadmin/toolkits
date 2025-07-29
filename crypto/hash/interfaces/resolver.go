@@ -10,10 +10,10 @@ import (
 )
 
 type TypeResolver interface {
-	ResolveType(t types.Type) (types.Type, error)
+	ResolveType(algType types.Type) (types.Type, error)
 }
-type AlgorithmResolver func(t types.Type) (types.Type, error)
+type AlgorithmResolver func(algType types.Type) (types.Type, error)
 
-func (r AlgorithmResolver) ResolveType(t types.Type) (types.Type, error) {
+func (r AlgorithmResolver) ResolveType(algType types.Type) (types.Type, error) {
 	return r(t)
 }

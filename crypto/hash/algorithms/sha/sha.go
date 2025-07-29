@@ -74,7 +74,7 @@ func (c *SHA) Verify(parts *types.HashParts, password string) error {
 	}
 	newHash := hashHash.New()
 	newHash.Write([]byte(password))
-	if parts.Salt != nil && len(parts.Salt) > 0 {
+	if len(parts.Salt) > 0 {
 		newHash.Write(parts.Salt)
 	}
 	if subtle.ConstantTimeCompare(newHash.Sum(nil), parts.Hash) != 1 {

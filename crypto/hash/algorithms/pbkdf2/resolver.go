@@ -14,14 +14,14 @@ import (
 )
 
 // ResolveType resolves the Type for PBKDF2, providing a default underlying hash if not specified.
-func ResolveType(t types.Type) (types.Type, error) {
-	if t.Underlying == "" {
-		t.Underlying = constants.SHA256 // Default to SHA256 for PBKDF2
+func ResolveType(algType types.Type) (types.Type, error) {
+	if algType.Underlying == "" {
+		algType.Underlying = constants.SHA256 // Default to SHA256 for PBKDF2
 	}
 	// Validate the underlying hash algorithm
-	_, err := stdhash.ParseHash(t.Underlying)
+	_, err := stdhash.ParseHash(algType.Underlying)
 	if err != nil {
-		return types.Type{}, fmt.Errorf("unsupported underlying hash for PBKDF2: %s", t.Underlying)
+		return types.Type{}, fmt.Errorf("unsupported underlying hash for PBKDF2: %s", algType.Underlying)
 	}
-	return t, nil
+	return algType, nil
 }

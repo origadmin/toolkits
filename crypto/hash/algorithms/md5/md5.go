@@ -5,7 +5,6 @@
 package md5
 
 import (
-	"crypto/md5"
 	"crypto/subtle"
 	"fmt"
 
@@ -21,7 +20,6 @@ import (
 var md5AlgType = types.NewType(constants.MD5)
 
 type ConfigValidator struct {
-	SaltLength int
 }
 
 func (v ConfigValidator) String() string {
@@ -113,7 +111,7 @@ func (c *MD5) Verify(parts *types.HashParts, password string) error {
 
 	hash := c.hashHash.New()
 	hash.Write([]byte(password))
-	if parts.Salt != nil && len(parts.Salt) > 0 {
+	if len(parts.Salt) > 0 {
 		hash.Write(parts.Salt)
 	}
 	hashBytes := hash.Sum(nil)

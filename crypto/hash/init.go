@@ -9,9 +9,11 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/crc"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/pbkdf2"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/ripemd160"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
@@ -119,24 +121,20 @@ var (
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
 		},
-		constants.HMAC: { // HMAC creator will now handle the Underlying type
-			creator:       hmac.NewHMAC,
-			defaultConfig: hmac.DefaultConfig,
-		},
 		constants.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
 		},
-		constants.RIPEMD160: {
+		constants.RIPEMD: {
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
 		},
 		constants.CRC32: {
-			creator:       wrapCreator(crc.NewCRC),
+			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
 		},
 		constants.CRC64: {
-			creator:       wrapCreator(crc.NewCRC),
+			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
 		},
 	}
