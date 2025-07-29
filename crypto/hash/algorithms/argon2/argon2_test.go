@@ -167,7 +167,7 @@ func TestNewArgon2(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewArgon2(types.Argon2(), tt.config)
+			c, err := NewArgon2(argon2Type, tt.config)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewArgon2() error = %v, wantErr %v", err, tt.wantErr)
 				return

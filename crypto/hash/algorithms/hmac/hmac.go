@@ -86,7 +86,7 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 	h := hmac.New(c.hashHash.New, salt)
 	h.Write([]byte(password))
 	hash := h.Sum(nil)
-	return types.NewHashParts(c.p, salt, hash), nil
+	return types.NewHashPartsWithHashSalt(c.Type(), hash, salt), nil
 }
 
 // Verify implements the verify method

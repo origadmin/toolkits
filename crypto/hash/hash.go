@@ -56,7 +56,7 @@ func init() {
 	if err != nil {
 		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
 		// If the hash module fails to initialize, use a no-op implementation
-		activeCrypto = &noop{}
+		activeCrypto = &uninitializedCrypto{}
 	} else {
 		activeCrypto = crypto
 	}
@@ -93,6 +93,6 @@ func Generate(password string) (string, error) {
 }
 
 // GenerateWithSalt generates a hash for the given password with the specified salt using the active cryptographic instance.
-func GenerateWithSalt(password, salt string) (string, error) {
+func GenerateWithSalt(password string, salt []byte) (string, error) {
 	return activeCrypto.HashWithSalt(password, salt)
 }

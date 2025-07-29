@@ -3,12 +3,9 @@ package bcrypt
 import (
 	"testing"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
-
-var codec = codecPkg.NewCodec(types.Bcrypt())
 
 func TestNewBcryptCrypto(t *testing.T) {
 	tests := []struct {
@@ -59,12 +56,13 @@ func TestCrypto_Hash(t *testing.T) {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
 
-	hash, err := crypto.Hash("password")
+	hashParts, err := crypto.Hash("password")
 	if err != nil {
 		t.Errorf("Hash() error = %v", err)
 	}
-	if hash == "" {
-		t.Error("Hash() returned empty string")
+	err = crypto.Verify(hashParts, "password")
+	if err != nil {
+		t.Errorf("Verify() error = %v", err)
 	}
 }
 
@@ -74,13 +72,30 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
 
-	salt := "somesaltvalue"
-	hash, err := crypto.HashWithSalt("password", salt)
+	salt := []byte("somesaltvalue")
+	hashParts, err := crypto.HashWithSalt("password", salt)
 	if err != nil {
 		t.Errorf("HashWithSalt() error = %v", err)
 	}
-	if hash == "" {
-		t.Error("HashWithSalt() returned empty string")
+	err = crypto.Verify(hashParts, "password")
+	if err != nil {
+		t.Errorf("Verify() error = %v", err)
+	}
+	// Test with wrong password
+	wrongPassword := "wrongpassword"
+	err = crypto.Verify(hashParts, wrongPassword)
+	if err == nil {
+		t.Error("Verify() should return error for wrong password")
+	}
+	// Test with empty password
+	err = crypto.Verify(hashParts, "")
+	if err == nil {
+		t.Error("Verify() should return error for empty password")
+	}
+	// Test with nil hash
+	err = crypto.Verify(nil, "password")
+	if err == nil {
+		t.Error("Verify() should return error for nil hash")
 	}
 }
 
@@ -95,19 +110,15 @@ func TestCrypto_Verify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Hash() error = %v", err)
 	}
-	decoded, err := codec.Decode(hash)
-	if err != nil {
-		t.Errorf("Decode() error = %v", err)
 
-	}
-	err = crypto.Verify(decoded, password)
+	err = crypto.Verify(hash, password)
 	if err != nil {
 		t.Errorf("Verify() error = %v", err)
 	}
 
 	// Test with wrong password
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(decoded, wrongPassword)
+	err = crypto.Verify(hash, wrongPassword)
 	if err == nil {
 		t.Error("Verify() should return error for wrong password")
 	}
@@ -119,22 +130,18 @@ func TestCrypto_VerifyWithSalt(t *testing.T) {
 		t.Fatalf("Failed to create Bcrypt crypto: %v", err)
 	}
 	password := "password"
-	salt := "somesaltvalue"
+	salt := []byte("somesaltvalue")
 	hash, err := crypto.HashWithSalt(password, salt)
 	if err != nil {
 		t.Fatalf("HashWithSalt() error = %v", err)
 	}
-	decoded, err := codec.Decode(hash)
-	if err != nil {
-		t.Errorf("Decode() error = %v", err)
 
-	}
-	err = crypto.Verify(decoded, password)
+	err = crypto.Verify(hash, password)
 	if err != nil {
 		t.Errorf("VerifyWithSalt() error = %v", err)
 	}
 	wrongPassword := "wrongpassword"
-	err = crypto.Verify(decoded, wrongPassword)
+	err = crypto.Verify(hash, wrongPassword)
 	if err == nil {
 		t.Error("VerifyWithSalt() should return error for wrong password")
 	}

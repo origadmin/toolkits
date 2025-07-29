@@ -95,13 +95,7 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 	hash.Write([]byte(password))
 	hash.Write(salt)
 	hashBytes := md5.Sum(nil)
-	return &types.HashParts{
-		Algorithm: constants.MD5,
-		Version:   "1.0",
-		Params:    map[string]string{},
-		Hash:      hashBytes[:],
-		Salt:      salt,
-	}, nil
+	return types.NewHashPartsWithHashSalt(c.Type(), hashBytes[:], salt), nil
 }
 
 // Verify implements the verify method

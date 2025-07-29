@@ -56,7 +56,8 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 	newHash := c.hashHash.New()
 	newHash.Write([]byte(password))
 	newHash.Write(salt)
-	return types.NewHashPartsFull(c.p, salt, newHash.Sum(nil), nil), nil
+	hashBytes := newHash.Sum(nil)
+	return types.NewHashPartsWithHashSalt(c.p, hashBytes, salt), nil
 }
 
 // Verify implements the verify method

@@ -4,6 +4,10 @@
 
 package types
 
+import (
+	"encoding/json"
+)
+
 // HashParts represents the parts of a hash
 type HashParts struct {
 	Algorithm string
@@ -44,6 +48,14 @@ func (h *HashParts) WithHashSalt(hash []byte, salt []byte) *HashParts {
 	return h
 }
 
+func (h *HashParts) String() string {
+	b, err := json.Marshal(h)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
 func NewHashParts(p Type) *HashParts {
 	return &HashParts{
 		Algorithm: p.String(),
@@ -59,11 +71,11 @@ func NewHashPartsWithHashSalt(p Type, hash []byte, salt []byte) *HashParts {
 	}
 }
 
-func NewHashPartsFull(p Type, salt []byte, hash []byte, params map[string]string) *HashParts {
+func NewHashPartsFull(p Type, hash []byte, salt []byte, params map[string]string) *HashParts {
 	return &HashParts{
 		Algorithm: p.String(),
-		Salt:      salt,
 		Hash:      hash,
+		Salt:      salt,
 		Params:    params,
 	}
 }

@@ -36,8 +36,8 @@ func wrapCreator(oldCreator func(*types.Config) (interfaces.Cryptographic, error
 }
 
 var (
-	// algorithms stores all supported hash algorithms, keyed by their main name (string)
-	algorithms = map[string]algorithm{
+	// algorithmMap stores all supported hash algorithmMap, keyed by their main name (string)
+	algorithmMap = map[string]algorithm{
 		constants.ARGON2: {
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,

@@ -39,11 +39,11 @@ func (c *Bcrypt) Hash(password string) (*types.HashParts, error) {
 // HashWithSalt implements the hash with salt method
 func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
 	newpass := password + string(salt)
-	hash, err := bcrypt.GenerateFromPassword([]byte(newpass), c.params.Cost)
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(newpass), c.params.Cost)
 	if err != nil {
 		return nil, err
 	}
-	return types.NewHashPartsWithParams(c.Type(), salt, hash, c.params.ToMap()), nil
+	return types.NewHashPartsFull(c.Type(), hashBytes, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method

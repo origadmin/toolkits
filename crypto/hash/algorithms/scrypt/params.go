@@ -26,10 +26,10 @@ func (p *Params) Validate(config *types.Config) error {
 		return fmt.Errorf("N must be > 1 and a power of 2")
 	}
 	if p.R <= 0 {
-		return fmt.Errorf("R must be > 0")
+		return fmt.Errorf("r must be > 0")
 	}
 	if p.P <= 0 {
-		return fmt.Errorf("P must be > 0")
+		return fmt.Errorf("p must be > 0")
 	}
 	if p.KeyLen <= 0 {
 		return fmt.Errorf("key length must be > 0")
@@ -39,7 +39,7 @@ func (p *Params) Validate(config *types.Config) error {
 
 func (p *Params) FromMap(params map[string]string) error {
 	// Parse N
-	if v, ok := params["n"]; ok {
+	if v, ok := params["N"]; ok {
 		n, err := strconv.Atoi(v)
 		if err != nil {
 			return fmt.Errorf("invalid N: %v", err)
@@ -51,7 +51,7 @@ func (p *Params) FromMap(params map[string]string) error {
 	if v, ok := params["r"]; ok {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			return fmt.Errorf("invalid R: %v", err)
+			return fmt.Errorf("invalid r: %v", err)
 		}
 		p.R = r
 	}
@@ -60,7 +60,7 @@ func (p *Params) FromMap(params map[string]string) error {
 	if v, ok := params["p"]; ok {
 		pp, err := strconv.Atoi(v)
 		if err != nil {
-			return fmt.Errorf("invalid P: %v", err)
+			return fmt.Errorf("invalid p: %v", err)
 		}
 		p.P = pp
 	}
@@ -98,7 +98,7 @@ func (p *Params) String() string {
 func (p *Params) ToMap() map[string]string {
 	m := make(map[string]string)
 	if p.N > 0 {
-		m["n"] = fmt.Sprintf("%d", p.N)
+		m["N"] = fmt.Sprintf("%d", p.N)
 	}
 	if p.R > 0 {
 		m["r"] = fmt.Sprintf("%d", p.R)

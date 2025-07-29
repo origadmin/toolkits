@@ -36,7 +36,7 @@ func (c *cachedCrypto) Hash(password string) (string, error) {
 }
 
 // HashWithSalt implements Cryptographic.
-func (c *cachedCrypto) HashWithSalt(password, salt string) (string, error) {
+func (c *cachedCrypto) HashWithSalt(password string, salt []byte) (string, error) {
 	return c.crypto.HashWithSalt(password, salt)
 }
 

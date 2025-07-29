@@ -10,7 +10,6 @@ import (
 
 	"github.com/goexts/generic/settings"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -28,21 +27,18 @@ func (f *algorithmFactory) create(cryptoType string, opts ...types.Option) (inte
 		return alg, nil
 	}
 
-	algType, err := constants.ParseAlgorithm(cryptoType)
+	algType, err := types.ParseType(cryptoType)
 	if err != nil {
 		return nil, err
 	}
 
-	algorithm, exists := algorithms[algType]
+	algorithm, exists := algorithmMap[cryptoType]
 	if !exists {
 		return nil, fmt.Errorf("unsupported algorithm: %s", algType)
 	}
 
-	cfg, err := f.createConfig(algType, algorithm, opts...)
-	if err != nil {
-		return nil, err
-	}
-	alg, err := algorithm.creator(cfg)
+	cfg := f.createConfig(algorithm, opts...)
+	alg, err := algorithm.creator(algType, cfg)
 	if err != nil {
 		return nil, err
 	}

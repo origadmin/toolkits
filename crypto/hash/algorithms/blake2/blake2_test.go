@@ -19,25 +19,25 @@ func TestNewBlake2(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Default Config",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			config:   types.DefaultConfig(),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Default Config",
-			hashType: types.Blake2s(),
+			hashType: blake2s256Type,
 			config:   types.DefaultConfig(),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Custom SaltLength",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			config:   &types.Config{SaltLength: 32},
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Invalid SaltLength",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			config:   &types.Config{SaltLength: 4}, // Less than 8
 			wantErr:  true,
 		},
@@ -62,13 +62,13 @@ func TestCrypto_Hash(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Hash",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			password: "testpassword",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Hash",
-			hashType: types.Blake2s(),
+			hashType: blake2s256Type,
 			password: "testpassword",
 			wantErr:  false,
 		},
@@ -104,14 +104,14 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b HashWithSalt",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s HashWithSalt",
-			hashType: types.Blake2s(),
+			hashType: blake2s256Type,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
@@ -145,21 +145,21 @@ func TestCrypto_Verify(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Verify Correct",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Verify Correct",
-			hashType: types.Blake2s(),
+			hashType: blake2s256Type,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Verify Wrong Password",
-			hashType: types.Blake2b(),
+			hashType: blake2b256Type,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  true, // Expect error for wrong password

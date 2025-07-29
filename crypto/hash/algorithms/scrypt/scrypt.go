@@ -74,7 +74,7 @@ func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 	if err != nil {
 		return nil, err
 	}
-	return types.NewHashPartsFull(c.Type(), salt, hash, c.params.ToMap()), nil
+	return types.NewHashPartsFull(c.Type(), hash, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method

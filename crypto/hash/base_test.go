@@ -15,8 +15,11 @@ import (
 )
 
 const (
-	origin  = "OrigAdmin@123456"
-	slatKey = "key"
+	origin = "OrigAdmin@123456"
+)
+
+var (
+	slatKey = []byte("key")
 )
 
 func TestGeneratePassword(t *testing.T) {

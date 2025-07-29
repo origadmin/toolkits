@@ -80,7 +80,7 @@ func NewCrypto(cryptoType string, opts ...types.Option) (Crypto, error) {
 
 // RegisterAlgorithm registers a new hash algorithm
 func RegisterAlgorithm(t types.Type, creator AlgorithmCreator, defaultConfig AlgorithmConfig) {
-	algorithms[t.Name] = algorithm{
+	algorithmMap[t.Name] = algorithm{
 		creator:       creator,
 		defaultConfig: defaultConfig,
 	}

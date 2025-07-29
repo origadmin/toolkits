@@ -66,7 +66,7 @@ func (c *Argon2) Hash(password string) (*types.HashParts, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	hash := c.keyFunc(
+	hashBytes := c.keyFunc(
 		[]byte(password),
 		salt,
 		c.params.TimeCost,
@@ -74,12 +74,7 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 		c.params.Threads,
 		c.params.KeyLength,
 	)
-	return &types.HashParts{
-		Algorithm: c.p.String(),
-		Params:    c.params.ToMap(),
-		Hash:      hash,
-		Salt:      salt,
-	}, nil
+	return types.NewHashPartsFull(c.p, hashBytes, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
