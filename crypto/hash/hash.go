@@ -96,3 +96,15 @@ func Generate(password string) (string, error) {
 func GenerateWithSalt(password string, salt []byte) (string, error) {
 	return activeCrypto.HashWithSalt(password, salt)
 }
+
+// AvailableAlgorithms returns a list of all registered hash algorithms.
+func AvailableAlgorithms() []types.Type {
+	var algorithms []types.Type
+	for algName := range algorithmMap {
+		algType, err := types.ParseType(algName)
+		if err == nil {
+			algorithms = append(algorithms, algType)
+		}
+	}
+	return algorithms
+}

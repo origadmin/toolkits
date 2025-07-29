@@ -113,7 +113,7 @@ func NewBlake2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", algType.Name)
 	}
 	return &Blake2{
-		algType:    algType,
+		algType:  algType,
 		params:   v.Params(),
 		config:   config,
 		hashFunc: hashFunc,
@@ -143,4 +143,8 @@ func NewBlake2s128(config *types.Config) (interfaces.Cryptographic, error) {
 // NewBlake2s256 creates a new BLAKE2s crypto instance
 func NewBlake2s256(config *types.Config) (interfaces.Cryptographic, error) {
 	return NewBlake2(blake2s256Type, config)
+}
+
+func DefaultConfig() *types.Config {
+	return types.DefaultConfig()
 }
