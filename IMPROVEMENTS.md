@@ -167,8 +167,8 @@ The original `rand` package suffered from several critical issues:
 
 ### 3. `crypto/hash` Package
 
-- [ ] **Status: To Do (Current Task)**
-- [ ] **Issue 1: Lack of Thread Safety (Concurrency Bug)**
+- [x] **Status: Completed**
+- [x] **Issue 1: Lack of Thread Safety (Concurrency Bug)**
 
 **Analysis:**
 The `algorithmFactory` in `factory.go` uses a `cryptos` map to cache hash algorithm instances. Access to this map (read and write) is not protected by any concurrency control mechanism. In a multi-goroutine environment, concurrent access to this map can lead to data races, resulting in program crashes or unpredictable behavior.
@@ -221,7 +221,11 @@ Use `sync.RWMutex` to protect the `cryptos` map. Read operations will acquire a 
 **Verification Plan:**
 *   **Unit Tests:** Add concurrent tests for `algorithmFactory.create` to verify no data races occur under heavy load.
 
-- [ ] **Issue 2: Panicking in `init()` (Robustness Issue)**
+- [x] **Issue 2: Panicking in `init()` (Robustness Issue)**
+
+- [x] **Feature: Algorithm Listing and Discovery**
+    *   **Reason**: Provide a public function to list all registered hash algorithms, improving discoverability and usability for consumers of the `hash` package.
+    *   **Implementation**: Added `AvailableAlgorithms()` function to `hash.go`.
 
 **Analysis:**
 The `init()` function in `hash.go` panics if `NewCrypto` fails during the initialization of the `defaultCrypto` global instance. While `panic` terminates the program immediately, a more robust library should log errors and allow for graceful failure or recovery if possible. Furthermore, public functions relying on `defaultCrypto` (e.g., `Generate`, `Verify`) might attempt to dereference a `nil` pointer if initialization fails, leading to runtime errors.
@@ -335,18 +339,21 @@ The `init()` function in `hash.go` panics if `NewCrypto` fails during the initia
     *   Write test cases to simulate `NewCrypto` initialization failures and verify that `init()` correctly logs errors without panicking.
     *   Write test cases to verify that calling `Generate`, `Verify`, and `GenerateWithSalt` when `defaultCrypto` is uninitialized returns the expected error.
 
-- [ ] **Feature: Add BLAKE2b and BLAKE2s independent implementations**
+- [x] **Feature: Add BLAKE2b and BLAKE2s independent implementations**
     *   **Reason**: Modern, high-performance cryptographic hashes, faster than SHA-3 while maintaining high security. Provide fine-grained configuration (e.g., key, output length).
-    *   **Target Location**: `algorithms/blake2b` and `algorithms/blake2s`.
+    *   **Target Location**: `algorithms/blake2b` and `algorithms/blake2s` (Implemented under `blake2` package).
 
-- [ ] **Feature: Add RIPEMD-160 independent implementation**
+- [x] **Feature: Add RIPEMD-160 independent implementation**
     *   **Reason**: Support for legacy systems or specific standards where RIPEMD-160 is used.
     *   **Target Location**: `algorithms/ripemd160`.
+    *   **Implementation**: RIPEMD-160 algorithm has been implemented and registered.
 
-- [ ] **Improvement: Provide more explicit PBKDF2 variants**
+- [x] **Improvement: Provide more explicit PBKDF2 variants**
     *   **Reason**: Enhance API clarity and ease of use by offering direct factory functions for specific PBKDF2-HMAC-SHA variants (e.g., PBKDF2-HMAC-SHA256, PBKDF2-HMAC-SHA512).
     *   **Target Location**: `algorithms/pbkdf2`.
+    *   **Implementation**: The `pbkdf2` package has been modified to dynamically create an HMAC-based PRF using the specified underlying hash algorithm (e.g., SHA256, SHA512) and an internally derived key for the HMAC, thus fully supporting PBKDF2-HMAC-SHA variants.
 
-- [ ] **(Optional) Feature: Encapsulate general purpose checksum algorithms (e.g., CRC32/CRC64)**
+- [x] **Feature: Encapsulate general purpose checksum algorithms (e.g., CRC32/CRC64)**
     *   **Reason**: If there's a need for non-security-sensitive data integrity checks through a unified `hash` module interface.
-    *   **Target Location**: `algorithms/crc32` (or similar).
+    *   **Target Location**: `algorithms/crc`.
+    *   **Implementation**: CRC32 and CRC64 algorithms have been implemented and registered under the `crc` package.

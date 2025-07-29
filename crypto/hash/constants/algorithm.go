@@ -53,6 +53,9 @@ const (
 	ARGON2id = "argon2id"
 	BLAKE2b  = "blake2b"
 	BLAKE2s  = "blake2s"
+	RIPEMD160 = "ripemd160"
+	CRC32    = "crc32"
+	CRC64    = "crc64"
 )
 
 // Composite Algorithm Identifiers (HMAC)
@@ -66,6 +69,7 @@ const (
 	HMAC_SHA3_384 = HMAC + "-" + SHA3_384
 	HMAC_SHA3_512 = HMAC + "-" + SHA3_512
 	DEFAULT_HMAC  = HMAC_SHA256
+	HMAC_PREFIX   = HMAC + "-"
 )
 
 // Composite Algorithm Identifiers (PBKDF2)

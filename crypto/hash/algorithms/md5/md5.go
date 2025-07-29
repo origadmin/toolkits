@@ -93,8 +93,10 @@ func (c *MD5) Hash(password string) (*types.HashParts, error) {
 func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
 	hash := c.hashHash.New()
 	hash.Write([]byte(password))
-	hash.Write(salt)
-	hashBytes := md5.Sum(nil)
+	if len(salt) > 0 {
+		hash.Write(salt)
+	}
+	hashBytes := hash.Sum(nil)
 	return types.NewHashPartsWithHashSalt(c.Type(), hashBytes[:], salt), nil
 }
 
@@ -111,8 +113,10 @@ func (c *MD5) Verify(parts *types.HashParts, password string) error {
 
 	hash := c.hashHash.New()
 	hash.Write([]byte(password))
-	hash.Write(parts.Salt)
-	hashBytes := md5.Sum(nil)
+	if parts.Salt != nil && len(parts.Salt) > 0 {
+		hash.Write(parts.Salt)
+	}
+	hashBytes := hash.Sum(nil)
 	if subtle.ConstantTimeCompare(hashBytes[:], parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}

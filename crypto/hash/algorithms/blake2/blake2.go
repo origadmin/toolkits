@@ -68,7 +68,9 @@ func (c *Blake2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 		return nil, err
 	}
 	h.Write([]byte(password))
-	h.Write(salt)
+	if len(salt) > 0 {
+		h.Write(salt)
+	}
 	hashBytes := h.Sum(nil)
 	return types.NewHashPartsFull(c.algType, hashBytes, salt, c.params.ToMap()), nil
 }
@@ -85,7 +87,9 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 	h.Write([]byte(password))
-	h.Write(parts.Salt)
+	if len(parts.Salt) > 0 {
+		h.Write(parts.Salt)
+	}
 	hashBytes := h.Sum(nil)
 
 	if subtle.ConstantTimeCompare(hashBytes, parts.Hash) != 1 {

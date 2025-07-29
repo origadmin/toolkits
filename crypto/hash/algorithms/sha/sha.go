@@ -55,7 +55,9 @@ func (c *SHA) Hash(password string) (*types.HashParts, error) {
 func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
 	newHash := c.hashHash.New()
 	newHash.Write([]byte(password))
-	newHash.Write(salt)
+	if len(salt) > 0 {
+		newHash.Write(salt)
+	}
 	hashBytes := newHash.Sum(nil)
 	return types.NewHashPartsWithHashSalt(c.algType, hashBytes, salt), nil
 }
@@ -72,7 +74,9 @@ func (c *SHA) Verify(parts *types.HashParts, password string) error {
 	}
 	newHash := hashHash.New()
 	newHash.Write([]byte(password))
-	newHash.Write(parts.Salt)
+	if parts.Salt != nil && len(parts.Salt) > 0 {
+		newHash.Write(parts.Salt)
+	}
 	if subtle.ConstantTimeCompare(newHash.Sum(nil), parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}

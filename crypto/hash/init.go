@@ -119,9 +119,25 @@ var (
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
 		},
+		constants.HMAC: { // HMAC creator will now handle the Underlying type
+			creator:       hmac.NewHMAC,
+			defaultConfig: hmac.DefaultConfig,
+		},
 		constants.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
+		},
+		constants.RIPEMD160: {
+			creator:       wrapCreator(ripemd160.NewRIPEMD160),
+			defaultConfig: ripemd160.DefaultConfig,
+		},
+		constants.CRC32: {
+			creator:       wrapCreator(crc.NewCRC),
+			defaultConfig: crc.DefaultConfig,
+		},
+		constants.CRC64: {
+			creator:       wrapCreator(crc.NewCRC),
+			defaultConfig: crc.DefaultConfig,
 		},
 	}
 )

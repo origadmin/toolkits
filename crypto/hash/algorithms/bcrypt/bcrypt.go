@@ -37,9 +37,17 @@ func (c *Bcrypt) Hash(password string) (*types.HashParts, error) {
 }
 
 // HashWithSalt implements the hash with salt method
+// WARNING: Manually concatenating salt for Bcrypt is INSECURE as Bcrypt handles salt internally.
+// This implementation is for framework consistency, but should be used with caution.
 func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	newpass := password + string(salt)
-	hashBytes, err := bcrypt.GenerateFromPassword([]byte(newpass), c.params.Cost)
+	var data []byte
+	if len(salt) > 0 {
+		data = append([]byte(password), salt...)
+	} else {
+		data = []byte(password)
+	}
+
+	hashBytes, err := bcrypt.GenerateFromPassword(data, c.params.Cost)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +55,8 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 }
 
 // Verify implements the verify method
+// WARNING: Manually concatenating salt for Bcrypt is INSECURE as Bcrypt handles salt internally.
+// This implementation is for framework consistency, but should be used with caution.
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	algType, err := types.ParseType(parts.Algorithm)
 	if err != nil {
@@ -55,8 +65,15 @@ func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	if constants.BCRYPT != algType.Name {
 		return errors.ErrAlgorithmMismatch
 	}
-	newpass := password + string(parts.Salt)
-	if err := bcrypt.CompareHashAndPassword(parts.Hash, []byte(newpass)); err != nil {
+
+	var data []byte
+	if len(parts.Salt) > 0 {
+		data = append([]byte(password), parts.Salt...)
+	} else {
+		data = []byte(password)
+	}
+
+	if err := bcrypt.CompareHashAndPassword(parts.Hash, data); err != nil {
 		return errors.ErrPasswordNotMatch
 	}
 	return nil
@@ -81,7 +98,5 @@ func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 }
 
 func DefaultConfig() *types.Config {
-	return &types.Config{
-		SaltLength: 16,
-	}
+	return &types.Config{}
 }
