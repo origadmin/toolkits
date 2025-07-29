@@ -29,9 +29,9 @@ func RegisterAlgorithmResolver(name string, resolver interfaces.AlgorithmResolve
 func ResolveType(algType types.Type) (types.Type, error) {
 	resolversMu.RLock()
 	defer resolversMu.RUnlock()
-	resolver, ok := algorithmResolvers[t.Name]
+	resolver, ok := algorithmResolvers[algType.Name]
 	if !ok {
-		return t, errors.ErrResolverNotRegistered
+		return algType, errors.ErrResolverNotRegistered
 	}
-	return resolver.ResolveType(t)
+	return resolver.ResolveType(algType)
 }

@@ -89,31 +89,35 @@ var (
 			creator:       wrapCreator(sha.NewSha512),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA3_224: {
-			creator:       wrapCreator(sha.NewSha3224),
+		constants.SHA3: {
+			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA3_256: {
-			creator:       wrapCreator(sha.NewSha3256),
-			defaultConfig: sha.DefaultConfig,
-		},
-		constants.SHA3_384: {
-			creator:       wrapCreator(sha.NewSha3384),
-			defaultConfig: sha.DefaultConfig,
-		},
+		//constants.SHA3_224: {
+		//	creator:       wrapCreator(sha.NewSha3224),
+		//	defaultConfig: sha.DefaultConfig,
+		//},
+		//constants.SHA3_256: {
+		//	creator:       wrapCreator(sha.NewSha3256),
+		//	defaultConfig: sha.DefaultConfig,
+		//},
+		//constants.SHA3_384: {
+		//	creator:       wrapCreator(sha.NewSha3384),
+		//	defaultConfig: sha.DefaultConfig,
+		//},
+		//constants.SHA3_512: {
+		//	creator:       wrapCreator(sha.NewSha3512),
+		//	defaultConfig: sha.DefaultConfig,
+		//},
 		constants.SHA384: {
 			creator:       wrapCreator(sha.NewSha384),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA3_512: {
-			creator:       wrapCreator(sha.NewSha3512),
-			defaultConfig: sha.DefaultConfig,
-		},
-		constants.SHA3_512_224: {
+		constants.SHA512_224: {
 			creator:       wrapCreator(sha.NewSha3512224),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA3_512_256: {
+		constants.SHA512_256: {
 			creator:       wrapCreator(sha.NewSha3512256),
 			defaultConfig: sha.DefaultConfig,
 		},

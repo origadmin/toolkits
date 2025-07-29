@@ -98,5 +98,7 @@ func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 }
 
 func DefaultConfig() *types.Config {
-	return &types.Config{}
+	return &types.Config{
+		SaltLength: constants.DefaultSaltLength,
+	}
 }

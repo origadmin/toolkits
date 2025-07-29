@@ -17,6 +17,7 @@ const (
 
 // SHA-3 Hashes
 const (
+	SHA3         = "sha3"
 	SHA3_224     = "sha3-224"
 	SHA3_256     = "sha3-256"
 	SHA3_384     = "sha3-384"
