@@ -68,10 +68,13 @@ func (c *crypto) Verify(hashed, password string) error {
 		return err
 	}
 
-	// Wrap the created algorithm with a safe verifier before using it
+	// Wrap the created algorithm with a safe verifier
 	safeAlg := &safeVerifier{wrapped: cryptographic}
 
-	return safeAlg.Verify(parts, password)
+	// Wrap the safe verifier with a cached verifier
+	cachedAlg := NewCachedVerifier(safeAlg)
+
+	return cachedAlg.Verify(parts, password)
 }
 
 // NewCrypto creates a new cryptographic instance

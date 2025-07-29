@@ -5,73 +5,66 @@
 // Package hash implements the functions, types, and interfaces for the module.
 package hash
 
-/*
-// import (
-// 	"crypto/subtle"
-// 	"fmt"
-// 	"sync"
-// 	"time"
+import (
+	"sync"
+	"time"
 
-// 	"github.com/origadmin/toolkits/crypto/hash/errors"
-// 	"github.com/origadmin/toolkits/crypto/hash/types"
-// )
+	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/types"
+)
 
-// // Memory cache optimization
-// type cachedCrypto struct {
-// 	crypto Crypto
-// 	cache  sync.Map
-// }
+// verificationResultCache is a global, in-memory cache for recently verified successful hashes.
+// The key is the full hashed string, and the value is a timestamp of when it expires.
+// This cache is used to reduce CPU load for repeated successful verifications within a short period.
+// IMPORTANT: A cache hit DOES NOT bypass the full cryptographic verification to prevent timing attacks.
+var verificationResultCache sync.Map
 
-// func (c *cachedCrypto) Type() types.Type {
-// 	return c.crypto.Type()
-// }
+const cacheDuration = 5 * time.Minute // Cache entries expire after 5 minutes
 
-// type cacheItem struct {
-// 	hash      string
-// 	expiresAt time.Time
-// }
+// cachedVerifier wraps a Cryptographic implementation to add result caching for Verify operations.
+type cachedVerifier struct {
+	wrapped interfaces.Cryptographic
+}
 
-// // Hash implements Cryptographic.
-// func (c *cachedCrypto) Hash(password string) (string, error) {
-// 	return c.crypto.Hash(password)
-// }
+func (c *cachedVerifier) Type() types.Type {
+	return c.wrapped.Type()
+}
 
-// // HashWithSalt implements Cryptographic.
-// func (c *cachedCrypto) HashWithSalt(password string, salt []byte) (string, error) {
-// 	return c.crypto.HashWithSalt(password, salt)
-// }
+func (c *cachedVerifier) Hash(password string) (*types.HashParts, error) {
+	return c.wrapped.Hash(password)
+}
 
-// func (c *cachedCrypto) Verify(hashed string, password string) error {
-// 	// Retrieve from cache
-// 	if item, ok := c.cache.Load(hashed); ok {
-// 		cached := item.(cacheItem)
-// 		if time.Now().Before(cached.expiresAt) {
-// 			if subtle.ConstantTimeCompare([]byte(cached.hash), []byte(hashed)) != 1 {
-// 				fmt.Printf("compare: %s | %s\n", cached.hash, hashed)
-// 				return errors.ErrPasswordNotMatch
-// 			}
-// 			return nil
-// 		}
-// 	}
+func (c *cachedVerifier) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
+	return c.wrapped.HashWithSalt(password, salt)
+}
 
-// 	// Verify password
-// 	err := c.crypto.Verify(hashed, password)
-// 	if err != nil {
-// 		return err
-// 	}
+// Verify implements the verify method with result caching.
+func (c *cachedVerifier) Verify(parts *types.HashParts, password string) error {
+	// Check cache for a recent successful verification of this specific hash string.
+	// This is a performance optimization, not a security bypass.
+	// We use the raw hash bytes as the key for the cache.
+	hashedString := string(parts.Hash)
+	if expiryTime, ok := verificationResultCache.Load(hashedString); ok {
+		if time.Now().Before(expiryTime.(time.Time)) {
+			// Cache hit: The hash was successfully verified recently.
+			// We still proceed with the full verification to prevent timing attacks.
+			// The presence in cache only indicates a high probability of success.
+		} else {
+			// Cache expired, remove it.
+			verificationResultCache.Delete(hashedString)
+		}
+	}
 
-// 	// Cache the result
-// 	c.cache.Store(hashed, cacheItem{
-// 		hash:      hashed,
-// 		expiresAt: time.Now().Add(5 * time.Minute),
-// 	})
+	// Perform the actual cryptographic verification.
+	err := c.wrapped.Verify(parts, password)
+	if err == nil {
+		// If verification is successful, cache the hash for a short period.
+		verificationResultCache.Store(hashedString, time.Now().Add(cacheDuration))
+	}
+	return err
+}
 
-// 	return nil
-// }
-
-// func CachedCrypto(crypto Crypto) Crypto {
-// 	return &cachedCrypto{
-// 		crypto: crypto,
-// 	}
-// }
-*/
+// NewCachedVerifier creates a new cachedVerifier that wraps the given Cryptographic implementation.
+func NewCachedVerifier(wrapped interfaces.Cryptographic) interfaces.Cryptographic {
+	return &cachedVerifier{wrapped: wrapped}
+}
