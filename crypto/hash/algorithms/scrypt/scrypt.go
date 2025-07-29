@@ -79,11 +79,11 @@ func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseType(parts.Algorithm)
+	algType, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	if algorithm.Name != constants.SCRYPT {
+	if algType.Name != constants.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

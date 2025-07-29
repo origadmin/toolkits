@@ -7,6 +7,7 @@ package hash
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/goexts/generic/settings"
 
@@ -15,49 +16,68 @@ import (
 )
 
 type internalFactory interface {
-	create(cryptoType string, opts ...types.Option) (interfaces.Cryptographic, error)
+	create(algName string) (interfaces.Cryptographic, error)
 }
 
 type algorithmFactory struct {
 	cryptos map[string]interfaces.Cryptographic
+	mux     sync.RWMutex
 }
 
-func (f *algorithmFactory) create(cryptoType string, opts ...types.Option) (interfaces.Cryptographic, error) {
-	if alg, exists := f.cryptos[cryptoType]; exists {
-		return alg, nil
+var (
+	defaultFactory internalFactory
+	once           sync.Once
+)
+
+func getFactory() internalFactory {
+	once.Do(func() {
+		defaultFactory = &algorithmFactory{
+			cryptos: make(map[string]interfaces.Cryptographic),
+		}
+	})
+	return defaultFactory
+}
+
+func (f *algorithmFactory) create(algName string) (interfaces.Cryptographic, error) {
+	f.mux.RLock()
+	if cachedAlg, exists := f.cryptos[algName]; exists {
+		f.mux.RUnlock()
+		return cachedAlg, nil
+	}
+	f.mux.RUnlock()
+
+	f.mux.Lock()
+	defer f.mux.Unlock()
+
+	// Double-check after acquiring lock
+	if cachedAlg, exists := f.cryptos[algName]; exists {
+		return cachedAlg, nil
 	}
 
-	algType, err := types.ParseType(cryptoType)
+	algType, err := types.ParseType(algName)
 	if err != nil {
 		return nil, err
 	}
-
-	algorithm, exists := algorithmMap[cryptoType]
+	algEntry, exists := algorithmMap[algType.Name]
 	if !exists {
 		return nil, fmt.Errorf("unsupported algorithm: %s", algType)
 	}
 
-	cfg := f.createConfig(algorithm, opts...)
-	alg, err := algorithm.creator(algType, cfg)
+	// Always create with default config for verification
+	defaultConfig := algEntry.defaultConfig()
+	newAlg, err := algEntry.creator(algType, defaultConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	f.cryptos[cryptoType] = alg
-	return alg, nil
+	f.cryptos[algName] = newAlg
+	return newAlg, nil
 }
 
-// 统一配置创建逻辑
-func (f *algorithmFactory) createConfig(algorithm algorithm, opts ...types.Option) *types.Config {
+func (f *algorithmFactory) createConfig(algEntry algorithm, opts ...types.Option) *types.Config {
 	cfg := &types.Config{}
-	if algorithm.defaultConfig != nil {
-		cfg = algorithm.defaultConfig()
+	if algEntry.defaultConfig != nil {
+		cfg = algEntry.defaultConfig()
 	}
 	return settings.Apply(cfg, opts)
-}
-
-func createFactory() internalFactory {
-	return &algorithmFactory{
-		cryptos: make(map[string]interfaces.Cryptographic),
-	}
 }

@@ -41,7 +41,7 @@ var hashFuncs = map[string]hashFunc{
 
 // Blake2 implements the BLAKE2 hashing algorithm
 type Blake2 struct {
-	p          types.Type
+	algType    types.Type
 	params     *Params
 	config     *types.Config
 	hashFunc   func(key []byte) (hash.Hash, error)
@@ -49,7 +49,7 @@ type Blake2 struct {
 }
 
 func (c *Blake2) Type() types.Type {
-	return c.p
+	return c.algType
 }
 
 // Hash implements the hash method
@@ -70,7 +70,7 @@ func (c *Blake2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 	h.Write([]byte(password))
 	h.Write(salt)
 	hashBytes := h.Sum(nil)
-	return types.NewHashPartsFull(c.p, hashBytes, salt, c.params.ToMap()), nil
+	return types.NewHashPartsFull(c.algType, hashBytes, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
@@ -95,7 +95,7 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	// Use default config if provided config is nil
 	if config == nil {
 		config = types.DefaultConfig()
@@ -107,13 +107,13 @@ func NewBlake2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	p = generic.Must(ResolveType(p))
-	hashFunc, ok := hashFuncs[p.Name]
+	algType = generic.Must(ResolveType(algType))
+	hashFunc, ok := hashFuncs[algType.Name]
 	if !ok {
-		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", p.Name)
+		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", algType.Name)
 	}
 	return &Blake2{
-		p:        p,
+		algType:    algType,
 		params:   v.Params(),
 		config:   config,
 		hashFunc: hashFunc,

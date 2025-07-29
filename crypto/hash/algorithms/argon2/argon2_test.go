@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -105,8 +107,7 @@ func TestParams_ParseAndString(t *testing.T) {
 
 			// Test String method to ensure it's the inverse of parsing.
 			// We parse the output of String() and compare the resulting struct
-			// with the original one. This avoids brittle string comparisons
-			// that are sensitive to parameter order.
+			// with the original one.
 			if tt.params != "" {
 				str := p.Params().String()
 				p2 := validator.WithParams(&Params{})
@@ -192,14 +193,14 @@ func TestNewArgon2(t *testing.T) {
 
 func TestArgon2_HashAndVerify(t *testing.T) {
 	testCases := []struct {
-		name       string
-		argon2Type types.Type
-		password   string
-		salt       []byte
+		name     string
+		algType  types.Type
+		password string
+		salt     []byte
 	}{
 		{
 			name: "Argon2id",
-			argon2Type: types.Type{
+			algType: types.Type{
 				Name: constants.ARGON2id,
 			},
 			password: "password123",
@@ -207,7 +208,7 @@ func TestArgon2_HashAndVerify(t *testing.T) {
 		},
 		{
 			name: "Argon2i",
-			argon2Type: types.Type{
+			algType: types.Type{
 				Name: constants.ARGON2i,
 			},
 			password: "anotherpassword",
@@ -218,7 +219,7 @@ func TestArgon2_HashAndVerify(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new Argon2 instance
-			a, err := NewArgon2(tc.argon2Type, DefaultConfig())
+			a, err := NewArgon2(tc.algType, DefaultConfig())
 			if err != nil {
 				t.Fatalf("failed to create Argon2 instance: %v", err)
 			}
@@ -229,8 +230,8 @@ func TestArgon2_HashAndVerify(t *testing.T) {
 				t.Fatalf("HashWithSalt() error = %v", err)
 			}
 
-			if parts.Algorithm != tc.argon2Type.String() {
-				t.Errorf("HashWithSalt() algorithm = %v, want %v", parts.Algorithm, tc.argon2Type.String())
+			if parts.Algorithm != tc.algType.String() {
+				t.Errorf("HashWithSalt() algorithm = %v, want %v", parts.Algorithm, tc.algType.String())
 			}
 
 			// Verify the hash
@@ -258,4 +259,49 @@ func TestArgon2_HashAndVerify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestArgon2_Hash_Error(t *testing.T) {
+	// This test is a bit tricky as it requires mocking rand.RandomBytes.
+	// For now, we'll just ensure the function doesn't panic with a valid config.
+	c, err := NewArgon2(argon2Type, DefaultConfig())
+	assert.NoError(t, err)
+	_, err = c.Hash("password")
+	assert.NoError(t, err)
+}
+
+func TestArgon2_Verify_Error(t *testing.T) {
+	c, err := NewArgon2(argon2Type, DefaultConfig())
+	assert.NoError(t, err)
+
+	// Invalid algorithm
+	err = c.Verify(&types.HashParts{Algorithm: "invalid"}, "password")
+	assert.Error(t, err)
+
+	// Invalid params
+	hash, err := c.Hash("password")
+	assert.NoError(t, err)
+	hash.Params = map[string]string{"invalid": "param"}
+	assert.Panics(t, func() {
+		c.Verify(hash, "password")
+	})
+
+	// Wrong password
+	hash, err = c.Hash("password")
+	assert.NoError(t, err)
+	err = c.Verify(hash, "wrongpassword")
+	assert.Error(t, err)
+}
+
+func TestNewArgon2_Error(t *testing.T) {
+	_, err := NewArgon2(types.Type{Name: "invalid"}, DefaultConfig())
+	assert.Error(t, err)
+}
+
+func TestNewArgon2i_And_NewArgon2id(t *testing.T) {
+	_, err := NewArgon2i(DefaultConfig())
+	assert.NoError(t, err)
+
+	_, err = NewArgon2id(DefaultConfig())
+	assert.NoError(t, err)
 }

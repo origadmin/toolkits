@@ -20,7 +20,7 @@ import (
 
 // HMAC implements the HMAC hashing algorithm
 type HMAC struct {
-	p        types.Type
+	algType  types.Type
 	config   *types.Config
 	hashHash stdhash.Hash
 }
@@ -28,7 +28,7 @@ type HMAC struct {
 var hmacType = types.Type{Name: constants.HMAC, Underlying: constants.SHA256}
 
 func (c *HMAC) Type() types.Type {
-	return c.p
+	return c.algType
 }
 
 type ConfigValidator struct {
@@ -43,7 +43,7 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 }
 
 // NewHMAC creates a new HMAC crypto instance
-func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+func NewHMAC(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -51,16 +51,17 @@ func NewHMAC(p types.Type, config *types.Config) (interfaces.Cryptographic, erro
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-	p, err := ResolveType(p)
+	algType, err := ResolveType(algType)
 	if err != nil {
 		return nil, err
 	}
-	hashHash, err := types.TypeHash(p.Underlying)
+	hashHash, err := types.TypeHash(algType.Underlying)
 	if err != nil {
 		return nil, err
 	}
 
 	return &HMAC{
+		algType:  algType,
 		config:   config,
 		hashHash: hashHash,
 	}, nil
@@ -91,19 +92,19 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseType(parts.Algorithm)
+	algType, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	algorithm, err = ResolveType(algorithm)
+	algType, err = ResolveType(algType)
 	if err != nil {
 		return err
 	}
-	if constants.HMAC != algorithm.Name {
+	if constants.HMAC != algType.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.TypeHash(algorithm.Underlying)
+	hashHash, err := types.TypeHash(algType.Underlying)
 	if err != nil {
 		return err
 	}

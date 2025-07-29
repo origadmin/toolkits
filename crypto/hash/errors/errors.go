@@ -25,4 +25,8 @@ var (
 	ErrInvalidAlgorithm = errors.String("invalid algorithm")
 	// ErrResolverNotRegistered is returned when a resolver is not registered.
 	ErrResolverNotRegistered = errors.String("resolver not registered")
+	// ErrInvalidHash is returned when the provided hash string is invalid.
+	ErrInvalidHash = errors.String("invalid hash string")
+	// ErrInvalidHashParts is returned when HashParts or its critical fields are invalid.
+	ErrInvalidHashParts = errors.String("invalid hash parts or missing hash/salt")
 )

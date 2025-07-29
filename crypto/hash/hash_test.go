@@ -142,7 +142,7 @@ func TestCompare(t *testing.T) {
 func TestAllHashTypes(t *testing.T) {
 	tests := []struct {
 		name     string
-		hashType string
+		algType  string
 		password string
 		salt     string
 		options  []types.Option // Special configuration options
@@ -150,25 +150,25 @@ func TestAllHashTypes(t *testing.T) {
 	}{
 		{
 			name:     "MD5",
-			hashType: constants.MD5,
+			algType:  constants.MD5,
 			password: "password123",
 			salt:     "salt123",
 		},
 		{
 			name:     "SHA1",
-			hashType: constants.SHA1,
+			algType:  constants.SHA1,
 			password: "securePass!",
 			salt:     "pepper456",
 		},
 		{
 			name:     "ScryptDefault",
-			hashType: constants.SCRYPT,
+			algType:  constants.SCRYPT,
 			password: "scryptPass",
 			salt:     "scryptSalt",
 		},
 		{
 			name:     "ScryptCustom",
-			hashType: constants.SCRYPT,
+			algType:  constants.SCRYPT,
 			password: "scryptPass2",
 			salt:     "scryptSalt2",
 			options: []types.Option{types.WithSaltLength(16), types.WithParams(&scrypt.Params{
@@ -180,19 +180,19 @@ func TestAllHashTypes(t *testing.T) {
 		},
 		{
 			name:     "Bcrypt",
-			hashType: constants.BCRYPT,
+			algType:  constants.BCRYPT,
 			password: "bcryptPassword",
 			salt:     "bcryptSalt",
 		},
 		{
 			name:     "Argon2",
-			hashType: constants.ARGON2,
+			algType:  constants.ARGON2,
 			password: "argon2Password",
 			salt:     "argon2Salt",
 		},
 		{
 			name:     "SHA256",
-			hashType: constants.SHA256,
+			algType:  constants.SHA256,
 			password: "sha256Password",
 			salt:     "sha256Salt",
 		},
@@ -201,7 +201,7 @@ func TestAllHashTypes(t *testing.T) {
 	var hashes []string
 	var hashes2 []string
 	for i, tt := range tests {
-		generator, err := NewCrypto(tt.hashType, tt.options...)
+		generator, err := NewCrypto(tt.algType, tt.options...)
 		assert.NoError(t, err)
 		assert.NotNil(t, generator)
 		tests[i].crypto = generator
@@ -218,26 +218,26 @@ func TestAllHashTypes(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(tt.name+"_Verify", func(t *testing.T) {
-			t.Logf("Verify %s hash", tt.hashType)
+			t.Logf("Verify %s hash", tt.algType)
 
 			err := tt.crypto.Verify(hashes[i], tt.password)
-			assert.NoError(t, err, "Failed to verify %s hash", tt.hashType)
+			assert.NoError(t, err, "Failed to verify %s hash", tt.algType)
 
 			err = tt.crypto.Verify(hashes[i], tt.password+"_invalid")
-			if tt.hashType == constants.MD5 {
+			if tt.algType == constants.MD5 {
 				assert.NoError(t, err, "MD5 should not return an error for wrong password")
 			} else {
-				assert.Error(t, err, "Should fail with wrong password for %s", tt.hashType)
+				assert.Error(t, err, "Should fail with wrong password for %s", tt.algType)
 			}
 
 			err2 := tt.crypto.Verify(hashes2[i], tt.password)
-			assert.NoError(t, err2, "Failed to verify %s hash", tt.hashType)
+			assert.NoError(t, err2, "Failed to verify %s hash", tt.algType)
 
 			err2 = tt.crypto.Verify(hashes2[i], tt.password+"_invalid")
-			if tt.hashType == constants.MD5 {
+			if tt.algType == constants.MD5 {
 				assert.NoError(t, err, "MD5 should not return an error for wrong password")
 			} else {
-				assert.Error(t, err2, "Should fail with wrong password for %s", tt.hashType)
+				assert.Error(t, err2, "Should fail with wrong password for %s", tt.algType)
 			}
 		})
 	}
@@ -256,7 +256,7 @@ func TestAllHashTypes(t *testing.T) {
 			assert.NoError(t, err, "Should verify hash without explicit salt")
 
 			err2 := Verify(hashes[i], tt.password+"_invalid")
-			if tt.hashType == constants.MD5 {
+			if tt.algType == constants.MD5 {
 				assert.NoError(t, err2, "MD5 should not return an error for wrong password")
 			} else {
 				assert.Error(t, err2, "Should fail with wrong password")
@@ -266,7 +266,7 @@ func TestAllHashTypes(t *testing.T) {
 			assert.NoError(t, err3, "Should verify hash without explicit salt")
 
 			err4 := Verify(hashes2[i], tt.password+"_invalid")
-			if tt.hashType == constants.MD5 {
+			if tt.algType == constants.MD5 {
 				assert.NoError(t, err4, "MD5 should not return an error for wrong password")
 			} else {
 				assert.Error(t, err4, "Should fail with wrong password")

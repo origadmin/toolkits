@@ -18,7 +18,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-var md5Type = types.NewType(constants.MD5)
+var md5AlgType = types.NewType(constants.MD5)
 
 type ConfigValidator struct {
 	SaltLength int
@@ -50,7 +50,7 @@ type MD5 struct {
 }
 
 func (c *MD5) Type() types.Type {
-	return md5Type
+	return md5AlgType
 }
 
 // NewMD5 creates a new MD5 crypto instance
@@ -63,7 +63,7 @@ func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
 
-	hashHash, err := types.TypeHash(md5Type.Name)
+	hashHash, err := types.TypeHash(md5AlgType.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +100,12 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseType(parts.Algorithm)
+	algType, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
 
-	if algorithm.Name != constants.MD5 {
+	if algType.Name != constants.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 

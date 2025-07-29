@@ -22,7 +22,7 @@ import (
 
 // PBKDF2 implements the PBKDF2 hashing algorithm
 type PBKDF2 struct {
-	p        types.Type
+	algType  types.Type
 	params   *Params
 	config   *types.Config
 	hashHash stdhash.Hash
@@ -45,11 +45,11 @@ func (c *PBKDF2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
-	algorithm, err := types.ParseType(parts.Algorithm)
+	algType, err := types.ParseType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	if algorithm.Name != constants.PBKDF2 {
+	if algType.Name != constants.PBKDF2 {
 		return errors.ErrInvalidAlgorithm
 	}
 
@@ -58,7 +58,7 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	hashHash, err := stdhash.ParseHash(algorithm.Underlying)
+	hashHash, err := stdhash.ParseHash(algType.Underlying)
 	if err != nil {
 		return err
 	}
@@ -70,11 +70,11 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 }
 
 func (c *PBKDF2) Type() types.Type {
-	return c.p
+	return c.algType
 }
 
 // NewPBKDF2 creates a new PBKDF2 crypto instance
-func NewPBKDF2(p types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+func NewPBKDF2(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -86,13 +86,13 @@ func NewPBKDF2(p types.Type, config *types.Config) (interfaces.Cryptographic, er
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid pbkdf2 config: %v", err)
 	}
-	p = generic.Must(ResolveType(p))
-	hashHash, err := stdhash.ParseHash(p.Underlying)
+	algType = generic.Must(ResolveType(algType))
+	hashHash, err := stdhash.ParseHash(algType.Underlying)
 	if err != nil {
 		return nil, err
 	}
 	return &PBKDF2{
-		p:        p,
+		algType:  algType,
 		params:   v.Params(),
 		config:   config,
 		hashHash: hashHash,

@@ -63,18 +63,18 @@ func init() {
 }
 
 // UseCrypto updates the active cryptographic instance
-func UseCrypto(t string, opts ...types.Option) error {
-	if t == "" {
+func UseCrypto(algName string, opts ...types.Option) error {
+	if algName == "" {
 		return errors.ErrInvalidAlgorithm
 	}
-	algType, err := types.ParseType(t)
+	algType, err := types.ParseType(algName)
 	if err != nil {
 		return err
 	}
 	if activeCrypto != nil && activeCrypto.Type() == algType {
 		return nil
 	}
-	newCrypto, err := NewCrypto(t, opts...)
+	newCrypto, err := NewCrypto(algName, opts...)
 	if err != nil {
 		return err
 	}
