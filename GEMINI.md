@@ -44,3 +44,35 @@ Project documentation is organized under the `docs/` directory in the root. Modu
 
 ### GitHub Templates
 Standardized GitHub templates (e.g., issue templates, PR templates) are managed as a `git subtree` under `docs/templates/github/`, sourced from `https://github.com/origadmin/.github`.
+
+## Go Module Information
+
+*   The Go module path for `runtime/` is `github.com/origadmin/runtime`.
+*   The Go module path for `contrib/` is `github.com/origadmin/contrib`.
+*   The Go module path for `toolkits/` is `github.com/origadmin/toolkits`.
+*   The Go module path for `tools/origen/` is `github.com/origadmin/origen`.
+
+## Git Subtree Information
+
+The following directories are managed as Git subtrees:
+
+*   `runtime/`:
+    *   Remote Name: `runtime_remote`
+    *   URL: `https://github.com/origadmin/runtime`
+    *   Expected Branch: `main`
+*   `docs/templates/github/`:
+    *   Remote Name: `github_templates_remote`
+    *   URL: `https://github.com/origadmin/.github`
+    *   Expected Branch: `main`
+*   `contrib/`:
+    *   Remote Name: `contrib_remote`
+    *   URL: `https://github.com/origadmin/contrib`
+    *   Expected Branch: `main`
+*   `toolkits/`:
+    *   Remote Name: `toolkits_remote`
+    *   URL: `https://github.com/origadmin/toolkits`
+    *   Expected Branch: `main`
+*   `tools/origen/`:
+    *   Remote Name: `origen_remote`
+    *   URL: `https://github.com/origadmin/origen`
+    *   Expected Branch: `main`
