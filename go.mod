@@ -1,6 +1,6 @@
 module github.com/origadmin/framework
 
-go 1.24.5
+go 1.13
 
 replace (
 	github.com/origadmin/contrib => ./contrib
