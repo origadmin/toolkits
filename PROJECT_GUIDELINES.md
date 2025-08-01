@@ -24,6 +24,8 @@ Install the following tools globally or ensure they are accessible in your PATH:
 *   **Git:** For version control.
 *   **Protoc:** Protocol Buffer compiler.
 *   **Buf:** For Protobuf linting, formatting, and breaking change detection.
+*   **golangci-lint:** A fast Go linters runner.
+*   **pre-commit:** A framework for managing and maintaining multi-language pre-commit hooks.
 *   **Go tools:**
     ```bash
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -37,16 +39,18 @@ Install the following tools globally or ensure they are accessible in your PATH:
     go install github.com/bufbuild/buf/cmd/protoc-gen-buf-lint@latest
     go install github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking@latest
     ```
+    To install `golangci-lint` and `pre-commit`, refer to their official documentation or use the `make init` command in the root `Makefile`.
 
 ## 3. Code Style & Conventions
 
 ### Go Language
-*   **Formatting:** Always run `go fmt ./...` before committing.
-*   **Linting:** Use `go vet ./...` and consider additional linters (e.g., `golangci-lint`) to ensure code quality.
+*   **Formatting:** Always run `make fmt` before committing. This uses `go fmt ./...` to ensure consistent code formatting.
+*   **Linting:** Run `make lint` to execute `golangci-lint` across the entire monorepo. Address all reported issues.
 *   **Naming:** Follow Go's official naming conventions (e.g., `CamelCase` for exported names, `camelCase` for unexported names).
 
 ### Protobuf
 *   Follow the [Buf Style Guide](https://docs.buf.build/style-guide/rules).
+*   Ensure all `.proto` files are formatted using `buf format`.
 
 ## 4. Git Workflow
 
@@ -72,13 +76,25 @@ BREAKING CHANGE: Old API is no longer supported.
 ### Pull Request (PR) Process
 1.  Create a new branch from `develop`.
 2.  Implement changes and commit frequently with descriptive messages.
-3.  Ensure all tests pass and code is linted.
+3.  Ensure all tests pass (`make test`), code is linted (`make lint`), and formatted (`make fmt`).
 4.  Create a Pull Request to `develop`.
 5.  Request reviews from at least two team members.
 6.  Address feedback and iterate.
 7.  Once approved, squash and merge the PR.
 
-## 5. Monorepo Specifics
+## 5. Unified Development Workflow
+
+### Root Makefile
+A comprehensive `Makefile` in the monorepo root (`./Makefile`) orchestrates common development tasks. Use it for:
+*   `make build`: Builds all Go modules.
+*   `make test`: Runs all Go tests.
+*   `make fmt`: Formats all Go code.
+*   `make lint`: Runs `golangci-lint` for code quality checks.
+*   `make generate`: Generates code (Protobuf, `go generate`).
+*   `make clean`: Cleans build artifacts.
+*   `make init`: Installs essential development tools.
+*   `make deps`: Updates Protobuf dependencies.
+*   `make help`: Displays available commands.
 
 ### Go Workspaces
 The `go.work` file in the root directory defines the modules within this monorepo.
@@ -89,18 +105,25 @@ go work use ./runtime ./toolkits ./contrib ./tools/origen .
 ```
 This allows `go build`, `go test`, `go run`, and `go mod tidy` to operate across all defined modules without needing `replace` directives in individual `go.mod` files for inter-module dependencies.
 
-### Submodule Management (`git subtree`)
-*   **Adding/Updating:** Use `git subtree add` and `git subtree pull` for managing external repositories as subtrees.
-*   **Pushing Changes Back:** Refer to `MONOREPO_MIGRATION_PLAN.md` for detailed instructions on pushing changes from a subtree back to its original repository, especially concerning `go.mod` handling.
+### Pre-commit Hooks
+We use `pre-commit` to automate code quality checks before each commit.
+To set up:
+1.  Install `pre-commit` (e.g., `pip install pre-commit`).
+2.  Run `pre-commit install` in the monorepo root.
+This will automatically run `go fmt`, `golangci-lint`, and other configured checks on staged files.
 
-### Unified Build Process
-A root `Makefile` will be used to orchestrate builds, tests, and other common tasks across all modules.
+## 6. Continuous Integration/Continuous Deployment (CI/CD)
 
-## 6. Testing
-*   **Unit Tests:** Write unit tests for all new code. Run with `go test ./...`.
+We use standardized CI/CD configurations (e.g., GitHub Actions) to ensure consistent build, test, and deployment processes across the monorepo.
+*   **Location:** CI/CD workflows are defined in `.github/workflows/`.
+*   **Templates:** Use common templates for shared steps (e.g., Go setup, linting, testing).
+*   **Triggers:** Workflows are typically triggered on pushes to `develop` and `main`, and on Pull Requests.
+
+## 7. Testing
+*   **Unit Tests:** Write unit tests for all new code. Run with `make test`.
 *   **Integration Tests:** For interactions between components.
 *   **Test Coverage:** Aim for high test coverage.
 
-## 7. Documentation
+## 8. Documentation
 *   Maintain clear and concise documentation for all code, APIs, and features.
 *   Update `README.md` files for each module and the root monorepo as needed.
