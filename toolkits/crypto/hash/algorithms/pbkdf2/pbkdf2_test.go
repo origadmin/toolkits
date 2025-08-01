@@ -1,0 +1,130 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+package pbkdf2
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/types"
+)
+
+func TestNewPBKDF2(t *testing.T) {
+	tests := []struct {
+		name               string
+		algType            types.Type
+		config             *types.Config
+		expectedUnderlying string
+		expectedErr        bool
+	}{
+		{
+			name:               "PBKDF2 Default (SHA256)",
+			algType:            types.NewType(constants.PBKDF2),
+			config:             DefaultConfig(),
+			expectedUnderlying: constants.SHA256,
+			expectedErr:        false,
+		},
+		{
+			name:               "PBKDF2-SHA1",
+			algType:            types.NewType(constants.PBKDF2, constants.SHA1),
+			config:             DefaultConfig(),
+			expectedUnderlying: constants.SHA1,
+			expectedErr:        false,
+		},
+		{
+			name:               "PBKDF2-HMAC-SHA256",
+			algType:            types.NewType(constants.PBKDF2, constants.HMAC_SHA256),
+			config:             DefaultConfig(),
+			expectedUnderlying: constants.HMAC_SHA256,
+			expectedErr:        false,
+		},
+		{
+			name:               "PBKDF2 with unsupported underlying hash (CRC32)",
+			algType:            types.NewType(constants.PBKDF2, constants.CRC32),
+			config:             DefaultConfig(),
+			expectedUnderlying: "",
+			expectedErr:        true,
+		},
+		{
+			name:               "PBKDF2 with invalid underlying hash",
+			algType:            types.NewType(constants.PBKDF2, "invalidhash"),
+			config:             DefaultConfig(),
+			expectedUnderlying: "",
+			expectedErr:        true,
+		},
+		{
+			name:               "Invalid SaltLength",
+			algType:            types.NewType(constants.PBKDF2),
+			config:             &types.Config{SaltLength: 4}, // Less than 8
+			expectedUnderlying: "",
+			expectedErr:        true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, err := NewPBKDF2(tt.algType, tt.config)
+			if (err != nil) != tt.expectedErr {
+				t.Errorf("NewPBKDF2() error = %v, expectedErr %v", err, tt.expectedErr)
+			}
+			if !tt.expectedErr {
+				assert.NotNil(t, c)
+				assert.Equal(t, constants.PBKDF2, c.Type().Name)
+				assert.Equal(t, tt.expectedUnderlying, c.Type().Underlying)
+			}
+		})
+	}
+}
+
+func TestPBKDF2_HashAndVerify(t *testing.T) {
+	password := "testpassword"
+	salt := []byte("testsalt12345678") // Must be at least 8 bytes for PBKDF2
+
+	tests := []struct {
+		name                    string
+		algType                 types.Type
+		expectedResolvedAlgType types.Type
+	}{
+		{name: "PBKDF2-SHA256", algType: types.NewType(constants.PBKDF2_SHA256), expectedResolvedAlgType: types.NewType(constants.PBKDF2, constants.SHA256)},
+		{name: "PBKDF2-HMAC-SHA512", algType: types.NewType(constants.PBKDF2, constants.HMAC_SHA512), expectedResolvedAlgType: types.NewType(constants.PBKDF2, constants.HMAC_SHA512)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pbkdf2Alg, err := NewPBKDF2(tt.algType, DefaultConfig())
+			assert.NoError(t, err)
+			assert.NotNil(t, pbkdf2Alg)
+
+			// Test Hash with salt
+			hashedParts, err := pbkdf2Alg.HashWithSalt(password, salt)
+			assert.NoError(t, err)
+			assert.NotNil(t, hashedParts)
+			assert.Equal(t, tt.expectedResolvedAlgType.String(), hashedParts.Algorithm)
+			parsedAlgType, err := types.ParseType(hashedParts.Algorithm)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expectedResolvedAlgType.Name, parsedAlgType.Name)
+			assert.Equal(t, tt.expectedResolvedAlgType.Underlying, parsedAlgType.Underlying)
+			assert.Equal(t, salt, hashedParts.Salt)
+
+			// Test Verify with correct password and salt
+			err = pbkdf2Alg.Verify(hashedParts, password)
+			assert.NoError(t, err)
+
+			// Test Verify with incorrect password
+			err = pbkdf2Alg.Verify(hashedParts, "wrongpassword")
+			assert.Error(t, err)
+			assert.EqualError(t, err, "password does not match")
+
+			// Test Hash without salt (SaltLength 0) - should return error
+			cfg := DefaultConfig()
+			cfg.SaltLength = 0 // This should cause an error due to ConfigValidator
+			pbkdf2NoSalt, err := NewPBKDF2(tt.algType, cfg)
+			assert.Error(t, err)
+			assert.Nil(t, pbkdf2NoSalt)
+		})
+	}
+}
