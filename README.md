@@ -58,7 +58,7 @@ import (
 //    "github.com/origadmin/runtime/xxx"
 "github.com/origadmin/runtime/config"
 "github.com/origadmin/contrib"
-//    "github.com/origadmin/contrib/xxx"    
+//    "github.com/origadmin/contrib/xxx"
 "github.com/origadmin/contrib/config"
 )
 ```
@@ -97,7 +97,7 @@ your_project --> contrib --> contrib/config --> runtime --> toolkits
 
 ```mermaid
 graph LR
-A(your_project) 
+A(your_project)
 A --> B(contrib)
 A --> C(runtime)
 A --> D(toolkits)
