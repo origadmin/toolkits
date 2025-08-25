@@ -16,8 +16,8 @@ type Options struct {
 	Level            Leveler
 	ReplaceAttr      func(groups []string, attr Attr) Attr
 	AddSource        bool
-	LumberjackConfig *LumberjackLogger
-	DevConfig        *DevConfig
+	LumberjackConfig *Logger
+	DevslogOptions   *DevslogOptions
 	NoColor          bool
 	Default          bool
 }
@@ -28,7 +28,7 @@ var (
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
 		Level:      LevelInfo,
-		DevConfig: &DevConfig{ // 预设默认配置
+		DevslogOptions: &DevslogOptions{ // 预设默认配置
 			HandlerOptions: &HandlerOptions{},
 		},
 	}
@@ -42,7 +42,7 @@ func WithFile(file string) Option {
 }
 
 // WithLumberjack write log to some File with rotation
-func WithLumberjack(config *LumberjackLogger) Option {
+func WithLumberjack(config *Logger) Option {
 	return func(opt *Options) {
 		opt.LumberjackConfig = config
 	}
@@ -113,8 +113,8 @@ func WithDefault(set bool) Option {
 }
 
 // WithDevConfig set dev config
-func WithDevConfig(config *DevConfig) Option {
+func WithDevConfig(config *DevslogOptions) Option {
 	return func(opt *Options) {
-		opt.DevConfig = config
+		opt.DevslogOptions = config
 	}
 }
