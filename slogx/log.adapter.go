@@ -6,7 +6,11 @@
 package slogx
 
 import (
+	"context"
+	"io"
+	"log"
 	slog "log/slog"
+	"time"
 
 	devslog "github.com/golang-cz/devslog"
 	tint "github.com/lmittmann/tint"
@@ -46,25 +50,37 @@ const (
 var DiscardHandler = slog.DiscardHandler
 
 type (
-	Color          = devslog.Color
-	DevslogOptions = devslog.Options
-	TintOptions    = tint.Options
-	Logger         = lumberjack.Logger
-	Attr           = slog.Attr
-	Handler        = slog.Handler
-	HandlerOptions = slog.HandlerOptions
-	JSONHandler    = slog.JSONHandler
-	Kind           = slog.Kind
-	Level          = slog.Level
-	LevelVar       = slog.LevelVar
-	Leveler        = slog.Leveler
-	LogValuer      = slog.LogValuer
-	Logger1        = slog.Logger
-	Record         = slog.Record
-	Source         = slog.Source
-	TextHandler    = slog.TextHandler
-	Value          = slog.Value
+	Color            = devslog.Color
+	DevslogOptions   = devslog.Options
+	TintOptions      = tint.Options
+	LumberjackLogger = lumberjack.Logger
+	Attr             = slog.Attr
+	Handler          = slog.Handler
+	HandlerOptions   = slog.HandlerOptions
+	JSONHandler      = slog.JSONHandler
+	Kind             = slog.Kind
+	Level            = slog.Level
+	LevelVar         = slog.LevelVar
+	Leveler          = slog.Leveler
+	LogValuer        = slog.LogValuer
+	Logger           = slog.Logger
+	Record           = slog.Record
+	Source           = slog.Source
+	TextHandler      = slog.TextHandler
+	Value            = slog.Value
 )
+
+func NewTintHandler(w io.Writer, opts *tint.Options) slog.Handler {
+	return tint.NewHandler(w, opts)
+}
+
+func TintAttr(color uint8, attr slog.Attr) slog.Attr {
+	return tint.Attr(color, attr)
+}
+
+func TintErr(err error) slog.Attr {
+	return tint.Err(err)
+}
 
 func Any(key string, value any) slog.Attr {
 	return slog.Any(key, value)
@@ -86,12 +102,28 @@ func Debug(msg string, args ...any) {
 	slog.Debug(msg, args...)
 }
 
+func DebugContext(ctx context.Context, msg string, args ...any) {
+	slog.DebugContext(ctx, msg, args...)
+}
+
 func Default() *slog.Logger {
 	return slog.Default()
 }
 
+func Duration(key string, v time.Duration) slog.Attr {
+	return slog.Duration(key, v)
+}
+
+func DurationValue(v time.Duration) slog.Value {
+	return slog.DurationValue(v)
+}
+
 func Error(msg string, args ...any) {
 	slog.Error(msg, args...)
+}
+
+func ErrorContext(ctx context.Context, msg string, args ...any) {
+	slog.ErrorContext(ctx, msg, args...)
 }
 
 func Float64(key string, v float64) slog.Attr {
@@ -114,6 +146,10 @@ func Info(msg string, args ...any) {
 	slog.Info(msg, args...)
 }
 
+func InfoContext(ctx context.Context, msg string, args ...any) {
+	slog.InfoContext(ctx, msg, args...)
+}
+
 func Int(key string, value int) slog.Attr {
 	return slog.Int(key, value)
 }
@@ -130,8 +166,32 @@ func IntValue(v int) slog.Value {
 	return slog.IntValue(v)
 }
 
+func Log(ctx context.Context, level slog.Level, msg string, args ...any) {
+	slog.Log(ctx, level, msg, args...)
+}
+
+func LogAttrs(ctx context.Context, level slog.Level, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, level, msg, attrs...)
+}
+
+func NewJSONHandler(w io.Writer, opts *slog.HandlerOptions) *slog.JSONHandler {
+	return slog.NewJSONHandler(w, opts)
+}
+
+func NewLogLogger(h slog.Handler, level slog.Level) *log.Logger {
+	return slog.NewLogLogger(h, level)
+}
+
+func NewRecord(t time.Time, level slog.Level, msg string, pc uintptr) slog.Record {
+	return slog.NewRecord(t, level, msg, pc)
+}
+
 func NewSlog(h slog.Handler) *slog.Logger {
 	return slog.New(h)
+}
+
+func NewTextHandler(w io.Writer, opts *slog.HandlerOptions) *slog.TextHandler {
+	return slog.NewTextHandler(w, opts)
 }
 
 func SetDefault(l *slog.Logger) {
@@ -150,6 +210,14 @@ func StringValue(value string) slog.Value {
 	return slog.StringValue(value)
 }
 
+func Time(key string, v time.Time) slog.Attr {
+	return slog.Time(key, v)
+}
+
+func TimeValue(v time.Time) slog.Value {
+	return slog.TimeValue(v)
+}
+
 func Uint64(key string, v uint64) slog.Attr {
 	return slog.Uint64(key, v)
 }
@@ -160,6 +228,10 @@ func Uint64Value(v uint64) slog.Value {
 
 func Warn(msg string, args ...any) {
 	slog.Warn(msg, args...)
+}
+
+func WarnContext(ctx context.Context, msg string, args ...any) {
+	slog.WarnContext(ctx, msg, args...)
 }
 
 func With(args ...any) *slog.Logger {

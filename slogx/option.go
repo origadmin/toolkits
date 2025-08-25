@@ -16,7 +16,7 @@ type Options struct {
 	Level            Leveler
 	ReplaceAttr      func(groups []string, attr Attr) Attr
 	AddSource        bool
-	LumberjackConfig *Logger
+	LumberjackLogger *LumberjackLogger
 	DevslogOptions   *DevslogOptions
 	NoColor          bool
 	Default          bool
@@ -42,9 +42,9 @@ func WithFile(file string) Option {
 }
 
 // WithLumberjack write log to some File with rotation
-func WithLumberjack(config *Logger) Option {
+func WithLumberjack(lumberjackLogger *LumberjackLogger) Option {
 	return func(opt *Options) {
-		opt.LumberjackConfig = config
+		opt.LumberjackLogger = lumberjackLogger
 	}
 }
 

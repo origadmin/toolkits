@@ -48,8 +48,8 @@ func New(options ...Option) *slog.Logger {
 	if cfg.Console {
 		writers = append(writers, os.Stderr)
 	}
-	if cfg.LumberjackConfig != nil {
-		writers = append(writers, cfg.LumberjackConfig)
+	if cfg.LumberjackLogger != nil {
+		writers = append(writers, cfg.LumberjackLogger)
 	}
 	// Ensure we don't write to the same file twice if lumberjack is also configured for it.
 	if cfg.Output != "" {
