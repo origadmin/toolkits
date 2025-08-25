@@ -6,7 +6,7 @@
 // This file exists to ensure the generated output is named log.adapter.go.
 package slogx
 
-//go:generate ./adptool ./log.go
+//go:generate adptool ./log.go
 //go:adapter:package gopkg.in/natefinch/lumberjack.v2 lumberjack
 //go:adapter:package:type Logger
 //go:adapter:package:type:rename LumberjackLogger
