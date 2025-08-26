@@ -7,9 +7,8 @@ require (
 	github.com/goexts/generic v0.3.0
 	github.com/origadmin/toolkits/codec v0.3.17
 	github.com/origadmin/toolkits/errors v0.3.17
-	github.com/origadmin/toolkits/identifier v0.3.17
-	github.com/origadmin/toolkits/sloge v0.3.12
-	github.com/stretchr/testify v1.10.0
+	github.com/origadmin/toolkits/slogx v0.3.19
+	github.com/stretchr/testify v1.11.0
 )
 
 require (
@@ -34,7 +33,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
