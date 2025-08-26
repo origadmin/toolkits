@@ -10,24 +10,29 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	"github.com/origadmin/toolkits/identifier/ulid"
 	// Blank import to trigger the ulid provider registration
 	_ "github.com/origadmin/toolkits/identifier/ulid"
 )
 
-// TestUlidProvider ensures the ulid provider is registered correctly.
-func TestUlidProvider(t *testing.T) {
-	// String generator should be available.
-	strGenerator := identifier.New[string]("ulid")
-	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'ulid'")
+// TestGeneratorCreation ensures the ulid provider is registered correctly.
+func TestGeneratorCreation(t *testing.T) {
+	// Test getting from the global registry
+	registryGenerator := identifier.Get[string]("ulid")
+	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'ulid'")
+
+	// Test getting via the convenience function
+	convenienceGenerator := ulid.New()
+	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from ulid.New()")
 
 	// Number generator should NOT be available.
-	numGenerator := identifier.New[int64]("ulid")
+	numGenerator := identifier.Get[int64]("ulid")
 	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'ulid' as it is not supported")
 }
 
 // TestGenerateAndValidate tests the generation and validation of a ULID.
 func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.New[string]("ulid")
+	generator := ulid.New()
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
@@ -48,7 +53,7 @@ func TestGenerateAndValidate(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the ulid generator.
 func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.New[string]("ulid")
+	generator := ulid.New()
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}

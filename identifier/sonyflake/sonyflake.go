@@ -20,11 +20,11 @@ type Config = sonyflake.Settings
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider     = (*provider)(nil)
-	_ identifier.TypedGenerator[int64] = (*numberGenerator)(nil)
+	_ identifier.Provider     = (*provider)(nil)
+	_ identifier.Generator[int64] = (*numberGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for Sonyflake.
+// provider implements identifier.Provider for Sonyflake.
 // It holds a configured, stateful sonyflake instance.
 type provider struct {
 	sf *sonyflake.Sonyflake
@@ -42,16 +42,16 @@ func (p *provider) Size() int {
 }
 
 // AsString returns nil as Sonyflake does not have a standard string representation.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return nil
 }
 
 // AsNumber returns a number-based generator for Sonyflake.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return &numberGenerator{sf: p.sf}
 }
 
-// numberGenerator implements identifier.TypedGenerator[int64] for Sonyflake.
+// numberGenerator implements identifier.Generator[int64] for Sonyflake.
 type numberGenerator struct {
 	sf *sonyflake.Sonyflake
 }
@@ -85,7 +85,7 @@ func (g *numberGenerator) Validate(id int64) bool {
 
 // New creates a new, local, configured Sonyflake provider.
 // This instance is NOT managed by the global identifier registry.
-func New(cfg Config) (identifier.GeneratorProvider, error) {
+func New(cfg Config) (identifier.Provider, error) {
 	sf := sonyflake.NewSonyflake(sonyflake.Settings(cfg))
 	if sf == nil {
 		// This can happen if the machine ID function fails.

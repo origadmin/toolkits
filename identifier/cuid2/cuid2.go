@@ -25,11 +25,11 @@ type Config struct {
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for CUID2.
+// provider implements identifier.Provider for CUID2.
 // It holds a configured generator function.
 type provider struct {
 	generator func() string
@@ -46,16 +46,16 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for CUID2.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{generator: p.generator}
 }
 
 // AsNumber returns nil as CUID2 only generates strings.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return nil
 }
 
-// stringGenerator implements identifier.TypedGenerator[string] for CUID2.
+// stringGenerator implements identifier.Generator[string] for CUID2.
 type stringGenerator struct {
 	generator func() string
 }
@@ -85,9 +85,9 @@ func (g *stringGenerator) Validate(id string) bool {
 // New creates a new, default CUID2 generator.
 // This is a convenience function for direct use of the cuid2 package,
 // and it returns the globally registered default generator.
-func New() identifier.TypedGenerator[string] {
+func New() identifier.Generator[string] {
 	// This relies on the init() function having registered the provider.
-	return identifier.New[string]("cuid2")
+	return identifier.Get[string]("cuid2")
 }
 
 // --- Advanced Usage ---
@@ -97,7 +97,7 @@ func New() identifier.TypedGenerator[string] {
 // NOTE: The underlying 'github.com/nrednav/cuid2' library does not support
 // custom length or fingerprint. This function will return an error if
 // configuration is provided.
-func NewGenerator(cfg Config) (identifier.TypedGenerator[string], error) {
+func NewGenerator(cfg Config) (identifier.Generator[string], error) {
 	if cfg.Length > 0 || cfg.Fingerprint != "" {
 		return nil, fmt.Errorf("cuid2: custom length and fingerprint are not supported by this generator")
 	}

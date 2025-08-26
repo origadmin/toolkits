@@ -15,14 +15,24 @@ import (
 	_ "github.com/origadmin/toolkits/identifier/cuid2"
 )
 
-// TestDefaultProvider ensures the default cuid2 provider is registered correctly.
-func TestDefaultProvider(t *testing.T) {
-	generator := identifier.New[string]("cuid2")
-	assert.NotNil(t, generator, "Expected to get a non-nil string generator for 'cuid2'")
+// TestGeneratorCreation ensures the generator can be retrieved correctly,
+// both from the central registry and the package's convenience function.
+func TestGeneratorCreation(t *testing.T) {
+	// Test getting from the global registry
+	registryGenerator := identifier.Get[string]("cuid2")
+	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'cuid2'")
 
-	id := generator.Generate()
-	assert.NotEmpty(t, id)
-	assert.True(t, generator.Validate(id))
+	id1 := registryGenerator.Generate()
+	assert.NotEmpty(t, id1)
+	assert.True(t, registryGenerator.Validate(id1))
+
+	// Test getting via the convenience function
+	convenienceGenerator := cuid2.New()
+	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from cuid2.New()")
+
+	id2 := convenienceGenerator.Generate()
+	assert.NotEmpty(t, id2)
+	assert.True(t, convenienceGenerator.Validate(id2))
 }
 
 // TestCustomGenerator tests the creation of a generator with custom settings.
@@ -52,7 +62,7 @@ func TestCustomGenerator(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the cuid2 generator.
 func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.New[string]("cuid2")
+	generator := identifier.Get[string]("cuid2")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
@@ -63,7 +73,7 @@ func TestGeneratorProperties(t *testing.T) {
 
 // TestValidationFailure checks that validation correctly identifies an invalid CUID2.
 func TestValidationFailure(t *testing.T) {
-	generator := identifier.New[string]("cuid2")
+	generator := identifier.Get[string]("cuid2")
 	if !assert.NotNil(t, generator) {
 		t.FailNow()
 	}

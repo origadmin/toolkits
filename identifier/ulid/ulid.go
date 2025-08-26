@@ -13,11 +13,11 @@ import (
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for ULID.
+// provider implements identifier.Provider for ULID.
 // It's a stateless singleton that vends the actual generator.
 type provider struct{}
 
@@ -33,16 +33,16 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for ULID.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{}
 }
 
 // AsNumber returns nil as ULID does not have a standard integer representation.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return nil
 }
 
-// stringGenerator implements identifier.TypedGenerator[string] for ULID.
+// stringGenerator implements identifier.Generator[string] for ULID.
 // This is the actual workhorse for generating and validating IDs.
 type stringGenerator struct{}
 
@@ -65,6 +65,15 @@ func (g *stringGenerator) Generate() string {
 func (g *stringGenerator) Validate(id string) bool {
 	_, err := ulid.ParseStrict(id)
 	return err == nil
+}
+
+// --- Convenience Constructor ---
+
+// New creates a new, default ULID generator.
+// This is a convenience function for direct use of the ulid package,
+// and it returns the globally registered default generator.
+func New() identifier.Generator[string] {
+	return identifier.Get[string]("ulid")
 }
 
 // init registers the ULID provider with the global identifier registry.

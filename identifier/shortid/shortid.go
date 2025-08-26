@@ -32,11 +32,11 @@ type Config struct {
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for shortid.
+// provider implements identifier.Provider for shortid.
 // It holds a configured instance of a shortid generator.
 type provider struct {
 	generator *shortid.Shortid
@@ -55,7 +55,7 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for shortid.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{
 		generator: p.generator,
 		alphabet:  p.alphabet,
@@ -63,11 +63,11 @@ func (p *provider) AsString() identifier.TypedGenerator[string] {
 }
 
 // AsNumber returns nil as shortid only generates strings.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return nil
 }
 
-// stringGenerator implements identifier.TypedGenerator[string] for shortid.
+// stringGenerator implements identifier.Generator[string] for shortid.
 type stringGenerator struct {
 	generator *shortid.Shortid
 	alphabet  string
@@ -115,11 +115,20 @@ func (g *stringGenerator) Validate(id string) bool {
 	return true
 }
 
+// --- Convenience Constructor ---
+
+// New creates a new, default Shortid generator.
+// This is a convenience function for direct use of the shortid package,
+// and it returns the globally registered default generator.
+func New() identifier.Generator[string] {
+	return identifier.Get[string]("shortid")
+}
+
 // --- Advanced Usage ---
 
 // NewGenerator creates a new, local, configured Shortid generator.
 // This instance is NOT managed by the global identifier registry.
-func NewGenerator(cfg Config) (identifier.TypedGenerator[string], error) {
+func NewGenerator(cfg Config) (identifier.Generator[string], error) {
 	// The library panics on invalid alphabet, so we check it first.
 	if len(cfg.Alphabet) < minAlphabetLen {
 		return nil, fmt.Errorf("shortid: alphabet must contain at least %d unique characters", minAlphabetLen)

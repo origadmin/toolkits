@@ -10,24 +10,29 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	"github.com/origadmin/toolkits/identifier/nanoid"
 	// Blank import to trigger the nanoid provider registration
 	_ "github.com/origadmin/toolkits/identifier/nanoid"
 )
 
-// TestNanoidProvider ensures the nanoid provider is registered correctly.
-func TestNanoidProvider(t *testing.T) {
-	// String generator should be available.
-	strGenerator := identifier.New[string]("nanoid")
-	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'nanoid'")
+// TestGeneratorCreation ensures the generator can be retrieved correctly.
+func TestGeneratorCreation(t *testing.T) {
+	// Test getting from the global registry
+	registryGenerator := identifier.Get[string]("nanoid")
+	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'nanoid'")
+
+	// Test getting via the convenience function
+	convenienceGenerator := nanoid.New()
+	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from nanoid.New()")
 
 	// Number generator should NOT be available.
-	numGenerator := identifier.New[int64]("nanoid")
+	numGenerator := identifier.Get[int64]("nanoid")
 	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'nanoid' as it is not supported")
 }
 
 // TestGenerateAndValidate tests the generation and validation of a NanoID.
 func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.New[string]("nanoid")
+	generator := identifier.Get[string]("nanoid")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
@@ -48,7 +53,7 @@ func TestGenerateAndValidate(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the nanoid generator.
 func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.New[string]("nanoid")
+	generator := identifier.Get[string]("nanoid")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}

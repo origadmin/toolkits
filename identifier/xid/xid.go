@@ -13,11 +13,11 @@ import (
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for XID.
+// provider implements identifier.Provider for XID.
 // It's a stateless singleton that vends the actual generator.
 type provider struct{}
 
@@ -33,16 +33,16 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for XID.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{}
 }
 
 // AsNumber returns nil as XID does not have a standard integer representation.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return nil
 }
 
-// stringGenerator implements identifier.TypedGenerator[string] for XID.
+// stringGenerator implements identifier.Generator[string] for XID.
 // This is the actual workhorse for generating and validating IDs.
 type stringGenerator struct{}
 
@@ -65,6 +65,15 @@ func (g *stringGenerator) Generate() string {
 func (g *stringGenerator) Validate(id string) bool {
 	_, err := xid.FromString(id)
 	return err == nil
+}
+
+// --- Convenience Constructor ---
+
+// New creates a new, default XID generator.
+// This is a convenience function for direct use of the xid package,
+// and it returns the globally registered default generator.
+func New() identifier.Generator[string] {
+	return identifier.Get[string]("xid")
 }
 
 // init registers the XID provider with the global identifier registry.

@@ -11,25 +11,25 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/snowflake"
+	sf "github.com/origadmin/toolkits/identifier/snowflake"
 	// Blank import to trigger the snowflake provider registration
 	_ "github.com/origadmin/toolkits/identifier/snowflake"
 )
 
-// TestSnowflakeProvider ensures the snowflake provider is registered correctly
+// TestDefaultGenerator ensures the default snowflake provider is registered correctly
 // and provides generators for both string and int64.
-func TestSnowflakeProvider(t *testing.T) {
-	// Both string and number generators should be available.
-	strGenerator := identifier.New[string]("snowflake")
+func TestDefaultGenerator(t *testing.T) {
+	// Both string and number generators should be available from the registry.
+	strGenerator := identifier.Get[string]("snowflake")
 	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'snowflake'")
 
-	numGenerator := identifier.New[int64]("snowflake")
+	numGenerator := identifier.Get[int64]("snowflake")
 	assert.NotNil(t, numGenerator, "Expected to get a non-nil number generator for 'snowflake'")
 }
 
 // TestGenerateAndValidateNumber tests the number-based snowflake generator.
 func TestGenerateAndValidateNumber(t *testing.T) {
-	generator := identifier.New[int64]("snowflake")
+	generator := identifier.Get[int64]("snowflake")
 	if !assert.NotNil(t, generator, "Number generator should not be nil") {
 		t.FailNow()
 	}
@@ -46,7 +46,7 @@ func TestGenerateAndValidateNumber(t *testing.T) {
 
 // TestGenerateAndValidateString tests the string-based snowflake generator.
 func TestGenerateAndValidateString(t *testing.T) {
-	generator := identifier.New[string]("snowflake")
+	generator := identifier.Get[string]("snowflake")
 	if !assert.NotNil(t, generator, "String generator should not be nil") {
 		t.FailNow()
 	}
@@ -63,8 +63,8 @@ func TestGenerateAndValidateString(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the snowflake generators.
 func TestGeneratorProperties(t *testing.T) {
-	strGenerator := identifier.New[string]("snowflake")
-	numGenerator := identifier.New[int64]("snowflake")
+	strGenerator := identifier.Get[string]("snowflake")
+	numGenerator := identifier.Get[int64]("snowflake")
 	if !assert.NotNil(t, strGenerator) || !assert.NotNil(t, numGenerator) {
 		t.FailNow()
 	}
@@ -80,10 +80,10 @@ func TestGeneratorProperties(t *testing.T) {
 func TestCustomNodeGenerator(t *testing.T) {
 	t.Run("ValidNodeID", func(t *testing.T) {
 		const nodeID int64 = 478
-		cfg := snowflake.Config{Node: nodeID}
+		cfg := sf.Config{Node: nodeID}
 
 		// Create a new provider with the custom config
-		provider, err := snowflake.New(cfg)
+		provider, err := sf.New(cfg)
 		assert.NoError(t, err)
 		assert.NotNil(t, provider)
 
@@ -105,8 +105,8 @@ func TestCustomNodeGenerator(t *testing.T) {
 
 	t.Run("InvalidNodeID", func(t *testing.T) {
 		// Node ID is out of the valid range (0-1023)
-		cfg := snowflake.Config{Node: 2000}
-		_, err := snowflake.New(cfg)
+		cfg := sf.Config{Node: 2000}
+		_, err := sf.New(cfg)
 		assert.Error(t, err, "Expected an error for an out-of-range node ID")
 	})
 }

@@ -15,14 +15,14 @@ import (
 
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
 // validationRegex is used to perform a basic validation of a standard nanoid string (21 chars, URL-friendly).
 var validationRegex = regexp.MustCompile("^[a-zA-Z0-9_-]{21}$")
 
-// provider implements identifier.GeneratorProvider for NanoID.
+// provider implements identifier.Provider for NanoID.
 type provider struct {
 	generator func() (string, error)
 }
@@ -39,16 +39,16 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for NanoID.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{generator: p.generator}
 }
 
 // AsNumber returns nil as NanoID is a string-based identifier.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return nil
 }
 
-// stringGenerator implements identifier.TypedGenerator[string] for NanoID.
+// stringGenerator implements identifier.Generator[string] for NanoID.
 type stringGenerator struct {
 	generator func() (string, error)
 }
@@ -85,9 +85,9 @@ func (g *stringGenerator) Validate(id string) bool {
 // New creates a new, default NanoID generator.
 // This is a convenience function for direct use of the nanoid package,
 // and it returns the globally registered default generator.
-func New() identifier.TypedGenerator[string] {
+func New() identifier.Generator[string] {
 	// This relies on the init() function having registered the provider.
-	return identifier.New[string]("nanoid")
+	return identifier.Get[string]("nanoid")
 }
 
 // init registers the NanoID provider with the global identifier registry.

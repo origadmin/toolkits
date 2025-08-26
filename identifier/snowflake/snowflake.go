@@ -22,12 +22,12 @@ type Config struct {
 
 // Ensure the provider and generators implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
-	_ identifier.TypedGenerator[int64]  = (*numberGenerator)(nil)
-	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
+	_ identifier.Provider      = (*provider)(nil)
+	_ identifier.Generator[int64]  = (*numberGenerator)(nil)
+	_ identifier.Generator[string] = (*stringGenerator)(nil)
 )
 
-// provider implements identifier.GeneratorProvider for Snowflake.
+// provider implements identifier.Provider for Snowflake.
 // It holds a configured, stateful snowflake node.
 type provider struct {
 	node *snowflake.Node
@@ -44,18 +44,18 @@ func (p *provider) Size() int {
 }
 
 // AsString returns a string-based generator for Snowflake.
-func (p *provider) AsString() identifier.TypedGenerator[string] {
+func (p *provider) AsString() identifier.Generator[string] {
 	return &stringGenerator{node: p.node}
 }
 
 // AsNumber returns a number-based generator for Snowflake.
-func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+func (p *provider) AsNumber() identifier.Generator[int64] {
 	return &numberGenerator{node: p.node}
 }
 
 // --- Number Generator ---
 
-// numberGenerator implements identifier.TypedGenerator[int64] for Snowflake.
+// numberGenerator implements identifier.Generator[int64] for Snowflake.
 type numberGenerator struct {
 	node *snowflake.Node
 }
@@ -82,7 +82,7 @@ func (g *numberGenerator) Validate(id int64) bool {
 
 // --- String Generator ---
 
-// stringGenerator implements identifier.TypedGenerator[string] for Snowflake.
+// stringGenerator implements identifier.Generator[string] for Snowflake.
 type stringGenerator struct {
 	node *snowflake.Node
 }
@@ -112,7 +112,7 @@ func (g *stringGenerator) Validate(id string) bool {
 
 // New creates a new, local, configured Snowflake provider.
 // This instance is NOT managed by the global identifier registry.
-func New(cfg Config) (identifier.GeneratorProvider, error) {
+func New(cfg Config) (identifier.Provider, error) {
 	if cfg.Node < 0 || cfg.Node > 1023 {
 		return nil, fmt.Errorf("snowflake node ID %d is out of range (0-1023)", cfg.Node)
 	}

@@ -18,21 +18,20 @@ import (
 	_ "github.com/origadmin/toolkits/identifier/sonyflake"
 )
 
-// TestSonyflakeProvider ensures the sonyflake provider is registered and can be retrieved
-// via the public identifier.New API.
-func TestSonyflakeProvider(t *testing.T) {
+// TestDefaultGenerator ensures the sonyflake provider is registered and can be retrieved.
+func TestDefaultGenerator(t *testing.T) {
 	// Attempt to get the number generator, which should succeed.
-	numGenerator := identifier.New[int64]("sonyflake")
+	numGenerator := identifier.Get[int64]("sonyflake")
 	assert.NotNil(t, numGenerator, "Expected to get a non-nil number generator for 'sonyflake'")
 
 	// Ensure the string generator is not supported and returns nil.
-	strGenerator := identifier.New[string]("sonyflake")
+	strGenerator := identifier.Get[string]("sonyflake")
 	assert.Nil(t, strGenerator, "Expected to get a nil string generator for 'sonyflake' as it is not supported")
 }
 
 // TestGenerateAndValidate tests the full lifecycle of generating and validating an ID.
 func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.New[int64]("sonyflake")
+	generator := identifier.Get[int64]("sonyflake")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
@@ -52,7 +51,7 @@ func TestGenerateAndValidate(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the sonyflake generator.
 func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.New[int64]("sonyflake")
+	generator := identifier.Get[int64]("sonyflake")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}

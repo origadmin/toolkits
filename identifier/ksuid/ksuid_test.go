@@ -10,24 +10,29 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	"github.com/origadmin/toolkits/identifier/ksuid"
 	// Blank import to trigger the ksuid provider registration
 	_ "github.com/origadmin/toolkits/identifier/ksuid"
 )
 
-// TestKsuidProvider ensures the ksuid provider is registered correctly.
-func TestKsuidProvider(t *testing.T) {
-	// String generator should be available.
-	strGenerator := identifier.New[string]("ksuid")
-	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'ksuid'")
+// TestGeneratorCreation ensures the ksuid provider is registered correctly.
+func TestGeneratorCreation(t *testing.T) {
+	// Test getting from the global registry
+	registryGenerator := identifier.Get[string]("ksuid")
+	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'ksuid'")
+
+	// Test getting via the convenience function
+	convenienceGenerator := ksuid.New()
+	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from ksuid.New()")
 
 	// Number generator should NOT be available.
-	numGenerator := identifier.New[int64]("ksuid")
+	numGenerator := identifier.Get[int64]("ksuid")
 	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'ksuid' as it is not supported")
 }
 
 // TestGenerateAndValidate tests the generation and validation of a KSUID.
 func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.New[string]("ksuid")
+	generator := identifier.Get[string]("ksuid")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
@@ -48,7 +53,7 @@ func TestGenerateAndValidate(t *testing.T) {
 
 // TestGeneratorProperties checks the metadata of the ksuid generator.
 func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.New[string]("ksuid")
+	generator := identifier.Get[string]("ksuid")
 	if !assert.NotNil(t, generator, "Generator should not be nil") {
 		t.FailNow()
 	}
