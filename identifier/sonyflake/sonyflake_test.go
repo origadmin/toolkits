@@ -5,11 +5,14 @@
 package sonyflake_test // Corrected package declaration for black-box testing
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	"github.com/origadmin/toolkits/identifier/sonyflake"
 	// This blank import is necessary to ensure the sonyflake's init() function is called,
 	// which registers the provider.
 	_ "github.com/origadmin/toolkits/identifier/sonyflake"
@@ -56,4 +59,43 @@ func TestGeneratorProperties(t *testing.T) {
 
 	assert.Equal(t, "sonyflake", generator.Name(), "Generator name should be 'sonyflake'")
 	assert.Equal(t, 63, generator.Size(), "Generator size should be 63 bits")
+}
+
+// TestCustomGenerator tests creating a sonyflake generator with custom settings.
+func TestCustomGenerator(t *testing.T) {
+	t.Run("SuccessfulCreation", func(t *testing.T) {
+		// Create a custom configuration
+		cfg := sonyflake.Config{
+			StartTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			MachineID: func() (uint16, error) {
+				return 123, nil
+			},
+		}
+
+		// Create a new provider with the custom config
+		provider, err := sonyflake.New(cfg)
+		assert.NoError(t, err)
+		assert.NotNil(t, provider)
+
+		// Get a number generator and generate an ID
+		generator := provider.AsNumber()
+		assert.NotNil(t, generator)
+		id := generator.Generate()
+		assert.NotZero(t, id)
+		assert.True(t, generator.Validate(id))
+	})
+
+	t.Run("FailedCreation", func(t *testing.T) {
+		// Create a config with a MachineID function that always fails
+		cfg := sonyflake.Config{
+			MachineID: func() (uint16, error) {
+				return 0, fmt.Errorf("simulated machine ID failure")
+			},
+		}
+
+		// Attempt to create a new provider, which should fail
+		provider, err := sonyflake.New(cfg)
+		assert.Error(t, err)
+		assert.Nil(t, provider)
+	})
 }

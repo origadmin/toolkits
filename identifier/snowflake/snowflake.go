@@ -6,12 +6,19 @@
 package snowflake
 
 import (
+	"fmt"
 	"math/rand/v2"
 
 	"github.com/bwmarrin/snowflake"
 
 	"github.com/origadmin/toolkits/identifier"
 )
+
+// Config holds the configuration for creating a new Snowflake node.
+type Config struct {
+	// Node is the unique node ID for this generator. It must be between 0 and 1023.
+	Node int64
+}
 
 // Ensure the provider and generators implement the required interfaces at compile time.
 var (
@@ -69,7 +76,6 @@ func (g *numberGenerator) Generate() int64 {
 }
 
 // Validate checks if the provided int64 is a plausible Snowflake ID.
-// Note: This is a basic check, as any positive int64 could be valid.
 func (g *numberGenerator) Validate(id int64) bool {
 	return id > 0
 }
@@ -102,18 +108,34 @@ func (g *stringGenerator) Validate(id string) bool {
 	return err == nil
 }
 
-// init registers the Snowflake provider with the global identifier registry.
+// --- Advanced Usage ---
+
+// New creates a new, local, configured Snowflake provider.
+// This instance is NOT managed by the global identifier registry.
+func New(cfg Config) (identifier.GeneratorProvider, error) {
+	if cfg.Node < 0 || cfg.Node > 1023 {
+		return nil, fmt.Errorf("snowflake node ID %d is out of range (0-1023)", cfg.Node)
+	}
+	node, err := snowflake.NewNode(cfg.Node)
+	if err != nil {
+		return nil, fmt.Errorf("snowflake: failed to create new node: %w", err)
+	}
+	return &provider{node: node}, nil
+}
+
+// --- Default Global Instance ---
+
+// init registers the default Snowflake provider with the global identifier registry.
+// This provider uses a random node ID.
 func init() {
-	// Create a snowflake node with a random ID between 0 and 1023.
-	// This helps prevent collisions when multiple application instances are running.
+	// Create a snowflake node with a random ID for the default global instance.
 	nodeID := rand.Int64N(1024)
 	node, err := snowflake.NewNode(nodeID)
 	if err != nil {
-		// This panic is acceptable in an init() function if a core component fails to initialize.
-		panic("identifier: failed to initialize snowflake node: " + err.Error())
+		panic("identifier: failed to initialize default snowflake node: " + err.Error())
 	}
 
-	// Register a provider instance containing the configured node.
+	// Register a provider instance containing the default node.
 	identifier.Register(&provider{
 		node: node,
 	})

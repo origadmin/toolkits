@@ -6,10 +6,10 @@
 package nanoid
 
 import (
+	"fmt"
 	"regexp"
 
-	gonanoid "github.com/jaevor/go-nanoid"
-
+	"github.com/jaevor/go-nanoid"
 	"github.com/origadmin/toolkits/identifier"
 )
 
@@ -23,8 +23,9 @@ var (
 var validationRegex = regexp.MustCompile("^[a-zA-Z0-9_-]{21}$")
 
 // provider implements identifier.GeneratorProvider for NanoID.
-// It's a stateless singleton that vends the actual generator.
-type provider struct{}
+type provider struct {
+	generator func() (string, error)
+}
 
 // Name returns the name of the identifier.
 func (p *provider) Name() string {
@@ -39,7 +40,7 @@ func (p *provider) Size() int {
 
 // AsString returns a string-based generator for NanoID.
 func (p *provider) AsString() identifier.TypedGenerator[string] {
-	return &stringGenerator{}
+	return &stringGenerator{generator: p.generator}
 }
 
 // AsNumber returns nil as NanoID is a string-based identifier.
@@ -48,7 +49,9 @@ func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
 }
 
 // stringGenerator implements identifier.TypedGenerator[string] for NanoID.
-type stringGenerator struct{}
+type stringGenerator struct {
+	generator func() (string, error)
+}
 
 // Name returns the name of the identifier.
 func (g *stringGenerator) Name() string {
@@ -62,11 +65,11 @@ func (g *stringGenerator) Size() int {
 
 // Generate creates a new, URL-friendly, unique string ID with a default length of 21.
 func (g *stringGenerator) Generate() string {
-	// Using a generator which is fast and uses crypto/rand.
-	id, err := gonanoid.New()
+	// This library is fast and uses crypto/rand by default.
+	// We panic on error for consistency with the generator pattern.
+	id, err := g.generator()
 	if err != nil {
-		// This is highly unlikely to fail. Return an empty string as a fallback.
-		return ""
+		panic(fmt.Sprintf("nanoid: failed to generate id: %v", err))
 	}
 	return id
 }
@@ -77,8 +80,28 @@ func (g *stringGenerator) Validate(id string) bool {
 	return validationRegex.MatchString(id)
 }
 
+// --- Convenience Constructor ---
+
+// New creates a new, default NanoID generator.
+// This is a convenience function for direct use of the nanoid package,
+// and it returns the globally registered default generator.
+func New() identifier.TypedGenerator[string] {
+	// This relies on the init() function having registered the provider.
+	return identifier.New[string]("nanoid")
+}
+
 // init registers the NanoID provider with the global identifier registry.
 func init() {
-	// Register a singleton instance of our provider.
-	identifier.Register(&provider{})
+	// Create a new generator function with the standard alphabet and a length of 21.
+	genFunc, err := nanoid.Standard(21)
+	if err != nil {
+		panic(fmt.Sprintf("nanoid: failed to initialize generator: %v", err))
+	}
+
+	// Wrap the generator to match the provider's expected signature.
+	wrappedGen := func() (string, error) {
+		return genFunc(), nil
+	}
+
+	identifier.Register(&provider{generator: wrappedGen})
 }

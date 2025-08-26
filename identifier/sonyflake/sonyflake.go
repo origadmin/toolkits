@@ -3,17 +3,24 @@
  */
 
 // Package sonyflake provides a unique ID generation based on Sony's snowflake variant.
-package sonyflake // Corrected package name from 'shortid'
+package sonyflake
 
 import (
+	"fmt"
+
 	"github.com/sony/sonyflake"
 
 	"github.com/origadmin/toolkits/identifier"
 )
 
+// Config is an alias for sonyflake.Settings, allowing for detailed configuration
+// such as setting a custom MachineID or StartTime.
+// See https://pkg.go.dev/github.com/sony/sonyflake#Settings for all options.
+type Config = sonyflake.Settings
+
 // Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	_ identifier.GeneratorProvider      = (*provider)(nil)
+	_ identifier.GeneratorProvider     = (*provider)(nil)
 	_ identifier.TypedGenerator[int64] = (*numberGenerator)(nil)
 )
 
@@ -64,7 +71,6 @@ func (g *numberGenerator) Generate() int64 {
 	id, err := g.sf.NextID()
 	if err != nil {
 		// This can happen if the system clock goes backwards.
-		// Returning 0 is a reasonable, if not ideal, fallback.
 		return 0
 	}
 	return int64(id)
@@ -72,21 +78,31 @@ func (g *numberGenerator) Generate() int64 {
 
 // Validate checks if the provided int64 is a plausible Sonyflake ID.
 func (g *numberGenerator) Validate(id int64) bool {
-	// Any positive number could be a valid ID.
 	return id > 0
 }
 
-// init registers the Sonyflake provider with the global identifier registry.
-func init() {
-	// Create a default sonyflake instance.
-	// An empty Settings struct will cause the library to use the private IP
-	// as the machine ID, which is a sensible default.
-	sf := sonyflake.NewSonyflake(sonyflake.Settings{})
+// --- Advanced Usage ---
+
+// New creates a new, local, configured Sonyflake provider.
+// This instance is NOT managed by the global identifier registry.
+func New(cfg Config) (identifier.GeneratorProvider, error) {
+	sf := sonyflake.NewSonyflake(sonyflake.Settings(cfg))
 	if sf == nil {
 		// This can happen if the machine ID function fails.
-		panic("identifier: failed to initialize sonyflake")
+		return nil, fmt.Errorf("sonyflake: failed to initialize with the given settings")
+	}
+	return &provider{sf: sf}, nil
+}
+
+// --- Default Global Instance ---
+
+// init registers the default Sonyflake provider with the global identifier registry.
+// This provider uses a default configuration (e.g., private IP for machine ID).
+func init() {
+	sf := sonyflake.NewSonyflake(sonyflake.Settings{})
+	if sf == nil {
+		panic("identifier: failed to initialize default sonyflake node")
 	}
 
-	// Register a provider instance containing the configured generator.
 	identifier.Register(&provider{sf: sf})
 }

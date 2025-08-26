@@ -7,9 +7,11 @@ package snowflake_test // Use black-box testing
 import (
 	"testing"
 
+	"github.com/bwmarrin/snowflake"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	"github.com/origadmin/toolkits/identifier/snowflake"
 	// Blank import to trigger the snowflake provider registration
 	_ "github.com/origadmin/toolkits/identifier/snowflake"
 )
@@ -72,4 +74,39 @@ func TestGeneratorProperties(t *testing.T) {
 
 	assert.Equal(t, "snowflake", numGenerator.Name())
 	assert.Equal(t, 64, numGenerator.Size())
+}
+
+// TestCustomNodeGenerator tests creating a snowflake generator with a specific node ID.
+func TestCustomNodeGenerator(t *testing.T) {
+	t.Run("ValidNodeID", func(t *testing.T) {
+		const nodeID int64 = 478
+		cfg := snowflake.Config{Node: nodeID}
+
+		// Create a new provider with the custom config
+		provider, err := snowflake.New(cfg)
+		assert.NoError(t, err)
+		assert.NotNil(t, provider)
+
+		// Get a number generator and verify the node ID
+		numGenerator := provider.AsNumber()
+		assert.NotNil(t, numGenerator)
+		generatedID := numGenerator.Generate()
+		parsedID := snowflake.ID(generatedID)
+		assert.Equal(t, nodeID, parsedID.Node())
+
+		// Get a string generator and verify the node ID
+		strGenerator := provider.AsString()
+		assert.NotNil(t, strGenerator)
+		generatedStrID := strGenerator.Generate()
+		parsedStrID, err := snowflake.ParseString(generatedStrID)
+		assert.NoError(t, err)
+		assert.Equal(t, nodeID, parsedStrID.Node())
+	})
+
+	t.Run("InvalidNodeID", func(t *testing.T) {
+		// Node ID is out of the valid range (0-1023)
+		cfg := snowflake.Config{Node: 2000}
+		_, err := snowflake.New(cfg)
+		assert.Error(t, err, "Expected an error for an out-of-range node ID")
+	})
 }
