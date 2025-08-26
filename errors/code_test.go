@@ -10,8 +10,8 @@ import (
 )
 
 func TestCodeAs(t *testing.T) {
-	var err error = Code(0)
-	var target Code
+	var err error = ErrorCode(0)
+	var target ErrorCode
 	match := stderr.As(err, &target)
 	if !match {
 		t.Fatalf("%v should convert to *Error", err)
@@ -26,17 +26,17 @@ func TestCodeAs(t *testing.T) {
 }
 
 func TestCodeIs(t *testing.T) {
-	var err error = Code(0)
-	var target = Code(0)
+	var err error = ErrorCode(0)
+	var target = ErrorCode(0)
 	match := stderr.Is(err, target)
 	if !match {
-		t.Fatalf("%v should convert to Code", err)
+		t.Fatalf("%v should convert to ErrorCode", err)
 	}
 
 	err = stderr.New(err.Error())
 	target = 0
 	match = stderr.Is(err, &target)
 	if match {
-		t.Fatalf("%v should not equal to Code", err)
+		t.Fatalf("%v should not equal to ErrorCode", err)
 	}
 }

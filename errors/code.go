@@ -10,27 +10,27 @@ import (
 )
 
 const (
-	Success = Code(0)
-	Error   = Code(1)
+	ErrorCodeSuccess = ErrorCode(0)
+	ErrorCodeError   = ErrorCode(1)
 )
 
-type Code int
+type ErrorCode int
 
 var (
-	errCodes = map[Code]string{
+	errCodes = map[ErrorCode]string{
 		0: "success",
 		1: "error",
 	}
 	mutCodes = sync.RWMutex{}
 )
 
-func RegisterCode(code Code, val string) {
+func RegisterCode(code ErrorCode, val string) {
 	mutCodes.Lock()
 	errCodes[code] = val
 	mutCodes.Unlock()
 }
 
-func CodeString(code Code) string {
+func CodeString(code ErrorCode) string {
 	mutCodes.Lock()
 	v, ok := errCodes[code]
 	mutCodes.Unlock()
@@ -40,17 +40,17 @@ func CodeString(code Code) string {
 	return fmt.Sprintf("unknown code: %d", code)
 }
 
-func (obj Code) Error() string {
+func (obj ErrorCode) Error() string {
 	return obj.String()
 }
 
 // Is checks whether the error is equal to the
-func (obj Code) Is(err error) bool {
+func (obj ErrorCode) Is(err error) bool {
 	if err == nil {
 		return false
 	}
 
-	var e Code
+	var e ErrorCode
 	if As(err, &e) {
 		return e == obj
 	}
@@ -58,15 +58,15 @@ func (obj Code) Is(err error) bool {
 	return false
 }
 
-func (obj Code) Code() int {
+func (obj ErrorCode) Code() int {
 	return int(obj)
 }
 
-func (obj Code) String() string {
+func (obj ErrorCode) String() string {
 	return CodeString(obj)
 }
 
 // ErrInteger creates a new error from a string
-func ErrInteger(err int) Code {
-	return Code(err)
+func ErrInteger(err int) ErrorCode {
+	return ErrorCode(err)
 }

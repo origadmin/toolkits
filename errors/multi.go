@@ -8,27 +8,11 @@ import (
 	"encoding/json"
 	"errors"
 	"sync"
-
-	merr "github.com/hashicorp/go-multierror"
-)
-
-type (
-	// MultiError is an alias of `github.com/hashicorp/go-multierror`.Error
-	MultiError = merr.Error
-	// ErrorFormatFunc is a helper function that will format the merr
-	ErrorFormatFunc = merr.ErrorFormatFunc
-)
-
-var (
-	// Append is a helper function that will append more merr
-	Append = merr.Append
-	// ListFormatFunc is a helper function that will format the merr
-	ListFormatFunc = merr.ListFormatFunc
 )
 
 // ThreadSafeMultiError  represents a collection of merr
 type ThreadSafeMultiError struct {
-	ErrorFormat ErrorFormatFunc
+	ErrorFormat MultiErrorFormatFunc
 	lock        sync.Mutex
 	merr        MultiError
 }
@@ -86,7 +70,7 @@ func (e *ThreadSafeMultiError) Errors() []error {
 }
 
 // ThreadSafe creates a new ThreadSafeMultiError collection
-func ThreadSafe(err error, fns ...ErrorFormatFunc) *ThreadSafeMultiError {
+func ThreadSafe(err error, fns ...MultiErrorFormatFunc) *ThreadSafeMultiError {
 	if len(fns) == 0 {
 		fns = append(fns, ErrorFormatJSON)
 	}
