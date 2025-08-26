@@ -14,10 +14,10 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "gomod"
-    directory: "/idgen"
+    directory: "/identifier"
     schedule:
       interval: "weekly"
   - package-ecosystem: "gomod"
-    directory: "/sloge"
+    directory: "/slogx"
     schedule:
       interval: "weekly"

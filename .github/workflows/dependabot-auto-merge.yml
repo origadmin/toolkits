@@ -11,18 +11,17 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'owner/repo'
+    if: github.actor == 'dependabot[bot]' && github.repository == 'origadmin/toolkits'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PR_URL: ${{github.event.pull_request.html_url}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: SetUp auto-merge
         id: auto-merge
-        uses: dependabot/fetch-metadata@v2.2.0
+        uses: dependabot/fetch-metadata@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Wait 5 minutes for other checks to complete
@@ -36,7 +35,7 @@ jobs:
 
           while [ $ATTEMPT -lt $MAX_RETRIES ]; do
             echo "Fetching PR status checks..."
-            WORKFLOWS=$(gh pr view "$PR_URL" --json statusCheckRollup -q '.statusCheckRollup')
+            WORKFLOWS=$(gh pr view ${{ github.event.pull_request.html_url }} --json statusCheckRollup -q '.statusCheckRollup')
 
             # Debug: Output the status of all checks
             echo "Debug: Current status of all checks:"
@@ -68,4 +67,4 @@ jobs:
           echo "Failed to merge the PR after $MAX_RETRIES attempts due to failing status checks."
           exit 1
       - name: Auto-merge for Dependabot PRs
-        run: gh pr merge --auto --merge "$PR_URL"
+        run: gh pr merge --auto --merge ${{ github.event.pull_request.html_url }}
