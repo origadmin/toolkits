@@ -2,114 +2,113 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package identifier provides a unified interface for generating and validating unique identifiers.
 package identifier
 
 import (
 	"sync"
 )
 
-// Registry manages the registration and retrieval of string and number identifier generators.
-type Registry struct {
+// registry manages the registration and retrieval of identifier generator providers.
+// It is kept internal to the package.
+type registry struct {
 	sync.RWMutex
-	stringGenerators map[string]StringIdentifier
-	numberGenerators map[string]NumberIdentifier
-	defaultStringGen StringIdentifier
-	defaultNumberGen NumberIdentifier
+	providers             map[string]GeneratorProvider
+	defaultStringProvider GeneratorProvider
+	defaultNumberProvider GeneratorProvider
 }
 
-// NewRegistry creates and returns a new Registry instance.
-func NewRegistry() *Registry {
-	return &Registry{
-		stringGenerators: make(map[string]StringIdentifier),
-		numberGenerators: make(map[string]NumberIdentifier),
+// globalRegistry is the singleton instance of the registry.
+var globalRegistry = &registry{
+	providers: make(map[string]GeneratorProvider),
+}
+
+// Register registers a generator provider, making it available via New().
+// This function should be called from the init() function of each algorithm's package.
+func Register(p GeneratorProvider) {
+	globalRegistry.Lock()
+	defer globalRegistry.Unlock()
+	if p == nil {
+		panic("identifier: cannot register a nil provider")
 	}
+	name := p.Name()
+	if _, dup := globalRegistry.providers[name]; dup {
+		panic("identifier: Register called twice for provider " + name)
+	}
+	globalRegistry.providers[name] = p
 }
 
-// RegisterString registers a string identifier generator.
-func (r *Registry) RegisterString(gen StringIdentifier) {
-	r.Lock()
-	defer r.Unlock()
-	r.stringGenerators[gen.Name()] = gen
+// New retrieves a typed generator by name in a single step.
+// This is the primary, recommended entry point for getting a generator.
+// It returns a ready-to-use, typed generator, or nil if the named
+// provider doesn't exist or doesn't support the requested type (string or int64).
+func New[T ~string | ~int64](name string) TypedGenerator[T] {
+	globalRegistry.RLock()
+	provider := globalRegistry.providers[name]
+	globalRegistry.RUnlock()
+
+	if provider == nil {
+		return nil
+	}
+
+	// Use 'any' to check the desired type T and call the correct provider method.
+	var t T
+	switch any(t).(type) {
+	case string:
+		// The result of AsString() is TypedGenerator[string].
+		// We cast it to 'any' and then to the generic return type TypedGenerator[T],
+		// which is valid because in this case, T is string.
+		if gen := provider.AsString(); gen != nil {
+			var asAny any = gen
+			return asAny.(TypedGenerator[T])
+		}
+	case int64:
+		// Same logic for the number type.
+		if gen := provider.AsNumber(); gen != nil {
+			var asAny any = gen
+			return asAny.(TypedGenerator[T])
+		}
+	}
+	return nil // Return nil if the type is not supported by the provider
 }
 
-// RegisterNumber registers a number identifier generator.
-func (r *Registry) RegisterNumber(gen NumberIdentifier) {
-	r.Lock()
-	defer r.Unlock()
-	r.numberGenerators[gen.Name()] = gen
+// SetDefaultString sets the default provider for string identifiers.
+// Panics if the provider does not support string generation.
+func SetDefaultString(p GeneratorProvider) {
+	if p == nil || p.AsString() == nil {
+		panic("identifier: provider cannot be nil or does not support string generation")
+	}
+	globalRegistry.Lock()
+	defer globalRegistry.Unlock()
+	globalRegistry.defaultStringProvider = p
 }
 
-// SetDefaultString sets the default string identifier generator.
-func (r *Registry) SetDefaultString(gen StringIdentifier) {
-	r.Lock()
-	defer r.Unlock()
-	r.defaultStringGen = gen
-}
-
-// SetDefaultNumber sets the default number identifier generator.
-func (r *Registry) SetDefaultNumber(gen NumberIdentifier) {
-	r.Lock()
-	defer r.Unlock()
-	r.defaultNumberGen = gen
-}
-
-// GetString retrieves a string identifier generator by name.
-func (r *Registry) GetString(name string) StringIdentifier {
-	r.RLock()
-	defer r.RUnlock()
-	return r.stringGenerators[name]
-}
-
-// GetNumber retrieves a number identifier generator by name.
-func (r *Registry) GetNumber(name string) NumberIdentifier {
-	r.RLock()
-	defer r.RUnlock()
-	return r.numberGenerators[name]
+// SetDefaultNumber sets the default provider for number identifiers.
+// Panics if the provider does not support number generation.
+func SetDefaultNumber(p GeneratorProvider) {
+	if p == nil || p.AsNumber() == nil {
+		panic("identifier: provider cannot be nil or does not support number generation")
+	}
+	globalRegistry.Lock()
+	defer globalRegistry.Unlock()
+	globalRegistry.defaultNumberProvider = p
 }
 
 // DefaultString returns the default string identifier generator.
-func (r *Registry) DefaultString() StringIdentifier {
-	r.RLock()
-	defer r.RUnlock()
-	return r.defaultStringGen
+func DefaultString() TypedGenerator[string] {
+	globalRegistry.RLock()
+	defer globalRegistry.RUnlock()
+	if globalRegistry.defaultStringProvider != nil {
+		return globalRegistry.defaultStringProvider.AsString()
+	}
+	return nil
 }
 
 // DefaultNumber returns the default number identifier generator.
-func (r *Registry) DefaultNumber() NumberIdentifier {
-	r.RLock()
-	defer r.RUnlock()
-	return r.defaultNumberGen
-}
-
-// RegisterStringIdentifier registers a string identifier generator.
-func RegisterStringIdentifier(gen StringIdentifier) {
-	registry.RegisterString(gen)
-}
-
-// RegisterNumberIdentifier registers a number identifier generator.
-func RegisterNumberIdentifier(gen NumberIdentifier) {
-	registry.RegisterNumber(gen)
-}
-
-// RegisterMultiTypeIdentifier registers a multi-type identifier generator.
-func RegisterMultiTypeIdentifier(gen MultiTypeIdentifier) {
-	RegisterStringIdentifier(gen)
-	RegisterNumberIdentifier(gen)
-}
-
-func SetDefaultString(identifier StringIdentifier) {
-	registry.SetDefaultString(identifier)
-}
-
-func SetDefaultNumber(identifier NumberIdentifier) {
-	registry.SetDefaultNumber(identifier)
-}
-
-func DefaultString() StringIdentifier {
-	return registry.DefaultString()
-}
-
-func DefaultNumber() NumberIdentifier {
-	return registry.DefaultNumber()
+func DefaultNumber() TypedGenerator[int64] {
+	globalRegistry.RLock()
+	defer globalRegistry.RUnlock()
+	if globalRegistry.defaultNumberProvider != nil {
+		return globalRegistry.defaultNumberProvider.AsNumber()
+	}
+	return nil
 }

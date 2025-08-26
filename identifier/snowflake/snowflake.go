@@ -9,118 +9,112 @@ import (
 	"math/rand/v2"
 
 	"github.com/bwmarrin/snowflake"
-	"github.com/goexts/generic/settings"
 
 	"github.com/origadmin/toolkits/identifier"
 )
 
-// nodeNumber range from 0 to 1023 is used for generating unique generator ID.
+// Ensure the provider and generators implement the required interfaces at compile time.
 var (
-	bitSize = 0 // bitSize is used to store the length of generated ID.
+	_ identifier.GeneratorProvider      = (*provider)(nil)
+	_ identifier.TypedGenerator[int64]  = (*numberGenerator)(nil)
+	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
 )
 
-func init() {
-	s := New()
-	bitSize = len(s.GenerateString())
-	identifier.RegisterNumberIdentifier(s)
-	identifier.RegisterStringIdentifier(s)
+// provider implements identifier.GeneratorProvider for Snowflake.
+// It holds a configured, stateful snowflake node.
+type provider struct {
+	node *snowflake.Node
 }
 
-// Snowflake represents a Snowflake generator with a unique generator.
-type Snowflake struct {
-	generator *snowflake.Node
-}
-
-// Name returns the name of the generator.
-func (s Snowflake) Name() string {
+// Name returns the name of the identifier.
+func (p *provider) Name() string {
 	return "snowflake"
 }
 
-// GenerateString generates a new Snowflake ID as a string.
-func (s Snowflake) GenerateString() string {
-	return s.generator.Generate().String()
+// Size returns the size of the identifier in bits.
+func (p *provider) Size() int {
+	return 64
 }
 
-// GenerateNumber generates a new Snowflake ID as an int64.
-func (s Snowflake) GenerateNumber() int64 {
-	return s.generator.Generate().Int64()
+// AsString returns a string-based generator for Snowflake.
+func (p *provider) AsString() identifier.TypedGenerator[string] {
+	return &stringGenerator{node: p.node}
 }
 
-// ValidateString checks if the provided ID is a valid Snowflake ID (string).
-func (s Snowflake) ValidateString(id string) bool {
-	if len(id) != bitSize {
-		return false
-	}
+// AsNumber returns a number-based generator for Snowflake.
+func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+	return &numberGenerator{node: p.node}
+}
+
+// --- Number Generator ---
+
+// numberGenerator implements identifier.TypedGenerator[int64] for Snowflake.
+type numberGenerator struct {
+	node *snowflake.Node
+}
+
+// Name returns the name of the identifier.
+func (g *numberGenerator) Name() string {
+	return "snowflake"
+}
+
+// Size returns the size of the identifier in bits.
+func (g *numberGenerator) Size() int {
+	return 64
+}
+
+// Generate creates a new Snowflake ID and returns it as an int64.
+func (g *numberGenerator) Generate() int64 {
+	return g.node.Generate().Int64()
+}
+
+// Validate checks if the provided int64 is a plausible Snowflake ID.
+// Note: This is a basic check, as any positive int64 could be valid.
+func (g *numberGenerator) Validate(id int64) bool {
+	return id > 0
+}
+
+// --- String Generator ---
+
+// stringGenerator implements identifier.TypedGenerator[string] for Snowflake.
+type stringGenerator struct {
+	node *snowflake.Node
+}
+
+// Name returns the name of the identifier.
+func (g *stringGenerator) Name() string {
+	return "snowflake"
+}
+
+// Size returns the size of the identifier in bits.
+func (g *stringGenerator) Size() int {
+	return 64
+}
+
+// Generate creates a new Snowflake ID and returns it as a string.
+func (g *stringGenerator) Generate() string {
+	return g.node.Generate().String()
+}
+
+// Validate checks if the provided string is a valid Snowflake ID.
+func (g *stringGenerator) Validate(id string) bool {
 	_, err := snowflake.ParseString(id)
 	return err == nil
 }
 
-// ValidateNumber checks if the provided ID is a valid Snowflake ID (int64).
-func (s Snowflake) ValidateNumber(id int64) bool {
-	return id > 0
-}
-
-// Size returns the bit size of the generated Snowflake ID.
-func (s Snowflake) Size() int {
-	return bitSize
-}
-
-type Options struct {
-	Node int64
-}
-
-type Option = func(options *Options)
-
-// New creates a new Snowflake generator with a unique generator.
-func New(opts ...Option) *Snowflake {
-	o := settings.Apply(&Options{}, opts)
-	if o.Node < 0 || o.Node > 1023 {
-		o.Node = rand.Int64N(1023)
-	}
-	generator, err := snowflake.NewNode(o.Node)
+// init registers the Snowflake provider with the global identifier registry.
+func init() {
+	// Create a snowflake node with a random ID between 0 and 1023.
+	// This helps prevent collisions when multiple application instances are running.
+	nodeID := rand.Int64N(1024)
+	node, err := snowflake.NewNode(nodeID)
 	if err != nil {
-		panic(err)
+		// This panic is acceptable in an init() function if a core component fails to initialize.
+		panic("identifier: failed to initialize snowflake node: " + err.Error())
 	}
-	return &Snowflake{
-		generator: generator,
-	}
-}
 
-type NumberSnowflake struct {
-	*Snowflake
+	// Register a provider instance containing the configured node.
+	identifier.Register(&provider{
+		node: node,
+	})
 }
-
-func (n NumberSnowflake) Generate() int64 {
-	return n.GenerateNumber()
-}
-
-func (n NumberSnowflake) Validate(t int64) bool {
-	return n.ValidateNumber(t)
-}
-
-func NewNumber(opts ...Option) *NumberSnowflake {
-	return &NumberSnowflake{
-		Snowflake: New(opts...),
-	}
-}
-
-type StringSnowflake struct {
-	*Snowflake
-}
-
-func (s StringSnowflake) Generate() string {
-	return s.GenerateString()
-}
-
-func (s StringSnowflake) Validate(id string) bool {
-	return s.ValidateString(id)
-}
-
-func NewString(opts ...Option) *StringSnowflake {
-	return &StringSnowflake{
-		Snowflake: New(opts...),
-	}
-}
-
-var _ identifier.TypedIdentifier[int64] = &NumberSnowflake{}
-var _ identifier.TypedIdentifier[string] = &StringSnowflake{}

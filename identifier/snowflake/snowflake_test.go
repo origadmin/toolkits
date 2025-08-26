@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package snowflake
+package snowflake_test // Use black-box testing
 
 import (
 	"testing"
@@ -10,81 +10,66 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	// Blank import to trigger the snowflake provider registration
+	_ "github.com/origadmin/toolkits/identifier/snowflake"
 )
 
-func TestSnowflakeGen(t *testing.T) {
-	s := New()
-	id := s.GenerateString()
-	assert.NotEmpty(t, id)
+// TestSnowflakeProvider ensures the snowflake provider is registered correctly
+// and provides generators for both string and int64.
+func TestSnowflakeProvider(t *testing.T) {
+	// Both string and number generators should be available.
+	strGenerator := identifier.New[string]("snowflake")
+	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'snowflake'")
+
+	numGenerator := identifier.New[int64]("snowflake")
+	assert.NotNil(t, numGenerator, "Expected to get a non-nil number generator for 'snowflake'")
 }
 
-func TestSnowflakeValidateValidID(t *testing.T) {
-	s := New()
-	id := s.GenerateString()
-	valid := s.ValidateString(id)
-	assert.True(t, valid)
-}
-
-func TestSnowflakeValidateInvalidID(t *testing.T) {
-	s := New()
-	invalidID := "invalidID"
-	valid := s.ValidateString(invalidID)
-	assert.False(t, valid)
-}
-
-func TestSnowflakeSize(t *testing.T) {
-	s := New()
-	size := s.Size()
-	assert.Equal(t, bitSize, size)
-}
-
-func TestRegister(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the default identifier is set
-	defaultIdentifier := identifier.DefaultString()
-	if defaultIdentifier == nil {
-		t.Fatal("Expected default identifier to be set, but it was not")
+// TestGenerateAndValidateNumber tests the number-based snowflake generator.
+func TestGenerateAndValidateNumber(t *testing.T) {
+	generator := identifier.New[int64]("snowflake")
+	if !assert.NotNil(t, generator, "Number generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that the default identifier is of type Snowflake
-	if defaultIdentifier.Name() != "snowflake" {
-		t.Errorf("Expected default identifier to be 'snowflake', but got '%s'", defaultIdentifier.Name())
-	}
+	id := generator.Generate()
+	assert.NotEqual(t, int64(0), id, "Generated number ID should not be zero")
+
+	isValid := generator.Validate(id)
+	assert.True(t, isValid, "A freshly generated number ID should be valid")
+
+	isInvalid := generator.Validate(0)
+	assert.False(t, isInvalid, "ID '0' should be considered invalid")
 }
 
-func TestGenID(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Generate an ID
-	generatedID := identifier.DefaultString().GenerateString()
-
-	// Check that the generated ID is valid
-	if !identifier.DefaultString().ValidateString(generatedID) {
-		t.Errorf("Generated ID is not valid")
+// TestGenerateAndValidateString tests the string-based snowflake generator.
+func TestGenerateAndValidateString(t *testing.T) {
+	generator := identifier.New[string]("snowflake")
+	if !assert.NotNil(t, generator, "String generator should not be nil") {
+		t.FailNow()
 	}
+
+	id := generator.Generate()
+	assert.NotEmpty(t, id, "Generated string ID should not be empty")
+
+	isValid := generator.Validate(id)
+	assert.True(t, isValid, "A freshly generated string ID should be valid")
+
+	isInvalid := generator.Validate("not-a-snowflake-id")
+	assert.False(t, isInvalid, "An invalid string should not be considered a valid snowflake ID")
 }
 
-func TestGenSize(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the size of the generated ID is correct
-	if identifier.DefaultString().Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, identifier.DefaultString().Size())
-	}
-}
-
-func TestValidate(t *testing.T) {
-	// Create a new identifier
-	generator := New()
-
-	// Generate an ID
-	generatedID := generator.GenerateString()
-
-	// Check that the generated ID is valid
-	if !generator.ValidateString(generatedID) {
-		t.Errorf("Generated ID is not valid")
+// TestGeneratorProperties checks the metadata of the snowflake generators.
+func TestGeneratorProperties(t *testing.T) {
+	strGenerator := identifier.New[string]("snowflake")
+	numGenerator := identifier.New[int64]("snowflake")
+	if !assert.NotNil(t, strGenerator) || !assert.NotNil(t, numGenerator) {
+		t.FailNow()
 	}
 
-	// Check that an invalid ID is not valid
-	if generator.ValidateString("invalid") {
-		t.Errorf("Invalid ID is valid")
-	}
+	assert.Equal(t, "snowflake", strGenerator.Name())
+	assert.Equal(t, 64, strGenerator.Size())
+
+	assert.Equal(t, "snowflake", numGenerator.Name())
+	assert.Equal(t, 64, numGenerator.Size())
 }

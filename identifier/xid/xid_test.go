@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package xid
+package xid_test // Use black-box testing
 
 import (
 	"testing"
@@ -10,81 +10,49 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	// Blank import to trigger the xid provider registration
+	_ "github.com/origadmin/toolkits/identifier/xid"
 )
 
-func TestXidentifier(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	assert.NotEmpty(t, id)
+// TestXidProvider ensures the xid provider is registered correctly.
+func TestXidProvider(t *testing.T) {
+	// String generator should be available.
+	strGenerator := identifier.New[string]("xid")
+	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'xid'")
+
+	// Number generator should NOT be available.
+	numGenerator := identifier.New[int64]("xid")
+	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'xid' as it is not supported")
 }
 
-func TestXIDValidateValidID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	valid := s.Validate(id)
-	assert.True(t, valid)
-}
-
-func TestXIDValidateInvalidID(t *testing.T) {
-	s := New()
-	invalidID := "invalidID"
-	valid := s.Validate(invalidID)
-	assert.False(t, valid)
-}
-
-func TestXIDSize(t *testing.T) {
-	s := New()
-	size := s.Size()
-	assert.Equal(t, bitSize, size)
-}
-
-func TestRegister(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the default identifier is set
-	defaultIdentifier := identifier.DefaultString()
-	if defaultIdentifier == nil {
-		t.Fatal("Expected default identifier to be set, but it was not")
+// TestGenerateAndValidate tests the generation and validation of an XID.
+func TestGenerateAndValidate(t *testing.T) {
+	generator := identifier.New[string]("xid")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that the default identifier is of type XID
-	if defaultIdentifier.Name() != "xid" {
-		t.Errorf("Expected default identifier to be 'xid', but got '%s'", defaultIdentifier.Name())
-	}
+	// 1. Generate a new ID
+	id := generator.Generate()
+	assert.NotEmpty(t, id, "Generated ID should not be empty")
+	assert.Len(t, id, 20, "A standard XID should have a length of 20 characters")
+
+	// 2. Validate the new ID
+	isValid := generator.Validate(id)
+	assert.True(t, isValid, "A freshly generated ID should be valid")
+
+	// 3. Validate a known invalid ID
+	isInvalid := generator.Validate("not-a-valid-xid")
+	assert.False(t, isInvalid, "An invalid string should not be considered a valid XID")
 }
 
-func TestGenerateID(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Generateerate an ID
-	generatedID := identifier.DefaultString().GenerateString()
-
-	// Check that the generated ID is valid
-	if !identifier.DefaultString().ValidateString(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
-	}
-}
-
-func TestGenerateSize(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the size of the generated ID is correct
-	if identifier.DefaultString().Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, identifier.DefaultString().Size())
-	}
-}
-
-func TestValidate(t *testing.T) {
-	// Create a new identifier
-	generator := New()
-
-	// Generateerate an ID
-	generatedID := generator.Generate()
-
-	// Check that the generated ID is valid
-	if !generator.Validate(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
+// TestGeneratorProperties checks the metadata of the xid generator.
+func TestGeneratorProperties(t *testing.T) {
+	generator := identifier.New[string]("xid")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that an invalid ID is not valid
-	if generator.Validate("invalid") {
-		t.Errorf("Invalid ID is valid")
-	}
+	assert.Equal(t, "xid", generator.Name(), "Generator name should be 'xid'")
+	assert.Equal(t, 96, generator.Size(), "Generator size should be 96 bits")
 }

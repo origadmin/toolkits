@@ -2,89 +2,56 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package uuid
+package uuid_test // Use black-box testing
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	// Blank import to trigger the uuid provider registration
+	_ "github.com/origadmin/toolkits/identifier/uuid"
 )
 
-func TestUUID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	assert.NotEmpty(t, id)
-}
+// TestUUIDProviders ensures all registered UUID providers work as expected.
+func TestUUIDProviders(t *testing.T) {
+	// A list of all registered UUID providers to test.
+	providerNames := []string{"uuid", "uuid-v1", "uuid-v4", "uuid-v6", "uuid-v7"}
 
-func TestUUIDValidateValidID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	valid := s.Validate(id)
-	assert.True(t, valid)
-}
+	for _, name := range providerNames {
+		// Run tests in a subtest to get clear output for each provider.
+		t.Run(fmt.Sprintf("Provider_%s", name), func(t *testing.T) {
+			// 1. Check provider availability
+			generator := identifier.New[string](name)
+			if !assert.NotNil(t, generator, "Expected to get a non-nil string generator for '%s'", name) {
+				t.FailNow()
+			}
 
-func TestUUIDValidateInvalidID(t *testing.T) {
-	s := New()
-	invalidID := "invalidID"
-	valid := s.Validate(invalidID)
-	assert.False(t, valid)
-}
+			// 2. Check that number generator is not supported
+			numGenerator := identifier.New[int64](name)
+			assert.Nil(t, numGenerator, "Expected to get a nil number generator for '%s'", name)
 
-func TestUUIDSize(t *testing.T) {
-	s := New()
-	size := s.Size()
-	assert.Equal(t, bitSize, size)
-}
+			// 3. Generate and validate an ID
+			id := generator.Generate()
+			assert.NotEmpty(t, id, "Generated ID should not be empty")
+			isValid := generator.Validate(id)
+			assert.True(t, isValid, "A freshly generated ID should be valid")
 
-func TestRegister(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the default identifier is set
-	defaultIdentifier := identifier.DefaultString()
-	if defaultIdentifier == nil {
-		t.Fatal("Expected default identifier to be set, but it was not")
-	}
-
-	// Check that the default identifier is of type UUID
-	if defaultIdentifier.Name() != "uuid" {
-		t.Errorf("Expected default identifier to be 'uuid', but got '%s'", defaultIdentifier.Name())
+			// 4. Check properties
+			assert.Equal(t, name, generator.Name(), "Generator name should match")
+			assert.Equal(t, 128, generator.Size(), "Generator size should be 128 bits")
+		})
 	}
 }
 
-func TestGenerateID(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Generateerate an ID
-	generatedID := identifier.DefaultString().GenerateString()
-
-	// Check that the generated ID is valid
-	if !identifier.DefaultString().ValidateString(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
+// TestUUIDValidationFailure specifically tests the validation logic with a bad input.
+func TestUUIDValidationFailure(t *testing.T) {
+	generator := identifier.New[string]("uuid")
+	if !assert.NotNil(t, generator) {
+		t.FailNow()
 	}
-}
-
-func TestGenerateSize(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the size of the generated ID is correct
-	if identifier.DefaultString().Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, identifier.DefaultString().Size())
-	}
-}
-
-func TestValidate(t *testing.T) {
-	// Create a new identifier
-	generator := New()
-
-	// Generateerate an ID
-	generatedID := generator.Generate()
-
-	// Check that the generated ID is valid
-	if !generator.Validate(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
-	}
-
-	// Check that an invalid ID is not valid
-	if generator.Validate("invalid") {
-		t.Errorf("Invalid ID is valid")
-	}
+	isInvalid := generator.Validate("not-a-valid-uuid")
+	assert.False(t, isInvalid, "An invalid string should not be considered a valid UUID")
 }

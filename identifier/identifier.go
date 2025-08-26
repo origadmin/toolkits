@@ -11,58 +11,23 @@ type Identifier interface {
 	Size() int    // Size returns the size of the identifier in bits.
 }
 
-// StringValidator defines the interface for validating string identifiers.
-type StringValidator interface {
-	ValidateString(string) bool // ValidateString checks if the provided string is a valid identifier.
-}
-
-// StringGenerator defines the interface for generating string identifiers.
-type StringGenerator interface {
-	GenerateString() string // GenerateString generates a new string identifier.
-}
-
-// NumberValidator defines the interface for validating number identifiers.
-type NumberValidator interface {
-	ValidateNumber(int64) bool // ValidateNumber checks if the provided number is a valid identifier.
-}
-
-// NumberGenerator defines the interface for generating number identifiers.
-type NumberGenerator interface {
-	GenerateNumber() int64 // GenerateNumber generates a new number identifier.
-}
-
-// StringIdentifier combines the Identifier, StringValidator, and StringGenerator interfaces.
-type StringIdentifier interface {
+// TypedGenerator defines a unified, generic interface for generating identifiers of a specific type.
+// This is the interface that consuming code will typically interact with after initialization.
+type TypedGenerator[T ~int64 | ~string] interface {
 	Identifier
-	StringValidator
-	StringGenerator
-}
-
-// NumberIdentifier combines the Identifier, NumberValidator, and NumberGenerator interfaces.
-type NumberIdentifier interface {
-	Identifier
-	NumberValidator
-	NumberGenerator
-}
-
-// MultiTypeIdentifier combines the StringIdentifier and NumberIdentifier interfaces.
-type MultiTypeIdentifier interface {
-	StringIdentifier
-	NumberIdentifier
-}
-
-type TypedIdentifier[T ~int64 | ~string] interface {
-	Identifier
+	// Generate creates a new identifier of type T.
 	Generate() T
+	// Validate checks if the provided value is a valid identifier of type T.
 	Validate(T) bool
 }
 
-// SetDefaultIdentifier sets the default identifier generator.
-func SetDefaultIdentifier(gen Identifier) {
-	switch v := gen.(type) {
-	case StringIdentifier:
-		registry.SetDefaultString(v)
-	case NumberIdentifier:
-		registry.SetDefaultNumber(v)
-	}
+// GeneratorProvider is an interface for an algorithm that can provide
+// generators for different types. A single provider can vend either a string
+// or a number generator, or both. This is the object you initialize via `New()`.
+type GeneratorProvider interface {
+    Identifier
+    // AsString returns a string-based generator. Returns nil if not supported.
+    AsString() TypedGenerator[string]
+    // AsNumber returns a number-based generator. Returns nil if not supported.
+    AsNumber() TypedGenerator[int64]
 }

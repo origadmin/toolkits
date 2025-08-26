@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package shortid
+package sonyflake_test // Corrected package declaration for black-box testing
 
 import (
 	"testing"
@@ -10,80 +10,50 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	// This blank import is necessary to ensure the sonyflake's init() function is called,
+	// which registers the provider.
+	_ "github.com/origadmin/toolkits/identifier/sonyflake"
 )
 
-func TestSonyflakeGenerate(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	assert.NotEmpty(t, id)
+// TestSonyflakeProvider ensures the sonyflake provider is registered and can be retrieved
+// via the public identifier.New API.
+func TestSonyflakeProvider(t *testing.T) {
+	// Attempt to get the number generator, which should succeed.
+	numGenerator := identifier.New[int64]("sonyflake")
+	assert.NotNil(t, numGenerator, "Expected to get a non-nil number generator for 'sonyflake'")
+
+	// Ensure the string generator is not supported and returns nil.
+	strGenerator := identifier.New[string]("sonyflake")
+	assert.Nil(t, strGenerator, "Expected to get a nil string generator for 'sonyflake' as it is not supported")
 }
 
-func TestSonyflakeValidateValidID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	valid := s.Validate(id)
-	assert.Truef(t, valid, "ID %s is not valid", id)
-}
-
-func TestSonyflakeValidateInvalidID(t *testing.T) {
-	s := New()
-	invalidID := int64(0)
-	valid := s.Validate(invalidID)
-	assert.False(t, valid)
-}
-
-func TestSonyflakeSize(t *testing.T) {
-	s := New()
-	size := s.Size()
-	assert.Equal(t, bitSize, size)
-}
-
-func TestRegister(t *testing.T) {
-	identifier.SetDefaultNumber(New())
-	// Check that the default identifier is set
-	defaultIdentifier := identifier.DefaultNumber()
-	if defaultIdentifier == nil {
-		t.Fatal("Expected default identifier to be set, but it was not")
+// TestGenerateAndValidate tests the full lifecycle of generating and validating an ID.
+func TestGenerateAndValidate(t *testing.T) {
+	generator := identifier.New[int64]("sonyflake")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that the default identifier is of type Sonyflake
-	if defaultIdentifier.Name() != "sonyflake" {
-		t.Errorf("Expected default identifier to be 'sonyflake', but got '%s'", defaultIdentifier.Name())
-	}
+	// 1. Generate a new ID
+	id := generator.Generate()
+	assert.NotEqual(t, int64(0), id, "Generated ID should not be zero")
+
+	// 2. Validate the newly generated ID
+	isValid := generator.Validate(id)
+	assert.True(t, isValid, "A freshly generated ID should be considered valid")
+
+	// 3. Validate a known invalid ID
+	isInvalid := generator.Validate(0)
+	assert.False(t, isInvalid, "ID '0' should be considered invalid")
 }
 
-func TestGenerateID(t *testing.T) {
-	identifier.SetDefaultNumber(New())
-	// Generateerate an ID
-	generatedID := identifier.DefaultNumber().GenerateNumber()
-
-	// Check that the generated ID is valid
-	if !identifier.DefaultNumber().ValidateNumber(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
-	}
-}
-
-func TestGenerateSize(t *testing.T) {
-	identifier.SetDefaultNumber(New())
-	// Check that the size of the generated ID is correct
-	if identifier.DefaultNumber().Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, identifier.DefaultNumber().Size())
-	}
-}
-
-func TestValidate(t *testing.T) {
-	// Create a new identifier
-	generator := New()
-
-	// Generateerate an ID
-	generatedID := generator.Generate()
-	// Check that the generated ID is valid
-	if !generator.Validate(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
+// TestGeneratorProperties checks the metadata of the sonyflake generator.
+func TestGeneratorProperties(t *testing.T) {
+	generator := identifier.New[int64]("sonyflake")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that an invalid ID is not valid
-	if generator.Validate(0) {
-		t.Errorf("Invalid ID is valid")
-	}
+	assert.Equal(t, "sonyflake", generator.Name(), "Generator name should be 'sonyflake'")
+	assert.Equal(t, 63, generator.Size(), "Generator size should be 63 bits")
 }

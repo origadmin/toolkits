@@ -2,7 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package shortid
+// Package ksuid provides a KSUID (K-Sortable Unique Identifier) implementation.
+package ksuid
 
 import (
 	"github.com/segmentio/ksuid"
@@ -10,65 +11,65 @@ import (
 	"github.com/origadmin/toolkits/identifier"
 )
 
+// Ensure the provider and generator implement the required interfaces at compile time.
 var (
-	bitSize = len(ksuid.New().String()) // bitSize is used to store the length of generated ID.
+	_ identifier.GeneratorProvider      = (*provider)(nil)
+	_ identifier.TypedGenerator[string] = (*stringGenerator)(nil)
 )
 
-// init registers the Snowflake generator with the ident package and initializes bitSize.
-func init() {
-	s := New()
-	bitSize = len(s.GenerateString())
-	identifier.RegisterStringIdentifier(s)
+// provider implements identifier.GeneratorProvider for KSUID.
+// It's a stateless singleton that vends the actual generator.
+type provider struct{}
+
+// Name returns the name of the identifier.
+func (p *provider) Name() string {
+	return "ksuid"
 }
 
-type KSUID struct {
-	generator ksuid.KSUID
+// Size returns the size of the identifier in bits.
+func (p *provider) Size() int {
+	// A KSUID is 160 bits (20 bytes).
+	return 160
 }
 
-func (s KSUID) ValidateString(id string) bool {
-	if len(id) != bitSize {
-		return false
-	}
+// AsString returns a string-based generator for KSUID.
+func (p *provider) AsString() identifier.TypedGenerator[string] {
+	return &stringGenerator{}
+}
+
+// AsNumber returns nil as KSUID does not have a standard integer representation.
+func (p *provider) AsNumber() identifier.TypedGenerator[int64] {
+	return nil
+}
+
+// stringGenerator implements identifier.TypedGenerator[string] for KSUID.
+// This is the actual workhorse for generating and validating IDs.
+type stringGenerator struct{}
+
+// Name returns the name of the identifier.
+func (g *stringGenerator) Name() string {
+	return "ksuid"
+}
+
+// Size returns the size of the identifier in bits.
+func (g *stringGenerator) Size() int {
+	return 160
+}
+
+// Generate creates a new KSUID and returns it as a string.
+func (g *stringGenerator) Generate() string {
+	// ksuid.New() panics if it fails to read from the system's entropy source.
+	return ksuid.New().String()
+}
+
+// Validate checks if the provided string is a valid KSUID.
+func (g *stringGenerator) Validate(id string) bool {
 	_, err := ksuid.Parse(id)
 	return err == nil
 }
 
-func (s KSUID) GenerateString() string {
-	return s.generator.String()
+// init registers the KSUID provider with the global identifier registry.
+func init() {
+	// Register a singleton instance of our provider.
+	identifier.Register(&provider{})
 }
-
-// Name returns the name of the generator.
-func (s KSUID) Name() string {
-	return "ksuid"
-}
-
-// Generate generates a new KSUID ID as a string.
-func (s KSUID) Generate() string {
-	return s.GenerateString()
-}
-
-// Validate checks if the provided ID is a valid KSUID ID.
-func (s KSUID) Validate(id string) bool {
-	return s.ValidateString(id)
-}
-
-// Size returns the bit size of the generated KSUID ID.
-func (s KSUID) Size() int {
-	return bitSize
-}
-
-type Options struct {
-}
-
-// New creates a new KSUID generator with a unique node.
-func New(_ ...Options) *KSUID {
-	generator, err := ksuid.NewRandom()
-	if err != nil {
-		panic(err)
-	}
-	return &KSUID{
-		generator: generator,
-	}
-}
-
-var _ identifier.TypedIdentifier[string] = &KSUID{}

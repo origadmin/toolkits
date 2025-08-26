@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package ulid
+package ulid_test // Use black-box testing
 
 import (
 	"testing"
@@ -10,82 +10,49 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
+	// Blank import to trigger the ulid provider registration
+	_ "github.com/origadmin/toolkits/identifier/ulid"
 )
 
-func TestULID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	assert.NotEmpty(t, id)
+// TestUlidProvider ensures the ulid provider is registered correctly.
+func TestUlidProvider(t *testing.T) {
+	// String generator should be available.
+	strGenerator := identifier.New[string]("ulid")
+	assert.NotNil(t, strGenerator, "Expected to get a non-nil string generator for 'ulid'")
+
+	// Number generator should NOT be available.
+	numGenerator := identifier.New[int64]("ulid")
+	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'ulid' as it is not supported")
 }
 
-func TestULIDValidateValidID(t *testing.T) {
-	s := New()
-	id := s.Generate()
-	valid := s.Validate(id)
-	assert.True(t, valid)
-}
-
-func TestULIDValidateInvalidID(t *testing.T) {
-	s := New()
-	invalidID := "invalidID"
-	valid := s.Validate(invalidID)
-	assert.False(t, valid)
-}
-
-func TestULIDSize(t *testing.T) {
-	s := New()
-	size := s.Size()
-	assert.Equal(t, bitSize, size)
-}
-
-func TestRegister(t *testing.T) {
-	identifier.SetDefaultString(New())
-	// Check that the default identifier is set
-	defaultIdentifier := identifier.DefaultString()
-	if defaultIdentifier == nil {
-		t.Fatal("Expected default identifier to be set, but it was not")
+// TestGenerateAndValidate tests the generation and validation of a ULID.
+func TestGenerateAndValidate(t *testing.T) {
+	generator := identifier.New[string]("ulid")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that the default identifier is of type ULID
-	if defaultIdentifier.Name() != "ulid" {
-		t.Errorf("Expected default identifier to be 'ulid', but got '%s'", defaultIdentifier.Name())
-	}
+	// 1. Generate a new ID
+	id := generator.Generate()
+	assert.NotEmpty(t, id, "Generated ID should not be empty")
+	assert.Len(t, id, 26, "A standard ULID should have a length of 26 characters")
+
+	// 2. Validate the new ID
+	isValid := generator.Validate(id)
+	assert.True(t, isValid, "A freshly generated ID should be valid")
+
+	// 3. Validate a known invalid ID
+	isInvalid := generator.Validate("not_a_valid_ulid_string")
+	assert.False(t, isInvalid, "An invalid string should not be considered a valid ULID")
 }
 
-func TestGenerateID(t *testing.T) {
-	// Generateerate an ID
-	gen := identifier.DefaultString()
-	generatedID := gen.GenerateString()
-
-	// Check that the generated ID is valid
-	if !gen.ValidateString(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
-	}
-}
-
-func TestGenerateSize(t *testing.T) {
-	identifier.SetDefaultString(New())
-	gen := identifier.DefaultString()
-	// Check that the size of the generated ID is correct
-	if gen.Size() != bitSize {
-		t.Errorf("Expected size of generated ID to be %d, but it was %d", bitSize, gen.Size())
-	}
-}
-
-func TestValidate(t *testing.T) {
-	// Create a new identifier
-	generator := New()
-
-	// Generateerate an ID
-	generatedID := generator.GenerateString()
-
-	// Check that the generated ID is valid
-	if !generator.ValidateString(generatedID) {
-		t.Errorf("Generateerated ID is not valid")
+// TestGeneratorProperties checks the metadata of the ulid generator.
+func TestGeneratorProperties(t *testing.T) {
+	generator := identifier.New[string]("ulid")
+	if !assert.NotNil(t, generator, "Generator should not be nil") {
+		t.FailNow()
 	}
 
-	// Check that an invalid ID is not valid
-	if generator.ValidateString("invalid") {
-		t.Errorf("Invalid ID is valid")
-	}
+	assert.Equal(t, "ulid", generator.Name(), "Generator name should be 'ulid'")
+	assert.Equal(t, 128, generator.Size(), "Generator size should be 128 bits")
 }
