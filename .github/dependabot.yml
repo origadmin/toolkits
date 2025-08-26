@@ -1,23 +1,21 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
+  # Enable version updates for Go modules
   - package-ecosystem: "gomod"
-    directory: "/codec"
+    # Look for go.mod files in the root directory and all subdirectories
+    directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "gomod"
-    directory: "/errors"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gomod"
-    directory: "/identifier"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gomod"
-    directory: "/slogx"
+    # By default, Dependabot will open a separate pull request for each go.mod file.
+    # You can use groups to combine all module updates into a single pull request.
+    # groups:
+    #   go-modules:
+    #     patterns:
+    #       - "*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Look for workflow files in the .github/workflows directory
+    directory: "/"
     schedule:
       interval: "weekly"
