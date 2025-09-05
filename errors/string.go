@@ -4,10 +4,6 @@
 
 package errors
 
-import (
-	"strings"
-)
-
 const (
 	UnsupportedError = String("unsupported error")
 )
@@ -15,34 +11,28 @@ const (
 type String string
 
 // Error returns the JSON representation of the error
-func (obj String) Error() string {
-	return obj.String()
+func (s String) Error() string {
+	return string(s)
 }
 
 // String returns the JSON representation of the error
-func (obj String) String() string {
-	return string(obj)
+func (s String) String() string {
+	return string(s)
 }
 
-// Is checks whether the error is equal to the
-func (obj String) Is(err error) bool {
+// Is checks if the target error is a String error and has the same value.
+// This allows `errors.Is(wrappedErr, someStringError)` to work correctly.
+func (s String) Is(err error) bool {
 	if err == nil {
 		return false
 	}
 
 	var e String
 	if As(err, &e) {
-		return strings.Compare(obj.String(), e.String()) == 0
+		return s == e
 	}
 
 	return false
-}
-
-// ErrString creates a new error from a string
-//
-// Deprecated: use errors.NewString instead
-func ErrString(err string) String {
-	return String(err)
 }
 
 // NewString creates a new error from a string

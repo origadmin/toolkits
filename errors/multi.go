@@ -10,63 +10,64 @@ import (
 	"sync"
 )
 
-// ThreadSafeMultiError  represents a collection of merr
+// ThreadSafeMultiError represents a thread-safe collection of errors.
+// It is a wrapper around hashicorp/go-multierror.
 type ThreadSafeMultiError struct {
 	ErrorFormat MultiErrorFormatFunc
 	lock        sync.Mutex
-	merr        MultiError
+	multiErr    MultiError
 }
 
 // Append adds an error to the MultiError collection
-func (e *ThreadSafeMultiError) Append(err error) {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	e.merr.Errors = append(e.merr.Errors, err)
+func (m *ThreadSafeMultiError) Append(err error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.multiErr.Errors = append(m.multiErr.Errors, err)
 }
 
-// HasErrors checks if the MultiError collection has any merr
-func (e *ThreadSafeMultiError) HasErrors() bool {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	return len(e.merr.Errors) > 0
+// HasErrors checks if the MultiError collection has any errors.
+func (m *ThreadSafeMultiError) HasErrors() bool {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return len(m.multiErr.Errors) > 0
 }
 
-// Has checks if the MultiError collection has the given merr or not
-func (e *ThreadSafeMultiError) Has(err any) error {
-	var idx = -1
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	for idx = range e.merr.Errors {
-		if errors.As(e.merr.Errors[idx], &err) {
-			return e.merr.Errors[idx]
+// Contains checks if any error in the collection matches the target error
+// using errors.Is. It returns true if a match is found.
+func (m *ThreadSafeMultiError) Contains(target error) bool {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	for _, err := range m.multiErr.Errors {
+		if errors.Is(err, target) {
+			return true
 		}
 	}
-	return nil
+	return false
 }
 
-// Unsafe returns the MultiError collection
-func (e *ThreadSafeMultiError) Unsafe() *MultiError {
-	e.lock.Lock()
-	defer e.lock.Unlock()
+// Snapshot returns a new, non-thread-safe copy of the MultiError collection.
+func (m *ThreadSafeMultiError) Snapshot() *MultiError {
+	m.lock.Lock()
+	defer m.lock.Unlock()
 	me := new(MultiError)
-	me.ErrorFormat = e.ErrorFormat
-	me.Errors = append(me.Errors, e.merr.Errors...)
+	me.ErrorFormat = m.ErrorFormat
+	me.Errors = append(me.Errors, m.multiErr.Errors...)
 	return me
 }
 
 // Error returns the JSON representation of the MultiError collection
-func (e *ThreadSafeMultiError) Error() string {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	e.merr.ErrorFormat = e.ErrorFormat
-	return e.merr.Error()
+func (m *ThreadSafeMultiError) Error() string {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.multiErr.ErrorFormat = m.ErrorFormat
+	return m.multiErr.Error()
 }
 
-// Errors returns the merr collection
-func (e *ThreadSafeMultiError) Errors() []error {
-	e.lock.Lock()
-	defer e.lock.Unlock()
-	return append([]error{}, e.merr.Errors...)
+// Errors returns a copy of the errors collection.
+func (m *ThreadSafeMultiError) Errors() []error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return append([]error{}, m.multiErr.Errors...)
 }
 
 // ThreadSafe creates a new ThreadSafeMultiError collection
@@ -78,22 +79,22 @@ func ThreadSafe(err error, fns ...MultiErrorFormatFunc) *ThreadSafeMultiError {
 	if err == nil {
 		return &ThreadSafeMultiError{
 			ErrorFormat: fns[0],
-			merr: MultiError{
+			multiErr: MultiError{
 				ErrorFormat: fns[0],
 			},
 		}
 	}
 
 	var multiError *MultiError
-	if errors.As(err, &multiError) {
+	if As(err, &multiError) {
 		return &ThreadSafeMultiError{
 			ErrorFormat: fns[0],
-			merr:        *multiError,
+			multiErr:    *multiError,
 		}
 	}
 	return &ThreadSafeMultiError{
 		ErrorFormat: fns[0],
-		merr: MultiError{
+		multiErr: MultiError{
 			ErrorFormat: fns[0],
 			Errors:      []error{err},
 		},

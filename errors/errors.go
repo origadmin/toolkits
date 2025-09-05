@@ -17,9 +17,6 @@ import (
 )
 
 //go:generate adptool .
-//go:adapter:package github.com/go-kratos/kratos/v2/errors kerrors
-//go:adapter:package:func *
-//go:adapter:package:func:prefix Kratos
 //go:adapter:package github.com/pkg/errors perr
 //go:adapter:package:func *
 //go:adapter:package:func:prefix Pkg

@@ -8,27 +8,13 @@ package errors
 import (
 	stderr "errors"
 
-	kerrors "github.com/go-kratos/kratos/v2/errors"
 	merr "github.com/hashicorp/go-multierror"
 	perr "github.com/pkg/errors"
 )
 
-const (
-	SupportPackageIsVersion1 = kerrors.SupportPackageIsVersion1
-	UnknownCode              = kerrors.UnknownCode
-	UnknownReason            = kerrors.UnknownReason
-)
-
-var (
-	ErrUnsupported           = stderr.ErrUnsupported
-	E_Code                   = kerrors.E_Code
-	E_DefaultCode            = kerrors.E_DefaultCode
-	File_errors_errors_proto = kerrors.File_errors_errors_proto
-)
+var ErrUnsupported = stderr.ErrUnsupported
 
 type (
-	Error                = kerrors.Error
-	Status               = kerrors.Status
 	MultiError           = merr.Error
 	MultiErrorFormatFunc = merr.ErrorFormatFunc
 	MultiGroup           = merr.Group
@@ -54,118 +40,6 @@ func New(text string) error {
 
 func Unwrap(err error) error {
 	return stderr.Unwrap(err)
-}
-
-func KratosAs(err error, target any) bool {
-	return kerrors.As(err, target)
-}
-
-func KratosBadRequest(reason, message string) *kerrors.Error {
-	return kerrors.BadRequest(reason, message)
-}
-
-func KratosClientClosed(reason, message string) *kerrors.Error {
-	return kerrors.ClientClosed(reason, message)
-}
-
-func KratosClone(err *kerrors.Error) *kerrors.Error {
-	return kerrors.Clone(err)
-}
-
-func KratosCode(err error) int {
-	return kerrors.Code(err)
-}
-
-func KratosConflict(reason, message string) *kerrors.Error {
-	return kerrors.Conflict(reason, message)
-}
-
-func KratosErrorf(code int, reason, format string, a ...any) error {
-	return kerrors.Errorf(code, reason, format, a...)
-}
-
-func KratosForbidden(reason, message string) *kerrors.Error {
-	return kerrors.Forbidden(reason, message)
-}
-
-func KratosFromError(err error) *kerrors.Error {
-	return kerrors.FromError(err)
-}
-
-func KratosGatewayTimeout(reason, message string) *kerrors.Error {
-	return kerrors.GatewayTimeout(reason, message)
-}
-
-func KratosInternalServer(reason, message string) *kerrors.Error {
-	return kerrors.InternalServer(reason, message)
-}
-
-func KratosIs(err, target error) bool {
-	return kerrors.Is(err, target)
-}
-
-func KratosIsBadRequest(err error) bool {
-	return kerrors.IsBadRequest(err)
-}
-
-func KratosIsClientClosed(err error) bool {
-	return kerrors.IsClientClosed(err)
-}
-
-func KratosIsConflict(err error) bool {
-	return kerrors.IsConflict(err)
-}
-
-func KratosIsForbidden(err error) bool {
-	return kerrors.IsForbidden(err)
-}
-
-func KratosIsGatewayTimeout(err error) bool {
-	return kerrors.IsGatewayTimeout(err)
-}
-
-func KratosIsInternalServer(err error) bool {
-	return kerrors.IsInternalServer(err)
-}
-
-func KratosIsNotFound(err error) bool {
-	return kerrors.IsNotFound(err)
-}
-
-func KratosIsServiceUnavailable(err error) bool {
-	return kerrors.IsServiceUnavailable(err)
-}
-
-func KratosIsUnauthorized(err error) bool {
-	return kerrors.IsUnauthorized(err)
-}
-
-func KratosNew(code int, reason, message string) *kerrors.Error {
-	return kerrors.New(code, reason, message)
-}
-
-func KratosNewf(code int, reason, format string, a ...any) *kerrors.Error {
-	return kerrors.Newf(code, reason, format, a...)
-}
-
-func KratosNotFound(reason, message string) *kerrors.Error {
-	return kerrors.NotFound(reason, message)
-}
-
-func KratosReason(err error) string {
-	return kerrors.Reason(err)
-}
-
-func KratosServiceUnavailable(reason, message string) *kerrors.Error {
-	return kerrors.ServiceUnavailable(reason, message)
-}
-
-func KratosUnauthorized(reason, message string) *kerrors.Error {
-	return kerrors.Unauthorized(reason, message)
-}
-
-func KratosUnwrap(err error) error {
-	return kerrors.Unwrap(err)
 }
 
 func Append(err error, errs ...error) *merr.Error {
