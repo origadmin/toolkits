@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 )
 
 // HostConfig defines the configuration for the host.

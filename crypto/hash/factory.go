@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"

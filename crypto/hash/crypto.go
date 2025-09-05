@@ -8,7 +8,7 @@ package hash
 import (
 	"fmt"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"

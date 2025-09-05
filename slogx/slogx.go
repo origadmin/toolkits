@@ -37,7 +37,7 @@ func NewDebug(options ...Option) *slog.Logger {
 // preserving all functionality while improving maintainability.
 func New(options ...Option) *slog.Logger {
 	// Apply functional options to the default configuration.
-	// This replaces the dependency on github.com/goexts/generic/settings.
+	// This replaces the dependency on github.com/goexts/generic/configure.
 	cfg := defaultOptions
 	for _, apply := range options {
 		apply(&cfg)

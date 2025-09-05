@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 )
 
 type stringFilter struct {

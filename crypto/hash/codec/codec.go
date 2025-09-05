@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"

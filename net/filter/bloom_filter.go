@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/bits-and-blooms/bloom/v3"
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 )
 
 type bloomFilter struct {
