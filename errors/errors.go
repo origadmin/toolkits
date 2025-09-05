@@ -18,9 +18,17 @@ import (
 
 //go:generate adptool .
 //go:adapter:package github.com/pkg/errors perr
-//go:adapter:package:func *
-//go:adapter:package:func:prefix Pkg
+//go:adapter:package:func Is
+//go:adapter:package:func:rename IsPkgError
+//go:adapter:package:func Unwrap
+//go:adapter:package:func:rename UnwrapPkgError
+//go:adapter:package:func As
+//go:adapter:package:func:rename AsPkgError
 //go:adapter:package github.com/hashicorp/go-multierror merr
 //go:adapter:package:type *
 //go:adapter:package:type:prefix Multi
+//go:adapter:package:func *
+//go:adapter:package:func:prefix Multi
 //go:adapter:package errors stderr
+//go:adapter:package:func New
+//go:adapter:package:func:rename NewStdError

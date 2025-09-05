@@ -34,7 +34,7 @@ func Join(errs ...error) error {
 	return stderr.Join(errs...)
 }
 
-func New(text string) error {
+func NewStdError(text string) error {
 	return stderr.New(text)
 }
 
@@ -42,62 +42,62 @@ func Unwrap(err error) error {
 	return stderr.Unwrap(err)
 }
 
-func Append(err error, errs ...error) *merr.Error {
+func MultiAppend(err error, errs ...error) *merr.Error {
 	return merr.Append(err, errs...)
 }
 
-func Flatten(err error) error {
+func MultiFlatten(err error) error {
 	return merr.Flatten(err)
 }
 
-func ListFormatFunc(es []error) string {
+func MultiListFormatFunc(es []error) string {
 	return merr.ListFormatFunc(es)
 }
 
-func Prefix(err error, prefix string) error {
+func MultiPrefix(err error, prefix string) error {
 	return merr.Prefix(err, prefix)
 }
 
-func PkgAs(err error, target interface{}) bool {
+func AsPkgError(err error, target interface{}) bool {
 	return perr.As(err, target)
 }
 
-func PkgCause(err error) error {
+func Cause(err error) error {
 	return perr.Cause(err)
 }
 
-func PkgErrorf(format string, args ...interface{}) error {
+func Errorf(format string, args ...interface{}) error {
 	return perr.Errorf(format, args...)
 }
 
-func PkgIs(err, target error) bool {
+func IsPkgError(err, target error) bool {
 	return perr.Is(err, target)
 }
 
-func PkgNew(message string) error {
+func New(message string) error {
 	return perr.New(message)
 }
 
-func PkgUnwrap(err error) error {
+func UnwrapPkgError(err error) error {
 	return perr.Unwrap(err)
 }
 
-func PkgWithMessage(err error, message string) error {
+func WithMessage(err error, message string) error {
 	return perr.WithMessage(err, message)
 }
 
-func PkgWithMessagef(err error, format string, args ...interface{}) error {
+func WithMessagef(err error, format string, args ...interface{}) error {
 	return perr.WithMessagef(err, format, args...)
 }
 
-func PkgWithStack(err error) error {
+func WithStack(err error) error {
 	return perr.WithStack(err)
 }
 
-func PkgWrap(err error, message string) error {
+func Wrap(err error, message string) error {
 	return perr.Wrap(err, message)
 }
 
-func PkgWrapf(err error, format string, args ...interface{}) error {
+func Wrapf(err error, format string, args ...interface{}) error {
 	return perr.Wrapf(err, format, args...)
 }
