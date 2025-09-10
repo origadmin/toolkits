@@ -2,8 +2,6 @@ module github.com/origadmin/toolkits/identifier/cuid2
 
 go 1.23.1
 
-toolchain go1.24.6
-
 require (
 	github.com/nrednav/cuid2 v1.1.0
 	github.com/origadmin/toolkits/identifier v0.3.19
