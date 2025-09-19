@@ -33,11 +33,17 @@ var (
 	}
 )
 
-// WithFile write log to some File
-func WithFile(file string) Option {
+// WithOutputFile write log to some File
+func WithOutputFile(file string) Option {
 	return func(opt *Options) {
 		opt.Output = file
 	}
+}
+
+// WithFile write log to some File
+// Deprecated: use WithOutputFile instead
+func WithFile(file string) Option {
+	return WithOutputFile(file)
 }
 
 // WithLumberjack write log to some File with rotation
