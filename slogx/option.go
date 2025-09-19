@@ -24,7 +24,6 @@ type Options struct {
 
 var (
 	defaultOptions = Options{
-		Output:     "output.log",
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
 		Level:      LevelInfo,

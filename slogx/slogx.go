@@ -64,6 +64,11 @@ func New(options ...Option) *slog.Logger {
 		}
 	}
 
+	// If no writers are explicitly configured, default to os.Stderr
+	if len(writers) == 0 {
+		writers = append(writers, os.Stderr)
+	}
+
 	var output io.Writer = io.Discard
 	if len(writers) > 0 {
 		output = io.MultiWriter(writers...)
