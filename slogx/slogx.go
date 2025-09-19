@@ -69,7 +69,7 @@ func New(options ...Option) *slog.Logger {
 		writers = append(writers, os.Stderr)
 	}
 
-	var output io.Writer = io.Discard
+	var output = io.Discard
 	if len(writers) > 0 {
 		output = io.MultiWriter(writers...)
 	}
