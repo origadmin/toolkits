@@ -7,6 +7,7 @@ package filter
 import (
 	"fmt"
 	"math/rand"
+	"runtime/debug"
 	"strconv"
 	"testing"
 )
@@ -238,11 +239,12 @@ func boolToAction(b bool) string {
 func TestDealsWithNilSettingsInput(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
+			t.Logf("Panic: %s", debug.Stack())
 			t.Errorf("The code did not panic")
 		}
 	}()
 	// Blimey! What if there be no settings at all?
-	filter := NewFilter(nil)
+	filter := NewFilter()
 	if filter == nil {
 		t.Errorf("Expected a linkFilter instance, got nil")
 	}

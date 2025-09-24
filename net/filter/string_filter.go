@@ -87,7 +87,7 @@ func (s stringFilter) Allowed(method, path string) bool {
 }
 
 func NewStringFilter(ss ...Setting) Filter {
-	opt := settings.Apply(&Option{
+	opt := configure.Apply(&Option{
 		Delimiter: DefaultDelimiter,
 		SkipAny:   false,
 		DenyOff:   false,

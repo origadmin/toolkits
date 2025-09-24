@@ -5,9 +5,8 @@
 package filter
 
 import (
+	"cmp"
 	"strings"
-
-	"github.com/goexts/generic/types"
 )
 
 type Linker interface {
@@ -149,7 +148,7 @@ func PathTerminator(paths []string) []string {
 	}
 
 	end := len(paths) - 1
-	paths[end] = types.ZeroOr(paths[end], Terminator)
+	paths[end] = cmp.Or(paths[end], Terminator)
 
 	// find the end if there is a Terminator
 	if IsTerminated(paths) {

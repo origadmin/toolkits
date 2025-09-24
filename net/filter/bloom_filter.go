@@ -74,7 +74,7 @@ func (bf *bloomFilter) DenyStrings(method string) []string {
 }
 
 func NewBloomFilter(ss ...Setting) Filter {
-	o := settings.Apply(&Option{
+	o := configure.Apply(&Option{
 		Delimiter:         DefaultDelimiter,
 		SkipAny:           false,
 		DenyOff:           false,

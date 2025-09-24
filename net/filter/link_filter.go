@@ -99,7 +99,7 @@ func hasNext(paths []string) ([]string, bool) {
 }
 
 func NewFilter(ss ...Setting) Filter {
-	o := settings.Apply(&Option{
+	o := configure.Apply(&Option{
 		Delimiter: DefaultDelimiter,
 		SkipAny:   false,
 		DenyOff:   false,
