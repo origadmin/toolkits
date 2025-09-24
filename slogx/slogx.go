@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/goexts/generic/configure"
 	"github.com/golang-cz/devslog"
 	"github.com/lmittmann/tint"
 )
@@ -39,9 +40,7 @@ func New(options ...Option) *slog.Logger {
 	// Apply functional options to the default configuration.
 	// This replaces the dependency on github.com/goexts/generic/configure.
 	cfg := defaultOptions
-	for _, apply := range options {
-		apply(&cfg)
-	}
+	configure.Apply(&cfg, options)
 
 	// Setup writers based on the configuration.
 	var writers []io.Writer

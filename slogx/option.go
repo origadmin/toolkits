@@ -22,8 +22,8 @@ type Options struct {
 	Default          bool
 }
 
-var (
-	defaultOptions = Options{
+func DefaultOptions() Options {
+	return Options{
 		Format:     FormatText,
 		TimeLayout: DefaultTimeLayout,
 		Level:      LevelInfo,
@@ -31,6 +31,10 @@ var (
 			HandlerOptions: &HandlerOptions{},
 		},
 	}
+}
+
+var (
+	defaultOptions = DefaultOptions()
 )
 
 // WithOutputFile write log to some File
