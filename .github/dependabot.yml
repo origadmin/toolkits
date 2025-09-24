@@ -6,12 +6,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    # By default, Dependabot will open a separate pull request for each go.mod file.
-    # You can use groups to combine all module updates into a single pull request.
-    # groups:
-    #   go-modules:
-    #     patterns:
-    #       - "*"
+    commit-message:
+      # Prefix all commit messages with "chore(deps):"
+      # This tells release-please that it's a dependency update
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
