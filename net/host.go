@@ -70,21 +70,35 @@ func isValidIP(addr string) bool {
 	return ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
 }
 
-func getValidIP(iface net.Interface) net.IP {
-	addrs, _ := iface.Addrs()
-	minIndex := int(^uint(0) >> 1)
-	ips := make([]net.IP, 0)
+// InterfaceWithAddrs abstracts a network interface and its addresses for mocking.
+type InterfaceWithAddrs interface {
+	GetInterface() net.Interface
+	GetAddrs() ([]net.Addr, error)
+}
+
+// realInterfaceWithAddrs implements InterfaceWithAddrs for real net.Interface.
+type realInterfaceWithAddrs struct {
+	net.Interface
+}
+
+func (r *realInterfaceWithAddrs) GetInterface() net.Interface { return r.Interface }
+func (r *realInterfaceWithAddrs) GetAddrs() ([]net.Addr, error) { return r.Interface.Addrs() }
+
+// getValidIP now takes InterfaceWithAddrs.
+func getValidIP(ifaceWithAddrs InterfaceWithAddrs) net.IP {
+	iface := ifaceWithAddrs.GetInterface()
 	if (iface.Flags & net.FlagUp) == 0 {
 		return nil
 	}
-	if iface.Index >= minIndex && len(ips) != 0 {
-		return nil
-	}
-	addrs, err := iface.Addrs()
+	addrs, err := ifaceWithAddrs.GetAddrs()
 	if err != nil {
 		return nil
 	}
-	for i, rawAddr := range addrs {
+
+	var firstIPv4 net.IP
+	var firstIPv6 net.IP
+
+	for _, rawAddr := range addrs {
 		var ip net.IP
 		switch addr := rawAddr.(type) {
 		case *net.IPAddr:
@@ -94,27 +108,51 @@ func getValidIP(iface net.Interface) net.IP {
 		default:
 			continue
 		}
+
 		if isValidIP(ip.String()) {
-			minIndex = iface.Index
-			if i == 0 {
-				ips = make([]net.IP, 0, 1)
-			}
-			ips = append(ips, ip)
 			if ip.To4() != nil {
-				break
+				if firstIPv4 == nil { // Store the first IPv4 found
+					firstIPv4 = ip
+				}
+			} else {
+				if firstIPv6 == nil { // Store the first IPv6 found
+					firstIPv6 = ip
+				}
 			}
 		}
 	}
-	if len(ips) != 0 {
-		return ips[len(ips)-1]
+
+	if firstIPv4 != nil {
+		return firstIPv4
 	}
-	return nil
+	return firstIPv6 // Return the first IPv6 if no IPv4 was found
 }
 
-func getByCIDR(cidrFilters []*net.IPNet) string {
-	interfaces, _ := net.Interfaces()
-	for _, iface := range interfaces {
-		if ip := getValidIP(iface); ip != nil {
+// networkInterfaceProvider now returns InterfaceWithAddrs.
+type networkInterfaceProvider interface {
+	Interfaces() ([]InterfaceWithAddrs, error)
+}
+
+// realNetworkInterfaceProvider is the default implementation using net.Interfaces().
+type realNetworkInterfaceProvider struct{}
+
+func (r *realNetworkInterfaceProvider) Interfaces() ([]InterfaceWithAddrs, error) {
+	realIfaces, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	ifacesWithAddrs := make([]InterfaceWithAddrs, len(realIfaces))
+	for i := range realIfaces {
+		ifacesWithAddrs[i] = &realInterfaceWithAddrs{Interface: realIfaces[i]}
+	}
+	return ifacesWithAddrs, nil
+}
+
+// getByCIDR uses the provided networkInterfaceProvider.
+func getByCIDR(provider networkInterfaceProvider, cidrFilters []*net.IPNet) string {
+	interfaces, _ := provider.Interfaces()
+	for _, ifaceWithAddrs := range interfaces {
+		if ip := getValidIP(ifaceWithAddrs); ip != nil {
 			for _, filter := range cidrFilters {
 				if filter.Contains(ip) {
 					return ip.String()
@@ -125,13 +163,15 @@ func getByCIDR(cidrFilters []*net.IPNet) string {
 	return ""
 }
 
-func getByInterfacePattern(patterns []string) string {
-	interfaces, _ := net.Interfaces()
-	for _, iface := range interfaces {
+// getByInterfacePattern uses the provided networkInterfaceProvider.
+func getByInterfacePattern(provider networkInterfaceProvider, patterns []string) string {
+	interfaces, _ := provider.Interfaces()
+	for _, ifaceWithAddrs := range interfaces {
+		iface := ifaceWithAddrs.GetInterface()
 		// Match the name of the interface（like: eth*, eno*, wlan*, etc）
 		for _, pattern := range patterns {
 			if matched, _ := filepath.Match(pattern, iface.Name); matched {
-				if ip := getValidIP(iface); ip != nil {
+				if ip := getValidIP(ifaceWithAddrs); ip != nil {
 					//return ip
 				}
 			}
@@ -140,17 +180,19 @@ func getByInterfacePattern(patterns []string) string {
 	return ""
 }
 
-func getFirstAvailableIP() net.IP {
-	interfaces, _ := net.Interfaces()
-	for _, iface := range interfaces {
-		if ip := getValidIP(iface); ip != nil {
+// getFirstAvailableIP uses the provided networkInterfaceProvider.
+func getFirstAvailableIP(provider networkInterfaceProvider) net.IP {
+	interfaces, _ := provider.Interfaces()
+	for _, ifaceWithAddrs := range interfaces {
+		if ip := getValidIP(ifaceWithAddrs); ip != nil {
 			return ip
 		}
 	}
 	return nil
 }
 
-func HostAddr(opts ...Option) string {
+// HostAddr now accepts a networkInterfaceProvider.
+func HostAddr(provider networkInterfaceProvider, opts ...Option) string {
 	cfg := defaultConfig
 	configure.Apply(&cfg, opts)
 
@@ -161,21 +203,26 @@ func HostAddr(opts ...Option) string {
 	}
 
 	if len(cfg.cidrFilters) > 0 {
-		if ip := getByCIDR(cfg.cidrFilters); ip != "" {
+		if ip := getByCIDR(provider, cfg.cidrFilters); ip != "" {
 			return ip
 		}
 	}
 
 	if len(cfg.patterns) > 0 {
-		if ip := getByInterfacePattern(cfg.patterns); ip != "" {
+		if ip := getByInterfacePattern(provider, cfg.patterns); ip != "" {
 			return ip
 		}
 	}
 
 	if cfg.fallbackToFirst {
-		if ip := getFirstAvailableIP(); ip != nil {
+		if ip := getFirstAvailableIP(provider); ip != nil {
 			return ip.String()
 		}
 	}
 	return ""
+}
+
+// GetHostAddr is a convenience function for external callers to use the real network provider.
+func GetHostAddr(opts ...Option) string {
+	return HostAddr(&realNetworkInterfaceProvider{}, opts...)
 }
