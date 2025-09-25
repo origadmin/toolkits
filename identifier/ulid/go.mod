@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/oklog/ulid/v2 v2.1.1
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (

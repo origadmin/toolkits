@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/sony/sonyflake v1.3.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (

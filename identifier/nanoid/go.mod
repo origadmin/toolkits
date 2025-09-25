@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	github.com/jaevor/go-nanoid v1.4.0
 	github.com/origadmin/toolkits/identifier v0.3.19
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (

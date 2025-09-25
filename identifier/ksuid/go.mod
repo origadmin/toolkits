@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/segmentio/ksuid v1.0.4
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
