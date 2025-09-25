@@ -51,7 +51,8 @@ jobs:
           # The release-type for a standard Go module.
           # It automatically finds the go.mod file, reads the module path,
           # and creates tags like `v1.2.3`.
-          release-type: go
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
           # The token is required for release-please to create releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 

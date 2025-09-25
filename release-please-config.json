@@ -1,0 +1,26 @@
+{
+  "packages": {
+    "toolkits": {
+      "release-type": "go",
+      "package-name": "github.com/origadmin/toolkits",
+      "component": "toolkits"
+    },
+    "toolkits/codec": {
+      "release-type": "go",
+      "package-name": "github.com/origadmin/toolkits/codec",
+      "component": "toolkits-codec"
+    },
+    "toolkits/errors": {
+      "release-type": "go",
+      "package-name": "github.com/origadmin/toolkits/errors",
+      "component": "toolkits-errors"
+    },
+    "toolkits/slogx": {
+      "release-type": "go",
+      "package-name": "github.com/origadmin/toolkits/slogx",
+      "component": "toolkits-slogx"
+    }
+  },
+  "manifest-path": ".release-please-manifest.json",
+  "changelog-path": "CHANGELOG.md"
+}
