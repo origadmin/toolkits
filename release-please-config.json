@@ -4,7 +4,9 @@
   "bump-patch-for-minor-pre-major": true,
   "packages": {
     ".": {
-      "package-name": "github.com/origadmin/toolkits"
+      "package-name": "github.com/origadmin/toolkits",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true
     },
     "codec": {
       "package-name": "github.com/origadmin/toolkits/codec",
