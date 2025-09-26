@@ -1,5 +1,5 @@
 {
-  "toolkits": "0.3.19",
+  ".": "0.3.19",
   "toolkits-codec": "0.3.19",
   "toolkits-errors": "0.3.19",
   "toolkits-slogx": "0.3.19"
