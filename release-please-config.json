@@ -2,26 +2,6 @@
   "release-type": "go",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
-  "release-groups": {
-    "toolkits": {
-      "packages": [
-        ".",
-        "codec",
-        "crypto",
-        "errors",
-        "slogx",
-        "identifier/cuid2",
-        "identifier/ksuid",
-        "identifier/nanoid",
-        "identifier/shortid",
-        "identifier/snowflake",
-        "identifier/sonyflake",
-        "identifier/ulid",
-        "identifier/uuid",
-        "identifier/xid"
-      ]
-    }
-  },
   "packages": {
     ".": {
       "package-name": "github.com/origadmin/toolkits"
@@ -46,12 +26,73 @@
       "component": "slogx",
       "tag-separator": "/"
     },
-    "identifier/*": {
-      "package-name": "github.com/origadmin/toolkits/identifier/${packageName}",
-      "component": "identifier/${packageName}",
+    "identifier/cuid2": {
+      "package-name": "github.com/origadmin/toolkits/identifier/cuid2",
+      "component": "identifier/cuid2",
+      "tag-separator": "/"
+    },
+    "identifier/ksuid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/ksuid",
+      "component": "identifier/ksuid",
+      "tag-separator": "/"
+    },
+    "identifier/nanoid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/nanoid",
+      "component": "identifier/nanoid",
+      "tag-separator": "/"
+    },
+    "identifier/shortid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/shortid",
+      "component": "identifier/shortid",
+      "tag-separator": "/"
+    },
+    "identifier/snowflake": {
+      "package-name": "github.com/origadmin/toolkits/identifier/snowflake",
+      "component": "identifier/snowflake",
+      "tag-separator": "/"
+    },
+    "identifier/sonyflake": {
+      "package-name": "github.com/origadmin/toolkits/identifier/sonyflake",
+      "component": "identifier/sonyflake",
+      "tag-separator": "/"
+    },
+    "identifier/ulid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/ulid",
+      "component": "identifier/ulid",
+      "tag-separator": "/"
+    },
+    "identifier/uuid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/uuid",
+      "component": "identifier/uuid",
+      "tag-separator": "/"
+    },
+    "identifier/xid": {
+      "package-name": "github.com/origadmin/toolkits/identifier/xid",
+      "component": "identifier/xid",
       "tag-separator": "/"
     }
   },
-  "manifest-path": ".github/.release-please-manifest.json",
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "toolkits-group",
+      "components": [
+        ".",
+        "codec",
+        "crypto",
+        "errors",
+        "slogx",
+        "identifier/cuid2",
+        "identifier/ksuid",
+        "identifier/nanoid",
+        "identifier/shortid",
+        "identifier/snowflake",
+        "identifier/sonyflake",
+        "identifier/ulid",
+        "identifier/uuid",
+        "identifier/xid"
+      ]
+    }
+  ],
   "changelog-path": "CHANGELOG.md"
 }
