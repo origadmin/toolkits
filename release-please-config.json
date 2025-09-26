@@ -1,26 +1,57 @@
 {
-  "packages": {
+  "release-type": "go",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "release-groups": {
     "toolkits": {
-      "release-type": "go",
-      "package-name": "github.com/origadmin/toolkits",
-      "component": "toolkits"
-    },
-    "toolkits/codec": {
-      "release-type": "go",
-      "package-name": "github.com/origadmin/toolkits/codec",
-      "component": "toolkits-codec"
-    },
-    "toolkits/errors": {
-      "release-type": "go",
-      "package-name": "github.com/origadmin/toolkits/errors",
-      "component": "toolkits-errors"
-    },
-    "toolkits/slogx": {
-      "release-type": "go",
-      "package-name": "github.com/origadmin/toolkits/slogx",
-      "component": "toolkits-slogx"
+      "packages": [
+        ".",
+        "codec",
+        "crypto",
+        "errors",
+        "slogx",
+        "identifier/cuid2",
+        "identifier/ksuid",
+        "identifier/nanoid",
+        "identifier/shortid",
+        "identifier/snowflake",
+        "identifier/sonyflake",
+        "identifier/ulid",
+        "identifier/uuid",
+        "identifier/xid"
+      ]
     }
   },
-  "manifest-path": ".release-please-manifest.json",
+  "packages": {
+    ".": {
+      "package-name": "github.com/origadmin/toolkits"
+    },
+    "codec": {
+      "package-name": "github.com/origadmin/toolkits/codec",
+      "component": "codec",
+      "tag-separator": "/"
+    },
+    "crypto": {
+      "package-name": "github.com/origadmin/toolkits/crypto",
+      "component": "crypto",
+      "tag-separator": "/"
+    },
+    "errors": {
+      "package-name": "github.com/origadmin/toolkits/errors",
+      "component": "errors",
+      "tag-separator": "/"
+    },
+    "slogx": {
+      "package-name": "github.com/origadmin/toolkits/slogx",
+      "component": "slogx",
+      "tag-separator": "/"
+    },
+    "identifier/*": {
+      "package-name": "github.com/origadmin/toolkits/identifier/${packageName}",
+      "component": "identifier/${packageName}",
+      "tag-separator": "/"
+    }
+  },
+  "manifest-path": ".github/.release-please-manifest.json",
   "changelog-path": "CHANGELOG.md"
 }
