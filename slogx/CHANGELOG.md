@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.20](https://github.com/origadmin/toolkits/compare/slogx/v0.3.20...slogx/v0.3.20) (2025-09-26)
+
+
+### Miscellaneous Chores
+
+* **slogx:** Synchronize toolkits-group versions
+
 ## [0.3.20](https://github.com/origadmin/toolkits/compare/slogx/v0.3.19...slogx/v0.3.20) (2025-09-26)
 
 
