@@ -1,9 +1,9 @@
 {
-  ".": "0.3.19",
-  "codec": "0.3.19",
+  ".": "0.3.20",
+  "codec": "0.3.20",
   "crypto": "0.3.19",
-  "errors": "0.3.19",
-  "slogx": "0.3.19",
+  "errors": "0.3.20",
+  "slogx": "0.3.20",
   "identifier/cuid2": "0.3.19",
   "identifier/ksuid": "0.3.19",
   "identifier/nanoid": "0.3.19",
