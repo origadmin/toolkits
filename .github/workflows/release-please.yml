@@ -53,7 +53,6 @@ jobs:
           # and creates tags like `v1.2.3`.
           config-file: release-please-config.json
           manifest-file: .github/.release-please-manifest.json # 已更新路径
-          merge-method: rebase # 或者 squash
           # The token is required for release-please to create releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 
