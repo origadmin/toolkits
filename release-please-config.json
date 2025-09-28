@@ -11,67 +11,80 @@
     "codec": {
       "package-name": "github.com/origadmin/toolkits/codec",
       "component": "codec",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "crypto": {
       "package-name": "github.com/origadmin/toolkits/crypto",
       "component": "crypto",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "errors": {
       "package-name": "github.com/origadmin/toolkits/errors",
       "component": "errors",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "slogx": {
       "package-name": "github.com/origadmin/toolkits/slogx",
       "component": "slogx",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/cuid2": {
       "package-name": "github.com/origadmin/toolkits/identifier/cuid2",
       "component": "identifier/cuid2",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/ksuid": {
       "package-name": "github.com/origadmin/toolkits/identifier/ksuid",
       "component": "identifier/ksuid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/nanoid": {
       "package-name": "github.com/origadmin/toolkits/identifier/nanoid",
       "component": "identifier/nanoid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/shortid": {
       "package-name": "github.com/origadmin/toolkits/identifier/shortid",
       "component": "identifier/shortid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/snowflake": {
       "package-name": "github.com/origadmin/toolkits/identifier/snowflake",
       "component": "identifier/snowflake",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/sonyflake": {
       "package-name": "github.com/origadmin/toolkits/identifier/sonyflake",
       "component": "identifier/sonyflake",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/ulid": {
       "package-name": "github.com/origadmin/toolkits/identifier/ulid",
       "component": "identifier/ulid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/uuid": {
       "package-name": "github.com/origadmin/toolkits/identifier/uuid",
       "component": "identifier/uuid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     },
     "identifier/xid": {
       "package-name": "github.com/origadmin/toolkits/identifier/xid",
       "component": "identifier/xid",
-      "tag-separator": "/"
+      "tag-separator": "/",
+      "skip-changelog": true
     }
   },
   "plugins": [
