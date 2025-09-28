@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.22](https://github.com/origadmin/toolkits/compare/v0.3.21...v0.3.22) (2025-09-28)
+
+
+### Features
+
+* **server:** Add service registration mechanism and example services ([bbb294a](https://github.com/origadmin/toolkits/commit/bbb294a247dbb7027d29d3244a028c050d29464e))
+
 ## [0.3.21](https://github.com/origadmin/toolkits/compare/v0.3.20...v0.3.21) (2025-09-26)
 
 
