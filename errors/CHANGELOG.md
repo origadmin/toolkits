@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.20](https://github.com/origadmin/toolkits/compare/errors/v0.3.20...errors/v0.3.20) (2025-09-26)
+
+
+### Miscellaneous Chores
+
+* **errors:** Synchronize toolkits-group versions
+
 ## [0.3.20](https://github.com/origadmin/toolkits/compare/errors/v0.3.19...errors/v0.3.20) (2025-09-26)
 
 

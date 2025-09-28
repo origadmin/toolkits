@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.20](https://github.com/origadmin/toolkits/compare/codec/v0.3.20...codec/v0.3.20) (2025-09-26)
+
+
+### Miscellaneous Chores
+
+* **codec:** Synchronize toolkits-group versions
+
 ## [0.3.20](https://github.com/origadmin/toolkits/compare/codec/v0.3.19...codec/v0.3.20) (2025-09-26)
 
 
