@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-> **Note:** For a faster response and to engage with the community, we strongly recommend asking questions in our [**GitHub Discussions**](https://github.com/origadmin/framework/discussions/new?category=q-a). Issues are primarily for tracking bugs and development tasks. If your question evolves into a feature request or bug report, we can easily convert it.
+> **Note:** For a faster response and to engage with the community, we strongly recommend asking questions in our [**GitHub Discussions**](https://github.com/orgs/origadmin/discussions/new?category=q-a). Issues are primarily for tracking bugs and development tasks. If your question evolves into a feature request or bug report, we can easily convert it.
 
 ### ❓ Your Question
 
