@@ -81,7 +81,7 @@ type realInterfaceWithAddrs struct {
 	net.Interface
 }
 
-func (r *realInterfaceWithAddrs) GetInterface() net.Interface { return r.Interface }
+func (r *realInterfaceWithAddrs) GetInterface() net.Interface   { return r.Interface }
 func (r *realInterfaceWithAddrs) GetAddrs() ([]net.Addr, error) { return r.Interface.Addrs() }
 
 // getValidIP now takes InterfaceWithAddrs.
@@ -222,7 +222,7 @@ func HostAddr(provider NetworkInterfaceProvider, opts ...Option) string {
 	return ""
 }
 
-// GetHostAddr is a convenience function for external callers to use the real network provider.
-func GetHostAddr(opts ...Option) string {
+// RealHostAddr is a convenience function for external callers to use the real network provider.
+func RealHostAddr(opts ...Option) string {
 	return HostAddr(&realNetworkInterfaceProvider{}, opts...)
 }

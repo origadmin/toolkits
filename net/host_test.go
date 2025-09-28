@@ -22,7 +22,7 @@ type mockInterfaceWithAddrs struct {
 	mockAddrs []net.Addr
 }
 
-func (m *mockInterfaceWithAddrs) GetInterface() net.Interface { return m.Interface }
+func (m *mockInterfaceWithAddrs) GetInterface() net.Interface   { return m.Interface }
 func (m *mockInterfaceWithAddrs) GetAddrs() ([]net.Addr, error) { return m.mockAddrs, nil }
 
 // newMockInterfaceWithAddrs is a helper to create a mock InterfaceWithAddrs.
@@ -38,11 +38,11 @@ func newMockInterfaceWithAddrs(name string, index int, flags net.Flags, ipStrs .
 
 	return &mockInterfaceWithAddrs{
 		Interface: net.Interface{
-			Index: index,
-			MTU:   1500,
-			Name:  name,
+			Index:        index,
+			MTU:          1500,
+			Name:         name,
 			HardwareAddr: nil,
-			Flags: flags,
+			Flags:        flags,
 		},
 		mockAddrs: addrs,
 	}
@@ -80,7 +80,7 @@ func ipInCIDR(t *testing.T, ipStr string, cidrStrs []string) bool {
 	return false
 }
 
-// TestGetHostAddrFromEnvironmentVariable is updated to use GetHostAddr (real provider).
+// TestGetHostAddrFromEnvironmentVariable is updated to use RealHostAddr (real provider).
 func TestGetHostAddrFromEnvironmentVariable(t *testing.T) {
 	// Setup
 	const envVarName = "TEST_HOST_IP"
@@ -88,13 +88,13 @@ func TestGetHostAddrFromEnvironmentVariable(t *testing.T) {
 	os.Setenv(envVarName, expectedIP)
 
 	// Call function with environment variable option using the real provider
-	result := GetHostAddr(WithEnvVar(envVarName))
+	result := RealHostAddr(WithEnvVar(envVarName))
 
 	// Assert result matches expected IP
 	assert.Equal(t, expectedIP, result, "Expected IP %s from environment variable, got %s", expectedIP, result)
 }
 
-// TestGetHostAddrReturnsEmptyWhenNoIPFound is updated to use GetHostAddr (real provider).
+// TestGetHostAddrReturnsEmptyWhenNoIPFound is updated to use RealHostAddr (real provider).
 func TestGetHostAddrReturnsEmptyWhenNoIPFound(t *testing.T) {
 	// Create a test configuration that should fail to find any IP
 	// - Use non-existent environment variable
@@ -105,7 +105,7 @@ func TestGetHostAddrReturnsEmptyWhenNoIPFound(t *testing.T) {
 	os.Unsetenv("NON_EXISTENT_ENV_VAR")
 
 	// Call function with options that should result in no IP found using the real provider
-	result := GetHostAddr(
+	result := RealHostAddr(
 		WithEnvVar("NON_EXISTENT_ENV_VAR"),
 		WithFallback(false),
 	)
@@ -215,8 +215,8 @@ func TestGetHostAddrReturnsEmptyWhenNoIPFoundWithMock(t *testing.T) {
 	// Create a mock provider with no valid interfaces
 	mockProvider := &mockNetworkInterfaceProvider{interfaces: []InterfaceWithAddrs{
 		newMockInterfaceWithAddrs("lo0", 1, net.FlagUp|net.FlagLoopback, "127.0.0.1"), // Loopback is not global unicast
-		newMockInterfaceWithAddrs("eth0", 2, 0),                                     // Down interface
-		newMockInterfaceWithAddrs("eth1", 3, net.FlagUp, "169.254.0.1"),             // Link-local is not global unicast
+		newMockInterfaceWithAddrs("eth0", 2, 0),                                       // Down interface
+		newMockInterfaceWithAddrs("eth1", 3, net.FlagUp, "169.254.0.1"),               // Link-local is not global unicast
 	}}
 
 	// Call function with options that should result in no IP found
