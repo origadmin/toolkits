@@ -128,8 +128,8 @@ func getValidIP(ifaceWithAddrs InterfaceWithAddrs) net.IP {
 	return firstIPv6 // Return the first IPv6 if no IPv4 was found
 }
 
-// networkInterfaceProvider now returns InterfaceWithAddrs.
-type networkInterfaceProvider interface {
+// NetworkInterfaceProvider now returns InterfaceWithAddrs.
+type NetworkInterfaceProvider interface {
 	Interfaces() ([]InterfaceWithAddrs, error)
 }
 
@@ -148,8 +148,8 @@ func (r *realNetworkInterfaceProvider) Interfaces() ([]InterfaceWithAddrs, error
 	return ifacesWithAddrs, nil
 }
 
-// getByCIDR uses the provided networkInterfaceProvider.
-func getByCIDR(provider networkInterfaceProvider, cidrFilters []*net.IPNet) string {
+// getByCIDR uses the provided NetworkInterfaceProvider.
+func getByCIDR(provider NetworkInterfaceProvider, cidrFilters []*net.IPNet) string {
 	interfaces, _ := provider.Interfaces()
 	for _, ifaceWithAddrs := range interfaces {
 		if ip := getValidIP(ifaceWithAddrs); ip != nil {
@@ -163,8 +163,8 @@ func getByCIDR(provider networkInterfaceProvider, cidrFilters []*net.IPNet) stri
 	return ""
 }
 
-// getByInterfacePattern uses the provided networkInterfaceProvider.
-func getByInterfacePattern(provider networkInterfaceProvider, patterns []string) string {
+// getByInterfacePattern uses the provided NetworkInterfaceProvider.
+func getByInterfacePattern(provider NetworkInterfaceProvider, patterns []string) string {
 	interfaces, _ := provider.Interfaces()
 	for _, ifaceWithAddrs := range interfaces {
 		iface := ifaceWithAddrs.GetInterface()
@@ -180,8 +180,8 @@ func getByInterfacePattern(provider networkInterfaceProvider, patterns []string)
 	return ""
 }
 
-// getFirstAvailableIP uses the provided networkInterfaceProvider.
-func getFirstAvailableIP(provider networkInterfaceProvider) net.IP {
+// getFirstAvailableIP uses the provided NetworkInterfaceProvider.
+func getFirstAvailableIP(provider NetworkInterfaceProvider) net.IP {
 	interfaces, _ := provider.Interfaces()
 	for _, ifaceWithAddrs := range interfaces {
 		if ip := getValidIP(ifaceWithAddrs); ip != nil {
@@ -191,8 +191,8 @@ func getFirstAvailableIP(provider networkInterfaceProvider) net.IP {
 	return nil
 }
 
-// HostAddr now accepts a networkInterfaceProvider.
-func HostAddr(provider networkInterfaceProvider, opts ...Option) string {
+// HostAddr now accepts a NetworkInterfaceProvider.
+func HostAddr(provider NetworkInterfaceProvider, opts ...Option) string {
 	cfg := defaultConfig
 	configure.Apply(&cfg, opts)
 
