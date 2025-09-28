@@ -20,7 +20,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 ### Environment
-- **`origadmin/framework` version**: (e.g., `v1.2.3` or commit hash)
+- **`origadmin/toolkits` version**: (e.g., `v1.2.3` or commit hash)
 - **Go version**: (output of `go version`)
 - **OS/Arch**: (e.g., `linux/amd64`, `windows/amd64`, `darwin/arm64`)
 
