@@ -13,61 +13,8 @@ import (
 	"github.com/goexts/generic/configure"
 )
 
-// HostConfig defines the configuration for the host.
-type HostConfig struct {
-	envVar          string       // The name of the environment variable
-	patterns        []string     // Interface name patterns
-	cidrFilters     []*net.IPNet // Segment filters
-	fallbackToFirst bool         // Whether to roll back to the first NIC
-}
-
-func WithEnvVar(name string) Option {
-	return func(c *HostConfig) {
-		c.envVar = name
-	}
-}
-
-func WithFallback(enable bool) Option {
-	return func(c *HostConfig) {
-		c.fallbackToFirst = enable
-	}
-}
-
-func WithCIDRFilters(cidrs []string) Option {
-	return func(c *HostConfig) {
-		for _, cidrStr := range cidrs {
-			_, ipNet, err := net.ParseCIDR(cidrStr)
-			if err == nil {
-				c.cidrFilters = append(c.cidrFilters, ipNet)
-			}
-		}
-	}
-}
-
-func WithInterfacePatterns(patterns []string) Option {
-	return func(c *HostConfig) {
-		c.patterns = patterns
-	}
-}
-
-type Option = func(*HostConfig)
-
-var defaultConfig = DefaultConfig()
-
-func DefaultConfig() HostConfig {
-	return HostConfig{
-		patterns:        []string{"eth*", "eno*", "wlan*"},
-		fallbackToFirst: true,
-	}
-}
-
 func getFromEnv(envVar string) string {
 	return os.Getenv(envVar)
-}
-
-func isValidIP(addr string) bool {
-	ip := net.ParseIP(addr)
-	return ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
 }
 
 // InterfaceWithAddrs abstracts a network interface and its addresses for mocking.
@@ -109,7 +56,7 @@ func getValidIP(ifaceWithAddrs InterfaceWithAddrs) net.IP {
 			continue
 		}
 
-		if isValidIP(ip.String()) {
+		if IsUsableHostIP(ip.String()) { // Changed to IsUsableHostIP
 			if ip.To4() != nil {
 				if firstIPv4 == nil { // Store the first IPv4 found
 					firstIPv4 = ip

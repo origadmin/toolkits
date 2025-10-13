@@ -8,6 +8,7 @@ import (
 	"math"
 )
 
+// ParseIP converts an IP address to its int64 representation.
 func ParseIP(ip IP) int64 {
 	var (
 		one   byte
@@ -22,6 +23,7 @@ func ParseIP(ip IP) int64 {
 	return intip
 }
 
+// ToIP converts an int64 representation back to an IP address.
 func ToIP(ip int64) IP {
 	if ip > math.MaxUint32 {
 		var ips []byte
