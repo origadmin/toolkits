@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # Manual triggering is allowed
 
 permissions:
   contents: write
@@ -42,7 +43,7 @@ jobs:
     # The release job depends on the test job succeeding.
     needs: [test]
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[release]')
+    # if: contains(github.event.head_commit.message, '[release]')
     steps:
       - name: Create Release and Changelog
         # This action automates the entire release process based on
