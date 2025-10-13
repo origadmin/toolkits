@@ -1,1 +1,1 @@
-{}
+{".":"1.0.0","codec":"1.0.0","crypto":"1.0.0","errors":"1.0.0","slogx":"1.0.0","identifier/cuid2":"1.0.0","identifier/ksuid":"1.0.0","identifier/nanoid":"1.0.0","identifier/shortid":"1.0.0","identifier/snowflake":"1.0.0","identifier/sonyflake":"1.0.0","identifier/ulid":"1.0.0","identifier/uuid":"1.0.0","identifier/xid":"1.0.0"}
