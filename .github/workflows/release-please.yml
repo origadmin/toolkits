@@ -42,24 +42,18 @@ jobs:
     # The release job depends on the test job succeeding.
     needs: [test]
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[release]')
     steps:
-      - name: Create Release and Changelog
-        # This action automates the entire release process based on
-        # Conventional Commit messages.
+      - name: Create Release and Changelog (Candidate Run)
+        id: release # 添加 ID 以便引用输出
         uses: googleapis/release-please-action@v4
         with:
-          # The release-type for a standard Go module.
-          # It automatically finds the go.mod file, reads the module path,
-          # and creates tags like `v1.2.3`.
           config-file: release-please-config.json
-          manifest-file: .github/.release-please-manifest.json # 已更新路径
-          # The token is required for release-please to create releases.
+          manifest-file: .github/.release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # Optional: If you want to do something after a release is created (e.g., notify Slack)
       - name: Notify on new release
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
         run: |
           echo "New release created: ${{ steps.release.outputs.tag_name }}"
           echo "Release notes: ${{ steps.release.outputs.release_notes }}"
