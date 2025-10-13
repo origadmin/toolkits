@@ -121,7 +121,8 @@
         "identifier/ulid",
         "identifier/uuid",
         "identifier/xid"
-      ]
+      ],
+      "force-group-release": true
     }
   ],
   "changelog-path": "CHANGELOG.md"
