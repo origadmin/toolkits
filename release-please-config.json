@@ -14,79 +14,92 @@
       "package-name": "github.com/origadmin/toolkits/codec",
       "component": "codec",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "crypto": {
       "package-name": "github.com/origadmin/toolkits/crypto",
       "component": "crypto",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "errors": {
       "package-name": "github.com/origadmin/toolkits/errors",
       "component": "errors",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "slogx": {
       "package-name": "github.com/origadmin/toolkits/slogx",
       "component": "slogx",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/cuid2": {
       "package-name": "github.com/origadmin/toolkits/identifier/cuid2",
       "component": "identifier/cuid2",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/ksuid": {
       "package-name": "github.com/origadmin/toolkits/identifier/ksuid",
       "component": "identifier/ksuid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/nanoid": {
       "package-name": "github.com/origadmin/toolkits/identifier/nanoid",
       "component": "identifier/nanoid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/shortid": {
       "package-name": "github.com/origadmin/toolkits/identifier/shortid",
       "component": "identifier/shortid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/snowflake": {
       "package-name": "github.com/origadmin/toolkits/identifier/snowflake",
       "component": "identifier/snowflake",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/sonyflake": {
       "package-name": "github.com/origadmin/toolkits/identifier/sonyflake",
       "component": "identifier/sonyflake",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/ulid": {
       "package-name": "github.com/origadmin/toolkits/identifier/ulid",
       "component": "identifier/ulid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/uuid": {
       "package-name": "github.com/origadmin/toolkits/identifier/uuid",
       "component": "identifier/uuid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     },
     "identifier/xid": {
       "package-name": "github.com/origadmin/toolkits/identifier/xid",
       "component": "identifier/xid",
       "tag-separator": "/",
-      "skip-changelog": true
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     }
   },
   "plugins": [
