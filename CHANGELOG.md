@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.23](https://github.com/origadmin/toolkits/compare/v0.3.22...v0.3.23) (2025-10-13)
+
+
+### Features
+
+* **net:** Add endpoint generation and IP utility functions with configurable strategies ([842466d](https://github.com/origadmin/toolkits/commit/842466d7f813bba89d42f4ae79466767363fccd1))
+
+
+### Bug Fixes
+
+* **toolkits:** Remove release-please manifest file ([94441a8](https://github.com/origadmin/toolkits/commit/94441a88fb2f271afc3f9723fdf780dfe6684bd9))
+
 ## [0.3.22](https://github.com/origadmin/toolkits/compare/v0.3.21...v0.3.22) (2025-09-28)
 
 
