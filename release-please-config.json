@@ -5,6 +5,7 @@
   "packages": {
     ".": {
       "package-name": "github.com/origadmin/toolkits",
+      "component": "toolkits",
       "include-component-in-tag": false,
       "include-v-in-tag": true
     },
@@ -92,7 +93,7 @@
       "type": "linked-versions",
       "groupName": "toolkits-group",
       "components": [
-        ".",
+        "toolkits",
         "codec",
         "crypto",
         "errors",
