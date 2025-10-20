@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
-	github.com/goexts/generic v0.6.0
+	github.com/goexts/generic v0.8.0
 	github.com/origadmin/toolkits/errors v0.3.22
 	github.com/stretchr/testify v1.11.1
 )
