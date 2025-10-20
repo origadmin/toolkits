@@ -8,6 +8,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/goexts/generic v0.6.0 h1:ystez2LtZ8dk8sy2l5aVx3uHvCRhxAyupobUCVBmkUg=
 github.com/goexts/generic v0.6.0/go.mod h1:3L0Ou9PAX35WPvO+aSeZsoENlGIRSDAuZ8/GNqUqaEs=
+github.com/goexts/generic v0.8.0 h1:+d7tjLfarVFkaccj+wJIODlIciZ7xz/OlP/M19WCcTQ=
+github.com/goexts/generic v0.8.0/go.mod h1:3L0Ou9PAX35WPvO+aSeZsoENlGIRSDAuZ8/GNqUqaEs=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
