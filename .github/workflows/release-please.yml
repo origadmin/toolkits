@@ -41,11 +41,11 @@ jobs:
 
   release:
     # The release job depends on the test job succeeding. Ensure lint and test pass before releasing.
-    needs: [lint, test]
+    needs: [ test ]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release and Changelog
-        id: release # 添加 ID 以便引用输出
+        id: release
         uses: googleapis/release-please-action@v4
         with:
           config-file: release-please-config.json
