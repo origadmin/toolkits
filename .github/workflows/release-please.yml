@@ -11,6 +11,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  checks: write
 
 jobs:
   lint:
@@ -39,11 +40,11 @@ jobs:
         run: make test
 
   release:
-    # The release job depends on the test job succeeding.
-    needs: [test]
+    # The release job depends on the test job succeeding. Ensure lint and test pass before releasing.
+    needs: [lint, test]
     runs-on: ubuntu-latest
     steps:
-      - name: Create Release and Changelog (Candidate Run)
+      - name: Create Release and Changelog
         id: release # 添加 ID 以便引用输出
         uses: googleapis/release-please-action@v4
         with:
