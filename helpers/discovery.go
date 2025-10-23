@@ -6,12 +6,12 @@
 package helpers
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"net/netip"
 	"strconv"
 	"strings"
-
-	"github.com/origadmin/toolkits/errors"
 )
 
 const (
@@ -59,14 +59,14 @@ func ServiceDiscoveryEndpoint(endpoint, scheme, host, addr string) string {
 func ServiceEndpoint(scheme, host, hostPort string) (string, error) {
 	_, port, err := net.SplitHostPort(hostPort)
 	if err != nil && host == "" {
-		return "", errors.Wrap(err, "invalid host")
+		return "", fmt.Errorf("invalid host: %w", err)
 	}
 	if len(host) > 0 && (host != "0.0.0.0" && host != "[::]" && host != "::") {
 		return schemeHost(scheme, net.JoinHostPort(host, port)), nil
 	}
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get local ip")
+		return "", fmt.Errorf("failed to get local ip: %w", err)
 	}
 	minIndex := int(^uint(0) >> 1)
 	ips := make([]net.IP, 0)

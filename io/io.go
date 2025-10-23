@@ -2,94 +2,52 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package io is the input/output package
+// Package io provides I/O utility functions, extending the standard io package.
 package io
 
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/origadmin/toolkits/errors"
 )
 
-const (
-	SeekStart   = io.SeekStart
-	SeekCurrent = io.SeekCurrent
-	SeekEnd     = io.SeekEnd
-)
+//go:generate adptool .
+//go:adapter:package io
 
-const (
-	ErrFileSize       = errors.String("file Size is zero")
-	ErrFileType       = errors.String("file type is not supported")
-	ErrTargetIsNotDir = errors.String("target is not a directory")
-	ErrFileRead       = errors.String("file read error")
-	ErrFileWrite      = errors.String("file write error")
-	ErrFileNotExist   = errors.String("file not exist")
-	ErrFileName       = errors.String("file path is empty")
-	ErrSizeNotMatch   = errors.String("file size not match")
-)
-
+// Errors returned by this package.
 var (
-	EOF              = io.EOF
-	ErrNoProgress    = io.ErrNoProgress
-	ErrUnexpectedEOF = io.ErrUnexpectedEOF
-	ErrShortBuffer   = io.ErrShortBuffer
-	ErrShortWrite    = io.ErrShortWrite
+	// ErrZeroSize indicates that a file's size is zero.
+	ErrZeroSize = errors.New("file Size is zero")
+	// ErrUnsupportedType indicates that a file's type is not supported.
+	ErrUnsupportedType = errors.New("file type is not supported")
+	// ErrTargetIsNotDir indicates that a target path for an operation is not a directory.
+	ErrTargetIsNotDir = errors.New("target is not a directory")
+	// ErrRead indicates a failure to read from a file.
+	ErrRead = errors.New("file read error")
+	// ErrWrite indicates a failure to write to a file.
+	ErrWrite = errors.New("file write error")
+	// ErrNotExist indicates that a file or directory does not exist.
+	ErrNotExist = errors.New("file not exist")
+	// ErrEmptyPath indicates that a file path is empty.
+	ErrEmptyPath = errors.New("file path is empty")
+	// ErrSizeNotMatch indicates that the number of bytes written does not match the expected size.
+	ErrSizeNotMatch = errors.New("file size not match")
 )
 
-var (
-	Discard        = io.Discard
-	StdWriteString = io.WriteString
-	StdCopy        = io.Copy
-	StdCopyBuffer  = io.CopyBuffer
-	StdCopyN       = io.CopyN
-	StdLimitReader = io.LimitReader
-	StdReadAll     = io.ReadAll
-	StdReadFull    = io.ReadFull
-	StdReadAtLeast = io.ReadAtLeast
-	StdMultiReader = io.MultiReader
-	StdMultiWriter = io.MultiWriter
-	StdNopCloser   = io.NopCloser
-	StdPipe        = io.Pipe
-)
-
+// Standard library fs types.
 type (
-	OffsetWriter  = io.OffsetWriter
-	SectionReader = io.SectionReader
+	ReadDirFile = fs.ReadDirFile
+	DirEntry    = fs.DirEntry
+	FileInfo    = fs.FileInfo
 )
 
-type (
-	Reader          = io.Reader
-	Writer          = io.Writer
-	ReaderFrom      = io.ReaderFrom
-	WriterTo        = io.WriterTo
-	ReaderAt        = io.ReaderAt
-	WriterAt        = io.WriterAt
-	Closer          = io.Closer
-	ByteReader      = io.ByteReader
-	ByteScanner     = io.ByteScanner
-	ByteWriter      = io.ByteWriter
-	RuneReader      = io.RuneReader
-	RuneScanner     = io.RuneScanner
-	Seeker          = io.Seeker
-	ReadCloser      = io.ReadCloser
-	WriteCloser     = io.WriteCloser
-	ReadWriteCloser = io.ReadWriteCloser
-	ReadWriteSeeker = io.ReadWriteSeeker
-	ReadSeeker      = io.ReadSeeker
-	ReadSeekCloser  = io.ReadSeekCloser
-	StringWriter    = io.StringWriter
-	ReadDirFile     = fs.ReadDirFile
-	DirEntry        = fs.DirEntry
-	FileInfo        = fs.FileInfo
-)
-
-// CopyContext copy data from src to dst until EOF or error, returning the number of bytes copied.
-func CopyContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
+// Copy copies data from src to dst until EOF, context cancellation, or an error occurs.
+// It returns the number of bytes copied.
+func Copy(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
 	var (
 		err   error
 		n     int
@@ -119,8 +77,8 @@ func CopyContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, erro
 	}
 }
 
-// ReadBuffer read file to buffer
-func ReadBuffer(path string, buf *bytes.Buffer) (int64, error) {
+// ReadToBuffer reads the entire file at the given path into the provided buffer.
+func ReadToBuffer(path string, buf *bytes.Buffer) (int64, error) {
 	reader, err := os.Open(path)
 	if err != nil {
 		return 0, err
@@ -131,11 +89,13 @@ func ReadBuffer(path string, buf *bytes.Buffer) (int64, error) {
 	return io.Copy(buf, reader)
 }
 
-// DeleteFile deletes files related to the provided id and param.
-func DeleteFile(path string) error {
+// Delete removes the file at the specified path.
+// If the path is empty, it returns ErrEmptyPath.
+// If the file does not exist, it returns no error.
+func Delete(path string) error {
 	path = filepath.FromSlash(path)
 	if path == "" {
-		return ErrFileName
+		return ErrEmptyPath
 	}
 	abspath, err := filepath.Abs(path)
 	if err != nil {
@@ -145,4 +105,53 @@ func DeleteFile(path string) error {
 		return err
 	}
 	return nil
+}
+
+// Save reads all data from a reader and saves it to the specified destination path.
+// It automatically creates any necessary parent directories for the destination path.
+func Save(ctx context.Context, dstPath string, src io.Reader) (int64, error) {
+	dir := filepath.Dir(dstPath)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return 0, err
+		}
+	}
+
+	f, err := os.Create(dstPath)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+
+	return Copy(ctx, f, src)
+}
+
+// Stream opens the file at the source path and streams its content to the destination writer.
+// This function is memory-efficient and suitable for large files.
+func Stream(ctx context.Context, srcPath string, dst io.Writer) (int64, error) {
+	f, err := os.Open(srcPath)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+
+	return Copy(ctx, dst, f)
+}
+
+// Exists checks if a file or directory exists at the given path.
+// It returns true if the path exists, and false if it does not.
+// An error is returned only if the check itself fails due to permission issues or other system errors.
+func Exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
