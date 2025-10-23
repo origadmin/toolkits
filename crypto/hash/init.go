@@ -29,6 +29,8 @@ type algorithm struct {
 
 // defaultTypeResolver is a pass-through resolver for algorithms that don't need special resolution.
 var defaultTypeResolver interfaces.TypeResolver = interfaces.AlgorithmResolver(func(algType types.Type) (types.Type, error) {
+	algType.Name = algType.String()
+	algType.Underlying = ""
 	return algType, nil
 })
 
