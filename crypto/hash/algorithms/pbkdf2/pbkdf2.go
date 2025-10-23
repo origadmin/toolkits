@@ -46,11 +46,9 @@ func (c *PBKDF2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
-	if err != nil {
-		return err
-	}
-	if algType.Name != types.PBKDF2 {
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm for comparison.
+	if parts.Algorithm.Name != types.PBKDF2 {
 		return errors.ErrInvalidAlgorithm
 	}
 
@@ -60,7 +58,7 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 
-	prf, err := getPRF(algType)
+	prf, err := getPRF(parts.Algorithm) // Pass parts.Algorithm directly
 	if err != nil {
 		return err
 	}
@@ -112,11 +110,9 @@ func NewPBKDF2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 		return nil, fmt.Errorf("invalid pbkdf2 config: %v", err)
 	}
 
-	resolvedAlgType, err := ResolveType(algType)
-	if err != nil {
-		return nil, err
-	}
-	algType = resolvedAlgType
+	// Removed: resolvedAlgType, err := ResolveType(algType)
+	// Removed: if err != nil { return nil, err }
+	// Removed: algType = resolvedAlgType
 
 	prf, err := getPRF(algType)
 	if err != nil {

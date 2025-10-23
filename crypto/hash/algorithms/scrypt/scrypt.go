@@ -78,11 +78,9 @@ func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
-	if err != nil {
-		return err
-	}
-	if algType.Name != types.SCRYPT {
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm.Name for comparison.
+	if parts.Algorithm.Name != types.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

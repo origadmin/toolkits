@@ -7,8 +7,6 @@ package crc
 import (
 	"crypto/subtle"
 
-	"github.com/goexts/generic/must"
-
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -48,7 +46,8 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *CRC) Verify(parts *types.HashParts, password string) error {
-	hashHash, err := types.TypeHash(parts.Algorithm)
+	// parts.Algorithm is already of type types.Type. Use its Name field to get the hash.
+	hashHash, err := types.TypeHash(parts.Algorithm.Name)
 	if err != nil {
 		return err
 	}
@@ -78,9 +77,7 @@ func NewCRC(algType types.Type, config *types.Config) (interfaces.Cryptographic,
 	// No validator needed here, as CRC doesn't have complex params beyond SaltLength
 	// which is handled by the main hash package's config validation.
 
-	// The algType.Underlying will contain the specific stdhash name after ResolveType
-	// We need to call ResolveType here to get the correct underlying hash.
-	algType = must.Do(ResolveType(algType))
+	// Removed: algType = must.Do(ResolveType(algType))
 	hashHash, err := stdhash.ParseHash(algType.Name)
 	if err != nil {
 		return nil, err

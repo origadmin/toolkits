@@ -48,8 +48,7 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 	hashBytes, err := bcrypt.GenerateFromPassword(data, c.params.Cost)
 	if err != nil {
-		return nil, err
-	}
+		return nil, err	}
 	return types.NewHashPartsFull(c.Type(), hashBytes, salt, c.params.ToMap()), nil
 }
 
@@ -57,11 +56,9 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 // WARNING: Manually concatenating salt for Bcrypt is INSECURE as Bcrypt handles salt internally.
 // This implementation is for framework consistency, but should be used with caution.
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
-	if err != nil {
-		return err
-	}
-	if types.BCRYPT != algType.Name {
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm.Name for comparison.
+	if types.BCRYPT != parts.Algorithm.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 

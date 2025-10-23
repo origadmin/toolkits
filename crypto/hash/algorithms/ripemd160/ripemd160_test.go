@@ -79,7 +79,7 @@ func TestRIPEMD160_HashAndVerify(t *testing.T) {
 			hashedParts, err := ripemd160Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algType.Name, hashedParts.Algorithm)
+			assert.Equal(t, tt.algType, hashedParts.Algorithm)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt

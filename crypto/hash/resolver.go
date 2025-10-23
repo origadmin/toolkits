@@ -5,33 +5,5 @@
 // Package hash implements the functions, types, and interfaces for the module.
 package hash
 
-import (
-	"sync"
-
-	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/types"
-)
-
-var (
-	// algorithmResolvers stores registered resolvers for different algorithm names.
-	algorithmResolvers = make(map[string]interfaces.AlgorithmResolver)
-	resolversMu        sync.RWMutex
-)
-
-// RegisterAlgorithmResolver registers a resolver for a specific algorithm name.
-func RegisterAlgorithmResolver(name string, resolver interfaces.AlgorithmResolver) {
-	resolversMu.Lock()
-	defer resolversMu.Unlock()
-	algorithmResolvers[name] = resolver
-}
-
-func ResolveType(algType types.Type) (types.Type, error) {
-	resolversMu.RLock()
-	defer resolversMu.RUnlock()
-	resolver, ok := algorithmResolvers[algType.Name]
-	if !ok {
-		return algType, errors.ErrResolverNotRegistered
-	}
-	return resolver.ResolveType(algType)
-}
+// This file previously contained global resolver registration and resolution logic.
+// This logic has been refactored into the algorithmFactory for better encapsulation and management.

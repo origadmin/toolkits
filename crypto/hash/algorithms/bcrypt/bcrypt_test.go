@@ -152,13 +152,13 @@ func TestBcrypt_Verify_Error(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Invalid algorithm
-	err = c.Verify(&types.HashParts{Algorithm: "invalid"}, "password")
+	err = c.Verify(&types.HashParts{Algorithm: types.NewType("invalid")}, "password")
 	assert.Error(t, err)
 
 	// Algorithm mismatch
 	hash, err := c.Hash("password")
 	assert.NoError(t, err)
-	hash.Algorithm = "argon2"
+	hash.Algorithm = types.NewType("argon2")
 	err = c.Verify(hash, "password")
 	assert.Error(t, err)
 }

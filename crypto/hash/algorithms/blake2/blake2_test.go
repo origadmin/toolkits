@@ -116,7 +116,7 @@ func TestCrypto_Hash(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Hash() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash.Algorithm == "" {
+			if !tt.wantErr && hash.Algorithm.Name == "" {
 				t.Error("Hash() returned empty string")
 			}
 			if err := crypto.Verify(hash, tt.password); err != nil {
@@ -160,7 +160,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HashWithSalt() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash.Algorithm == "" {
+			if !tt.wantErr && hash.Algorithm.Name == "" {
 				t.Error("HashWithSalt() returned empty string")
 			}
 		})

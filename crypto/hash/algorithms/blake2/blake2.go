@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"hash"
 
-	"github.com/goexts/generic/must"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 
@@ -76,9 +75,10 @@ func (c *Blake2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Blake2) Verify(parts *types.HashParts, password string) error {
-	hashFunc, ok := hashFuncs[parts.Algorithm]
+	// parts.Algorithm is already of type types.Type. Use its Name field as the map key.
+	hashFunc, ok := hashFuncs[parts.Algorithm.Name]
 	if !ok {
-		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Algorithm)
+		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Algorithm.String())
 	}
 	// Recreate the hash function based on the stored parameters
 	h, err := hashFunc(c.params.Key)
@@ -110,7 +110,7 @@ func NewBlake2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	algType = must.Do(ResolveType(algType))
+	// Removed: algType = must.Do(ResolveType(algType))
 	hashFunc, ok := hashFuncs[algType.Name]
 	if !ok {
 		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", algType.Name)

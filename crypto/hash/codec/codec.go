@@ -69,7 +69,7 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 		return nil, fmt.Errorf("invalid salt: %v", err)
 	}
 	return &types.HashParts{
-		Algorithm: algorithm,
+		Algorithm: types.NewType(algorithm),
 		Version:   version,
 		Params:    decodedParams,
 		Hash:      hash,

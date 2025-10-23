@@ -203,12 +203,12 @@ func TestNewArgon2(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, tt.expectedAlgType.Name, c.Type().Name)
+				assert.Equal(t, tt.expectedAlgType, c.Type())
 				// Test Hash and Verify for valid cases
 				hash, err := c.Hash("password")
 				assert.NoError(t, err)
 				assert.NotNil(t, hash)
-				assert.Equal(t, tt.expectedAlgType.Name, hash.Algorithm)
+				assert.Equal(t, tt.expectedAlgType, hash.Algorithm)
 
 				err = c.Verify(hash, "password")
 				assert.NoError(t, err)

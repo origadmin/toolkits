@@ -16,7 +16,8 @@ import (
 )
 
 type internalFactory interface {
-	create(algName string) (interfaces.Cryptographic, error)
+	// create now accepts types.Type directly
+	create(algType types.Type) (interfaces.Cryptographic, error)
 }
 
 type algorithmFactory struct {
@@ -38,9 +39,25 @@ func getFactory() internalFactory {
 	return defaultFactory
 }
 
-func (f *algorithmFactory) create(algName string) (interfaces.Cryptographic, error) {
+func (f *algorithmFactory) create(algType types.Type) (interfaces.Cryptographic, error) {
+	// First, find the algorithm entry based on the initial algType.Name
+	// This is needed to get the specific resolver for this algorithm.
+	algEntry, exists := algorithmMap[algType.Name]
+	if !exists {
+		return nil, fmt.Errorf("unsupported algorithm: %s", algType.String())
+	}
+
+	// 1. Resolve the algorithm Type to its canonical form using the algorithm's specific resolver
+	resolvedAlgType, err := algEntry.resolver.ResolveType(algType) // Use algEntry.resolver
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algType.String(), err)
+	}
+
+	// Use the resolved algorithm's string representation for caching
+	algNameKey := resolvedAlgType.String()
+
 	f.mux.RLock()
-	if cachedAlg, exists := f.cryptos[algName]; exists {
+	if cachedAlg, exists := f.cryptos[algNameKey]; exists {
 		f.mux.RUnlock()
 		return cachedAlg, nil
 	}
@@ -50,27 +67,25 @@ func (f *algorithmFactory) create(algName string) (interfaces.Cryptographic, err
 	defer f.mux.Unlock()
 
 	// Double-check after acquiring lock
-	if cachedAlg, exists := f.cryptos[algName]; exists {
+	if cachedAlg, exists := f.cryptos[algNameKey]; exists {
 		return cachedAlg, nil
 	}
 
-	algType, err := types.ParseType(algName)
-	if err != nil {
-		return nil, err
-	}
-	algEntry, exists := algorithmMap[algType.Name]
-	if !exists {
-		return nil, fmt.Errorf("unsupported algorithm: %s", algType)
-	}
+	// Re-check algEntry after resolution, in case the resolved type's Name is different
+	// and points to a different algorithm entry. This is important if resolvers can change the main Name.
+	// For now, we assume algEntry is based on the initial algType.Name
+	// and the resolver just canonicalizes the type itself.
+	// If resolvedAlgType.Name could be different, we'd need to re-lookup here.
+	// For simplicity and current design, we'll stick with the initial algEntry.
 
 	// Always create with default config for verification
 	defaultConfig := algEntry.defaultConfig()
-	newAlg, err := algEntry.creator(algType, defaultConfig)
+	newAlg, err := algEntry.creator(resolvedAlgType, defaultConfig) // Pass resolvedAlgType
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create algorithm %s: %w", resolvedAlgType.String(), err)
 	}
 
-	f.cryptos[algName] = newAlg
+	f.cryptos[algNameKey] = newAlg
 	return newAlg, nil
 }
 

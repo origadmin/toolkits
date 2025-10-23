@@ -8,7 +8,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/goexts/generic/must"
 	"golang.org/x/crypto/argon2"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
@@ -70,13 +69,11 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
-	if err != nil {
-		return err
-	}
-	keyFunc := ParseKeyFunc(algType)
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm for comparison and passing to ParseKeyFunc.
+	keyFunc := ParseKeyFunc(parts.Algorithm)
 	if keyFunc == nil {
-		return fmt.Errorf("unsupported argon2 type: %s", algType.String())
+		return fmt.Errorf("unsupported argon2 type: %s", parts.Algorithm.String())
 	}
 
 	// Parse parameters
@@ -129,9 +126,6 @@ func NewArgon2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
-
-	resolvedType := must.Do(ResolveType(algType))
-	algType = resolvedType
 
 	keyFunc := ParseKeyFunc(algType)
 	algType.Underlying = ""

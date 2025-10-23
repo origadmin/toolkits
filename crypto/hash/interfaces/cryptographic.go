@@ -18,3 +18,10 @@ type Cryptographic interface {
 	// Verify checks if the given hashed password matches the plaintext password
 	Verify(parts *types.HashParts, oldPassword string) error
 }
+
+// AlgorithmConfig defines a function type that returns a default configuration for an algorithm.
+type AlgorithmConfig func() *types.Config
+
+// AlgorithmCreator defines a function type that creates a new Cryptographic instance.
+// It accepts the resolved algorithm Type and a configuration.
+type AlgorithmCreator func(algType types.Type, cfg *types.Config) (Cryptographic, error)

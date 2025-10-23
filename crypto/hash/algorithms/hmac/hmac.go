@@ -50,10 +50,8 @@ func NewHMAC(algType types.Type, config *types.Config) (interfaces.Cryptographic
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-	algType, err := ResolveType(algType)
-	if err != nil {
-		return nil, err
-	}
+	// Removed: algType, err := ResolveType(algType)
+	// Removed: if err != nil { return nil, err }
 	hashHash, err := types.TypeHash(algType.Underlying)
 	if err != nil {
 		return nil, err
@@ -91,19 +89,17 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm.
+	resolvedAlgType, err := ResolveType(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	algType, err = ResolveType(algType)
-	if err != nil {
-		return err
-	}
-	if types.HMAC != algType.Name {
+	if types.HMAC != resolvedAlgType.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.TypeHash(algType.Underlying)
+	hashHash, err := types.TypeHash(resolvedAlgType.Underlying)
 	if err != nil {
 		return err
 	}

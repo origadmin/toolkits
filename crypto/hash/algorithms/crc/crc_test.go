@@ -70,7 +70,7 @@ func TestCRCHashAndVerify(t *testing.T) {
 			hashedParts, err := crc.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.expectedAlgorithm, hashedParts.Algorithm)
+			assert.Equal(t, tt.expectedAlgorithm, hashedParts.Algorithm.String())
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt

@@ -103,8 +103,7 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
 			assert.Equal(t, tt.expectedResolvedAlgType.String(), hashedParts.Algorithm)
-			parsedAlgType, err := types.ParseType(hashedParts.Algorithm)
-			assert.NoError(t, err)
+			parsedAlgType := hashedParts.Algorithm
 			assert.Equal(t, tt.expectedResolvedAlgType.Name, parsedAlgType.Name)
 			assert.Equal(t, tt.expectedResolvedAlgType.Underlying, parsedAlgType.Underlying)
 			assert.Equal(t, salt, hashedParts.Salt)

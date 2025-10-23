@@ -68,7 +68,7 @@ func (c *crypto) Verify(hashed, password string) error {
 
 	// Get algorithm instance from global factory based on the decoded algorithm
 	factory := getFactory()
-	cryptographic, err := factory.create(parts.Algorithm)
+	cryptographic, err := factory.create(parts.Algorithm) // Pass types.Type directly
 	if err != nil {
 		return err
 	}
@@ -81,18 +81,27 @@ func (c *crypto) Verify(hashed, password string) error {
 
 // NewCrypto creates a new cryptographic instance
 func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
+	// 1. Parse the algorithm name string into a structured Type
 	algType, err := types.ParseType(algName)
 	if err != nil {
 		return nil, err
 	}
-	algorithm, exists := algorithmMap[algType.Name]
+
+	// 2. Look up the algorithm entry to get its specific resolver
+	algEntry, exists := algorithmMap[algType.Name]
 	if !exists {
-		return nil, fmt.Errorf("unsupported algorithm: %s", algType)
+		return nil, fmt.Errorf("unsupported algorithm: %s", algType.String())
 	}
 
-	// Apply opts to default config, create instance for HASH
-	cfg := configure.Apply(algorithm.defaultConfig(), opts)
-	cryptographic, err := algorithm.creator(algType, cfg)
+	// 3. Resolve the parsed Type to its canonical form using the algorithm's specific resolver
+	resolvedAlgType, err := algEntry.resolver.ResolveType(algType) // Use algEntry.resolver
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algType.String(), err)
+	}
+
+	// 4. Apply options to default config and create the cryptographic instance
+	cfg := configure.Apply(algEntry.defaultConfig(), opts)
+	cryptographic, err := algEntry.creator(resolvedAlgType, cfg) // Pass the resolved type
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +118,12 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 }
 
 // RegisterAlgorithm registers a new hash algorithm
-func RegisterAlgorithm(algType types.Type, creator AlgorithmCreator, defaultConfig AlgorithmConfig) {
+func RegisterAlgorithm(algType types.Type, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig) {
 	algorithmMap[algType.Name] = algorithm{
 		algType:       algType,
 		creator:       creator,
 		defaultConfig: defaultConfig,
+		resolver:      defaultTypeResolver,
 	}
 }
 

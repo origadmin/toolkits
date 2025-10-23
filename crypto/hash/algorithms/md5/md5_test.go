@@ -61,7 +61,7 @@ func TestMD5_HashAndVerify(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			md5Alg, err := NewMD5(DefaultConfig())
 			assert.NoError(t, err)
 			assert.NotNil(t, md5Alg)
@@ -70,7 +70,7 @@ func TestMD5_HashAndVerify(t *testing.T) {
 			hashedParts, err := md5Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algType.String(), hashedParts.Algorithm)
+			assert.Equal(t, tt.algType, hashedParts.Algorithm)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt

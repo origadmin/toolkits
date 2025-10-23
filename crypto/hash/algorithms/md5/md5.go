@@ -99,12 +99,9 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	algType, err := types.ParseType(parts.Algorithm)
-	if err != nil {
-		return err
-	}
-
-	if algType.Name != types.MD5 {
+	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// We can directly use parts.Algorithm.Name for comparison.
+	if parts.Algorithm.Name != types.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 

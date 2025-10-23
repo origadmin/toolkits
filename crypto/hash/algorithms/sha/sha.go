@@ -8,8 +8,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/goexts/generic/must"
-
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -65,11 +63,8 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	//algType, err := types.ParseType(parts.Algorithm)
-	//if err != nil {
-	//	return err
-	//}
-	hashHash, err := stdhash.ParseHash(parts.Algorithm)
+	// parts.Algorithm is already of type types.Type. Use its Name field for stdhash.ParseHash.
+	hashHash, err := stdhash.ParseHash(parts.Algorithm.Name)
 	if err != nil {
 		return err
 	}
@@ -89,7 +84,7 @@ func NewSHA(algType types.Type, config *types.Config) (interfaces.Cryptographic,
 	if config == nil {
 		config = DefaultConfig()
 	}
-	algType = must.Do(ResolveType(algType))
+	// Removed: algType = must.Do(ResolveType(algType))
 	v := validator.WithParams(&Params{})
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
