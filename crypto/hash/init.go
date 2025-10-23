@@ -45,7 +45,7 @@ var (
 			algType:       types.NewType(types.ARGON2),
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(argon2.ResolveType), // 使用argon2自定义解析器
 		},
 		types.ARGON2i: {
 			algType:       types.NewType(types.ARGON2i),
@@ -69,13 +69,13 @@ var (
 			algType:       types.NewType(types.BLAKE2b),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(blake2.ResolveType),
 		},
 		types.BLAKE2s: {
 			algType:       types.NewType(types.BLAKE2s),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(blake2.ResolveType),
 		},
 		types.MD5: {
 			algType:       types.NewType(types.MD5),
@@ -117,7 +117,7 @@ var (
 			algType:       types.NewType(types.SHA3),
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(sha.ResolveType),
 		},
 		types.SHA3_224: {
 			algType:       types.NewType(types.SHA3_224),
@@ -165,31 +165,31 @@ var (
 			algType:       types.NewType(types.HMAC),
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(hmac.ResolveType), // 使用hmac自定义解析器
 		},
 		types.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
 			algType:       types.NewType(types.PBKDF2),
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(pbkdf2.ResolveType), // 使用pbkdf2自定义解析器
 		},
 		types.RIPEMD: {
 			algType:       types.NewType(types.RIPEMD),
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(ripemd160.ResolveType), // 使用ripemd160自定义解析器
 		},
 		types.CRC32: {
 			algType:       types.NewType(types.CRC32),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(crc.ResolveType), // 使用crc自定义解析器
 		},
 		types.CRC64: {
 			algType:       types.NewType(types.CRC64),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      interfaces.AlgorithmResolver(crc.ResolveType), // 使用crc自定义解析器
 		},
 	}
 )

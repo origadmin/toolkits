@@ -24,7 +24,7 @@ type Crypto interface {
 }
 
 type crypto struct {
-	codec   interfaces.Codec
+	codec interfaces.Codec
 	// algImpl is the cryptographic implementation used for hashing, wrapped with cachedVerifier
 	algImpl interfaces.Cryptographic
 }
@@ -76,6 +76,15 @@ func (c *crypto) Verify(hashed, password string) error {
 	// Wrap the created algorithm with a cached verifier for performance
 	cachedAlg := NewCachedVerifier(cryptographic)
 
+	algEntry, exists := algorithmMap[parts.Algorithm.Name]
+	if !exists {
+		return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm.String())
+	}
+	parts.Algorithm, err = algEntry.resolver.ResolveType(parts.Algorithm) // Ensure the resolver is called
+	if err != nil {
+		return err
+	}
+
 	return cachedAlg.Verify(parts, password)
 }
 
@@ -111,13 +120,13 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 
 	// Create cryptographic instance
 	return &crypto{
-		algImpl: finalAlg,
-		codec:   codec.NewCodec(),
-	},
-	nil
+			algImpl: finalAlg,
+			codec:   codec.NewCodec(),
+		},
+		nil
 }
 
-// RegisterAlgorithm registers a new hash algorithm
+// RegisterAlgorithm register a new hash algorithm that uses defaultTypeResolver by default
 func RegisterAlgorithm(algType types.Type, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig) {
 	algorithmMap[algType.Name] = algorithm{
 		algType:       algType,
@@ -127,4 +136,26 @@ func RegisterAlgorithm(algType types.Type, creator interfaces.AlgorithmCreator, 
 	}
 }
 
-// Removed safeVerifier type and its methods as its logic is now in crypto.Verify
+// RegisterAlgorithmWithResolver register a new hash algorithm and specify a custom TypeResolver
+func RegisterAlgorithmWithResolver(algType types.Type, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig, resolver interfaces.TypeResolver) {
+	if resolver == nil {
+		resolver = defaultTypeResolver
+	}
+
+	algorithmMap[algType.Name] = algorithm{
+		algType:       algType,
+		creator:       creator,
+		defaultConfig: defaultConfig,
+		resolver:      resolver,
+	}
+}
+
+// AlgorithmMap returns all registered algorithm mapping tables (read-only access)
+func AlgorithmMap() map[string]algorithm {
+	// 返回一个副本以防止外部修改
+	result := make(map[string]algorithm, len(algorithmMap))
+	for k, v := range algorithmMap {
+		result[k] = v
+	}
+	return result
+}

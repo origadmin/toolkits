@@ -13,5 +13,12 @@ import (
 func ResolveType(algType types.Type) (types.Type, error) {
 	algType.Name = algType.String()
 	algType.Underlying = ""
+	
+	// Map generic SHA3 name to default version SHA3-256
+	switch algType.Name {
+	case types.SHA3:
+		algType.Name = types.SHA3_256
+	}
+	
 	return algType, nil
 }

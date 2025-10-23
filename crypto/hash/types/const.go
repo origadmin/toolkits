@@ -98,7 +98,7 @@ const (
 	// BLAKE2s_256 is the BLAKE2s-256 hash algorithm.
 	BLAKE2s_256 = "blake2s-256"
 	// DefaultBLAKE2b is the default BLAKE2b hash algorithm.
-	DefaultBLAKE2b = BLAKE2b_256
+	DefaultBLAKE2b = BLAKE2b_512
 	// DefaultBLAKE2s is the default BLAKE2s hash algorithm.
 	DefaultBLAKE2s = BLAKE2s_256
 

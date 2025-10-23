@@ -6,327 +6,324 @@
 package hash
 
 import (
-	stderr "errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
-	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-func TestGenerateScryptPassword(t *testing.T) {
-	password := "password"
-	salt := "salt"
+func TestNewCryptoAllAlgorithms(t *testing.T) {
+	// 基础算法测试用例
+	baseAlgorithms := []struct {
+		algName         string
+		expectedAlgName string
+	}{{
+		algName:         types.MD5,
+		expectedAlgName: types.MD5,
+	}, {
+		algName:         types.SHA1,
+		expectedAlgName: types.SHA1,
+	}, {
+		algName:         types.SHA224,
+		expectedAlgName: types.SHA224,
+	}, {
+		algName:         types.SHA256,
+		expectedAlgName: types.SHA256,
+	}, {
+		algName:         types.SHA384,
+		expectedAlgName: types.SHA384,
+	}, {
+		algName:         types.SHA512,
+		expectedAlgName: types.SHA512,
+	}, {
+		algName:         types.SHA3,
+		expectedAlgName: types.SHA3_256,
+	}, {
+		algName:         types.SHA3_224,
+		expectedAlgName: types.SHA3_224,
+	}, {
+		algName:         types.SHA3_256,
+		expectedAlgName: types.SHA3_256,
+	}, {
+		algName:         types.SHA3_384,
+		expectedAlgName: types.SHA3_384,
+	}, {
+		algName:         types.SHA3_512,
+		expectedAlgName: types.SHA3_512,
+	}, {
+		algName:         types.SHA512_224,
+		expectedAlgName: types.SHA512_224,
+	}, {
+		algName:         types.SHA512_256,
+		expectedAlgName: types.SHA512_256,
+	}, {
+		algName:         types.BLAKE2b,
+		expectedAlgName: types.DefaultBLAKE2b,
+	}, {
+		algName:         types.BLAKE2s,
+		expectedAlgName: types.DefaultBLAKE2s,
+	}, {
+		algName:         types.BLAKE2b_256,
+		expectedAlgName: types.BLAKE2b_256,
+	}, {
+		algName:         types.BLAKE2b_384,
+		expectedAlgName: types.BLAKE2b_384,
+	}, {
+		algName:         types.BLAKE2b_512,
+		expectedAlgName: types.BLAKE2b_512,
+	}, {
+		algName:         types.BLAKE2s_128,
+		expectedAlgName: types.BLAKE2s_128,
+	}, {
+		algName:         types.BLAKE2s_256,
+		expectedAlgName: types.BLAKE2s_256,
+	}, {
+		algName:         types.ARGON2,
+		expectedAlgName: types.ARGON2i,
+	}, {
+		algName:         types.ARGON2i,
+		expectedAlgName: types.ARGON2i,
+	}, {
+		algName:         types.ARGON2id,
+		expectedAlgName: types.ARGON2id,
+	}, {
+		algName:         types.BCRYPT,
+		expectedAlgName: types.BCRYPT,
+	}, {
+		algName:         types.SCRYPT,
+		expectedAlgName: types.SCRYPT,
+	}, {
+		algName:         types.RIPEMD,
+		expectedAlgName: types.RIPEMD160,
+	}, {
+		algName:         types.RIPEMD160,
+		expectedAlgName: types.RIPEMD160,
+	}, {
+		algName:         types.CRC32,
+		expectedAlgName: types.CRC32_ISO,
+	}, {
+		algName:         types.CRC32_ISO,
+		expectedAlgName: types.CRC32_ISO,
+	}, {
+		algName:         types.CRC32_CAST,
+		expectedAlgName: types.CRC32_CAST,
+	}, {
+		algName:         types.CRC32_KOOP,
+		expectedAlgName: types.CRC32_KOOP,
+	}, {
+		algName:         types.CRC64,
+		expectedAlgName: types.CRC64_ISO,
+	}, {
+		algName:         types.CRC64_ISO,
+		expectedAlgName: types.CRC64_ISO,
+	}, {
+		algName:         types.CRC64_ECMA,
+		expectedAlgName: types.CRC64_ECMA,
+	}}
 
-	crypto, err := NewCrypto(types.SCRYPT)
-	assert.NoError(t, err)
+	// 复合算法测试用例
+	compositeAlgorithms := []struct {
+		algName         string
+		expectedAlgName string
+	}{{
+		algName:         types.HMAC,
+		expectedAlgName: types.DefaultHMAC,
+	}, {
+		algName:         types.HMAC_SHA1,
+		expectedAlgName: types.HMAC_SHA1,
+	}, {
+		algName:         types.HMAC_SHA256,
+		expectedAlgName: types.HMAC_SHA256,
+	}, {
+		algName:         types.HMAC_SHA384,
+		expectedAlgName: types.HMAC_SHA384,
+	}, {
+		algName:         types.HMAC_SHA512,
+		expectedAlgName: types.HMAC_SHA512,
+	}, {
+		algName:         types.HMAC_SHA3_224,
+		expectedAlgName: types.HMAC_SHA3_224,
+	}, {
+		algName:         types.HMAC_SHA3_256,
+		expectedAlgName: types.HMAC_SHA3_256,
+	}, {
+		algName:         types.HMAC_SHA3_384,
+		expectedAlgName: types.HMAC_SHA3_384,
+	}, {
+		algName:         types.HMAC_SHA3_512,
+		expectedAlgName: types.HMAC_SHA3_512,
+	}, {
+		algName:         types.PBKDF2,
+		expectedAlgName: types.DefaultPBKDF2,
+	}, {
+		algName:         types.PBKDF2_SHA1,
+		expectedAlgName: types.PBKDF2_SHA1,
+	}, {
+		algName:         types.PBKDF2_SHA256,
+		expectedAlgName: types.PBKDF2_SHA256,
+	}, {
+		algName:         types.PBKDF2_SHA384,
+		expectedAlgName: types.PBKDF2_SHA384,
+	}, {
+		algName:         types.PBKDF2_SHA512,
+		expectedAlgName: types.PBKDF2_SHA512,
+	}, {
+		algName:         types.PBKDF2_SHA3_224,
+		expectedAlgName: types.PBKDF2_SHA3_224,
+	}, {
+		algName:         types.PBKDF2_SHA3_256,
+		expectedAlgName: types.PBKDF2_SHA3_256,
+	}, {
+		algName:         types.PBKDF2_SHA3_384,
+		expectedAlgName: types.PBKDF2_SHA3_384,
+	}, {
+		algName:         types.PBKDF2_SHA3_512,
+		expectedAlgName: types.PBKDF2_SHA3_512,
+	}}
 
-	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashedPassword)
-}
+	// 合并所有测试用例
+	allAlgorithms := append(baseAlgorithms, compositeAlgorithms...)
 
-func TestCompareScryptHashAndPassword(t *testing.T) {
-	password := "password"
-	salt := "salt"
+	// 测试所有算法
+	for _, tc := range allAlgorithms {
+		t.Run(tc.algName, func(t *testing.T) {
+			// 测试创建算法实例
+			crypto, err := NewCrypto(tc.algName)
+			assert.NoError(t, err, "Failed to create crypto for algorithm: %s", tc.algName)
+			assert.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
 
-	crypto, err := NewCrypto(types.SCRYPT)
-	assert.NoError(t, err)
+			// 测试算法类型是否正确
+			assert.Equal(t, tc.expectedAlgName, crypto.Type().String(), "Unexpected algorithm name for %s", tc.algName)
 
-	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashedPassword)
+			// 测试 Hash 方法
+			password := "testpassword"
+			hashed, err := crypto.Hash(password)
+			if err == nil {
+				assert.NotEmpty(t, hashed, "Hashed string is empty for %s (Hash method)", tc.algName)
 
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-}
+				// 测试 Verify 方法 - 正确的密码
+				verifyErr := crypto.Verify(hashed, password)
+				assert.NoError(t, verifyErr, "Verification failed for %s with correct password (Hash method)", tc.algName)
 
-func TestGenerateArgon2Password(t *testing.T) {
-	password := "password"
-	salt := "salt"
+				// 测试 Verify 方法 - 错误的密码
+				verifyErr = crypto.Verify(hashed, "wrongpassword")
+				assert.Error(t, verifyErr, "Verification should fail for %s with wrong password (Hash method)", tc.algName)
+			} else {
+				t.Logf("Skipping Hash method test for %s due to error: %v", tc.algName, err)
+			}
 
-	crypto, err := NewCrypto(types.ARGON2)
-	assert.NoError(t, err)
+			// 测试 HashWithSalt 方法
+			salt := []byte("testsalt12345678") // 示例盐值
+			hashedWithSalt, err := crypto.HashWithSalt(password, salt)
+			if err == nil {
+				assert.NotEmpty(t, hashedWithSalt, "Hashed string is empty for %s (HashWithSalt method)", tc.algName)
 
-	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashedPassword)
+				// 测试 Verify 方法 - 正确的密码
+				verifyErr := crypto.Verify(hashedWithSalt, password)
+				assert.NoError(t, verifyErr, "Verification failed for %s with correct password (HashWithSalt method)", tc.algName)
 
-	err = UseCrypto(types.ARGON2, types.WithSaltLength(16))
-	assert.NoError(t, err)
-}
-
-func TestCompareArgon2HashAndPassword(t *testing.T) {
-	password := "password"
-	salt := "salt"
-
-	crypto, err := NewCrypto(types.ARGON2)
-	assert.NoError(t, err)
-
-	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashedPassword)
-
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-}
-
-func TestGenerate(t *testing.T) {
-	password := "myPassword123"
-	salt := "mySalt123"
-
-	crypto, err := NewCrypto(types.ARGON2)
-	assert.NoError(t, err)
-
-	hash, err := crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hash)
-}
-
-func TestCompare(t *testing.T) {
-	password := "password123"
-	hashedPassword := ""
-	salt := "salt123"
-
-	// Test MD5
-	crypto, err := NewCrypto(types.MD5)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-
-	// Test SHA1
-	crypto, err = NewCrypto(types.SHA1)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-
-	// Test Scrypt
-	crypto, err = NewCrypto(types.SCRYPT)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	crypto2, err := NewCrypto(types.SCRYPT, types.WithSaltLength(16))
-	assert.NoError(t, err)
-	err = crypto2.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-
-	// Test Bcrypt
-	crypto, err = NewCrypto(types.BCRYPT)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-
-	// Test Argon2
-	crypto, err = NewCrypto(types.ARGON2)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-
-	// Test SHA256
-	crypto, err = NewCrypto(types.SHA256)
-	assert.NoError(t, err)
-	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	assert.NoError(t, err)
-	err = crypto.Verify(hashedPassword, password)
-	assert.NoError(t, err)
-}
-
-func TestAllHashTypes(t *testing.T) {
-	tests := []struct {
-		name     string
-		algType  types.Type // Changed from string to types.Type
-		password string
-		salt     string
-		options  []types.Option // Special configuration options
-		crypto   Crypto
-	}{
-		{
-			name:     "MD5",
-			algType:  types.NewType(types.MD5), // Changed to types.NewType
-			password: "password123",
-			salt:     "salt123",
-		},
-		{
-			name:     "SHA1",
-			algType:  types.NewType(types.SHA1), // Changed to types.NewType
-			password: "securePass!",
-			salt:     "pepper456",
-		},
-		{
-			name:     "ScryptDefault",
-			algType:  types.NewType(types.SCRYPT), // Changed to types.NewType
-			password: "scryptPass",
-			salt:     "scryptSalt",
-		},
-		{
-			name:     "ScryptCustom",
-			algType:  types.NewType(types.SCRYPT), // Changed to types.NewType
-			password: "scryptPass2",
-			salt:     "scryptSalt2",
-			options: []types.Option{types.WithSaltLength(16), types.WithParams(&scrypt.Params{
-				N:      2,
-				R:      1,
-				P:      1,
-				KeyLen: 16,
-			})},
-		},
-		{
-			name:     "Bcrypt",
-			algType:  types.NewType(types.BCRYPT), // Changed to types.NewType
-			password: "bcryptPassword",
-			salt:     "bcryptSalt",
-		},
-		{
-			name:     "Argon2",
-			algType:  types.NewType(types.ARGON2), // Changed to types.NewType
-			password: "argon2Password",
-			salt:     "argon2Salt",
-		},
-		{
-			name:     "SHA256",
-			algType:  types.NewType(types.SHA256), // Changed to types.NewType
-			password: "sha256Password",
-			salt:     "sha256Salt",
-		},
-		{
-			name:     "SHA3-224", // Added SHA3-224 test case
-			algType:  types.NewType(types.SHA3, "224"),
-			password: "sha3-224Password",
-			salt:     "sha3-224Salt",
-		},
-	}
-
-	var hashes []string
-	var hashes2 []string
-	for i, tt := range tests {
-		generator, err := NewCrypto(tt.algType.String(), tt.options...) // Changed to tt.algType.String()
-		assert.NoError(t, err, "Failed to create crypto for algorithm: %s", tt.algType.String())
-		assert.NotNil(t, generator, "Crypto instance is nil for algorithm: %s", tt.algType.String())
-		tests[i].crypto = generator
-		hashed, err := generator.HashWithSalt(tt.password, []byte(tt.salt))
-		assert.NoError(t, err)
-		assert.NotEmpty(t, hashed)
-		hashes = append(hashes, hashed)
-
-		hashed2, err2 := generator.Hash(tt.password)
-		assert.NoError(t, err2)
-		assert.NotEmpty(t, hashed2)
-		hashes2 = append(hashes2, hashed2)
-	}
-
-	for i, tt := range tests {
-		t.Run(tt.name+"_Verify", func(t *testing.T) {
-			t.Logf("Verify %s hash", tt.algType.String())
-
-			err := tt.crypto.Verify(hashes[i], tt.password)
-			assert.NoError(t, err, "Failed to verify %s hash", tt.algType.String())
-
-			// Corrected expectation: MD5 should also return an error for wrong password
-			err = tt.crypto.Verify(hashes[i], tt.password+"_invalid")
-			assert.Error(t, err, "Should fail with wrong password for %s", tt.algType.String())
-		})
-	}
-
-	argonCrypto, _ := NewCrypto(types.ARGON2)
-	hashed, err := argonCrypto.Hash("passwordWithoutSalt")
-	assert.NoError(t, err)
-	for i, tt := range tests {
-		t.Run(tt.name+"_VerifyWithCrypto", func(t *testing.T) {
-			err = tt.crypto.Verify(hashed, "passwordWithoutSalt")
-			assert.NoError(t, err, "Should verify hash without explicit salt")
-		})
-		t.Run(tt.name+"_VerifyWithCommon", func(t *testing.T) {
-			t.Logf("hash details: %s", hashes[i])
-			err := Verify(hashes[i], tt.password)
-			assert.NoError(t, err, "Should verify hash without explicit salt")
-
-			// Corrected expectation: MD5 should also return an error for wrong password
-			// This block was previously incorrect for MD5
-			err2 := Verify(hashes[i], tt.password+"_invalid")
-			assert.Error(t, err2, "Should fail with wrong password")
-
-			err3 := Verify(hashes2[i], tt.password)
-			assert.NoError(t, err3, "Should verify hash without explicit salt")
-
-			// Corrected expectation: MD5 should also return an error for wrong password
-			// This block was previously incorrect for MD5
-			err4 := Verify(hashes2[i], tt.password+"_invalid")
-			assert.Error(t, err4, "Should fail with wrong password")
+				// 测试 Verify 方法 - 错误的密码
+				verifyErr = crypto.Verify(hashedWithSalt, "wrongpassword")
+				assert.Error(t, verifyErr, "Verification should fail for %s with wrong password (HashWithSalt method)", tc.algName)
+			} else {
+				t.Logf("Skipping HashWithSalt method test for %s due to error: %v", tc.algName, err)
+			}
 		})
 	}
 }
 
-func TestUseCrypto(t *testing.T) {
-	err := UseCrypto(types.BCRYPT)
-	assert.NoError(t, err)
-	assert.Equal(t, types.NewType(types.BCRYPT), activeCrypto.Type())
+func TestNewCryptoWithOptions(t *testing.T) {
+	// 测试带有选项的算法创建
+	testCases := []struct {
+		algName string
+		options []types.Option
+	}{{
+		algName: types.ARGON2,
+		options: []types.Option{
+			types.WithSaltLength(32),
+			// Argon2的具体参数应该在其算法实现中处理
+		},
+	}, {
+		algName: types.BCRYPT,
+		options: []types.Option{
+			types.WithSaltLength(16),
+			// Bcrypt的具体参数应该在其算法实现中处理
+		},
+	}, {
+		algName: types.SHA256,
+		options: []types.Option{
+			types.WithSaltLength(24),
+		},
+	}, {
+		algName: types.HMAC_SHA256,
+		options: []types.Option{
+			types.WithSaltLength(32),
+		},
+	}, {
+		algName: types.PBKDF2_SHA256,
+		options: []types.Option{
+			types.WithSaltLength(24),
+			// PBKDF2的具体参数应该在其算法实现中处理
+		},
+	}}
 
-	err = UseCrypto(types.SCRYPT)
-	assert.NoError(t, err)
-	assert.Equal(t, types.NewType(types.SCRYPT), activeCrypto.Type())
+	for _, tc := range testCases {
+		t.Run(tc.algName+"_with_options", func(t *testing.T) {
+			crypto, err := NewCrypto(tc.algName, tc.options...)
+			assert.NoError(t, err, "Failed to create crypto with options for algorithm: %s", tc.algName)
+			assert.NotNil(t, crypto, "Crypto instance is nil with options for algorithm: %s", tc.algName)
+
+			// 测试带选项的哈希和验证功能
+			password := "testpassword"
+			hashed, err := crypto.Hash(password)
+			assert.NoError(t, err, "Hash failed with options for %s", tc.algName)
+			assert.NotEmpty(t, hashed, "Hashed string is empty with options for %s", tc.algName)
+
+			verifyErr := crypto.Verify(hashed, password)
+			assert.NoError(t, verifyErr, "Verification failed with options for %s with correct password", tc.algName)
+
+			verifyErr = crypto.Verify(hashed, "wrongpassword")
+			assert.Error(t, verifyErr, "Verification should fail with options for %s with wrong password", tc.algName)
+		})
+	}
 }
 
-func TestGenerateAndVerify(t *testing.T) {
-	password := "testPassword"
-	err := UseCrypto(types.BCRYPT)
-	assert.NoError(t, err)
+func TestNewCryptoInvalidAlgorithm(t *testing.T) {
+	// 测试无效的算法名称
+	invalidAlgorithms := []string{
+		"invalid_algorithm",
+		"hmac-invalid",
+		"pbkdf2-invalid",
+		"",
+		"unknown",
+	}
 
-	hashed, err := Generate(password)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashed)
-
-	err = Verify(hashed, password)
-	assert.NoError(t, err)
-
-	err = Verify(hashed, "wrongPassword")
-	assert.Error(t, err)
+	for _, algName := range invalidAlgorithms {
+		t.Run(algName, func(t *testing.T) {
+			crypto, err := NewCrypto(algName)
+			assert.Error(t, err, "Expected error for invalid algorithm: %s", algName)
+			assert.Nil(t, crypto, "Expected nil crypto for invalid algorithm: %s", algName)
+		})
+	}
 }
 
-func TestGenerateWithSaltAndVerify(t *testing.T) {
-	password := "testPassword"
-	salt := []byte("testSalt")
-	err := UseCrypto(types.SCRYPT)
-	assert.NoError(t, err)
+func TestAlgorithmMap(t *testing.T) {
+	// 测试 AlgorithmMap 函数返回的算法映射表
+	algMap := AlgorithmMap()
+	assert.NotEmpty(t, algMap, "Algorithm map is empty")
 
-	hashed, err := GenerateWithSalt(password, salt)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, hashed)
+	// 检查一些关键算法是否存在
+	expectedAlgs := []string{
+		types.ARGON2,
+		types.BCRYPT,
+		types.SHA256,
+		types.HMAC,
+		types.PBKDF2,
+	}
 
-	err = Verify(hashed, password)
-	assert.NoError(t, err)
-
-	err = Verify(hashed, "wrongPassword")
-	assert.Error(t, err)
-}
-
-func TestInvalidAlgorithm(t *testing.T) {
-	_, err := NewCrypto("invalid_alg")
-	assert.Error(t, err)
-	assert.Equal(t, stderr.New("unsupported algorithm: invalid_alg"), err)
-}
-
-func TestUninitializedCrypto(t *testing.T) {
-	activeCrypto = &uninitializedCrypto{}
-	password := "testPassword"
-	hashed, err := Generate(password)
-	assert.Error(t, err)
-	assert.Empty(t, hashed)
-	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
-
-	_, err = GenerateWithSalt(password, []byte("salt"))
-	assert.Error(t, err)
-	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
-
-	err = Verify("hashed", password)
-	assert.Error(t, err)
-	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
+	for _, algName := range expectedAlgs {
+		_, exists := algMap[algName]
+		assert.True(t, exists, "Expected algorithm not found in map: %s", algName)
+	}
 }

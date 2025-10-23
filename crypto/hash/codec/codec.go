@@ -48,7 +48,10 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 		return nil, errors.ErrInvalidHashFormat
 	}
 
-	algorithm := parts[1]
+	algorithm, err := types.ParseType(parts[1])
+	if err != nil {
+		return nil, err
+	}
 	version := parts[2]
 
 	// Add version checks
@@ -69,7 +72,7 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 		return nil, fmt.Errorf("invalid salt: %v", err)
 	}
 	return &types.HashParts{
-		Algorithm: types.NewType(algorithm),
+		Algorithm: algorithm,
 		Version:   version,
 		Params:    decodedParams,
 		Hash:      hash,
