@@ -8,12 +8,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var unknownAlgType = types.Type{Name: constants.UNKNOWN}
+var unknownAlgType = types.Type{Name: types.UNKNOWN}
 
 // noop implements a noop hashing algorithm
 type noop struct {

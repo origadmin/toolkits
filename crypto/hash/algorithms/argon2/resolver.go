@@ -6,13 +6,12 @@
 package argon2
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func ResolveType(p types.Type) (types.Type, error) {
-	if p.Name == constants.ARGON2 {
-		return types.Type{Name: constants.ARGON2i, Underlying: ""}, nil
+	if p.Name == types.ARGON2 {
+		return types.Type{Name: types.ARGON2i, Underlying: ""}, nil
 	}
 	return p, nil
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -25,7 +24,7 @@ func TestNewBcryptCrypto(t *testing.T) {
 			config: &types.Config{
 				SaltLength: 16,
 				ParamConfig: (&Params{
-					Cost: constants.DefaultCost,
+					Cost: types.DefaultCost,
 				}).String(),
 			},
 			wantErr: false,

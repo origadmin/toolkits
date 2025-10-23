@@ -25,7 +25,7 @@ type Crypto interface {
 
 type crypto struct {
 	codec   interfaces.Codec
-	// algImpl is the cryptographic implementation, wrapped with cachedVerifier
+	// algImpl is the cryptographic implementation used for hashing, wrapped with cachedVerifier
 	algImpl interfaces.Cryptographic
 }
 
@@ -55,19 +55,28 @@ func (c *crypto) Verify(hashed, password string) error {
 		return errors.ErrInvalidHash
 	}
 
-	// Decode the hash value
+	// Decode the hash value to get algorithm type and parts
 	parts, err := c.codec.Decode(hashed)
 	if err != nil {
 		return err
 	}
 
-	// Perform nil checks for HashParts here, as safeVerifier is removed
+	// Perform nil checks for HashParts directly here
 	if parts == nil || parts.Hash == nil || parts.Salt == nil {
 		return errors.ErrInvalidHashParts
 	}
 
-	// Now call the wrapped algorithm (which is cachedVerifier)
-	return c.algImpl.Verify(parts, password)
+	// Get algorithm instance from global factory based on the decoded algorithm
+	factory := getFactory()
+	cryptographic, err := factory.create(parts.Algorithm)
+	if err != nil {
+		return err
+	}
+
+	// Wrap the created algorithm with a cached verifier for performance
+	cachedAlg := NewCachedVerifier(cryptographic)
+
+	return cachedAlg.Verify(parts, password)
 }
 
 // NewCrypto creates a new cryptographic instance
@@ -88,14 +97,15 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 		return nil, err
 	}
 
-	// Wrap the cryptographic implementation with a cached verifier
+	// Wrap the cryptographic implementation with a cached verifier for hashing operations
 	finalAlg := NewCachedVerifier(cryptographic)
 
 	// Create cryptographic instance
 	return &crypto{
 		algImpl: finalAlg,
 		codec:   codec.NewCodec(),
-	}, nil
+	},
+	nil
 }
 
 // RegisterAlgorithm registers a new hash algorithm

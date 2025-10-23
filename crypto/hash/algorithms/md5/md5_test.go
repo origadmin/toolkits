@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -44,7 +43,7 @@ func TestNewMD5(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, constants.MD5, c.Type().Name)
+				assert.Equal(t, types.MD5, c.Type().Name)
 			}
 		})
 	}
@@ -58,11 +57,11 @@ func TestMD5_HashAndVerify(t *testing.T) {
 		name    string
 		algType types.Type
 	}{
-		{name: "MD5", algType: types.NewType(constants.MD5)},
+		{name: "MD5", algType: types.NewType(types.MD5)},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+			t.Run(tt.name, func(t *testing.T) {
 			md5Alg, err := NewMD5(DefaultConfig())
 			assert.NoError(t, err)
 			assert.NotNil(t, md5Alg)

@@ -10,7 +10,6 @@ import (
 
 	"github.com/goexts/generic/must"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -27,17 +26,17 @@ type SHA struct {
 }
 
 var (
-	sha1AlgType       = types.NewType(constants.SHA1)
-	sha256AlgType     = types.NewType(constants.SHA256)
-	sha224AlgType     = types.NewType(constants.SHA224)
-	sha384AlgType     = types.NewType(constants.SHA384)
-	sha512AlgType     = types.NewType(constants.SHA512)
-	sha512_224AlgType = types.NewType(constants.SHA512_224)
-	sha512_256AlgType = types.NewType(constants.SHA512_256)
-	sha3_224AlgType   = types.NewType(constants.SHA3_224)
-	sha3_256AlgType   = types.NewType(constants.SHA3_256)
-	sha3_384AlgType   = types.NewType(constants.SHA3_384)
-	sha3_512AlgType   = types.NewType(constants.SHA3_512)
+	sha1AlgType       = types.NewType(types.SHA1)
+	sha256AlgType     = types.NewType(types.SHA256)
+	sha224AlgType     = types.NewType(types.SHA224)
+	sha384AlgType     = types.NewType(types.SHA384)
+	sha512AlgType     = types.NewType(types.SHA512)
+	sha512_224AlgType = types.NewType(types.SHA512_224)
+	sha512_256AlgType = types.NewType(types.SHA512_256)
+	sha3_224AlgType   = types.NewType(types.SHA3_224)
+	sha3_256AlgType   = types.NewType(types.SHA3_256)
+	sha3_384AlgType   = types.NewType(types.SHA3_384)
+	sha3_512AlgType   = types.NewType(types.SHA3_512)
 )
 
 func (c *SHA) Type() types.Type {

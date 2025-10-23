@@ -6,7 +6,6 @@
 package blake2
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -14,10 +13,10 @@ func ResolveType(p types.Type) (types.Type, error) {
 	p.Name = p.String()
 	p.Underlying = ""
 	switch p.Name {
-	case constants.BLAKE2b:
-		p.Name = constants.BLAKE2b_512
-	case constants.BLAKE2s:
-		p.Name = constants.BLAKE2s_256
+	case types.BLAKE2b:
+		p.Name = types.BLAKE2b_512
+	case types.BLAKE2s:
+		p.Name = types.BLAKE2s_256
 	}
 	return p, nil
 }

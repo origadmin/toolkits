@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -19,17 +18,17 @@ import (
 func ResolveType(algType types.Type) (types.Type, error) {
 	// If the name is a composite HMAC type (e.g., "hmac-sha256"), parse it.
 	// This handles cases where types.NewType might not fully parse the composite name into Name and Underlying.
-	if strings.HasPrefix(algType.Name, constants.PBKDF2_PREFIX) {
-		algType.Underlying = strings.TrimPrefix(algType.Name, constants.PBKDF2_PREFIX)
-		algType.Name = constants.PBKDF2
+	if strings.HasPrefix(algType.Name, types.PBKDF2_PREFIX) {
+		algType.Underlying = strings.TrimPrefix(algType.Name, types.PBKDF2_PREFIX)
+		algType.Name = types.PBKDF2
 	}
 	if algType.Underlying == "" {
-		algType.Underlying = constants.SHA256 // Default to SHA256 for PBKDF2
+		algType.Underlying = types.SHA256 // Default to SHA256 for PBKDF2
 	}
 
 	resolvedUnderlying := algType.Underlying
-	if strings.HasPrefix(algType.Underlying, constants.HMAC_PREFIX) {
-		resolvedUnderlying = strings.TrimPrefix(algType.Underlying, constants.HMAC_PREFIX)
+	if strings.HasPrefix(algType.Underlying, types.HMAC_PREFIX) {
+		resolvedUnderlying = strings.TrimPrefix(algType.Underlying, types.HMAC_PREFIX)
 	}
 
 	// Validate the underlying hash algorithm

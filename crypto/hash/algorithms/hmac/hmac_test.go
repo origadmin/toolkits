@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -26,34 +25,34 @@ func TestNewHMAC(t *testing.T) {
 	}{
 		{
 			name:               "HMAC Default (SHA256)",
-			algType:            types.NewType(constants.HMAC),
+			algType:            types.NewType(types.HMAC),
 			config:             DefaultConfig(),
-			expectedAlgName:    constants.HMAC,
-			expectedUnderlying: constants.SHA256,
+			expectedAlgName:    types.HMAC,
+			expectedUnderlying: types.SHA256,
 			expectedStdHash:    stdhash.SHA256,
 			wantErr:            false,
 		},
 		{
 			name:               "HMAC-SHA1",
-			algType:            types.NewType(constants.HMAC_SHA1),
+			algType:            types.NewType(types.HMAC_SHA1),
 			config:             DefaultConfig(),
-			expectedAlgName:    constants.HMAC,
-			expectedUnderlying: constants.SHA1,
+			expectedAlgName:    types.HMAC,
+			expectedUnderlying: types.SHA1,
 			expectedStdHash:    stdhash.SHA1,
 			wantErr:            false,
 		},
 		{
 			name:               "HMAC-SHA512",
-			algType:            types.NewType(constants.HMAC_SHA512),
+			algType:            types.NewType(types.HMAC_SHA512),
 			config:             DefaultConfig(),
-			expectedAlgName:    constants.HMAC,
-			expectedUnderlying: constants.SHA512,
+			expectedAlgName:    types.HMAC,
+			expectedUnderlying: types.SHA512,
 			expectedStdHash:    stdhash.SHA512,
 			wantErr:            false,
 		},
 		{
 			name:               "HMAC with unsupported underlying hash (CRC32)",
-			algType:            types.NewType(constants.HMAC, constants.CRC32),
+			algType:            types.NewType(types.HMAC, types.CRC32),
 			config:             DefaultConfig(),
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -61,7 +60,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC with invalid underlying hash",
-			algType:            types.NewType(constants.HMAC, "invalidhash"),
+			algType:            types.NewType(types.HMAC, "invalidhash"),
 			config:             DefaultConfig(),
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -69,7 +68,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "Invalid SaltLength",
-			algType:            types.NewType(constants.HMAC),
+			algType:            types.NewType(types.HMAC),
 			config:             &types.Config{SaltLength: 4}, // Less than 8
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -101,8 +100,8 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 		name    string
 		algType types.Type
 	}{
-		{name: "HMAC-SHA256", algType: types.NewType(constants.HMAC_SHA256)},
-		{name: "HMAC-SHA512", algType: types.NewType(constants.HMAC_SHA512)},
+		{name: "HMAC-SHA256", algType: types.NewType(types.HMAC_SHA256)},
+		{name: "HMAC-SHA512", algType: types.NewType(types.HMAC_SHA512)},
 	}
 
 	for _, tt := range tests {

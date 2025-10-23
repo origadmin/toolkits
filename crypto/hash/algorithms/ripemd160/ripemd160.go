@@ -7,7 +7,6 @@ package ripemd160
 import (
 	"crypto/subtle"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -21,7 +20,7 @@ type RIPEMD160 struct {
 	hashHash stdhash.Hash
 }
 
-var ripemd160Type = types.Type{Name: constants.RIPEMD160}
+var ripemd160Type = types.Type{Name: types.RIPEMD160}
 
 // Hash implements the hash method
 func (r *RIPEMD160) Hash(password string) (*types.HashParts, error) {

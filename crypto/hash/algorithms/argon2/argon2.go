@@ -11,7 +11,6 @@ import (
 	"github.com/goexts/generic/must"
 	"golang.org/x/crypto/argon2"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
@@ -30,9 +29,9 @@ type Argon2 struct {
 }
 
 var (
-	argon2Type = types.Type{Name: constants.ARGON2}
-	argon2i    = types.Type{Name: constants.ARGON2i}
-	argon2id   = types.Type{Name: constants.ARGON2id}
+	argon2Type = types.Type{Name: types.ARGON2}
+	argon2i    = types.Type{Name: types.ARGON2i}
+	argon2id   = types.Type{Name: types.ARGON2id}
 )
 
 func (c *Argon2) Type() types.Type {
@@ -103,9 +102,9 @@ func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 
 func ParseKeyFunc(algType types.Type) KeyFunc {
 	switch algType.Name {
-	case constants.ARGON2id:
+	case types.ARGON2id:
 		return argon2.IDKey
-	case constants.ARGON2i:
+	case types.ARGON2i:
 		return argon2.Key
 	default:
 		return nil

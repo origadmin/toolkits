@@ -6,7 +6,6 @@
 package crc
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -14,10 +13,10 @@ func ResolveType(p types.Type) (types.Type, error) {
 	p.Name = p.String()
 	p.Underlying = ""
 	switch p.Name {
-	case constants.CRC32:
-		p.Name = constants.CRC32_ISO
-	case constants.CRC64:
-		p.Name = constants.CRC64_ISO
+	case types.CRC32:
+		p.Name = types.CRC32_ISO
+	case types.CRC64:
+		p.Name = types.CRC64_ISO
 	}
 	return p, nil
 }

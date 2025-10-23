@@ -5,7 +5,6 @@
 package types
 
 import (
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 )
 
 // ParamStringer defines an interface for types that can be converted to a string
@@ -39,12 +38,6 @@ func WithParams(params ParamStringer) Option {
 	}
 }
 
-func WithParamsString(paramConfig string) Option {
-	return func(cfg *Config) {
-		cfg.ParamConfig = paramConfig
-	}
-}
-
 func WithParamConfig(fn func(string) string) Option {
 	return func(cfg *Config) {
 		cfg.ParamConfig = fn(cfg.ParamConfig)
@@ -54,6 +47,6 @@ func WithParamConfig(fn func(string) string) Option {
 // DefaultConfig return to the default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		SaltLength: constants.DefaultSaltLength, // Default salt length
+		SaltLength: DefaultSaltLength, // Default salt length
 	}
 }

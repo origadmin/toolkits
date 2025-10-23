@@ -16,7 +16,6 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/ripemd160"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -42,128 +41,128 @@ func wrapCreator(oldCreator func(*types.Config) (interfaces.Cryptographic, error
 var (
 	// algorithmMap stores all supported hash algorithmMap, keyed by their main name (string)
 	algorithmMap = map[string]algorithm{
-		constants.ARGON2: {
-			algType:       types.NewType(constants.ARGON2),
+		types.ARGON2: {
+			algType:       types.NewType(types.ARGON2),
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
 		},
-		constants.ARGON2i: {
-			algType:       types.NewType(constants.ARGON2i),
+		types.ARGON2i: {
+			algType:       types.NewType(types.ARGON2i),
 			creator:       wrapCreator(argon2.NewArgon2i),
 			defaultConfig: argon2.DefaultConfig,
 		},
-		constants.ARGON2id: {
-			algType:       types.NewType(constants.ARGON2id),
+		types.ARGON2id: {
+			algType:       types.NewType(types.ARGON2id),
 			creator:       wrapCreator(argon2.NewArgon2id),
 			defaultConfig: argon2.DefaultConfig,
 		},
-		constants.BCRYPT: {
-			algType:       types.NewType(constants.BCRYPT),
+		types.BCRYPT: {
+			algType:       types.NewType(types.BCRYPT),
 			creator:       wrapCreator(bcrypt.NewBcrypt),
 			defaultConfig: bcrypt.DefaultConfig,
 		},
-		constants.BLAKE2b: {
-			algType:       types.NewType(constants.BLAKE2b),
+		types.BLAKE2b: {
+			algType:       types.NewType(types.BLAKE2b),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
 		},
-		constants.BLAKE2s: {
-			algType:       types.NewType(constants.BLAKE2s),
+		types.BLAKE2s: {
+			algType:       types.NewType(types.BLAKE2s),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
 		},
-		constants.MD5: {
-			algType:       types.NewType(constants.MD5),
+		types.MD5: {
+			algType:       types.NewType(types.MD5),
 			creator:       wrapCreator(md5.NewMD5),
 			defaultConfig: md5.DefaultConfig,
 		},
-		constants.SCRYPT: {
-			algType:       types.NewType(constants.SCRYPT),
+		types.SCRYPT: {
+			algType:       types.NewType(types.SCRYPT),
 			creator:       wrapCreator(scrypt.NewScrypt),
 			defaultConfig: scrypt.DefaultConfig,
 		},
-		constants.SHA1: {
-			algType:       types.NewType(constants.SHA1),
+		types.SHA1: {
+			algType:       types.NewType(types.SHA1),
 			creator:       wrapCreator(sha.NewSha1),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA224: {
-			algType:       types.NewType(constants.SHA224),
+		types.SHA224: {
+			algType:       types.NewType(types.SHA224),
 			creator:       wrapCreator(sha.NewSha224),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA256: {
-			algType:       types.NewType(constants.SHA256),
+		types.SHA256: {
+			algType:       types.NewType(types.SHA256),
 			creator:       wrapCreator(sha.NewSha256),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA512: {
-			algType:       types.NewType(constants.SHA512),
+		types.SHA512: {
+			algType:       types.NewType(types.SHA512),
 			creator:       wrapCreator(sha.NewSha512),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA3: {
-			algType:       types.NewType(constants.SHA3),
+		types.SHA3: {
+			algType:       types.NewType(types.SHA3),
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
 		},
-		//constants.SHA3_224: {
-		//	algType:       types.NewType(constants.SHA3_224),
+		//types.SHA3_224: {
+		//	algType:       types.NewType(types.SHA3_224),
 		//	creator:       wrapCreator(sha.NewSha3224),
 		//	defaultConfig: sha.DefaultConfig,
 		//},
-		//constants.SHA3_256: {
-		//	algType:       types.NewType(constants.SHA3_256),
+		//types.SHA3_256: {
+		//	algType:       types.NewType(types.SHA3_256),
 		//	creator:       wrapCreator(sha.NewSha3256),
 		//	defaultConfig: sha.DefaultConfig,
 		//},
-		//constants.SHA3_384: {
-		//	algType:       types.NewType(constants.SHA3_384),
+		//types.SHA3_384: {
+		//	algType:       types.NewType(types.SHA3_384),
 		//	creator:       wrapCreator(sha.NewSha3384),
 		//	defaultConfig: sha.DefaultConfig,
 		//},
-		//constants.SHA3_512: {
-		//	algType:       types.NewType(constants.SHA3_512),
+		//types.SHA3_512: {
+		//	algType:       types.NewType(types.SHA3_512),
 		//	creator:       wrapCreator(sha.NewSha3512),
 		//	defaultConfig: sha.DefaultConfig,
 		//},
-		constants.SHA384: {
-			algType:       types.NewType(constants.SHA384),
+		types.SHA384: {
+			algType:       types.NewType(types.SHA384),
 			creator:       wrapCreator(sha.NewSha384),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA512_224: {
-			algType:       types.NewType(constants.SHA512_224),
+		types.SHA512_224: {
+			algType:       types.NewType(types.SHA512_224),
 			creator:       wrapCreator(sha.NewSha3512224),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.SHA512_256: {
-			algType:       types.NewType(constants.SHA512_256),
+		types.SHA512_256: {
+			algType:       types.NewType(types.SHA512_256),
 			creator:       wrapCreator(sha.NewSha3512256),
 			defaultConfig: sha.DefaultConfig,
 		},
-		constants.HMAC: { // HMAC creator will now handle the Underlying type
-			algType:       types.NewType(constants.HMAC),
+		types.HMAC: { // HMAC creator will now handle the Underlying type
+			algType:       types.NewType(types.HMAC),
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
 		},
-		constants.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
-			algType:       types.NewType(constants.PBKDF2),
+		types.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
+			algType:       types.NewType(types.PBKDF2),
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
 		},
-		constants.RIPEMD: {
-			algType:       types.NewType(constants.RIPEMD),
+		types.RIPEMD: {
+			algType:       types.NewType(types.RIPEMD),
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
 		},
-		constants.CRC32: {
-			algType:       types.NewType(constants.CRC32),
+		types.CRC32: {
+			algType:       types.NewType(types.CRC32),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
 		},
-		constants.CRC64: {
-			algType:       types.NewType(constants.CRC64),
+		types.CRC64: {
+			algType:       types.NewType(types.CRC64),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
 		},

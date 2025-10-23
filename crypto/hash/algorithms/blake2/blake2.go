@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
@@ -24,19 +23,19 @@ import (
 type hashFunc func(key []byte) (hash.Hash, error)
 
 var (
-	blake2b512Type = types.Type{Name: constants.BLAKE2b_512}
-	blake2b384Type = types.Type{Name: constants.BLAKE2b_384}
-	blake2b256Type = types.Type{Name: constants.BLAKE2b_256}
-	blake2s256Type = types.Type{Name: constants.BLAKE2s_256}
-	blake2s128Type = types.Type{Name: constants.BLAKE2s_128}
+	blake2b512Type = types.Type{Name: types.BLAKE2b_512}
+	blake2b384Type = types.Type{Name: types.BLAKE2b_384}
+	blake2b256Type = types.Type{Name: types.BLAKE2b_256}
+	blake2s256Type = types.Type{Name: types.BLAKE2s_256}
+	blake2s128Type = types.Type{Name: types.BLAKE2s_128}
 )
 
 var hashFuncs = map[string]hashFunc{
-	constants.BLAKE2b_512: blake2b.New512,
-	constants.BLAKE2b_384: blake2b.New384,
-	constants.BLAKE2b_256: blake2b.New256,
-	constants.BLAKE2s_256: blake2s.New256,
-	constants.BLAKE2s_128: blake2s.New128,
+	types.BLAKE2b_512: blake2b.New512,
+	types.BLAKE2b_384: blake2b.New384,
+	types.BLAKE2b_256: blake2b.New256,
+	types.BLAKE2s_256: blake2s.New256,
+	types.BLAKE2s_128: blake2s.New128,
 }
 
 // Blake2 implements the BLAKE2 hashing algorithm

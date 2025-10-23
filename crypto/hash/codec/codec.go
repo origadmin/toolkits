@@ -12,7 +12,6 @@ import (
 
 	"github.com/goexts/generic/configure"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -44,7 +43,7 @@ func (c *Codec) Encode(parts *types.HashParts) (string, error) {
 
 // Decode implements the core decoding method
 func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
-	parts := strings.Split(encoded, constants.CodecSeparator)
+	parts := strings.Split(encoded, types.CodecSeparator)
 	if len(parts) != 6 {
 		return nil, errors.ErrInvalidHashFormat
 	}
@@ -82,7 +81,7 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 func NewCodec(opts ...Option) interfaces.Codec {
 	return configure.Apply(
 		&Codec{
-			version: constants.DefaultVersion,
+			version: types.DefaultVersion,
 		}, opts)
 }
 
@@ -101,8 +100,8 @@ func DecodeParams(params string) (map[string]string, error) {
 	if params == "" {
 		return kv, nil
 	}
-	for _, param := range strings.Split(params, constants.ParamSeparator) {
-		parts := strings.Split(param, constants.ParamValueSeparator)
+	for _, param := range strings.Split(params, types.ParamSeparator) {
+		parts := strings.Split(param, types.ParamValueSeparator)
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid param format: %s", param)
 		}
@@ -126,7 +125,7 @@ func EncodeParams(params map[string]string) string {
 
 	var parts []string
 	for _, k := range keys {
-		parts = append(parts, fmt.Sprintf("%s%s%s", k, constants.ParamValueSeparator, params[k]))
+		parts = append(parts, fmt.Sprintf("%s%s%s", k, types.ParamValueSeparator, params[k]))
 	}
-	return strings.Join(parts, constants.ParamSeparator)
+	return strings.Join(parts, types.ParamSeparator)
 }

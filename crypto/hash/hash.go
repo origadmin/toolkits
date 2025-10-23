@@ -10,7 +10,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -26,7 +25,7 @@ var (
 type uninitializedCrypto struct{}
 
 func (u *uninitializedCrypto) Type() types.Type {
-	return types.Type{Name: constants.UNKNOWN}
+	return types.Type{Name: types.UNKNOWN}
 }
 
 func (u *uninitializedCrypto) Hash(password string) (string, error) {
@@ -42,9 +41,9 @@ func (u *uninitializedCrypto) Verify(hashed, password string) error {
 }
 
 func init() {
-	algStr := os.Getenv(constants.ENV)
+	algStr := os.Getenv(types.ENV)
 	if algStr == "" {
-		algStr = constants.DefaultType
+		algStr = types.DefaultType
 	}
 
 	// Try to create an encryption instance with the defined algorithm type

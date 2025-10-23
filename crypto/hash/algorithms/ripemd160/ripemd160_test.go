@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,21 +22,21 @@ func TestNewRIPEMD160(t *testing.T) {
 	}{
 		{
 			name:            "Default config",
-			algType:         types.NewType(constants.RIPEMD160),
+			algType:         types.NewType(types.RIPEMD160),
 			config:          DefaultConfig(),
-			expectedAlgName: constants.RIPEMD160,
+			expectedAlgName: types.RIPEMD160,
 			wantErr:         false,
 		},
 		{
 			name:            "With underlying type (should be ignored)",
-			algType:         types.NewType(constants.RIPEMD160, "sha256"),
+			algType:         types.NewType(types.RIPEMD160, "sha256"),
 			config:          DefaultConfig(),
-			expectedAlgName: constants.RIPEMD160,
+			expectedAlgName: types.RIPEMD160,
 			wantErr:         false,
 		},
 		{
 			name:            "Invalid SaltLength",
-			algType:         types.NewType(constants.RIPEMD160),
+			algType:         types.NewType(types.RIPEMD160),
 			config:          &types.Config{SaltLength: 4}, // Less than 8
 			expectedAlgName: "",
 			wantErr:         true,
@@ -67,7 +66,7 @@ func TestRIPEMD160_HashAndVerify(t *testing.T) {
 		name    string
 		algType types.Type
 	}{
-		{name: "RIPEMD160", algType: types.NewType(constants.RIPEMD160)},
+		{name: "RIPEMD160", algType: types.NewType(types.RIPEMD160)},
 	}
 
 	for _, tt := range tests {

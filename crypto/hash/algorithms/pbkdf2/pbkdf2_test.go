@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,42 +22,42 @@ func TestNewPBKDF2(t *testing.T) {
 	}{
 		{
 			name:               "PBKDF2 Default (SHA256)",
-			algType:            types.NewType(constants.PBKDF2),
+			algType:            types.NewType(types.PBKDF2),
 			config:             DefaultConfig(),
-			expectedUnderlying: constants.SHA256,
+			expectedUnderlying: types.SHA256,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2-SHA1",
-			algType:            types.NewType(constants.PBKDF2, constants.SHA1),
+			algType:            types.NewType(types.PBKDF2, types.SHA1),
 			config:             DefaultConfig(),
-			expectedUnderlying: constants.SHA1,
+			expectedUnderlying: types.SHA1,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2-HMAC-SHA256",
-			algType:            types.NewType(constants.PBKDF2, constants.HMAC_SHA256),
+			algType:            types.NewType(types.PBKDF2, types.HMAC_SHA256),
 			config:             DefaultConfig(),
-			expectedUnderlying: constants.HMAC_SHA256,
+			expectedUnderlying: types.HMAC_SHA256,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2 with unsupported underlying hash (CRC32)",
-			algType:            types.NewType(constants.PBKDF2, constants.CRC32),
+			algType:            types.NewType(types.PBKDF2, types.CRC32),
 			config:             DefaultConfig(),
 			expectedUnderlying: "",
 			expectedErr:        true,
 		},
 		{
 			name:               "PBKDF2 with invalid underlying hash",
-			algType:            types.NewType(constants.PBKDF2, "invalidhash"),
+			algType:            types.NewType(types.PBKDF2, "invalidhash"),
 			config:             DefaultConfig(),
 			expectedUnderlying: "",
 			expectedErr:        true,
 		},
 		{
 			name:               "Invalid SaltLength",
-			algType:            types.NewType(constants.PBKDF2),
+			algType:            types.NewType(types.PBKDF2),
 			config:             &types.Config{SaltLength: 4}, // Less than 8
 			expectedUnderlying: "",
 			expectedErr:        true,
@@ -73,7 +72,7 @@ func TestNewPBKDF2(t *testing.T) {
 			}
 			if !tt.expectedErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, constants.PBKDF2, c.Type().Name)
+				assert.Equal(t, types.PBKDF2, c.Type().Name)
 				assert.Equal(t, tt.expectedUnderlying, c.Type().Underlying)
 			}
 		})
@@ -89,8 +88,8 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 		algType                 types.Type
 		expectedResolvedAlgType types.Type
 	}{
-		{name: "PBKDF2-SHA256", algType: types.NewType(constants.PBKDF2_SHA256), expectedResolvedAlgType: types.NewType(constants.PBKDF2, constants.SHA256)},
-		{name: "PBKDF2-HMAC-SHA512", algType: types.NewType(constants.PBKDF2, constants.HMAC_SHA512), expectedResolvedAlgType: types.NewType(constants.PBKDF2, constants.HMAC_SHA512)},
+		{name: "PBKDF2-SHA256", algType: types.NewType(types.PBKDF2_SHA256), expectedResolvedAlgType: types.NewType(types.PBKDF2, types.SHA256)},
+		{name: "PBKDF2-HMAC-SHA512", algType: types.NewType(types.PBKDF2, types.HMAC_SHA512), expectedResolvedAlgType: types.NewType(types.PBKDF2, types.HMAC_SHA512)},
 	}
 
 	for _, tt := range tests {

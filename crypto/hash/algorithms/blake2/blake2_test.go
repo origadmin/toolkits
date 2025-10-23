@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,42 +22,42 @@ func TestNewBlake2(t *testing.T) {
 	}{
 		{
 			name:            "BLAKE2b Default Type",
-			algType:         types.NewType(constants.BLAKE2b),
+			algType:         types.NewType(types.BLAKE2b),
 			config:          types.DefaultConfig(),
-			expectedAlgName: constants.BLAKE2b_512,
+			expectedAlgName: types.BLAKE2b_512,
 			wantErr:         false,
 		},
 		{
 			name:            "BLAKE2s Default Type",
-			algType:         types.NewType(constants.BLAKE2s),
+			algType:         types.NewType(types.BLAKE2s),
 			config:          types.DefaultConfig(),
-			expectedAlgName: constants.BLAKE2s_256,
+			expectedAlgName: types.BLAKE2s_256,
 			wantErr:         false,
 		},
 		{
 			name:            "BLAKE2b_256 Explicit",
-			algType:         types.NewType(constants.BLAKE2b_256),
+			algType:         types.NewType(types.BLAKE2b_256),
 			config:          types.DefaultConfig(),
-			expectedAlgName: constants.BLAKE2b_256,
+			expectedAlgName: types.BLAKE2b_256,
 			wantErr:         false,
 		},
 		{
 			name:            "BLAKE2s_128 Explicit",
-			algType:         types.NewType(constants.BLAKE2s_128),
+			algType:         types.NewType(types.BLAKE2s_128),
 			config:          types.DefaultConfig(),
-			expectedAlgName: constants.BLAKE2s_128,
+			expectedAlgName: types.BLAKE2s_128,
 			wantErr:         false,
 		},
 		{
 			name:            "BLAKE2b Custom SaltLength",
-			algType:         types.NewType(constants.BLAKE2b_256),
+			algType:         types.NewType(types.BLAKE2b_256),
 			config:          &types.Config{SaltLength: 32},
-			expectedAlgName: constants.BLAKE2b_256,
+			expectedAlgName: types.BLAKE2b_256,
 			wantErr:         false,
 		},
 		{
 			name:            "BLAKE2b Invalid SaltLength",
-			algType:         types.NewType(constants.BLAKE2b_256),
+			algType:         types.NewType(types.BLAKE2b_256),
 			config:          &types.Config{SaltLength: 4},
 			expectedAlgName: "",
 			wantErr:         true,

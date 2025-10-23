@@ -9,12 +9,12 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash"
-	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func main() {
 	// The hash is generated using the SHA-256 algorithm
-	sha256Crypto, err := hash.NewCrypto(constants.SHA256)
+	sha256Crypto, err := hash.NewCrypto(types.SHA256)
 	if err != nil {
 		fmt.Println("Failed to create SHA-256 crypto:", err)
 		return
@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Upgrade to the Argon2 algorithm
-	argon2Crypto, err := hash.NewCrypto(constants.ARGON2)
+	argon2Crypto, err := hash.NewCrypto(types.ARGON2)
 	if err != nil {
 		fmt.Println("Failed to create Argon2 crypto:", err)
 		return

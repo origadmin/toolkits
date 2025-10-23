@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -129,69 +128,69 @@ func TestParams_ParseAndString(t *testing.T) {
 
 func TestNewArgon2(t *testing.T) {
 	tests := []struct {
-		name    string
-		algType types.Type
-		config  *types.Config
+		name            string
+		algType         types.Type
+		config          *types.Config
 		expectedAlgType types.Type
-		wantErr bool
+		wantErr         bool
 	}{
 		{
-			name:    "Default config for ARGON2",
-			algType: types.NewType(constants.ARGON2),
-			config:  DefaultConfig(),
-			expectedAlgType: types.Type{Name: constants.ARGON2i},
-			wantErr: false,
+			name:            "Default config for ARGON2",
+			algType:         types.NewType(types.ARGON2),
+			config:          DefaultConfig(),
+			expectedAlgType: types.Type{Name: types.ARGON2i},
+			wantErr:         false,
 		},
 		{
-			name:    "Default config for ARGON2i",
-			algType: types.NewType(constants.ARGON2i),
-			config:  DefaultConfig(),
-			expectedAlgType: types.Type{Name: constants.ARGON2i},
-			wantErr: false,
+			name:            "Default config for ARGON2i",
+			algType:         types.NewType(types.ARGON2i),
+			config:          DefaultConfig(),
+			expectedAlgType: types.Type{Name: types.ARGON2i},
+			wantErr:         false,
 		},
 		{
-			name:    "Default config for ARGON2id",
-			algType: types.NewType(constants.ARGON2id),
-			config:  DefaultConfig(),
-			expectedAlgType: types.Type{Name: constants.ARGON2id},
-			wantErr: false,
+			name:            "Default config for ARGON2id",
+			algType:         types.NewType(types.ARGON2id),
+			config:          DefaultConfig(),
+			expectedAlgType: types.Type{Name: types.ARGON2id},
+			wantErr:         false,
 		},
 		{
-			name: "Custom config",
-			algType: types.NewType(constants.ARGON2id),
+			name:    "Custom config",
+			algType: types.NewType(types.ARGON2id),
 			config: &types.Config{
-				SaltLength: constants.DefaultSaltLength,
+				SaltLength: types.DefaultSaltLength,
 				ParamConfig: (&Params{
-					TimeCost:   constants.DefaultTimeCost,
-					MemoryCost: constants.DefaultMemoryCost,
-					Threads:    constants.DefaultThreads,
+					TimeCost:   types.DefaultTimeCost,
+					MemoryCost: types.DefaultMemoryCost,
+					Threads:    types.DefaultThreads,
 					KeyLength:  32,
 				}).String(),
 			},
-			expectedAlgType: types.Type{Name: constants.ARGON2id},
-			wantErr: false,
+			expectedAlgType: types.Type{Name: types.ARGON2id},
+			wantErr:         false,
 		},
 		{
-			name: "Invalid config - zero time cost",
-			algType: types.NewType(constants.ARGON2i),
+			name:    "Invalid config - zero time cost",
+			algType: types.NewType(types.ARGON2i),
 			config: &types.Config{
-				SaltLength: constants.DefaultSaltLength,
+				SaltLength: types.DefaultSaltLength,
 				ParamConfig: (&Params{
 					TimeCost:   0,
-					MemoryCost: constants.DefaultMemoryCost,
-					Threads:    constants.DefaultThreads,
+					MemoryCost: types.DefaultMemoryCost,
+					Threads:    types.DefaultThreads,
 					KeyLength:  32,
 				}).String(),
 			},
 			expectedAlgType: types.Type{},
-			wantErr: true,
+			wantErr:         true,
 		},
 		{
-			name: "Unsupported algorithm type",
-			algType: types.NewType("unsupported"),
-			config: DefaultConfig(),
+			name:            "Unsupported algorithm type",
+			algType:         types.NewType("unsupported"),
+			config:          DefaultConfig(),
 			expectedAlgType: types.Type{},
-			wantErr: true,
+			wantErr:         true,
 		},
 	}
 

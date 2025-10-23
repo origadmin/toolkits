@@ -9,7 +9,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -25,7 +24,7 @@ type HMAC struct {
 	hashHash stdhash.Hash
 }
 
-var hmacType = types.Type{Name: constants.HMAC, Underlying: constants.SHA256}
+var hmacType = types.Type{Name: types.HMAC, Underlying: types.SHA256}
 
 func (c *HMAC) Type() types.Type {
 	return c.algType
@@ -100,7 +99,7 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	if constants.HMAC != algType.Name {
+	if types.HMAC != algType.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 

@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -21,7 +20,7 @@ func TestGenerateScryptPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(constants.SCRYPT)
+	crypto, err := NewCrypto(types.SCRYPT)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
@@ -33,7 +32,7 @@ func TestCompareScryptHashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(constants.SCRYPT)
+	crypto, err := NewCrypto(types.SCRYPT)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
@@ -48,14 +47,14 @@ func TestGenerateArgon2Password(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(constants.ARGON2)
+	crypto, err := NewCrypto(types.ARGON2)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashedPassword)
 
-	err = UseCrypto(constants.ARGON2, types.WithSaltLength(16))
+	err = UseCrypto(types.ARGON2, types.WithSaltLength(16))
 	assert.NoError(t, err)
 }
 
@@ -63,7 +62,7 @@ func TestCompareArgon2HashAndPassword(t *testing.T) {
 	password := "password"
 	salt := "salt"
 
-	crypto, err := NewCrypto(constants.ARGON2)
+	crypto, err := NewCrypto(types.ARGON2)
 	assert.NoError(t, err)
 
 	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
@@ -78,7 +77,7 @@ func TestGenerate(t *testing.T) {
 	password := "myPassword123"
 	salt := "mySalt123"
 
-	crypto, err := NewCrypto(constants.ARGON2)
+	crypto, err := NewCrypto(types.ARGON2)
 	assert.NoError(t, err)
 
 	hash, err := crypto.HashWithSalt(password, []byte(salt))
@@ -91,7 +90,7 @@ func TestCompare(t *testing.T) {
 	salt := "salt123"
 
 	// Test MD5
-	crypto, err := NewCrypto(constants.MD5)
+	crypto, err := NewCrypto(types.MD5)
 	assert.NoError(t, err)
 	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
@@ -99,7 +98,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test SHA1
-	crypto, err = NewCrypto(constants.SHA1)
+	crypto, err = NewCrypto(types.SHA1)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
@@ -107,16 +106,16 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test Scrypt
-	crypto, err = NewCrypto(constants.SCRYPT)
+	crypto, err = NewCrypto(types.SCRYPT)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
-	crypto2, err := NewCrypto(constants.SCRYPT, types.WithSaltLength(16))
+	crypto2, err := NewCrypto(types.SCRYPT, types.WithSaltLength(16))
 	assert.NoError(t, err)
 	err = crypto2.Verify(hashedPassword, password)
 	assert.NoError(t, err)
 
 	// Test Bcrypt
-	crypto, err = NewCrypto(constants.BCRYPT)
+	crypto, err = NewCrypto(types.BCRYPT)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
@@ -124,7 +123,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test Argon2
-	crypto, err = NewCrypto(constants.ARGON2)
+	crypto, err = NewCrypto(types.ARGON2)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
@@ -132,7 +131,7 @@ func TestCompare(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test SHA256
-	crypto, err = NewCrypto(constants.SHA256)
+	crypto, err = NewCrypto(types.SHA256)
 	assert.NoError(t, err)
 	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
@@ -151,25 +150,25 @@ func TestAllHashTypes(t *testing.T) {
 	}{
 		{
 			name:     "MD5",
-			algType:  constants.MD5,
+			algType:  types.MD5,
 			password: "password123",
 			salt:     "salt123",
 		},
 		{
 			name:     "SHA1",
-			algType:  constants.SHA1,
+			algType:  types.SHA1,
 			password: "securePass!",
 			salt:     "pepper456",
 		},
 		{
 			name:     "ScryptDefault",
-			algType:  constants.SCRYPT,
+			algType:  types.SCRYPT,
 			password: "scryptPass",
 			salt:     "scryptSalt",
 		},
 		{
 			name:     "ScryptCustom",
-			algType:  constants.SCRYPT,
+			algType:  types.SCRYPT,
 			password: "scryptPass2",
 			salt:     "scryptSalt2",
 			options: []types.Option{types.WithSaltLength(16), types.WithParams(&scrypt.Params{
@@ -181,19 +180,19 @@ func TestAllHashTypes(t *testing.T) {
 		},
 		{
 			name:     "Bcrypt",
-			algType:  constants.BCRYPT,
+			algType:  types.BCRYPT,
 			password: "bcryptPassword",
 			salt:     "bcryptSalt",
 		},
 		{
 			name:     "Argon2",
-			algType:  constants.ARGON2,
+			algType:  types.ARGON2,
 			password: "argon2Password",
 			salt:     "argon2Salt",
 		},
 		{
 			name:     "SHA256",
-			algType:  constants.SHA256,
+			algType:  types.SHA256,
 			password: "sha256Password",
 			salt:     "sha256Salt",
 		},
@@ -230,7 +229,7 @@ func TestAllHashTypes(t *testing.T) {
 		})
 	}
 
-	argonCrypto, _ := NewCrypto(constants.ARGON2)
+	argonCrypto, _ := NewCrypto(types.ARGON2)
 	hashed, err := argonCrypto.Hash("passwordWithoutSalt")
 	assert.NoError(t, err)
 	for i, tt := range tests {
@@ -260,18 +259,18 @@ func TestAllHashTypes(t *testing.T) {
 }
 
 func TestUseCrypto(t *testing.T) {
-	err := UseCrypto(constants.BCRYPT)
+	err := UseCrypto(types.BCRYPT)
 	assert.NoError(t, err)
-	assert.Equal(t, constants.BCRYPT, activeCrypto.Type().Name)
+	assert.Equal(t, types.BCRYPT, activeCrypto.Type().Name)
 
-	err = UseCrypto(constants.SCRYPT)
+	err = UseCrypto(types.SCRYPT)
 	assert.NoError(t, err)
-	assert.Equal(t, constants.SCRYPT, activeCrypto.Type().Name)
+	assert.Equal(t, types.SCRYPT, activeCrypto.Type().Name)
 }
 
 func TestGenerateAndVerify(t *testing.T) {
 	password := "testPassword"
-	err := UseCrypto(constants.BCRYPT)
+	err := UseCrypto(types.BCRYPT)
 	assert.NoError(t, err)
 
 	hashed, err := Generate(password)
@@ -288,7 +287,7 @@ func TestGenerateAndVerify(t *testing.T) {
 func TestGenerateWithSaltAndVerify(t *testing.T) {
 	password := "testPassword"
 	salt := []byte("testSalt")
-	err := UseCrypto(constants.SCRYPT)
+	err := UseCrypto(types.SCRYPT)
 	assert.NoError(t, err)
 
 	hashed, err := GenerateWithSalt(password, salt)

@@ -13,7 +13,6 @@ import (
 
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -51,7 +50,7 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	if algType.Name != constants.PBKDF2 {
+	if algType.Name != types.PBKDF2 {
 		return errors.ErrInvalidAlgorithm
 	}
 
@@ -80,9 +79,9 @@ func (c *PBKDF2) Type() types.Type {
 // getPRF determines the Pseudo-Random Function (PRF) based on the algorithm type's underlying hash.
 // It supports both direct hash functions and HMAC-based PRFs.
 func getPRF(algType types.Type) (func() hash.Hash, error) {
-	if strings.HasPrefix(algType.Underlying, constants.HMAC_PREFIX) {
+	if strings.HasPrefix(algType.Underlying, types.HMAC_PREFIX) {
 		// Extract the underlying hash for HMAC
-		hmacHashName := strings.TrimPrefix(algType.Underlying, constants.HMAC_PREFIX)
+		hmacHashName := strings.TrimPrefix(algType.Underlying, types.HMAC_PREFIX)
 		hmacHash, err := stdhash.ParseHash(hmacHashName)
 		if err != nil {
 			return nil, err

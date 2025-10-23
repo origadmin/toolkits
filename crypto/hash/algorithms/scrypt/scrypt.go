@@ -10,7 +10,6 @@ import (
 
 	"golang.org/x/crypto/scrypt"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
@@ -25,7 +24,7 @@ type Scrypt struct {
 }
 
 var scryptType = types.Type{
-	Name: constants.SCRYPT,
+	Name: types.SCRYPT,
 }
 
 func (c *Scrypt) Type() types.Type {
@@ -83,7 +82,7 @@ func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	if algType.Name != constants.SCRYPT {
+	if algType.Name != types.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

@@ -7,7 +7,6 @@ package bcrypt
 import (
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
@@ -21,7 +20,7 @@ type Bcrypt struct {
 	config *types.Config
 }
 
-var bcryptType = types.Type{Name: constants.BCRYPT}
+var bcryptType = types.Type{Name: types.BCRYPT}
 
 func (c *Bcrypt) Type() types.Type {
 	return bcryptType
@@ -62,7 +61,7 @@ func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	if err != nil {
 		return err
 	}
-	if constants.BCRYPT != algType.Name {
+	if types.BCRYPT != algType.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
@@ -99,6 +98,6 @@ func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: constants.DefaultSaltLength,
+		SaltLength: types.DefaultSaltLength,
 	}
 }

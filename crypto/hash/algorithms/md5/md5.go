@@ -8,7 +8,6 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -17,7 +16,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-var md5AlgType = types.NewType(constants.MD5)
+var md5AlgType = types.NewType(types.MD5)
 
 type ConfigValidator struct {
 }
@@ -105,7 +104,7 @@ func (c *MD5) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 
-	if algType.Name != constants.MD5 {
+	if algType.Name != types.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 
