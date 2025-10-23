@@ -8,7 +8,7 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/goexts/generic"
+	"github.com/goexts/generic/must"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
@@ -90,7 +90,7 @@ func NewSHA(algType types.Type, config *types.Config) (interfaces.Cryptographic,
 	if config == nil {
 		config = DefaultConfig()
 	}
-	algType = generic.Must(ResolveType(algType))
+	algType = must.Do(ResolveType(algType))
 	v := validator.WithParams(&Params{})
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)

@@ -5,66 +5,120 @@
 package identifier
 
 import (
+	"fmt"
 	"sync"
 )
 
-// registry manages the registration and retrieval of identifier providers.
-// It is kept internal to the package.
+// --- Registry Logic ---
+
+const (
+	// defaultString defines the name of the default string-based provider.
+	defaultString = "uuid"
+	// defaultNumber defines the name of the default number-based provider.
+	defaultNumber = "snowflake"
+)
+
 type registry struct {
 	sync.RWMutex
-	providers map[string]Provider
+	providers         map[string]Provider
+	defaultStringName string
+	defaultNumberName string
 }
 
-// globalRegistry is the singleton instance of the registry.
+// globalRegistry is pre-populated with built-in, dependency-free providers.
+// External packages can override these defaults by re-registering the same name.
 var globalRegistry = &registry{
-	providers: make(map[string]Provider),
+	providers: map[string]Provider{
+		defaultString: builtinString, // Pre-register the built-in string provider
+		defaultNumber: builtinNumber, // Pre-register the built-in number provider
+	},
+	defaultStringName: defaultString, // Set the initial default
+	defaultNumberName: defaultNumber, // Set the initial default
 }
 
-// Register registers a provider, making it available via Get().
-// This function should be called from the init() function of each algorithm's package.
+// Register registers a provider, overriding any existing provider with the same name.
 func Register(p Provider) {
 	globalRegistry.Lock()
 	defer globalRegistry.Unlock()
 	if p == nil {
 		panic("identifier: cannot register a nil provider")
 	}
-	name := p.Name()
-	if _, dup := globalRegistry.providers[name]; dup {
-		panic("identifier: Register called twice for provider " + name)
-	}
-	globalRegistry.providers[name] = p
+	globalRegistry.providers[p.Name()] = p
 }
 
-// Get retrieves a typed generator by name from the registry.
-// This is the primary, recommended entry point for getting a shared generator instance.
-// It returns a ready-to-use, typed generator, or nil if the named
-// provider doesn't exist or doesn't support the requested type (string or int64).
+// SetDefaultString sets the global default for string-based identifiers.
+func SetDefaultString(name string) {
+	globalRegistry.Lock()
+	defer globalRegistry.Unlock()
+	if _, ok := globalRegistry.providers[name]; !ok {
+		panic(fmt.Sprintf("identifier: SetDefaultString called with unregistered provider \"%s\"", name))
+	}
+	globalRegistry.defaultStringName = name
+}
+
+// SetDefaultNumber sets the global default for number-based identifiers.
+func SetDefaultNumber(name string) {
+	globalRegistry.Lock()
+	defer globalRegistry.Unlock()
+	if _, ok := globalRegistry.providers[name]; !ok {
+		panic(fmt.Sprintf("identifier: SetDefaultNumber called with unregistered provider \"%s\"", name))
+	}
+	globalRegistry.defaultNumberName = name
+}
+
+// Get retrieves a typed generator by name.
+// It returns nil if no provider with the given name is registered.
 func Get[T ~string | ~int64](name string) Generator[T] {
 	globalRegistry.RLock()
-	provider := globalRegistry.providers[name]
+	provider, ok := globalRegistry.providers[name]
 	globalRegistry.RUnlock()
 
-	if provider == nil {
+	if !ok {
 		return nil
 	}
 
-	// Use 'any' to check the desired type T and call the correct provider method.
 	var t T
 	switch any(t).(type) {
 	case string:
-		// The result of AsString() is Generator[string].
-		// We cast it to 'any' and then to the generic return type Generator[T],
-		// which is valid because in this case, T is string.
 		if gen := provider.AsString(); gen != nil {
 			var asAny any = gen
 			return asAny.(Generator[T])
 		}
 	case int64:
-		// Same logic for the number type.
 		if gen := provider.AsNumber(); gen != nil {
 			var asAny any = gen
 			return asAny.(Generator[T])
 		}
 	}
-	return nil // Return nil if the type is not supported by the provider
+	return nil
+}
+
+// GenerateString generates a string ID using the configured default provider.
+func GenerateString() string {
+	globalRegistry.RLock()
+	name := globalRegistry.defaultStringName
+	globalRegistry.RUnlock()
+
+	gen := Get[string](name)
+	if gen == nil {
+		// This should theoretically not happen if configured correctly,
+		// as the default is pre-registered.
+		panic("identifier: no default string provider available")
+	}
+	return gen.Generate()
+}
+
+// GenerateNumber generates a number ID using the configured default provider.
+func GenerateNumber() int64 {
+	globalRegistry.RLock()
+	name := globalRegistry.defaultNumberName
+	globalRegistry.RUnlock()
+
+	gen := Get[int64](name)
+	if gen == nil {
+		// This should theoretically not happen if configured correctly,
+		// as the default is pre-registered.
+		panic("identifier: no default number provider available")
+	}
+	return gen.Generate()
 }
