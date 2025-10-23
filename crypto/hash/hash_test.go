@@ -87,12 +87,13 @@ func TestGenerate(t *testing.T) {
 
 func TestCompare(t *testing.T) {
 	password := "password123"
+	hashedPassword := ""
 	salt := "salt123"
 
 	// Test MD5
 	crypto, err := NewCrypto(types.MD5)
 	assert.NoError(t, err)
-	hashedPassword, err := crypto.HashWithSalt(password, []byte(salt))
+	hashedPassword, err = crypto.HashWithSalt(password, []byte(salt))
 	assert.NoError(t, err)
 	err = crypto.Verify(hashedPassword, password)
 	assert.NoError(t, err)

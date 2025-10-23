@@ -12,16 +12,6 @@ import (
 )
 
 // ----------------------------------------------------------------------------
-// Interfaces
-// ----------------------------------------------------------------------------
-
-// AlgorithmResolver defines an interface for resolving and normalizing algorithm types.
-type AlgorithmResolver interface {
-	// ResolveType resolves and normalizes the given algorithm Type.
-	ResolveType(t Type) (Type, error)
-}
-
-// ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 

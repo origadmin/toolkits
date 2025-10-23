@@ -8,6 +8,7 @@ package interfaces
 // Params A common interface for algorithm parameters is defined
 type Params interface {
 	ConfigValidator
+
 	// String returns the string representation of parameters
 	String() string
 
