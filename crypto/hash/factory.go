@@ -79,5 +79,5 @@ func (f *algorithmFactory) createConfig(algEntry algorithm, opts ...types.Option
 	if algEntry.defaultConfig != nil {
 		cfg = algEntry.defaultConfig()
 	}
-	return settings.Apply(cfg, opts)
+	return configure.Apply(cfg, opts)
 }
