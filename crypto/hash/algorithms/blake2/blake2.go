@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"hash"
 
-	"github.com/goexts/generic"
+	"github.com/goexts/generic/must"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 
@@ -111,7 +111,7 @@ func NewBlake2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	algType = generic.Must(ResolveType(algType))
+	algType = must.Do(ResolveType(algType))
 	hashFunc, ok := hashFuncs[algType.Name]
 	if !ok {
 		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", algType.Name)

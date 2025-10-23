@@ -80,7 +80,7 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 
 // NewCodec creates a new codec
 func NewCodec(opts ...Option) interfaces.Codec {
-	return settings.Apply(
+	return configure.Apply(
 		&Codec{
 			version: constants.DefaultVersion,
 		}, opts)

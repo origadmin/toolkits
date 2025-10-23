@@ -8,7 +8,7 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/goexts/generic"
+	"github.com/goexts/generic/must"
 	"golang.org/x/crypto/argon2"
 
 	"github.com/origadmin/toolkits/crypto/hash/constants"
@@ -130,7 +130,10 @@ func NewArgon2(algType types.Type, config *types.Config) (interfaces.Cryptograph
 	if err := v.Validate(config); err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
-	algType = generic.Must(ResolveType(algType))
+
+	resolvedType := must.Do(ResolveType(algType))
+	algType = resolvedType
+
 	keyFunc := ParseKeyFunc(algType)
 	algType.Underlying = ""
 	if keyFunc == nil {

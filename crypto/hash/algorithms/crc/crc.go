@@ -7,7 +7,7 @@ package crc
 import (
 	"crypto/subtle"
 
-	"github.com/goexts/generic"
+	"github.com/goexts/generic/must"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
@@ -80,8 +80,7 @@ func NewCRC(algType types.Type, config *types.Config) (interfaces.Cryptographic,
 
 	// The algType.Underlying will contain the specific stdhash name after ResolveType
 	// We need to call ResolveType here to get the correct underlying hash.
-	algType = generic.Must(ResolveType(algType))
-
+	algType = must.Do(ResolveType(algType))
 	hashHash, err := stdhash.ParseHash(algType.Name)
 	if err != nil {
 		return nil, err

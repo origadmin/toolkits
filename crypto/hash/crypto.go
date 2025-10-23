@@ -25,6 +25,7 @@ type Crypto interface {
 
 type crypto struct {
 	codec   interfaces.Codec
+	// algImpl is the cryptographic implementation, wrapped with cachedVerifier
 	algImpl interfaces.Cryptographic
 }
 
@@ -60,21 +61,13 @@ func (c *crypto) Verify(hashed, password string) error {
 		return err
 	}
 
-	// Get algorithm instance from global factory
-	factory := getFactory()
-
-	cryptographic, err := factory.create(parts.Algorithm)
-	if err != nil {
-		return err
+	// Perform nil checks for HashParts here, as safeVerifier is removed
+	if parts == nil || parts.Hash == nil || parts.Salt == nil {
+		return errors.ErrInvalidHashParts
 	}
 
-	// Wrap the created algorithm with a safe verifier
-	safeAlg := &safeVerifier{wrapped: cryptographic}
-
-	// Wrap the safe verifier with a cached verifier
-	cachedAlg := NewCachedVerifier(safeAlg)
-
-	return cachedAlg.Verify(parts, password)
+	// Now call the wrapped algorithm (which is cachedVerifier)
+	return c.algImpl.Verify(parts, password)
 }
 
 // NewCrypto creates a new cryptographic instance
@@ -89,15 +82,18 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 	}
 
 	// Apply opts to default config, create instance for HASH
-	cfg := settings.Apply(algorithm.defaultConfig(), opts)
+	cfg := configure.Apply(algorithm.defaultConfig(), opts)
 	cryptographic, err := algorithm.creator(algType, cfg)
 	if err != nil {
 		return nil, err
 	}
 
+	// Wrap the cryptographic implementation with a cached verifier
+	finalAlg := NewCachedVerifier(cryptographic)
+
 	// Create cryptographic instance
 	return &crypto{
-		algImpl: cryptographic,
+		algImpl: finalAlg,
 		codec:   codec.NewCodec(),
 	}, nil
 }
@@ -105,32 +101,10 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 // RegisterAlgorithm registers a new hash algorithm
 func RegisterAlgorithm(algType types.Type, creator AlgorithmCreator, defaultConfig AlgorithmConfig) {
 	algorithmMap[algType.Name] = algorithm{
+		algType:       algType,
 		creator:       creator,
 		defaultConfig: defaultConfig,
 	}
 }
 
-// safeVerifier wraps a Cryptographic implementation to add nil checks for HashParts
-type safeVerifier struct {
-	wrapped interfaces.Cryptographic
-}
-
-func (s *safeVerifier) Type() types.Type {
-	return s.wrapped.Type()
-}
-
-func (s *safeVerifier) Hash(password string) (*types.HashParts, error) {
-	return s.wrapped.Hash(password)
-}
-
-func (s *safeVerifier) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	return s.wrapped.HashWithSalt(password, salt)
-}
-
-func (s *safeVerifier) Verify(parts *types.HashParts, password string) error {
-	// Perform nil checks before delegating to the wrapped verifier
-	if parts == nil || parts.Hash == nil || parts.Salt == nil {
-		return errors.ErrInvalidHashParts
-	}
-	return s.wrapped.Verify(parts, password)
-}
+// Removed safeVerifier type and its methods as its logic is now in crypto.Verify

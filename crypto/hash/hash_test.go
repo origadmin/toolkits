@@ -6,13 +6,14 @@
 package hash
 
 import (
-	"errors"
+	stderr "errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/constants"
+	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -223,22 +224,9 @@ func TestAllHashTypes(t *testing.T) {
 			err := tt.crypto.Verify(hashes[i], tt.password)
 			assert.NoError(t, err, "Failed to verify %s hash", tt.algType)
 
+			// Corrected expectation: MD5 should also return an error for wrong password
 			err = tt.crypto.Verify(hashes[i], tt.password+"_invalid")
-			if tt.algType == constants.MD5 {
-				assert.NoError(t, err, "MD5 should not return an error for wrong password")
-			} else {
-				assert.Error(t, err, "Should fail with wrong password for %s", tt.algType)
-			}
-
-			err2 := tt.crypto.Verify(hashes2[i], tt.password)
-			assert.NoError(t, err2, "Failed to verify %s hash", tt.algType)
-
-			err2 = tt.crypto.Verify(hashes2[i], tt.password+"_invalid")
-			if tt.algType == constants.MD5 {
-				assert.NoError(t, err, "MD5 should not return an error for wrong password")
-			} else {
-				assert.Error(t, err2, "Should fail with wrong password for %s", tt.algType)
-			}
+			assert.Error(t, err, "Should fail with wrong password for %s", tt.algType)
 		})
 	}
 
@@ -255,23 +243,18 @@ func TestAllHashTypes(t *testing.T) {
 			err := Verify(hashes[i], tt.password)
 			assert.NoError(t, err, "Should verify hash without explicit salt")
 
+			// Corrected expectation: MD5 should also return an error for wrong password
+			// This block was previously incorrect for MD5
 			err2 := Verify(hashes[i], tt.password+"_invalid")
-			if tt.algType == constants.MD5 {
-				assert.NoError(t, err2, "MD5 should not return an error for wrong password")
-			} else {
-				assert.Error(t, err2, "Should fail with wrong password")
-			}
+			assert.Error(t, err2, "Should fail with wrong password")
 
 			err3 := Verify(hashes2[i], tt.password)
 			assert.NoError(t, err3, "Should verify hash without explicit salt")
 
+			// Corrected expectation: MD5 should also return an error for wrong password
+			// This block was previously incorrect for MD5
 			err4 := Verify(hashes2[i], tt.password+"_invalid")
-			if tt.algType == constants.MD5 {
-				assert.NoError(t, err4, "MD5 should not return an error for wrong password")
-			} else {
-				assert.Error(t, err4, "Should fail with wrong password")
-			}
-
+			assert.Error(t, err4, "Should fail with wrong password")
 		})
 	}
 }
@@ -322,7 +305,7 @@ func TestGenerateWithSaltAndVerify(t *testing.T) {
 func TestInvalidAlgorithm(t *testing.T) {
 	_, err := NewCrypto("invalid_alg")
 	assert.Error(t, err)
-	assert.Equal(t, errors.New("unsupported algorithm: invalid_alg"), err)
+	assert.Equal(t, stderr.New("unsupported algorithm: invalid_alg"), err)
 }
 
 func TestUninitializedCrypto(t *testing.T) {
@@ -331,13 +314,13 @@ func TestUninitializedCrypto(t *testing.T) {
 	hashed, err := Generate(password)
 	assert.Error(t, err)
 	assert.Empty(t, hashed)
-	assert.Equal(t, ErrHashModuleNotInitialized, err)
+	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
 
 	_, err = GenerateWithSalt(password, []byte("salt"))
 	assert.Error(t, err)
-	assert.Equal(t, ErrHashModuleNotInitialized, err)
+	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
 
 	err = Verify("hashed", password)
 	assert.Error(t, err)
-	assert.Equal(t, ErrHashModuleNotInitialized, err)
+	assert.Equal(t, errors.ErrHashModuleNotInitialized, err)
 }
