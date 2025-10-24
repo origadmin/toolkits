@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -112,7 +111,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	return params, nil
 }
 
-func DefaultParams() interfaces.Params {
+func DefaultParams() *Params {
 	return &Params{
 		TimeCost:   types.DefaultTimeCost,
 		MemoryCost: types.DefaultMemoryCost,

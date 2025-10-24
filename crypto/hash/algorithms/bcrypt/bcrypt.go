@@ -20,10 +20,10 @@ type Bcrypt struct {
 	config *types.Config
 }
 
-var bcryptType = types.Type{Name: types.BCRYPT}
+var bcryptSpec = types.Spec{Name: types.BCRYPT}
 
-func (c *Bcrypt) Type() types.Type {
-	return bcryptType
+func (c *Bcrypt) Spec() types.Spec {
+	return bcryptSpec
 }
 
 // Hash implements the hash method
@@ -48,15 +48,16 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 	hashBytes, err := bcrypt.GenerateFromPassword(data, c.params.Cost)
 	if err != nil {
-		return nil, err	}
-	return types.NewHashPartsFull(c.Type(), hashBytes, salt, c.params.ToMap()), nil
+		return nil, err
+	}
+	return types.NewHashPartsFull(c.Spec(), hashBytes, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
 // WARNING: Manually concatenating salt for Bcrypt is INSECURE as Bcrypt handles salt internally.
 // This implementation is for framework consistency, but should be used with caution.
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
 	// We can directly use parts.Algorithm.Name for comparison.
 	if types.BCRYPT != parts.Algorithm.Name {
 		return errors.ErrAlgorithmMismatch
@@ -76,20 +77,13 @@ func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 }
 
 func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
-	if config == nil {
-		config = DefaultConfig()
-	}
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	if err != nil {
 		return nil, err
 	}
 	return &Bcrypt{
-		params: v.Params(),
-		config: config,
+		params: prep.Params,
+		config: prep.Config,
 	}, nil
 }
 

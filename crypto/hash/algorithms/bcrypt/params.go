@@ -58,7 +58,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	return params, nil
 }
 
-func DefaultParams() interfaces.Params {
+func DefaultParams() *Params {
 	return &Params{
 		Cost: types.DefaultCost,
 	}

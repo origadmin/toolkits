@@ -64,6 +64,12 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	return params, nil
 }
 
-func DefaultParams() interfaces.Params {
+func WithKey(key []byte) func(p *Params) {
+	return func(p *Params) {
+		p.Key = key
+	}
+}
+
+func DefaultParams() *Params {
 	return &Params{}
 }

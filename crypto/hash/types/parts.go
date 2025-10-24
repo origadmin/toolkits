@@ -14,8 +14,8 @@ import (
 // It is suitable for serialization (e.g., to JSON) for debugging or transfer.
 type HashParts struct {
 	// Algorithm is the structured identifier for the hash algorithm (e.g., {Name: "pbkdf2", Underlying: "sha256"}).
-	// It is of type Type, representing the parsed algorithm definition.
-	Algorithm Type `json:"algorithm"`
+	// It is of type Spec, representing the parsed algorithm definition.
+	Algorithm Spec `json:"algorithm"`
 
 	// Version indicates a specific version of the algorithm or its parameters, if applicable.
 	Version string `json:"version,omitempty"`
@@ -54,8 +54,8 @@ func (h *HashParts) WithSalt(salt []byte) *HashParts {
 	return h
 }
 
-// WithAlgorithm sets the algorithm Type for the hash parts and returns the modified HashParts instance.
-func (h *HashParts) WithAlgorithm(algorithm Type) *HashParts {
+// WithAlgorithm sets the algorithm Spec for the hash parts and returns the modified HashParts instance.
+func (h *HashParts) WithAlgorithm(algorithm Spec) *HashParts {
 	h.Algorithm = algorithm
 	return h
 }
@@ -77,18 +77,18 @@ func (h *HashParts) String() string {
 	return string(b)
 }
 
-// NewHashParts creates a new HashParts instance using the provided algorithm Type.
+// NewHashParts creates a new HashParts instance using the provided algorithm Spec.
 // It initializes Params to an empty map to prevent nil map panics.
-func NewHashParts(p Type) *HashParts {
+func NewHashParts(p Spec) *HashParts {
 	return &HashParts{
 		Algorithm: p,
 		Params:    make(map[string]string), // Ensure Params is initialized
 	}
 }
 
-// NewHashPartsWithHashSalt creates a new HashParts instance with the given algorithm Type, hash, and salt.
+// NewHashPartsWithHashSalt creates a new HashParts instance with the given algorithm Spec, hash, and salt.
 // It initializes Params to an empty map to prevent nil map panics.
-func NewHashPartsWithHashSalt(p Type, hash []byte, salt []byte) *HashParts {
+func NewHashPartsWithHashSalt(p Spec, hash []byte, salt []byte) *HashParts {
 	return &HashParts{
 		Algorithm: p,
 		Hash:      hash,
@@ -99,7 +99,7 @@ func NewHashPartsWithHashSalt(p Type, hash []byte, salt []byte) *HashParts {
 
 // NewHashPartsFull creates a new HashParts instance with all fields provided.
 // If the provided params map is nil, it initializes it to an empty map.
-func NewHashPartsFull(p Type, hash []byte, salt []byte, params map[string]string) *HashParts {
+func NewHashPartsFull(p Spec, hash []byte, salt []byte, params map[string]string) *HashParts {
 	if params == nil {
 		params = make(map[string]string) // Ensure Params is initialized if nil
 	}

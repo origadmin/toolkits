@@ -13,28 +13,28 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-func TestAllSHATypes(t *testing.T) {
+func TestAllSHASpecs(t *testing.T) {
 	testCases := []struct {
 		name    string
-		algType types.Type
+		algSpec types.Spec
 	}{
-		{name: "SHA1", algType: sha1AlgType},
-		{name: "SHA224", algType: sha224AlgType},
-		{name: "SHA256", algType: sha256AlgType},
-		{name: "SHA384", algType: sha384AlgType},
-		{name: "SHA512", algType: sha512AlgType},
-		{name: "SHA512_224", algType: sha512_224AlgType},
-		{name: "SHA512_256", algType: sha512_256AlgType},
-		{name: "SHA3_224", algType: sha3_224AlgType},
-		{name: "SHA3_256", algType: sha3_256AlgType},
-		{name: "SHA3_384", algType: sha3_384AlgType},
-		{name: "SHA3_512", algType: sha3_512AlgType},
+		{name: "SHA1", algSpec: sha1AlgSpec},
+		{name: "SHA224", algSpec: sha224AlgSpec},
+		{name: "SHA256", algSpec: sha256AlgSpec},
+		{name: "SHA384", algSpec: sha384AlgSpec},
+		{name: "SHA512", algSpec: sha512AlgSpec},
+		{name: "SHA512_224", algSpec: sha512_224AlgSpec},
+		{name: "SHA512_256", algSpec: sha512_256AlgSpec},
+		{name: "SHA3_224", algSpec: sha3_224AlgSpec},
+		{name: "SHA3_256", algSpec: sha3_256AlgSpec},
+		{name: "SHA3_384", algSpec: sha3_384AlgSpec},
+		{name: "SHA3_512", algSpec: sha3_512AlgSpec},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a new SHA instance
-			crypto, err := NewSHA(tc.algType, nil)
+			crypto, err := NewSHA(tc.algSpec, nil)
 			assert.NoError(t, err)
 			assert.NotNil(t, crypto)
 
@@ -59,19 +59,19 @@ func TestNewShaFunctions(t *testing.T) {
 	testCases := []struct {
 		name     string
 		newFunc  func(config *types.Config) (interfaces.Cryptographic, error)
-		expected types.Type
+		expected types.Spec
 	}{
-		{"NewSha1", NewSha1, sha1AlgType},
-		{"NewSha224", NewSha224, sha224AlgType},
-		{"NewSha256", NewSha256, sha256AlgType},
-		{"NewSha384", NewSha384, sha384AlgType},
-		{"NewSha512", NewSha512, sha512AlgType},
-		{"NewSha3224", NewSha3224, sha3_224AlgType},
-		{"NewSha3256", NewSha3256, sha3_256AlgType},
-		{"NewSha3384", NewSha3384, sha3_384AlgType},
-		{"NewSha3512", NewSha3512, sha3_512AlgType},
-		{"NewSha3512224", NewSha3512224, sha512_224AlgType},
-		{"NewSha3512256", NewSha3512256, sha512_256AlgType},
+		{"NewSha1", NewSha1, sha1AlgSpec},
+		{"NewSha224", NewSha224, sha224AlgSpec},
+		{"NewSha256", NewSha256, sha256AlgSpec},
+		{"NewSha384", NewSha384, sha384AlgSpec},
+		{"NewSha512", NewSha512, sha512AlgSpec},
+		{"NewSha3224", NewSha3224, sha3_224AlgSpec},
+		{"NewSha3256", NewSha3256, sha3_256AlgSpec},
+		{"NewSha3384", NewSha3384, sha3_384AlgSpec},
+		{"NewSha3512", NewSha3512, sha3_512AlgSpec},
+		{"NewSha3512224", NewSha3512224, sha512_224AlgSpec},
+		{"NewSha3512256", NewSha3512256, sha512_256AlgSpec},
 	}
 
 	for _, tc := range testCases {
@@ -79,7 +79,7 @@ func TestNewShaFunctions(t *testing.T) {
 			crypto, err := tc.newFunc(nil)
 			assert.NoError(t, err)
 			assert.NotNil(t, crypto)
-			assert.Equal(t, tc.expected, crypto.Type())
+			assert.Equal(t, tc.expected, crypto.Spec())
 		})
 	}
 }

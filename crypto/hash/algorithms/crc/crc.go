@@ -16,7 +16,7 @@ import (
 
 // CRC implements CRC32 and CRC64 hashing algorithms
 type CRC struct {
-	algType  types.Type
+	algSpec  types.Spec
 	config   *types.Config
 	hashHash stdhash.Hash
 }
@@ -41,13 +41,13 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 	if len(salt) > 0 {
 		_, _ = h.Write(salt) // Error is always nil for standard hash.Hash.Write
 	}
-	return types.NewHashPartsFull(c.Type(), h.Sum(nil), salt, nil), nil
+	return types.NewHashPartsFull(c.Spec(), h.Sum(nil), salt, nil), nil
 }
 
 // Verify implements the verify method
 func (c *CRC) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Type. Use its Name field to get the hash.
-	hashHash, err := types.TypeHash(parts.Algorithm.Name)
+	// parts.Algorithm is already of type types.Spec. Use its Name field to get the hash.
+	hashHash, err := types.SpecHash(parts.Algorithm.Name)
 	if err != nil {
 		return err
 	}
@@ -64,12 +64,12 @@ func (c *CRC) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func (c *CRC) Type() types.Type {
-	return c.algType
+func (c *CRC) Spec() types.Spec {
+	return c.algSpec
 }
 
 // NewCRC creates a new CRC crypto instance
-func NewCRC(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
+func NewCRC(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -77,14 +77,14 @@ func NewCRC(algType types.Type, config *types.Config) (interfaces.Cryptographic,
 	// No validator needed here, as CRC doesn't have complex params beyond SaltLength
 	// which is handled by the main hash package's config validation.
 
-	// Removed: algType = must.Do(ResolveType(algType))
-	hashHash, err := stdhash.ParseHash(algType.Name)
+	// Removed: algSpec = must.Do(ResolveSpec(algSpec))
+	hashHash, err := stdhash.ParseHash(algSpec.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	return &CRC{
-		algType:  algType,
+		algSpec:  algSpec,
 		config:   config,
 		hashHash: hashHash,
 	}, nil

@@ -16,7 +16,7 @@ import (
 func TestNewHMAC(t *testing.T) {
 	tests := []struct {
 		name               string
-		algType            types.Type
+		algSpec            types.Spec
 		config             *types.Config
 		expectedAlgName    string
 		expectedUnderlying string
@@ -25,7 +25,7 @@ func TestNewHMAC(t *testing.T) {
 	}{
 		{
 			name:               "HMAC Default (SHA256)",
-			algType:            types.NewType(types.HMAC),
+			algSpec:            types.New(types.HMAC),
 			config:             DefaultConfig(),
 			expectedAlgName:    types.HMAC,
 			expectedUnderlying: types.SHA256,
@@ -34,7 +34,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC-SHA1",
-			algType:            types.NewType(types.HMAC_SHA1),
+			algSpec:            types.New(types.HMAC_SHA1),
 			config:             DefaultConfig(),
 			expectedAlgName:    types.HMAC,
 			expectedUnderlying: types.SHA1,
@@ -43,7 +43,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC-SHA512",
-			algType:            types.NewType(types.HMAC_SHA512),
+			algSpec:            types.New(types.HMAC_SHA512),
 			config:             DefaultConfig(),
 			expectedAlgName:    types.HMAC,
 			expectedUnderlying: types.SHA512,
@@ -52,7 +52,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC with unsupported underlying hash (CRC32)",
-			algType:            types.NewType(types.HMAC, types.CRC32),
+			algSpec:            types.New(types.HMAC, types.CRC32),
 			config:             DefaultConfig(),
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -60,7 +60,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "HMAC with invalid underlying hash",
-			algType:            types.NewType(types.HMAC, "invalidhash"),
+			algSpec:            types.New(types.HMAC, "invalidhash"),
 			config:             DefaultConfig(),
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -68,7 +68,7 @@ func TestNewHMAC(t *testing.T) {
 		},
 		{
 			name:               "Invalid SaltLength",
-			algType:            types.NewType(types.HMAC),
+			algSpec:            types.New(types.HMAC),
 			config:             &types.Config{SaltLength: 4}, // Less than 8
 			expectedAlgName:    "",
 			expectedUnderlying: "",
@@ -78,14 +78,14 @@ func TestNewHMAC(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewHMAC(tt.algType, tt.config)
+			c, err := NewHMAC(tt.algSpec, tt.config)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewHMAC() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, tt.expectedAlgName, c.Type().Name)
-				assert.Equal(t, tt.expectedUnderlying, c.Type().Underlying)
+				assert.Equal(t, tt.expectedAlgName, c.Spec().Name)
+				assert.Equal(t, tt.expectedUnderlying, c.Spec().Underlying)
 				assert.Equal(t, tt.expectedStdHash, c.(*HMAC).hashHash)
 			}
 		})
@@ -98,15 +98,15 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		algType types.Type
+		algSpec types.Spec
 	}{
-		{name: "HMAC-SHA256", algType: types.NewType(types.HMAC_SHA256)},
-		{name: "HMAC-SHA512", algType: types.NewType(types.HMAC_SHA512)},
+		{name: "HMAC-SHA256", algSpec: types.New(types.HMAC_SHA256)},
+		{name: "HMAC-SHA512", algSpec: types.New(types.HMAC_SHA512)},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hmac, err := NewHMAC(tt.algType, DefaultConfig())
+			hmac, err := NewHMAC(tt.algSpec, DefaultConfig())
 			assert.NoError(t, err)
 			assert.NotNil(t, hmac)
 
@@ -114,7 +114,7 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			hashedParts, err := hmac.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algType.String(), hashedParts.Algorithm)
+			assert.Equal(t, tt.algSpec.String(), hashedParts.Algorithm)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt
@@ -129,7 +129,7 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			// Test Hash without salt (SaltLength 0) - should return error
 			cfg := DefaultConfig()
 			cfg.SaltLength = 0 // This should cause an error due to ConfigValidator
-			hmacNoSalt, err := NewHMAC(tt.algType, cfg)
+			hmacNoSalt, err := NewHMAC(tt.algSpec, cfg)
 			assert.Error(t, err)      // Expect an error here
 			assert.Nil(t, hmacNoSalt) // Expect hmacNoSalt to be nil
 

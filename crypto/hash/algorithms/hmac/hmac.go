@@ -19,15 +19,15 @@ import (
 
 // HMAC implements the HMAC hashing algorithm
 type HMAC struct {
-	algType  types.Type
+	algSpec  types.Spec
 	config   *types.Config
 	hashHash stdhash.Hash
 }
 
-var hmacType = types.Type{Name: types.HMAC, Underlying: types.SHA256}
+var hmacSpec = types.Spec{Name: types.HMAC, Underlying: types.SHA256}
 
-func (c *HMAC) Type() types.Type {
-	return c.algType
+func (c *HMAC) Spec() types.Spec {
+	return c.algSpec
 }
 
 type ConfigValidator struct {
@@ -42,24 +42,21 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 }
 
 // NewHMAC creates a new HMAC crypto instance
-func NewHMAC(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	if config == nil {
-		config = DefaultConfig()
-	}
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+func NewHMAC(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	if err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-	// Removed: algType, err := ResolveType(algType)
+	// Removed: algSpec, err := ResolveSpec(algSpec)
 	// Removed: if err != nil { return nil, err }
-	hashHash, err := types.TypeHash(algType.Underlying)
+	hashHash, err := types.SpecHash(algSpec.Underlying)
 	if err != nil {
 		return nil, err
 	}
 
 	return &HMAC{
-		algType:  algType,
-		config:   config,
+		algSpec:  algSpec,
+		config:   prep.Config,
 		hashHash: hashHash,
 	}, nil
 }
@@ -84,22 +81,22 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 	h := hmac.New(c.hashHash.New, salt)
 	h.Write([]byte(password))
 	hash := h.Sum(nil)
-	return types.NewHashPartsWithHashSalt(c.Type(), hash, salt), nil
+	return types.NewHashPartsWithHashSalt(c.Spec(), hash, salt), nil
 }
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
 	// We can directly use parts.Algorithm.
-	resolvedAlgType, err := ResolveType(parts.Algorithm)
+	resolvedAlgSpec, err := ResolveSpec(parts.Algorithm)
 	if err != nil {
 		return err
 	}
-	if types.HMAC != resolvedAlgType.Name {
+	if types.HMAC != resolvedAlgSpec.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.TypeHash(resolvedAlgType.Underlying)
+	hashHash, err := types.SpecHash(resolvedAlgSpec.Underlying)
 	if err != nil {
 		return err
 	}

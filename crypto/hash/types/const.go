@@ -19,8 +19,8 @@ package types
 const (
 	// ENV is the environment variable name for hash type.
 	ENV = "ORIGADMIN_HASH_TYPE"
-	// DefaultType is the default hash type.
-	DefaultType = "argon2"
+	// DefaultSpec is the default hash type.
+	DefaultSpec = "argon2"
 	// DefaultVersion is the default hash version.
 	DefaultVersion = "v1"
 	// DefaultSaltLength is the default salt length.

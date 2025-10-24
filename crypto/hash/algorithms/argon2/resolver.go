@@ -9,9 +9,9 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-func ResolveType(p types.Type) (types.Type, error) {
+func ResolveSpec(p types.Spec) (types.Spec, error) {
 	if p.Name == types.ARGON2 {
-		return types.Type{Name: types.ARGON2i, Underlying: ""}, nil
+		return types.Spec{Name: types.ARGON2i, Underlying: ""}, nil
 	}
 	return p, nil
 }

@@ -14,27 +14,27 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// ResolveType resolves the Type for PBKDF2, providing a default underlying hash if not specified.
-func ResolveType(algType types.Type) (types.Type, error) {
+// ResolveSpec resolves the Spec for PBKDF2, providing a default underlying hash if not specified.
+func ResolveSpec(algSpec types.Spec) (types.Spec, error) {
 	// If the name is a composite HMAC type (e.g., "hmac-sha256"), parse it.
-	// This handles cases where types.NewType might not fully parse the composite name into Name and Underlying.
-	if strings.HasPrefix(algType.Name, types.PBKDF2_PREFIX) {
-		algType.Underlying = strings.TrimPrefix(algType.Name, types.PBKDF2_PREFIX)
-		algType.Name = types.PBKDF2
+	// This handles cases where types.New might not fully parse the composite name into Name and Underlying.
+	if strings.HasPrefix(algSpec.Name, types.PBKDF2_PREFIX) {
+		algSpec.Underlying = strings.TrimPrefix(algSpec.Name, types.PBKDF2_PREFIX)
+		algSpec.Name = types.PBKDF2
 	}
-	if algType.Underlying == "" {
-		algType.Underlying = types.SHA256 // Default to SHA256 for PBKDF2
+	if algSpec.Underlying == "" {
+		algSpec.Underlying = types.SHA256 // Default to SHA256 for PBKDF2
 	}
 
-	resolvedUnderlying := algType.Underlying
-	if strings.HasPrefix(algType.Underlying, types.HMAC_PREFIX) {
-		resolvedUnderlying = strings.TrimPrefix(algType.Underlying, types.HMAC_PREFIX)
+	resolvedUnderlying := algSpec.Underlying
+	if strings.HasPrefix(algSpec.Underlying, types.HMAC_PREFIX) {
+		resolvedUnderlying = strings.TrimPrefix(algSpec.Underlying, types.HMAC_PREFIX)
 	}
 
 	// Validate the underlying hash algorithm
 	hashHash, err := stdhash.ParseHash(resolvedUnderlying)
 	if err != nil {
-		return types.Type{}, fmt.Errorf("unsupported underlying hash for PBKDF2: %s", algType.Underlying)
+		return types.Spec{}, fmt.Errorf("unsupported underlying hash for PBKDF2: %s", algSpec.Underlying)
 	}
 
 	// Explicitly check for unsuitable hash types for PBKDF2 (non-cryptographic or weak hashes)
@@ -42,13 +42,13 @@ func ResolveType(algType types.Type) (types.Type, error) {
 	case stdhash.MAPHASH, stdhash.ADLER32, stdhash.CRC32, stdhash.CRC32_ISO, stdhash.CRC32_CAST, stdhash.CRC32_KOOP,
 		stdhash.CRC64_ISO, stdhash.CRC64_ECMA, stdhash.FNV32, stdhash.FNV32A, stdhash.FNV64, stdhash.FNV64A,
 		stdhash.FNV128, stdhash.FNV128A:
-		return types.Type{}, errors.ErrUnsupportedHashForPBKDF2 // Assuming this error exists or needs to be created
+		return types.Spec{}, errors.ErrUnsupportedHashForPBKDF2 // Assuming this error exists or needs to be created
 	default:
 	}
 
-	// Update algType.Underlying to the resolved (stripped) version if it was an HMAC composite
+	// Update algSpec.Underlying to the resolved (stripped) version if it was an HMAC composite
 	// Comment out or remove this line if not needed
-	//algType.Underlying = resolvedUnderlying
+	//algSpec.Underlying = resolvedUnderlying
 
-	return algType, nil
+	return algSpec, nil
 }

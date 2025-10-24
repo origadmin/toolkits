@@ -17,20 +17,20 @@ import (
 )
 
 type Crypto interface {
-	Type() types.Type
+	Spec() types.Spec
 	Hash(password string) (string, error)
 	HashWithSalt(password string, salt []byte) (string, error)
 	Verify(hashed, password string) error
 }
 
 type crypto struct {
-	codec interfaces.Codec
+	codec codec.Codec
 	// algImpl is the cryptographic implementation used for hashing, wrapped with cachedVerifier
 	algImpl interfaces.Cryptographic
 }
 
-func (c *crypto) Type() types.Type {
-	return c.algImpl.Type()
+func (c *crypto) Spec() types.Spec {
+	return c.algImpl.Spec()
 }
 
 func (c *crypto) Hash(password string) (string, error) {
@@ -68,7 +68,7 @@ func (c *crypto) Verify(hashed, password string) error {
 
 	// Get algorithm instance from global factory based on the decoded algorithm
 	factory := getFactory()
-	cryptographic, err := factory.create(parts.Algorithm) // Pass types.Type directly
+	cryptographic, err := factory.create(parts.Algorithm) // Pass types.Spec directly
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (c *crypto) Verify(hashed, password string) error {
 	if !exists {
 		return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm.String())
 	}
-	parts.Algorithm, err = algEntry.resolver.ResolveType(parts.Algorithm) // Ensure the resolver is called
+	parts.Algorithm, err = algEntry.resolver.ResolveSpec(parts.Algorithm) // Ensure the resolver is called
 	if err != nil {
 		return err
 	}
@@ -90,27 +90,27 @@ func (c *crypto) Verify(hashed, password string) error {
 
 // NewCrypto creates a new cryptographic instance
 func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
-	// 1. Parse the algorithm name string into a structured Type
-	algType, err := types.ParseType(algName)
+	// 1. Parse the algorithm name string into a structured Spec
+	algSpec, err := types.Parse(algName)
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. Look up the algorithm entry to get its specific resolver
-	algEntry, exists := algorithmMap[algType.Name]
+	algEntry, exists := algorithmMap[algSpec.Name]
 	if !exists {
-		return nil, fmt.Errorf("unsupported algorithm: %s", algType.String())
+		return nil, fmt.Errorf("unsupported algorithm: %s", algSpec.String())
 	}
 
-	// 3. Resolve the parsed Type to its canonical form using the algorithm's specific resolver
-	resolvedAlgType, err := algEntry.resolver.ResolveType(algType) // Use algEntry.resolver
+	// 3. Resolve the parsed Spec to its canonical form using the algorithm's specific resolver
+	resolvedAlgSpec, err := algEntry.resolver.ResolveSpec(algSpec) // Use algEntry.resolver
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algType.String(), err)
+		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algSpec.String(), err)
 	}
 
 	// 4. Apply options to default config and create the cryptographic instance
 	cfg := configure.Apply(algEntry.defaultConfig(), opts)
-	cryptographic, err := algEntry.creator(resolvedAlgType, cfg) // Pass the resolved type
+	cryptographic, err := algEntry.creator(resolvedAlgSpec, cfg) // Pass the resolved type
 	if err != nil {
 		return nil, err
 	}
@@ -126,24 +126,24 @@ func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
 		nil
 }
 
-// RegisterAlgorithm register a new hash algorithm that uses defaultTypeResolver by default
-func RegisterAlgorithm(algType types.Type, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig) {
-	algorithmMap[algType.Name] = algorithm{
-		algType:       algType,
+// RegisterAlgorithm register a new hash algorithm that uses defaultSpecResolver by default
+func RegisterAlgorithm(algSpec types.Spec, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig) {
+	algorithmMap[algSpec.Name] = algorithm{
+		algSpec:       algSpec,
 		creator:       creator,
 		defaultConfig: defaultConfig,
-		resolver:      defaultTypeResolver,
+		resolver:      defaultSpecResolver,
 	}
 }
 
-// RegisterAlgorithmWithResolver register a new hash algorithm and specify a custom TypeResolver
-func RegisterAlgorithmWithResolver(algType types.Type, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig, resolver interfaces.TypeResolver) {
+// RegisterAlgorithmWithResolver register a new hash algorithm and specify a custom SpecResolver
+func RegisterAlgorithmWithResolver(algSpec types.Spec, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig, resolver interfaces.SpecResolver) {
 	if resolver == nil {
-		resolver = defaultTypeResolver
+		resolver = defaultSpecResolver
 	}
 
-	algorithmMap[algType.Name] = algorithm{
-		algType:       algType,
+	algorithmMap[algSpec.Name] = algorithm{
+		algSpec:       algSpec,
 		creator:       creator,
 		defaultConfig: defaultConfig,
 		resolver:      resolver,

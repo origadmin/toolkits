@@ -41,3 +41,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	params = &Params{}
 	return params, nil
 }
+
+func DefaultParams() *Params {
+	return &Params{}
+}

@@ -9,7 +9,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-func ResolveType(p types.Type) (types.Type, error) {
+func ResolveSpec(p types.Spec) (types.Spec, error) {
 	p.Name = p.String()
 	p.Underlying = ""
 	switch p.Name {

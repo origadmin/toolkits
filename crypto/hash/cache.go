@@ -26,8 +26,8 @@ type cachedVerifier struct {
 	wrapped interfaces.Cryptographic
 }
 
-func (c *cachedVerifier) Type() types.Type {
-	return c.wrapped.Type()
+func (c *cachedVerifier) Spec() types.Spec {
+	return c.wrapped.Spec()
 }
 
 func (c *cachedVerifier) Hash(password string) (*types.HashParts, error) {

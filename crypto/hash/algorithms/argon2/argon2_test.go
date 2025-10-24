@@ -129,35 +129,35 @@ func TestParams_ParseAndString(t *testing.T) {
 func TestNewArgon2(t *testing.T) {
 	tests := []struct {
 		name            string
-		algType         types.Type
+		algSpec         types.Spec
 		config          *types.Config
-		expectedAlgType types.Type
+		expectedAlgSpec types.Spec
 		wantErr         bool
 	}{
 		{
 			name:            "Default config for ARGON2",
-			algType:         types.NewType(types.ARGON2),
+			algSpec:         types.New(types.ARGON2),
 			config:          DefaultConfig(),
-			expectedAlgType: types.Type{Name: types.ARGON2i},
+			expectedAlgSpec: types.Spec{Name: types.ARGON2i},
 			wantErr:         false,
 		},
 		{
 			name:            "Default config for ARGON2i",
-			algType:         types.NewType(types.ARGON2i),
+			algSpec:         types.New(types.ARGON2i),
 			config:          DefaultConfig(),
-			expectedAlgType: types.Type{Name: types.ARGON2i},
+			expectedAlgSpec: types.Spec{Name: types.ARGON2i},
 			wantErr:         false,
 		},
 		{
 			name:            "Default config for ARGON2id",
-			algType:         types.NewType(types.ARGON2id),
+			algSpec:         types.New(types.ARGON2id),
 			config:          DefaultConfig(),
-			expectedAlgType: types.Type{Name: types.ARGON2id},
+			expectedAlgSpec: types.Spec{Name: types.ARGON2id},
 			wantErr:         false,
 		},
 		{
 			name:    "Custom config",
-			algType: types.NewType(types.ARGON2id),
+			algSpec: types.New(types.ARGON2id),
 			config: &types.Config{
 				SaltLength: types.DefaultSaltLength,
 				ParamConfig: (&Params{
@@ -167,12 +167,12 @@ func TestNewArgon2(t *testing.T) {
 					KeyLength:  32,
 				}).String(),
 			},
-			expectedAlgType: types.Type{Name: types.ARGON2id},
+			expectedAlgSpec: types.Spec{Name: types.ARGON2id},
 			wantErr:         false,
 		},
 		{
 			name:    "Invalid config - zero time cost",
-			algType: types.NewType(types.ARGON2i),
+			algSpec: types.New(types.ARGON2i),
 			config: &types.Config{
 				SaltLength: types.DefaultSaltLength,
 				ParamConfig: (&Params{
@@ -182,33 +182,33 @@ func TestNewArgon2(t *testing.T) {
 					KeyLength:  32,
 				}).String(),
 			},
-			expectedAlgType: types.Type{},
+			expectedAlgSpec: types.Spec{},
 			wantErr:         true,
 		},
 		{
 			name:            "Unsupported algorithm type",
-			algType:         types.NewType("unsupported"),
+			algSpec:         types.New("unsupported"),
 			config:          DefaultConfig(),
-			expectedAlgType: types.Type{},
+			expectedAlgSpec: types.Spec{},
 			wantErr:         true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewArgon2(tt.algType, tt.config)
+			c, err := NewArgon2(tt.algSpec, tt.config)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewArgon2() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, tt.expectedAlgType, c.Type())
+				assert.Equal(t, tt.expectedAlgSpec, c.Spec())
 				// Test Hash and Verify for valid cases
 				hash, err := c.Hash("password")
 				assert.NoError(t, err)
 				assert.NotNil(t, hash)
-				assert.Equal(t, tt.expectedAlgType, hash.Algorithm)
+				assert.Equal(t, tt.expectedAlgSpec, hash.Algorithm)
 
 				err = c.Verify(hash, "password")
 				assert.NoError(t, err)

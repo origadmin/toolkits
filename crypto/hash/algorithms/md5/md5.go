@@ -16,7 +16,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-var md5AlgType = types.NewType(types.MD5)
+var md5AlgSpec = types.New(types.MD5)
 
 type ConfigValidator struct {
 }
@@ -46,8 +46,8 @@ type MD5 struct {
 	hashHash stdhash.Hash
 }
 
-func (c *MD5) Type() types.Type {
-	return md5AlgType
+func (c *MD5) Spec() types.Spec {
+	return md5AlgSpec
 }
 
 // NewMD5 creates a new MD5 crypto instance
@@ -60,7 +60,7 @@ func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
 
-	hashHash, err := types.TypeHash(md5AlgType.Name)
+	hashHash, err := types.SpecHash(md5AlgSpec.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -94,12 +94,12 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 		hash.Write(salt)
 	}
 	hashBytes := hash.Sum(nil)
-	return types.NewHashPartsWithHashSalt(c.Type(), hashBytes[:], salt), nil
+	return types.NewHashPartsWithHashSalt(c.Spec(), hashBytes[:], salt), nil
 }
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
 	// We can directly use parts.Algorithm.Name for comparison.
 	if parts.Algorithm.Name != types.MD5 {
 		return errors.ErrAlgorithmMismatch

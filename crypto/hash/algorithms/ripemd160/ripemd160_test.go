@@ -15,28 +15,28 @@ import (
 func TestNewRIPEMD160(t *testing.T) {
 	tests := []struct {
 		name            string
-		algType         types.Type
+		algSpec         types.Spec
 		config          *types.Config
 		expectedAlgName string
 		wantErr         bool
 	}{
 		{
 			name:            "Default config",
-			algType:         types.NewType(types.RIPEMD160),
+			algSpec:         types.New(types.RIPEMD160),
 			config:          DefaultConfig(),
 			expectedAlgName: types.RIPEMD160,
 			wantErr:         false,
 		},
 		{
 			name:            "With underlying type (should be ignored)",
-			algType:         types.NewType(types.RIPEMD160, "sha256"),
+			algSpec:         types.New(types.RIPEMD160, "sha256"),
 			config:          DefaultConfig(),
 			expectedAlgName: types.RIPEMD160,
 			wantErr:         false,
 		},
 		{
 			name:            "Invalid SaltLength",
-			algType:         types.NewType(types.RIPEMD160),
+			algSpec:         types.New(types.RIPEMD160),
 			config:          &types.Config{SaltLength: 4}, // Less than 8
 			expectedAlgName: "",
 			wantErr:         true,
@@ -51,8 +51,8 @@ func TestNewRIPEMD160(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, tt.expectedAlgName, c.Type().Name)
-				assert.Empty(t, c.Type().Underlying) // Underlying should always be empty after ResolveType
+				assert.Equal(t, tt.expectedAlgName, c.Spec().Name)
+				assert.Empty(t, c.Spec().Underlying) // Underlying should always be empty after ResolveSpec
 			}
 		})
 	}
@@ -64,9 +64,9 @@ func TestRIPEMD160_HashAndVerify(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		algType types.Type
+		algSpec types.Spec
 	}{
-		{name: "RIPEMD160", algType: types.NewType(types.RIPEMD160)},
+		{name: "RIPEMD160", algSpec: types.New(types.RIPEMD160)},
 	}
 
 	for _, tt := range tests {
@@ -79,7 +79,7 @@ func TestRIPEMD160_HashAndVerify(t *testing.T) {
 			hashedParts, err := ripemd160Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algType, hashedParts.Algorithm)
+			assert.Equal(t, tt.algSpec, hashedParts.Algorithm)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt

@@ -16,31 +16,31 @@ import (
 func TestNewCRC(t *testing.T) {
 	tests := []struct {
 		name            string
-		algType         types.Type
+		algSpec         types.Spec
 		expectedAlgName string
 		expectedStdHash stdhash.Hash
 		expectedErr     bool
 	}{
-		{name: "CRC32", algType: types.NewType("crc32"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
-		{name: "CRC32-ISO", algType: types.NewType("crc32-iso"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
-		{name: "CRC32-CAST", algType: types.NewType("crc32-cast"), expectedAlgName: "crc32-cast", expectedStdHash: stdhash.CRC32_CAST, expectedErr: false},
-		{name: "CRC32-KOOP", algType: types.NewType("crc32-koop"), expectedAlgName: "crc32-koop", expectedStdHash: stdhash.CRC32_KOOP, expectedErr: false},
-		{name: "CRC64", algType: types.NewType("crc64"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false}, // Default to ISO
-		{name: "CRC64-ISO", algType: types.NewType("crc64-iso"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false},
-		{name: "CRC64-ECMA", algType: types.NewType("crc64-ecma"), expectedAlgName: "crc64-ecma", expectedStdHash: stdhash.CRC64_ECMA, expectedErr: false},
-		{name: "Unsupported", algType: types.NewType("unsupported"), expectedAlgName: "", expectedStdHash: 0, expectedErr: true},
+		{name: "CRC32", algSpec: types.New("crc32"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
+		{name: "CRC32-ISO", algSpec: types.New("crc32-iso"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
+		{name: "CRC32-CAST", algSpec: types.New("crc32-cast"), expectedAlgName: "crc32-cast", expectedStdHash: stdhash.CRC32_CAST, expectedErr: false},
+		{name: "CRC32-KOOP", algSpec: types.New("crc32-koop"), expectedAlgName: "crc32-koop", expectedStdHash: stdhash.CRC32_KOOP, expectedErr: false},
+		{name: "CRC64", algSpec: types.New("crc64"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false}, // Default to ISO
+		{name: "CRC64-ISO", algSpec: types.New("crc64-iso"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false},
+		{name: "CRC64-ECMA", algSpec: types.New("crc64-ecma"), expectedAlgName: "crc64-ecma", expectedStdHash: stdhash.CRC64_ECMA, expectedErr: false},
+		{name: "Unsupported", algSpec: types.New("unsupported"), expectedAlgName: "", expectedStdHash: 0, expectedErr: true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			crc, err := NewCRC(tt.algType, nil)
+			crc, err := NewCRC(tt.algSpec, nil)
 			if tt.expectedErr {
 				assert.Error(t, err)
 				assert.Nil(t, crc)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, crc)
-				assert.Equal(t, tt.expectedAlgName, crc.Type().Name)
+				assert.Equal(t, tt.expectedAlgName, crc.Spec().Name)
 				assert.Equal(t, tt.expectedStdHash, crc.(*CRC).hashHash)
 			}
 		})
@@ -53,16 +53,16 @@ func TestCRCHashAndVerify(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		algType           types.Type
+		algSpec           types.Spec
 		expectedAlgorithm string
 	}{
-		{name: "CRC32", algType: types.NewType("crc32"), expectedAlgorithm: "crc32-iso"},
-		{name: "CRC64", algType: types.NewType("crc64"), expectedAlgorithm: "crc64-iso"},
+		{name: "CRC32", algSpec: types.New("crc32"), expectedAlgorithm: "crc32-iso"},
+		{name: "CRC64", algSpec: types.New("crc64"), expectedAlgorithm: "crc64-iso"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			crc, err := NewCRC(tt.algType, DefaultConfig())
+			crc, err := NewCRC(tt.algSpec, DefaultConfig())
 			assert.NoError(t, err)
 			assert.NotNil(t, crc)
 
@@ -85,7 +85,7 @@ func TestCRCHashAndVerify(t *testing.T) {
 			// Test Hash without salt (SaltLength 0)
 			cfg := DefaultConfig()
 			cfg.SaltLength = 0
-			crcNoSalt, err := NewCRC(tt.algType, cfg)
+			crcNoSalt, err := NewCRC(tt.algSpec, cfg)
 			assert.NoError(t, err)
 			assert.NotNil(t, crcNoSalt)
 
@@ -108,9 +108,9 @@ func TestCRCHashAndVerify(t *testing.T) {
 
 func TestCRCHashWithSaltEmpty(t *testing.T) {
 	password := "testpassword"
-	algType := types.NewType("crc32")
+	algSpec := types.New("crc32")
 
-	crc, err := NewCRC(algType, DefaultConfig())
+	crc, err := NewCRC(algSpec, DefaultConfig())
 	assert.NoError(t, err)
 
 	// Test HashWithSalt with empty salt

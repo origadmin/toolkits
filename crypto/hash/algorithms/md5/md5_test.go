@@ -43,7 +43,7 @@ func TestNewMD5(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, types.MD5, c.Type().Name)
+				assert.Equal(t, types.MD5, c.Spec().Name)
 			}
 		})
 	}
@@ -55,9 +55,9 @@ func TestMD5_HashAndVerify(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		algType types.Type
+		algSpec types.Spec
 	}{
-		{name: "MD5", algType: types.NewType(types.MD5)},
+		{name: "MD5", algSpec: types.New(types.MD5)},
 	}
 
 	for _, tt := range tests {
@@ -70,7 +70,7 @@ func TestMD5_HashAndVerify(t *testing.T) {
 			hashedParts, err := md5Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algType, hashedParts.Algorithm)
+			assert.Equal(t, tt.algSpec, hashedParts.Algorithm)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt

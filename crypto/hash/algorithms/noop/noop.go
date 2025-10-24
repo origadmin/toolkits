@@ -12,14 +12,14 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-var unknownAlgType = types.Type{Name: types.UNKNOWN}
+var unknownAlgSpec = types.Spec{Name: types.UNKNOWN}
 
 // noop implements a noop hashing algorithm
 type noop struct {
 }
 
-func (n *noop) Type() types.Type {
-	return unknownAlgType
+func (n *noop) Spec() types.Spec {
+	return unknownAlgSpec
 }
 
 // New creates a new noop crypto instance

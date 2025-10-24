@@ -24,8 +24,8 @@ var (
 // uninitializedCrypto is a no-op Crypto implementation used when the module fails to initialize.
 type uninitializedCrypto struct{}
 
-func (u *uninitializedCrypto) Type() types.Type {
-	return types.Type{Name: types.UNKNOWN}
+func (u *uninitializedCrypto) Spec() types.Spec {
+	return types.Spec{Name: types.UNKNOWN}
 }
 
 func (u *uninitializedCrypto) Hash(password string) (string, error) {
@@ -43,7 +43,7 @@ func (u *uninitializedCrypto) Verify(hashed, password string) error {
 func init() {
 	algStr := os.Getenv(types.ENV)
 	if algStr == "" {
-		algStr = types.DefaultType
+		algStr = types.DefaultSpec
 	}
 
 	// Try to create an encryption instance with the defined algorithm type
@@ -64,7 +64,7 @@ func UseCrypto(algName string, opts ...types.Option) error {
 	if algName == "" {
 		return errors.ErrInvalidAlgorithm
 	}
-	algType, err := types.ParseType(algName)
+	algSpec, err := types.Parse(algName)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func UseCrypto(algName string, opts ...types.Option) error {
 	currentCrypto := activeCrypto
 	activeCryptoMu.RUnlock()
 
-	if currentCrypto != nil && currentCrypto.Type().Is(algType) {
+	if currentCrypto != nil && currentCrypto.Spec().Is(algSpec) {
 		return nil
 	}
 
@@ -109,10 +109,10 @@ func GenerateWithSalt(password string, salt []byte) (string, error) {
 }
 
 // AvailableAlgorithms returns a list of all registered hash algorithms.
-func AvailableAlgorithms() []types.Type {
-	var algorithms []types.Type
+func AvailableAlgorithms() []types.Spec {
+	var algorithms []types.Spec
 	for _, algEntry := range algorithmMap {
-		algorithms = append(algorithms, algEntry.algType)
+		algorithms = append(algorithms, algEntry.algSpec)
 	}
 	return algorithms
 }

@@ -20,7 +20,7 @@ type RIPEMD160 struct {
 	hashHash stdhash.Hash
 }
 
-var ripemd160Type = types.Type{Name: types.RIPEMD160}
+var ripemd160Spec = types.Spec{Name: types.RIPEMD160}
 
 // Hash implements the hash method
 func (r *RIPEMD160) Hash(password string) (*types.HashParts, error) {
@@ -38,7 +38,7 @@ func (r *RIPEMD160) HashWithSalt(password string, salt []byte) (*types.HashParts
 	if len(salt) > 0 {
 		h.Write(salt)
 	}
-	return types.NewHashPartsFull(r.Type(), h.Sum(nil), salt, nil), nil
+	return types.NewHashPartsFull(r.Spec(), h.Sum(nil), salt, nil), nil
 }
 
 // Verify implements the verify method
@@ -56,8 +56,8 @@ func (r *RIPEMD160) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func (r *RIPEMD160) Type() types.Type {
-	return ripemd160Type
+func (r *RIPEMD160) Spec() types.Spec {
+	return ripemd160Spec
 }
 
 // NewRIPEMD160 creates a new RIPEMD-160 crypto instance
@@ -69,7 +69,7 @@ func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
 		return nil, errors.ErrSaltLengthTooShort
 	}
 
-	hashHash, err := stdhash.ParseHash(ripemd160Type.Name)
+	hashHash, err := stdhash.ParseHash(ripemd160Spec.Name)
 	if err != nil {
 		return nil, err
 	}

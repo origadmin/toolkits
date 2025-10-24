@@ -194,7 +194,7 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 			assert.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
 
 			// 测试算法类型是否正确
-			assert.Equal(t, tc.expectedAlgName, crypto.Type().String(), "Unexpected algorithm name for %s", tc.algName)
+			assert.Equal(t, tc.expectedAlgName, crypto.Spec().String(), "Unexpected algorithm name for %s", tc.algName)
 
 			// 测试 Hash 方法
 			password := "testpassword"

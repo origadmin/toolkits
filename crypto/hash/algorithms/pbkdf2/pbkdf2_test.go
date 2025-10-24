@@ -15,49 +15,49 @@ import (
 func TestNewPBKDF2(t *testing.T) {
 	tests := []struct {
 		name               string
-		algType            types.Type
+		algSpec            types.Spec
 		config             *types.Config
 		expectedUnderlying string
 		expectedErr        bool
 	}{
 		{
 			name:               "PBKDF2 Default (SHA256)",
-			algType:            types.NewType(types.PBKDF2),
+			algSpec:            types.New(types.PBKDF2),
 			config:             DefaultConfig(),
 			expectedUnderlying: types.SHA256,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2-SHA1",
-			algType:            types.NewType(types.PBKDF2, types.SHA1),
+			algSpec:            types.New(types.PBKDF2, types.SHA1),
 			config:             DefaultConfig(),
 			expectedUnderlying: types.SHA1,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2-HMAC-SHA256",
-			algType:            types.NewType(types.PBKDF2, types.HMAC_SHA256),
+			algSpec:            types.New(types.PBKDF2, types.HMAC_SHA256),
 			config:             DefaultConfig(),
 			expectedUnderlying: types.HMAC_SHA256,
 			expectedErr:        false,
 		},
 		{
 			name:               "PBKDF2 with unsupported underlying hash (CRC32)",
-			algType:            types.NewType(types.PBKDF2, types.CRC32),
+			algSpec:            types.New(types.PBKDF2, types.CRC32),
 			config:             DefaultConfig(),
 			expectedUnderlying: "",
 			expectedErr:        true,
 		},
 		{
 			name:               "PBKDF2 with invalid underlying hash",
-			algType:            types.NewType(types.PBKDF2, "invalidhash"),
+			algSpec:            types.New(types.PBKDF2, "invalidhash"),
 			config:             DefaultConfig(),
 			expectedUnderlying: "",
 			expectedErr:        true,
 		},
 		{
 			name:               "Invalid SaltLength",
-			algType:            types.NewType(types.PBKDF2),
+			algSpec:            types.New(types.PBKDF2),
 			config:             &types.Config{SaltLength: 4}, // Less than 8
 			expectedUnderlying: "",
 			expectedErr:        true,
@@ -66,14 +66,14 @@ func TestNewPBKDF2(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewPBKDF2(tt.algType, tt.config)
+			c, err := NewPBKDF2(tt.algSpec, tt.config)
 			if (err != nil) != tt.expectedErr {
 				t.Errorf("NewPBKDF2() error = %v, expectedErr %v", err, tt.expectedErr)
 			}
 			if !tt.expectedErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, types.PBKDF2, c.Type().Name)
-				assert.Equal(t, tt.expectedUnderlying, c.Type().Underlying)
+				assert.Equal(t, types.PBKDF2, c.Spec().Name)
+				assert.Equal(t, tt.expectedUnderlying, c.Spec().Underlying)
 			}
 		})
 	}
@@ -85,16 +85,16 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 
 	tests := []struct {
 		name                    string
-		algType                 types.Type
-		expectedResolvedAlgType types.Type
+		algSpec                 types.Spec
+		expectedResolvedAlgSpec types.Spec
 	}{
-		{name: "PBKDF2-SHA256", algType: types.NewType(types.PBKDF2_SHA256), expectedResolvedAlgType: types.NewType(types.PBKDF2, types.SHA256)},
-		{name: "PBKDF2-HMAC-SHA512", algType: types.NewType(types.PBKDF2, types.HMAC_SHA512), expectedResolvedAlgType: types.NewType(types.PBKDF2, types.HMAC_SHA512)},
+		{name: "PBKDF2-SHA256", algSpec: types.New(types.PBKDF2_SHA256), expectedResolvedAlgSpec: types.New(types.PBKDF2, types.SHA256)},
+		{name: "PBKDF2-HMAC-SHA512", algSpec: types.New(types.PBKDF2, types.HMAC_SHA512), expectedResolvedAlgSpec: types.New(types.PBKDF2, types.HMAC_SHA512)},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pbkdf2Alg, err := NewPBKDF2(tt.algType, DefaultConfig())
+			pbkdf2Alg, err := NewPBKDF2(tt.algSpec, DefaultConfig())
 			assert.NoError(t, err)
 			assert.NotNil(t, pbkdf2Alg)
 
@@ -102,10 +102,10 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			hashedParts, err := pbkdf2Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.expectedResolvedAlgType.String(), hashedParts.Algorithm)
-			parsedAlgType := hashedParts.Algorithm
-			assert.Equal(t, tt.expectedResolvedAlgType.Name, parsedAlgType.Name)
-			assert.Equal(t, tt.expectedResolvedAlgType.Underlying, parsedAlgType.Underlying)
+			assert.Equal(t, tt.expectedResolvedAlgSpec.String(), hashedParts.Algorithm)
+			parsedAlgSpec := hashedParts.Algorithm
+			assert.Equal(t, tt.expectedResolvedAlgSpec.Name, parsedAlgSpec.Name)
+			assert.Equal(t, tt.expectedResolvedAlgSpec.Underlying, parsedAlgSpec.Underlying)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt
@@ -120,7 +120,7 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			// Test Hash without salt (SaltLength 0) - should return error
 			cfg := DefaultConfig()
 			cfg.SaltLength = 0 // This should cause an error due to ConfigValidator
-			pbkdf2NoSalt, err := NewPBKDF2(tt.algType, cfg)
+			pbkdf2NoSalt, err := NewPBKDF2(tt.algSpec, cfg)
 			assert.Error(t, err)
 			assert.Nil(t, pbkdf2NoSalt)
 		})

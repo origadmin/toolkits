@@ -13,21 +13,45 @@ import (
 	"github.com/goexts/generic/configure"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// Codec implements a generic hash codec
-type Codec struct {
+// Encoder defines the interface for hash encoding operations
+type Encoder interface {
+	// Encode encodes salt and hash into a string
+	Encode(parts *types.HashParts) (string, error)
+}
+
+// Decoder defines the interface for hash decoding operations
+type Decoder interface {
+	// Decode decodes a string into hash parts
+	Decode(encoded string) (*types.HashParts, error)
+}
+
+// Version defines the interface for version operations
+type Version interface {
+	// Version returns the version of the codec
+	Version() string
+}
+
+// codec defines the interface for hash encoding and decoding operations
+type Codec interface {
+	Encoder
+	Decoder
+	Version
+}
+
+// codec implements a generic hash codec
+type codec struct {
 	version string
 }
 
-func (c *Codec) Version() string {
+func (c *codec) Version() string {
 	return c.version
 }
 
 // Encode implements the core encoding method
-func (c *Codec) Encode(parts *types.HashParts) (string, error) {
+func (c *codec) Encode(parts *types.HashParts) (string, error) {
 	if parts.Version == "" {
 		parts.Version = c.version
 	}
@@ -42,13 +66,13 @@ func (c *Codec) Encode(parts *types.HashParts) (string, error) {
 }
 
 // Decode implements the core decoding method
-func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
+func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 	parts := strings.Split(encoded, types.CodecSeparator)
 	if len(parts) != 6 {
 		return nil, errors.ErrInvalidHashFormat
 	}
 
-	algorithm, err := types.ParseType(parts[1])
+	algorithm, err := types.Parse(parts[1])
 	if err != nil {
 		return nil, err
 	}
@@ -81,19 +105,19 @@ func (c *Codec) Decode(encoded string) (*types.HashParts, error) {
 }
 
 // NewCodec creates a new codec
-func NewCodec(opts ...Option) interfaces.Codec {
+func NewCodec(opts ...Option) Codec {
 	return configure.Apply(
-		&Codec{
+		&codec{
 			version: types.DefaultVersion,
 		}, opts)
 }
 
 // Option defines configuration options for the codec
-type Option func(*Codec)
+type Option func(*codec)
 
 // WithVersion sets the version number
 func WithVersion(version string) Option {
-	return func(c *Codec) {
+	return func(c *codec) {
 		c.version = version
 	}
 }

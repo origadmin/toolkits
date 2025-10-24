@@ -12,14 +12,14 @@ import (
 )
 
 // ----------------------------------------------------------------------------
-// Types
+// Specs
 // ----------------------------------------------------------------------------
 
-// Type represents a structured hash algorithm definition.
+// Spec represents a structured hash algorithm specification.
 // It separates the main algorithm from its underlying hash function,
 // allowing for clear and extensible handling of composite algorithms
 // like HMAC and PBKDF2.
-type Type struct {
+type Spec struct {
 	// Name is the main algorithm's name, e.g., "hmac", "pbkdf2", "sha256".
 	// This is the key field for logical dispatch.
 	Name string
@@ -31,51 +31,51 @@ type Type struct {
 	Underlying string
 }
 
-// String returns the string representation of the type.
-func (t Type) String() string {
-	if t.Underlying != "" {
-		return t.Name + "-" + t.Underlying
+// String returns the string representation of the spec.
+func (s Spec) String() string {
+	if s.Underlying != "" {
+		return s.Name + "-" + s.Underlying
 	}
-	return t.Name
+	return s.Name
 }
 
-// Is compares two Type instances for equality.
-func (t Type) Is(t2 Type) bool {
-	return t.Name == t2.Name && t.Underlying == t2.Underlying
+// Is compares two Spec instances for equality.
+func (s Spec) Is(s2 Spec) bool {
+	return s.Name == s2.Name && s.Underlying == s2.Underlying
 }
 
-// ParseType parses an algorithm string into its structured Type.
+// Parse parses an algorithm string into its structured Spec.
 // It handles common aliases and composite algorithm formats.
-func ParseType(algorithm string) (Type, error) {
+func Parse(algorithm string) (Spec, error) {
 	algorithm = strings.ToLower(algorithm)
 
 	parts := strings.SplitN(algorithm, "-", 2)
-	var t Type
+	var s Spec
 	if len(parts) == 2 {
 		// This is a composite algorithm like "hmac-sha256" or "pbkdf2-sha512"
-		t = Type{Name: parts[0], Underlying: parts[1]}
+		s = Spec{Name: parts[0], Underlying: parts[1]}
 	} else {
 		// This is a simple algorithm like "sha256"
-		t = Type{Name: algorithm}
+		s = Spec{Name: algorithm}
 	}
 
-	// If no specific resolver is registered, return the parsed type as is.
-	return t, nil
+	// If no specific resolver is registered, return the parsed spec as is.
+	return s, nil
 }
 
-// NewType creates a new Type instance with the specified name and underlying hash.
-func NewType(name string, underlying ...string) Type {
-	t := Type{Name: name}
+// New creates a new Spec instance with the specified name and underlying hash.
+func New(name string, underlying ...string) Spec {
+	s := Spec{Name: name}
 	if len(underlying) > 0 {
-		t.Underlying = underlying[0]
+		s.Underlying = underlying[0]
 	}
-	return t
+	return s
 }
 
-// TypeHash is a helper function that might need to be refactored
-// depending on how stdhash.ParseHash is updated to handle the new Type struct.
+// GetHash is a helper function that might need to be refactored
+// depending on how stdhash.ParseHash is updated to handle the new Spec struct.
 // For now, it assumes subAlg is a simple string.
-func TypeHash(subAlg string) (stdhash.Hash, error) {
+func GetHash(subAlg string) (stdhash.Hash, error) {
 	h, err := stdhash.ParseHash(subAlg)
 	if err != nil {
 		return 0, fmt.Errorf("unsupported hash type: %s", subAlg)

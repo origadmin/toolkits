@@ -9,16 +9,16 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// ResolveType resolves the Type for PBKDF2, providing a default underlying hash if not specified.
-func ResolveType(algType types.Type) (types.Type, error) {
-	algType.Name = algType.String()
-	algType.Underlying = ""
-	
+// ResolveSpec resolves the Spec for PBKDF2, providing a default underlying hash if not specified.
+func ResolveSpec(algSpec types.Spec) (types.Spec, error) {
+	algSpec.Name = algSpec.String()
+	algSpec.Underlying = ""
+
 	// Map generic SHA3 name to default version SHA3-256
-	switch algType.Name {
+	switch algSpec.Name {
 	case types.SHA3:
-		algType.Name = types.SHA3_256
+		algSpec.Name = types.SHA3_256
 	}
-	
-	return algType, nil
+
+	return algSpec, nil
 }

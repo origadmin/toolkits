@@ -21,27 +21,26 @@ type KeyFunc func(password []byte, salt []byte, time uint32, memory uint32, thre
 
 // Argon2 implements the Argon2 hashing algorithm
 type Argon2 struct {
-	algType types.Type
+	algSpec types.Spec
 	params  *Params
 	config  *types.Config
 	keyFunc KeyFunc
 }
 
 var (
-	argon2Type = types.Type{Name: types.ARGON2}
-	argon2i    = types.Type{Name: types.ARGON2i}
-	argon2id   = types.Type{Name: types.ARGON2id}
+	argon2Spec = types.Spec{Name: types.ARGON2}
+	argon2i    = types.Spec{Name: types.ARGON2i}
+	argon2id   = types.Spec{Name: types.ARGON2id}
 )
 
-func (c *Argon2) Type() types.Type {
-	return c.algType
+func (c *Argon2) Spec() types.Spec {
+	return c.algSpec
 }
 
 // DefaultConfig returns the default configuration for Argon2
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength:  16,
-		ParamConfig: DefaultParams().String(),
+		SaltLength: 16,
 	}
 }
 
@@ -64,12 +63,12 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 		c.params.Threads,
 		c.params.KeyLength,
 	)
-	return types.NewHashPartsFull(c.algType, hashBytes, salt, c.params.ToMap()), nil
+	return types.NewHashPartsFull(c.algSpec, hashBytes, salt, c.params.ToMap()), nil
 }
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Type, so no need to parse it again.
+	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
 	// We can directly use parts.Algorithm for comparison and passing to ParseKeyFunc.
 	keyFunc := ParseKeyFunc(parts.Algorithm)
 	if keyFunc == nil {
@@ -97,8 +96,8 @@ func (c *Argon2) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func ParseKeyFunc(algType types.Type) KeyFunc {
-	switch algType.Name {
+func ParseKeyFunc(algSpec types.Spec) KeyFunc {
+	switch algSpec.Name {
 	case types.ARGON2id:
 		return argon2.IDKey
 	case types.ARGON2i:
@@ -109,35 +108,27 @@ func ParseKeyFunc(algType types.Type) KeyFunc {
 }
 
 func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
-	return NewArgon2(argon2Type, config)
+	return NewArgon2(argon2Spec, config)
 }
 
 // NewArgon2 creates a new Argon2 crypto instance
-func NewArgon2(algType types.Type, config *types.Config) (interfaces.Cryptographic, error) {
-	// Use default config if provided config is nil
-	if config == nil {
-		config = DefaultConfig()
-	}
-
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+func NewArgon2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	if err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
 
-	keyFunc := ParseKeyFunc(algType)
-	algType.Underlying = ""
+	keyFunc := ParseKeyFunc(algSpec)
+	algSpec.Underlying = ""
 	if keyFunc == nil {
-		return nil, fmt.Errorf("unsupported argon2 type: %s", algType.String())
+		return nil, fmt.Errorf("unsupported argon2 type: %s", algSpec.String())
 	}
 
 	return &Argon2{
-		algType: algType,
-		params:  v.Params(),
+		algSpec: algSpec,
+		params:  prep.Params,
 		keyFunc: keyFunc,
-		config:  config,
+		config:  prep.Config,
 	}, nil
 }
 

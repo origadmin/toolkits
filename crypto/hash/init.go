@@ -21,21 +21,21 @@ import (
 )
 
 type algorithm struct {
-	algType       types.Type // Added to store the algorithm type
+	algSpec       types.Spec // Added to store the algorithm type
 	creator       interfaces.AlgorithmCreator
 	defaultConfig interfaces.AlgorithmConfig
-	resolver      interfaces.TypeResolver // New field: Resolver for this algorithm type
+	resolver      interfaces.SpecResolver // New field: Resolver for this algorithm type
 }
 
-// defaultTypeResolver is a pass-through resolver for algorithms that don't need special resolution.
-var defaultTypeResolver interfaces.TypeResolver = interfaces.AlgorithmResolver(func(algType types.Type) (types.Type, error) {
-	algType.Name = algType.String()
-	algType.Underlying = ""
-	return algType, nil
+// defaultSpecResolver is a pass-through resolver for algorithms that don't need special resolution.
+var defaultSpecResolver interfaces.SpecResolver = interfaces.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
+	algSpec.Name = algSpec.String()
+	algSpec.Underlying = ""
+	return algSpec, nil
 })
 
 func wrapCreator(oldCreator func(*types.Config) (interfaces.Cryptographic, error)) interfaces.AlgorithmCreator {
-	return func(_ types.Type, cfg *types.Config) (interfaces.Cryptographic, error) {
+	return func(_ types.Spec, cfg *types.Config) (interfaces.Cryptographic, error) {
 		return oldCreator(cfg)
 	}
 }
@@ -44,154 +44,154 @@ var (
 	// algorithmMap stores all supported hash algorithmMap, keyed by their main name (string)
 	algorithmMap = map[string]algorithm{
 		types.ARGON2: {
-			algType:       types.NewType(types.ARGON2),
+			algSpec:       types.New(types.ARGON2),
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(argon2.ResolveType), // 使用argon2自定义解析器
+			resolver:      interfaces.AlgorithmResolver(argon2.ResolveSpec), // 使用argon2自定义解析器
 		},
 		types.ARGON2i: {
-			algType:       types.NewType(types.ARGON2i),
+			algSpec:       types.New(types.ARGON2i),
 			creator:       wrapCreator(argon2.NewArgon2i),
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.ARGON2id: {
-			algType:       types.NewType(types.ARGON2id),
+			algSpec:       types.New(types.ARGON2id),
 			creator:       wrapCreator(argon2.NewArgon2id),
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.BCRYPT: {
-			algType:       types.NewType(types.BCRYPT),
+			algSpec:       types.New(types.BCRYPT),
 			creator:       wrapCreator(bcrypt.NewBcrypt),
 			defaultConfig: bcrypt.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.BLAKE2b: {
-			algType:       types.NewType(types.BLAKE2b),
+			algSpec:       types.New(types.BLAKE2b),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(blake2.ResolveType),
+			resolver:      interfaces.AlgorithmResolver(blake2.ResolveSpec),
 		},
 		types.BLAKE2s: {
-			algType:       types.NewType(types.BLAKE2s),
+			algSpec:       types.New(types.BLAKE2s),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(blake2.ResolveType),
+			resolver:      interfaces.AlgorithmResolver(blake2.ResolveSpec),
 		},
 		types.MD5: {
-			algType:       types.NewType(types.MD5),
+			algSpec:       types.New(types.MD5),
 			creator:       wrapCreator(md5.NewMD5),
 			defaultConfig: md5.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SCRYPT: {
-			algType:       types.NewType(types.SCRYPT),
+			algSpec:       types.New(types.SCRYPT),
 			creator:       wrapCreator(scrypt.NewScrypt),
 			defaultConfig: scrypt.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA1: {
-			algType:       types.NewType(types.SHA1),
+			algSpec:       types.New(types.SHA1),
 			creator:       wrapCreator(sha.NewSha1),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA224: {
-			algType:       types.NewType(types.SHA224),
+			algSpec:       types.New(types.SHA224),
 			creator:       wrapCreator(sha.NewSha224),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA256: {
-			algType:       types.NewType(types.SHA256),
+			algSpec:       types.New(types.SHA256),
 			creator:       wrapCreator(sha.NewSha256),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA512: {
-			algType:       types.NewType(types.SHA512),
+			algSpec:       types.New(types.SHA512),
 			creator:       wrapCreator(sha.NewSha512),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA3: {
-			algType:       types.NewType(types.SHA3),
+			algSpec:       types.New(types.SHA3),
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(sha.ResolveType),
+			resolver:      interfaces.AlgorithmResolver(sha.ResolveSpec),
 		},
 		types.SHA3_224: {
-			algType:       types.NewType(types.SHA3_224),
+			algSpec:       types.New(types.SHA3_224),
 			creator:       wrapCreator(sha.NewSha3224),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA3_256: {
-			algType:       types.NewType(types.SHA3_256),
+			algSpec:       types.New(types.SHA3_256),
 			creator:       wrapCreator(sha.NewSha3256),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA3_384: {
-			algType:       types.NewType(types.SHA3_384),
+			algSpec:       types.New(types.SHA3_384),
 			creator:       wrapCreator(sha.NewSha3384),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA3_512: {
-			algType:       types.NewType(types.SHA3_512),
+			algSpec:       types.New(types.SHA3_512),
 			creator:       wrapCreator(sha.NewSha3512),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA384: {
-			algType:       types.NewType(types.SHA384),
+			algSpec:       types.New(types.SHA384),
 			creator:       wrapCreator(sha.NewSha384),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA512_224: {
-			algType:       types.NewType(types.SHA512_224),
+			algSpec:       types.New(types.SHA512_224),
 			creator:       wrapCreator(sha.NewSha3512224),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA512_256: {
-			algType:       types.NewType(types.SHA512_256),
+			algSpec:       types.New(types.SHA512_256),
 			creator:       wrapCreator(sha.NewSha3512256),
 			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultTypeResolver,
+			resolver:      defaultSpecResolver,
 		},
 		types.HMAC: { // HMAC creator will now handle the Underlying type
-			algType:       types.NewType(types.HMAC),
+			algSpec:       types.New(types.HMAC),
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(hmac.ResolveType), // 使用hmac自定义解析器
+			resolver:      interfaces.AlgorithmResolver(hmac.ResolveSpec), // 使用hmac自定义解析器
 		},
 		types.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
-			algType:       types.NewType(types.PBKDF2),
+			algSpec:       types.New(types.PBKDF2),
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(pbkdf2.ResolveType), // 使用pbkdf2自定义解析器
+			resolver:      interfaces.AlgorithmResolver(pbkdf2.ResolveSpec), // 使用pbkdf2自定义解析器
 		},
 		types.RIPEMD: {
-			algType:       types.NewType(types.RIPEMD),
+			algSpec:       types.New(types.RIPEMD),
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(ripemd160.ResolveType), // 使用ripemd160自定义解析器
+			resolver:      interfaces.AlgorithmResolver(ripemd160.ResolveSpec), // 使用ripemd160自定义解析器
 		},
 		types.CRC32: {
-			algType:       types.NewType(types.CRC32),
+			algSpec:       types.New(types.CRC32),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(crc.ResolveType), // 使用crc自定义解析器
+			resolver:      interfaces.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
 		},
 		types.CRC64: {
-			algType:       types.NewType(types.CRC64),
+			algSpec:       types.New(types.CRC64),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(crc.ResolveType), // 使用crc自定义解析器
+			resolver:      interfaces.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
 		},
 	}
 )

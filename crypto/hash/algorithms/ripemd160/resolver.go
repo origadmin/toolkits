@@ -9,9 +9,9 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// ResolveType resolves the Type for PBKDF2, providing a default underlying hash if not specified.
-func ResolveType(algType types.Type) (types.Type, error) {
-	algType.Name = types.RIPEMD160
-	algType.Underlying = ""
-	return algType, nil
+// ResolveSpec resolves the Spec for PBKDF2, providing a default underlying hash if not specified.
+func ResolveSpec(algSpec types.Spec) (types.Spec, error) {
+	algSpec.Name = types.RIPEMD160
+	algSpec.Underlying = ""
+	return algSpec, nil
 }
