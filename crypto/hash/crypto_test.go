@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -180,7 +181,14 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 	}, {
 		algName:         types.PBKDF2_SHA3_512,
 		expectedAlgName: types.PBKDF2_SHA3_512,
-	}}
+	}, {
+		algName:         "sha-256",
+		expectedAlgName: types.SHA256,
+	}, {
+		algName:         "sha-512",
+		expectedAlgName: types.SHA512,
+	},
+	}
 
 	// 合并所有测试用例
 	allAlgorithms := append(baseAlgorithms, compositeAlgorithms...)
@@ -190,8 +198,8 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 		t.Run(tc.algName, func(t *testing.T) {
 			// 测试创建算法实例
 			crypto, err := NewCrypto(tc.algName)
-			assert.NoError(t, err, "Failed to create crypto for algorithm: %s", tc.algName)
-			assert.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
+			require.NoError(t, err, "Failed to create crypto for algorithm: %s", tc.algName)
+			require.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
 
 			// 测试算法类型是否正确
 			assert.Equal(t, tc.expectedAlgName, crypto.Spec().String(), "Unexpected algorithm name for %s", tc.algName)
@@ -271,8 +279,8 @@ func TestNewCryptoWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.algName+"_with_options", func(t *testing.T) {
 			crypto, err := NewCrypto(tc.algName, tc.options...)
-			assert.NoError(t, err, "Failed to create crypto with options for algorithm: %s", tc.algName)
-			assert.NotNil(t, crypto, "Crypto instance is nil with options for algorithm: %s", tc.algName)
+			require.NoError(t, err, "Failed to create crypto with options for algorithm: %s", tc.algName)
+			require.NotNil(t, crypto, "Crypto instance is nil with options for algorithm: %s", tc.algName)
 
 			// 测试带选项的哈希和验证功能
 			password := "testpassword"

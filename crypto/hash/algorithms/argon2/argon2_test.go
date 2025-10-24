@@ -93,7 +93,7 @@ func TestParams_ParseAndString(t *testing.T) {
 				ParamConfig: tt.params,
 			}, &Params{})
 			if (err != nil) != tt.wantErr {
-				t.Errorf("parseParams() error = %p, wantErr %p", err, tt.wantErr)
+				t.Errorf("parseParams() error = %p, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.wantErr {
@@ -117,7 +117,8 @@ func TestParams_ParseAndString(t *testing.T) {
 				}
 
 				if !reflect.DeepEqual(p.Params, p2.Params) {
-					t.Errorf("Params after String()->Parse roundtrip do not match original. got %+p, want %+p", p2.Params, p.Params)
+					t.Errorf("Params after String()->Parse roundtrip do not match original. got %+v, want %+v",
+						p2.Params, p.Params)
 				}
 			}
 		})

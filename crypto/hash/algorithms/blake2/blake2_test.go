@@ -79,7 +79,7 @@ func TestNewBlake2(t *testing.T) {
 			}
 			if !tt.wantErr {
 				assert.NotNil(t, c)
-				assert.Equal(t, tt.expectedAlgName, c.Spec().Name)
+				assert.Equal(t, tt.expectedAlgName, c.Spec())
 			}
 		})
 	}

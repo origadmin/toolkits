@@ -104,9 +104,14 @@ func NewBlake2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 		config = DefaultConfig()
 	}
 
-	v, err := validator.ValidateParams(config, DefaultParams())
-	if err != nil {
-		return nil, fmt.Errorf("invalid blake2 config: %v", err)
+	p := DefaultParams()
+	if algSpec.Name == types.BLAKE2s_128 {
+		v, err := validator.ValidateParams(config, DefaultParams())
+		if err != nil {
+			return nil, fmt.Errorf("invalid blake2s128 config: %v", err)
+		}
+		p = v.Params
+		config = v.Config
 	}
 
 	hashFunc, ok := hashFuncs[algSpec.Name]
@@ -115,8 +120,8 @@ func NewBlake2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 	}
 	return &Blake2{
 		algSpec:  algSpec,
-		params:   v.Params,
-		config:   v.Config,
+		params:   p,
+		config:   config,
 		hashFunc: hashFunc,
 	}, nil
 }

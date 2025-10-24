@@ -23,12 +23,13 @@ func (p *Params) IsNil() bool {
 }
 
 func (p *Params) Validate(config *types.Config) error {
-	if config.SaltLength < 8 {
-		return fmt.Errorf("salt length must be at least 8 bytes")
-	}
-	//if len(p.Key) < MinKeyLength || len(p.Key) > MaxKeyLength {
-	//	return fmt.Errorf("invalid key length: %d", len(p.Key))
+
+	//if config.SaltLength < 8 {
+	//	return fmt.Errorf("salt length must be at least 8 bytes")
 	//}
+	if len(p.Key) < MinKeyLength || len(p.Key) > MaxKeyLength {
+		return fmt.Errorf("invalid key length: %d", len(p.Key))
+	}
 	return nil
 }
 
@@ -68,9 +69,16 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	return params, nil
 }
 
-func WithKey(key []byte) func(p *Params) {
-	return func(p *Params) {
-		p.Key = key
+func WithKey(key []byte) types.Option {
+	p := &Params{
+		Key: key,
+	}
+	return func(config *types.Config) {
+		if config.ParamConfig == "" {
+			config.ParamConfig = p.String()
+		} else {
+			config.ParamConfig = hashcodec.MergeParams(config.ParamConfig, p.ToMap())
+		}
 	}
 }
 

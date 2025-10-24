@@ -11,8 +11,8 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -55,7 +55,7 @@ func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	v, err := validator.ValidateParams(config, DefaultParams())
+	cfg, err := validator.ValidateConfig(config)
 	if err != nil {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
@@ -66,14 +66,14 @@ func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 	}
 
 	return &MD5{
-		config:   v.Config,
+		config:   cfg,
 		hashHash: hashHash,
 	}, nil
 }
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
+		SaltLength: types.DefaultSaltLength,
 	}
 }
 

@@ -156,3 +156,17 @@ func EncodeParams(params map[string]string) string {
 	}
 	return strings.Join(parts, types.ParamSeparator)
 }
+
+func MergeParams(sources string, params map[string]string) string {
+	if sources == "" {
+		return EncodeParams(params)
+	}
+	decodedParams, err := DecodeParams(sources)
+	if err != nil {
+		return EncodeParams(params)
+	}
+	for k, v := range params {
+		decodedParams[k] = v
+	}
+	return EncodeParams(decodedParams)
+}
