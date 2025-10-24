@@ -17,7 +17,7 @@ import (
 
 type internalFactory interface {
 	// create now accepts types.Spec directly
-	create(algSpec types.Spec) (interfaces.Cryptographic, error)
+	create(algSpec types.Spec, opts ...Option) (interfaces.Cryptographic, error)
 }
 
 type algorithmFactory struct {
@@ -39,7 +39,7 @@ func getFactory() internalFactory {
 	return defaultFactory
 }
 
-func (f *algorithmFactory) create(algSpec types.Spec) (interfaces.Cryptographic, error) {
+func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (interfaces.Cryptographic, error) {
 	// First, find the algorithm entry based on the initial algSpec.Name
 	// This is needed to get the specific resolver for this algorithm.
 	algEntry, exists := algorithmMap[algSpec.Name]
@@ -79,8 +79,8 @@ func (f *algorithmFactory) create(algSpec types.Spec) (interfaces.Cryptographic,
 	// For simplicity and current design, we'll stick with the initial algEntry.
 
 	// Always create with default config for verification
-	defaultConfig := algEntry.defaultConfig()
-	newAlg, err := algEntry.creator(resolvedAlgSpec, defaultConfig) // Pass resolvedAlgSpec
+	cfg := f.createConfig(algEntry, opts...)
+	newAlg, err := algEntry.creator(resolvedAlgSpec, cfg) // Pass resolvedAlgSpec
 	if err != nil {
 		return nil, fmt.Errorf("failed to create algorithm %s: %w", resolvedAlgSpec.String(), err)
 	}

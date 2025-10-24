@@ -68,7 +68,8 @@ func (c *crypto) Verify(hashed, password string) error {
 
 	// Get algorithm instance from global factory based on the decoded algorithm
 	factory := getFactory()
-	cryptographic, err := factory.create(parts.Algorithm) // Pass types.Spec directly
+	cryptographic, err := factory.create(parts.Algorithm, WithEncodedParams(parts.Params,
+		codec.EncodeParams)) // Pass types.Spec directly
 	if err != nil {
 		return err
 	}
