@@ -1,13 +1,17 @@
 package sha
 
 import (
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	hashcodec "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// Params represents parameters for Scrypt algorithm
+// Params represents parameters for SHA algorithms
 type Params struct {
+}
+
+func (p *Params) IsNil() bool {
+	return p == nil
 }
 
 func (p *Params) Validate(config *types.Config) error {
@@ -36,7 +40,7 @@ func FromParams(m map[string]string) (params *Params, err error) {
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	return codecPkg.EncodeParams(p.ToMap())
+	return hashcodec.EncodeParams(p.ToMap())
 }
 
 // ToMap converts Params to a map[string]string

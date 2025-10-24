@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	hashcodec "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 )
 
 const (
@@ -16,6 +16,10 @@ const (
 
 type Params struct {
 	Key []byte
+}
+
+func (p *Params) IsNil() bool {
+	return p == nil
 }
 
 func (p *Params) Validate(config *types.Config) error {
@@ -49,7 +53,7 @@ func (p *Params) ToMap() map[string]string {
 }
 
 func (p *Params) String() string {
-	return codecPkg.EncodeParams(p.ToMap())
+	return hashcodec.EncodeParams(p.ToMap())
 }
 
 func FromMap(m map[string]string) (params *Params, err error) {
@@ -73,3 +77,5 @@ func WithKey(key []byte) func(p *Params) {
 func DefaultParams() *Params {
 	return &Params{}
 }
+
+var _ validator.Parameters = (*Params)(nil)

@@ -12,7 +12,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -43,20 +43,24 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 
 // NewHMAC creates a new HMAC crypto instance
 func NewHMAC(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
-	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	// Ensure algorithm-specific default config is applied when caller passes nil.
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	v, err := validator.ValidateParams(config, DefaultParams())
 	if err != nil {
 		return nil, fmt.Errorf("invalid hmac config: %v", err)
 	}
-	// Removed: algSpec, err := ResolveSpec(algSpec)
-	// Removed: if err != nil { return nil, err }
-	hashHash, err := types.SpecHash(algSpec.Underlying)
+
+	hashHash, err := types.Hash(algSpec.Underlying)
 	if err != nil {
 		return nil, err
 	}
 
 	return &HMAC{
 		algSpec:  algSpec,
-		config:   prep.Config,
+		config:   v.Config,
 		hashHash: hashHash,
 	}, nil
 }
@@ -96,7 +100,7 @@ func (c *HMAC) Verify(parts *types.HashParts, password string) error {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.SpecHash(resolvedAlgSpec.Underlying)
+	hashHash, err := types.Hash(resolvedAlgSpec.Underlying)
 	if err != nil {
 		return err
 	}

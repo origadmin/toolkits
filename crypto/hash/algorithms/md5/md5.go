@@ -11,7 +11,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -55,18 +55,18 @@ func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	v := validator.WithParams(&ConfigValidator{})
-	if err := v.Validate(config); err != nil {
+	v, err := validator.ValidateParams(config, DefaultParams())
+	if err != nil {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
 
-	hashHash, err := types.SpecHash(md5AlgSpec.Name)
+	hashHash, err := types.Hash(md5AlgSpec.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	return &MD5{
-		config:   config,
+		config:   v.Config,
 		hashHash: hashHash,
 	}, nil
 }
@@ -88,12 +88,12 @@ func (c *MD5) Hash(password string) (*types.HashParts, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	hash := c.hashHash.New()
-	hash.Write([]byte(password))
+	h := c.hashHash.New()
+	h.Write([]byte(password))
 	if len(salt) > 0 {
-		hash.Write(salt)
+		h.Write(salt)
 	}
-	hashBytes := hash.Sum(nil)
+	hashBytes := h.Sum(nil)
 	return types.NewHashPartsWithHashSalt(c.Spec(), hashBytes[:], salt), nil
 }
 
@@ -105,12 +105,12 @@ func (c *MD5) Verify(parts *types.HashParts, password string) error {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hash := c.hashHash.New()
-	hash.Write([]byte(password))
+	h := c.hashHash.New()
+	h.Write([]byte(password))
 	if len(parts.Salt) > 0 {
-		hash.Write(parts.Salt)
+		h.Write(parts.Salt)
 	}
-	hashBytes := hash.Sum(nil)
+	hashBytes := h.Sum(nil)
 	if subtle.ConstantTimeCompare(hashBytes[:], parts.Hash) != 1 {
 		return errors.ErrPasswordNotMatch
 	}

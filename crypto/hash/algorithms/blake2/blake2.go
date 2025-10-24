@@ -14,8 +14,8 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -99,26 +99,24 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 }
 
 func NewBlake2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
-	// Use default config if provided config is nil
+	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
-		config = types.DefaultConfig()
+		config = DefaultConfig()
 	}
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+
+	v, err := validator.ValidateParams(config, DefaultParams())
+	if err != nil {
 		return nil, fmt.Errorf("invalid blake2 config: %v", err)
 	}
-	// Removed: algSpec = must.Do(ResolveSpec(algSpec))
+
 	hashFunc, ok := hashFuncs[algSpec.Name]
 	if !ok {
 		return nil, fmt.Errorf("unsupported blake2 type for keyed hash: %s", algSpec.Name)
 	}
 	return &Blake2{
 		algSpec:  algSpec,
-		params:   v.Params(),
-		config:   config,
+		params:   v.Params,
+		config:   v.Config,
 		hashFunc: hashFunc,
 	}, nil
 }

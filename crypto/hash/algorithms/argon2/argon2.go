@@ -12,8 +12,8 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -40,7 +40,7 @@ func (c *Argon2) Spec() types.Spec {
 // DefaultConfig returns the default configuration for Argon2
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength: 16,
+		SaltLength: types.DefaultSaltLength,
 	}
 }
 
@@ -113,7 +113,12 @@ func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
 
 // NewArgon2 creates a new Argon2 crypto instance
 func NewArgon2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
-	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	// Ensure algorithm-specific default config is applied when caller passes nil.
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	v, err := validator.ValidateParams(config, DefaultParams())
 	if err != nil {
 		return nil, fmt.Errorf("invalid argon2 config: %v", err)
 	}
@@ -126,9 +131,9 @@ func NewArgon2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 
 	return &Argon2{
 		algSpec: algSpec,
-		params:  prep.Params,
+		params:  v.Params,
 		keyFunc: keyFunc,
-		config:  prep.Config,
+		config:  v.Config,
 	}, nil
 }
 

@@ -47,7 +47,7 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 // Verify implements the verify method
 func (c *CRC) Verify(parts *types.HashParts, password string) error {
 	// parts.Algorithm is already of type types.Spec. Use its Name field to get the hash.
-	hashHash, err := types.SpecHash(parts.Algorithm.Name)
+	hashHash, err := types.Hash(parts.Algorithm.Name)
 	if err != nil {
 		return err
 	}

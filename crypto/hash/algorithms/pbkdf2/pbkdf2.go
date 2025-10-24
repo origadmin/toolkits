@@ -16,7 +16,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -98,14 +98,15 @@ func getPRF(algSpec types.Spec) (func() hash.Hash, error) {
 
 // NewPBKDF2 creates a new PBKDF2 crypto instance
 func NewPBKDF2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
-	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	// Ensure algorithm-specific default config is applied when caller passes nil.
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	v, err := validator.ValidateParams(config, DefaultParams())
 	if err != nil {
 		return nil, fmt.Errorf("invalid pbkdf2 config: %v", err)
 	}
-
-	// Removed: resolvedAlgSpec, err := ResolveSpec(algSpec)
-	// Removed: if err != nil { return nil, err }
-	// Removed: algSpec = resolvedAlgSpec
 
 	prf, err := getPRF(algSpec)
 	if err != nil {
@@ -114,8 +115,8 @@ func NewPBKDF2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 
 	return &PBKDF2{
 		algSpec: algSpec,
-		params:  prep.Params,
-		config:  prep.Config,
+		params:  v.Params,
+		config:  v.Config,
 		prf:     prf,
 	}, nil
 }

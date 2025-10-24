@@ -14,6 +14,10 @@ type Config struct {
 	ParamConfig string `env:"HASH_PARAM_CONFIG"`
 }
 
+func (c *Config) String() string {
+	return fmt.Sprintf("SaltLength: %d, ParamConfig: %s", c.SaltLength, c.ParamConfig)
+}
+
 // Option is a function that modifies a Config
 type Option func(*Config)
 

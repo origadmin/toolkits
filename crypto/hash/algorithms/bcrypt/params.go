@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"strconv"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	hashcodec "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 )
 
 type Params struct {
 	Cost int
+}
+
+func (p *Params) IsNil() bool {
+	return p == nil
 }
 
 func (p *Params) Validate(config *types.Config) error {
@@ -46,7 +50,7 @@ func (p *Params) ToMap() map[string]string {
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	return codecPkg.EncodeParams(p.ToMap())
+	return hashcodec.EncodeParams(p.ToMap())
 }
 
 // FromMap parses Argon2 parameters from string
@@ -63,3 +67,5 @@ func DefaultParams() *Params {
 		Cost: types.DefaultCost,
 	}
 }
+
+var _ validator.Parameters = (*Params)(nil)

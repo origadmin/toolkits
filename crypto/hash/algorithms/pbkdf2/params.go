@@ -4,15 +4,24 @@ import (
 	"fmt"
 	"strconv"
 
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	hashcodec "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 )
 
 // Params represents parameters for PBKDF2 algorithm
 type Params struct {
 	Iterations int
 	KeyLength  uint32
+}
+
+func (p *Params) IsNil() bool {
+	return p == nil
+}
+
+func (p *Params) IsValid() bool {
+	return true
 }
 
 func (p *Params) Validate(config *types.Config) error {
@@ -52,7 +61,7 @@ func (p *Params) FromMap(params map[string]string) error {
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	return codecPkg.EncodeParams(p.ToMap())
+	return hashcodec.EncodeParams(p.ToMap())
 }
 
 // ToMap converts Params to a map[string]string
@@ -98,3 +107,5 @@ func DefaultParams() *Params {
 		KeyLength:  32,
 	}
 }
+
+var _ validator.Parameters = (*Params)(nil)

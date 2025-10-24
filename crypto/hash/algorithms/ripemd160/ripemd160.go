@@ -6,11 +6,13 @@ package ripemd160
 
 import (
 	"crypto/subtle"
+	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -65,8 +67,15 @@ func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	if config.SaltLength < 8 {
-		return nil, errors.ErrSaltLengthTooShort
+
+	cfg, err := validator.WithValidator(config, func(cfg *types.Config) error {
+		if cfg.SaltLength < 8 {
+			return errors.ErrSaltLengthTooShort
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("invalid ripemd160 config: %v", err)
 	}
 
 	hashHash, err := stdhash.ParseHash(ripemd160Spec.Name)
@@ -75,7 +84,7 @@ func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
 	}
 
 	return &RIPEMD160{
-		config:   config,
+		config:   cfg,
 		hashHash: hashHash,
 	}, nil
 }

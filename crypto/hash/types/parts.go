@@ -36,15 +36,15 @@ func (h *HashParts) WithParams(params map[string]string) *HashParts {
 	return h
 }
 
-// WithHash sets the hash bytes for the hash parts and returns the modified HashParts instance.
-func (h *HashParts) WithHash(hash []byte) *HashParts {
-	h.Hash = hash
-	return h
-}
-
 // WithVersion sets the version string for the hash parts and returns the modified HashParts instance.
 func (h *HashParts) WithVersion(version string) *HashParts {
 	h.Version = version
+	return h
+}
+
+// WithHash sets the hash bytes for the hash parts and returns the modified HashParts instance.
+func (h *HashParts) WithHash(hash []byte) *HashParts {
+	h.Hash = hash
 	return h
 }
 

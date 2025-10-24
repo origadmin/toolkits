@@ -159,6 +159,11 @@ func ParseHash(s string) (Hash, error) {
 	return 0, fmt.Errorf("unknown hash function: %s", s)
 }
 
+func IsHash(s string) bool {
+	_, err := ParseHash(s)
+	return err == nil
+}
+
 func registerHash(h Hash, name string, newFunc func() hash.Hash) {
 	UpdateHashFunc(h, newFunc)
 	hashNames[h] = name

@@ -12,7 +12,7 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -33,21 +33,19 @@ func (c *Scrypt) Spec() types.Spec {
 
 // NewScrypt creates a new Scrypt crypto instance
 func NewScrypt(config *types.Config) (interfaces.Cryptographic, error) {
+	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()
 	}
 
-	if config.ParamConfig == "" {
-		config.ParamConfig = DefaultParams().String()
-	}
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+	v, err := validator.ValidateParams(config, DefaultParams())
+	if err != nil {
 		return nil, fmt.Errorf("invalid scrypt param config: %v", err)
 	}
 
 	return &Scrypt{
-		params: v.Params(),
-		config: config,
+		params: v.Params,
+		config: v.Config,
 	}, nil
 }
 

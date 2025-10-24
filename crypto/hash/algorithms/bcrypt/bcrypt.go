@@ -9,8 +9,8 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -77,13 +77,19 @@ func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 }
 
 func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
-	prep, err := validator.Prepare(config, DefaultConfig, DefaultParams)
+	// Ensure algorithm-specific default config is applied when caller passes nil.
+	if config == nil {
+		config = DefaultConfig()
+	}
+
+	v, err := validator.ValidateParams(config, DefaultParams())
 	if err != nil {
 		return nil, err
 	}
+
 	return &Bcrypt{
-		params: prep.Params,
-		config: prep.Config,
+		params: v.Params,
+		config: v.Config,
 	}, nil
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/internal/validator"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -81,14 +81,16 @@ func (c *SHA) Verify(parts *types.HashParts, password string) error {
 
 // NewSHA creates a new SHA crypto instance
 func NewSHA(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()
 	}
-	// Removed: algSpec = must.Do(ResolveSpec(algSpec))
-	v := validator.WithParams(&Params{})
-	if err := v.Validate(config); err != nil {
+
+	v, err := validator.ValidateParams(config, DefaultParams())
+	if err != nil {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
+
 	hashHash, err := stdhash.ParseHash(algSpec.Name)
 	if err != nil {
 		return nil, err
@@ -96,7 +98,7 @@ func NewSHA(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic,
 
 	return &SHA{
 		algSpec:  algSpec,
-		config:   config,
+		config:   v.Config,
 		hashHash: hashHash,
 	}, nil
 }

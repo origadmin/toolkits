@@ -6,13 +6,17 @@
 package hmac
 
 import (
-	codecPkg "github.com/origadmin/toolkits/crypto/hash/codec"
+	hashcodec "github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// Params represents parameters for Argon2 algorithm
+// Params represents parameters for HMAC algorithm
 type Params struct {
+}
+
+func (p *Params) IsNil() bool {
+	return p == nil
 }
 
 func (p *Params) Validate(config *types.Config) error {
@@ -33,7 +37,7 @@ func (p *Params) FromMap(params map[string]string) error {
 
 // String returns the string representation of parameters
 func (p *Params) String() string {
-	return codecPkg.EncodeParams(p.ToMap())
+	return hashcodec.EncodeParams(p.ToMap())
 }
 
 // FromMap parses Argon2 parameters from string
