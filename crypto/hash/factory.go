@@ -89,7 +89,7 @@ func (f *algorithmFactory) create(algSpec types.Spec) (interfaces.Cryptographic,
 	return newAlg, nil
 }
 
-func (f *algorithmFactory) createConfig(algEntry algorithm, opts ...types.Option) *types.Config {
+func (f *algorithmFactory) createConfig(algEntry algorithm, opts ...Option) *types.Config {
 	cfg := &types.Config{}
 	if algEntry.defaultConfig != nil {
 		cfg = algEntry.defaultConfig()

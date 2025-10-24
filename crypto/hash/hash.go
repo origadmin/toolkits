@@ -60,7 +60,7 @@ func init() {
 }
 
 // UseCrypto updates the active cryptographic instance
-func UseCrypto(algName string, opts ...types.Option) error {
+func UseCrypto(algName string, opts ...Option) error {
 	if algName == "" {
 		return errors.ErrInvalidAlgorithm
 	}

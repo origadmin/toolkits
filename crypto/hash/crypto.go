@@ -89,7 +89,7 @@ func (c *crypto) Verify(hashed, password string) error {
 }
 
 // NewCrypto creates a new cryptographic instance
-func NewCrypto(algName string, opts ...types.Option) (Crypto, error) {
+func NewCrypto(algName string, opts ...Option) (Crypto, error) {
 	// 1. Parse the algorithm name string into a structured Spec
 	algSpec, err := types.Parse(algName)
 	if err != nil {

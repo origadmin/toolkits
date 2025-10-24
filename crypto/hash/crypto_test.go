@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -19,147 +20,194 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 	baseAlgorithms := []struct {
 		algName         string
 		expectedAlgName string
+		options         []Option
 	}{{
 		algName:         types.MD5,
 		expectedAlgName: types.MD5,
+		options:         nil,
 	}, {
 		algName:         types.SHA1,
 		expectedAlgName: types.SHA1,
+		options:         nil,
 	}, {
 		algName:         types.SHA224,
 		expectedAlgName: types.SHA224,
+		options:         nil,
 	}, {
 		algName:         types.SHA256,
 		expectedAlgName: types.SHA256,
+		options:         nil,
 	}, {
 		algName:         types.SHA384,
 		expectedAlgName: types.SHA384,
+		options:         nil,
 	}, {
 		algName:         types.SHA512,
 		expectedAlgName: types.SHA512,
+		options:         nil,
 	}, {
 		algName:         types.SHA3,
 		expectedAlgName: types.SHA3_256,
+		options:         nil,
 	}, {
 		algName:         types.SHA3_224,
 		expectedAlgName: types.SHA3_224,
+		options:         nil,
 	}, {
 		algName:         types.SHA3_256,
 		expectedAlgName: types.SHA3_256,
+		options:         nil,
 	}, {
 		algName:         types.SHA3_384,
 		expectedAlgName: types.SHA3_384,
+		options:         nil,
 	}, {
 		algName:         types.SHA3_512,
 		expectedAlgName: types.SHA3_512,
+		options:         nil,
 	}, {
 		algName:         types.SHA512_224,
 		expectedAlgName: types.SHA512_224,
+		options:         nil,
 	}, {
 		algName:         types.SHA512_256,
 		expectedAlgName: types.SHA512_256,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2b,
 		expectedAlgName: types.DefaultBLAKE2b,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2s,
 		expectedAlgName: types.DefaultBLAKE2s,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2b_256,
 		expectedAlgName: types.BLAKE2b_256,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2b_384,
 		expectedAlgName: types.BLAKE2b_384,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2b_512,
 		expectedAlgName: types.BLAKE2b_512,
+		options:         nil,
 	}, {
 		algName:         types.BLAKE2s_128,
 		expectedAlgName: types.BLAKE2s_128,
+		options:         []Option{blake2.WithKey([]byte("default-16-byte-key!!"))},
 	}, {
 		algName:         types.BLAKE2s_256,
 		expectedAlgName: types.BLAKE2s_256,
+		options:         []Option{blake2.WithKey([]byte("default-32-byte-key-for-blake2s-256!!"))},
 	}, {
 		algName:         types.ARGON2,
 		expectedAlgName: types.ARGON2i,
+		options:         nil,
 	}, {
 		algName:         types.ARGON2i,
 		expectedAlgName: types.ARGON2i,
+		options:         nil,
 	}, {
 		algName:         types.ARGON2id,
 		expectedAlgName: types.ARGON2id,
+		options:         nil,
 	}, {
 		algName:         types.BCRYPT,
 		expectedAlgName: types.BCRYPT,
+		options:         nil,
 	}, {
 		algName:         types.SCRYPT,
 		expectedAlgName: types.SCRYPT,
+		options:         nil,
 	}, {
 		algName:         types.RIPEMD,
 		expectedAlgName: types.RIPEMD160,
+		options:         nil,
 	}, {
 		algName:         types.RIPEMD160,
 		expectedAlgName: types.RIPEMD160,
+		options:         nil,
 	}, {
 		algName:         types.CRC32,
 		expectedAlgName: types.CRC32_ISO,
+		options:         nil,
 	}, {
 		algName:         types.CRC32_ISO,
 		expectedAlgName: types.CRC32_ISO,
+		options:         nil,
 	}, {
 		algName:         types.CRC32_CAST,
 		expectedAlgName: types.CRC32_CAST,
+		options:         nil,
 	}, {
 		algName:         types.CRC32_KOOP,
 		expectedAlgName: types.CRC32_KOOP,
+		options:         nil,
 	}, {
 		algName:         types.CRC64,
 		expectedAlgName: types.CRC64_ISO,
+		options:         nil,
 	}, {
 		algName:         types.CRC64_ISO,
 		expectedAlgName: types.CRC64_ISO,
+		options:         nil,
 	}, {
 		algName:         types.CRC64_ECMA,
 		expectedAlgName: types.CRC64_ECMA,
+		options:         nil,
 	}}
 
 	// 复合算法测试用例
 	compositeAlgorithms := []struct {
 		algName         string
 		expectedAlgName string
+		options         []Option
 	}{{
 		algName:         types.HMAC,
 		expectedAlgName: types.DefaultHMAC,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA1,
 		expectedAlgName: types.HMAC_SHA1,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA256,
 		expectedAlgName: types.HMAC_SHA256,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA384,
 		expectedAlgName: types.HMAC_SHA384,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA512,
 		expectedAlgName: types.HMAC_SHA512,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA3_224,
 		expectedAlgName: types.HMAC_SHA3_224,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA3_256,
 		expectedAlgName: types.HMAC_SHA3_256,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA3_384,
 		expectedAlgName: types.HMAC_SHA3_384,
+		options:         nil,
 	}, {
 		algName:         types.HMAC_SHA3_512,
 		expectedAlgName: types.HMAC_SHA3_512,
+		options:         nil,
 	}, {
 		algName:         types.PBKDF2,
 		expectedAlgName: types.DefaultPBKDF2,
+		options:         nil,
 	}, {
 		algName:         types.PBKDF2_SHA1,
 		expectedAlgName: types.PBKDF2_SHA1,
+		options:         nil,
 	}, {
 		algName:         types.PBKDF2_SHA256,
 		expectedAlgName: types.PBKDF2_SHA256,
@@ -197,7 +245,7 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 	for _, tc := range allAlgorithms {
 		t.Run(tc.algName, func(t *testing.T) {
 			// 测试创建算法实例
-			crypto, err := NewCrypto(tc.algName)
+			crypto, err := NewCrypto(tc.algName, tc.options...)
 			require.NoError(t, err, "Failed to create crypto for algorithm: %s", tc.algName)
 			require.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
 
@@ -245,33 +293,33 @@ func TestNewCryptoWithOptions(t *testing.T) {
 	// 测试带有选项的算法创建
 	testCases := []struct {
 		algName string
-		options []types.Option
+		options []Option
 	}{{
 		algName: types.ARGON2,
-		options: []types.Option{
-			types.WithSaltLength(32),
+		options: []Option{
+			WithSaltLength(32),
 			// Argon2的具体参数应该在其算法实现中处理
 		},
 	}, {
 		algName: types.BCRYPT,
-		options: []types.Option{
-			types.WithSaltLength(16),
+		options: []Option{
+			WithSaltLength(16),
 			// Bcrypt的具体参数应该在其算法实现中处理
 		},
 	}, {
 		algName: types.SHA256,
-		options: []types.Option{
-			types.WithSaltLength(24),
+		options: []Option{
+			WithSaltLength(24),
 		},
 	}, {
 		algName: types.HMAC_SHA256,
-		options: []types.Option{
-			types.WithSaltLength(32),
+		options: []Option{
+			WithSaltLength(32),
 		},
 	}, {
 		algName: types.PBKDF2_SHA256,
-		options: []types.Option{
-			types.WithSaltLength(24),
+		options: []Option{
+			WithSaltLength(24),
 			// PBKDF2的具体参数应该在其算法实现中处理
 		},
 	}}

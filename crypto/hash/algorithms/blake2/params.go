@@ -69,16 +69,13 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	return params, nil
 }
 
-func WithKey(key []byte) types.Option {
+func WithKey(key []byte) func(config *types.Config) {
 	p := &Params{
 		Key: key,
 	}
 	return func(config *types.Config) {
-		if config.ParamConfig == "" {
-			config.ParamConfig = p.String()
-		} else {
-			config.ParamConfig = hashcodec.MergeParams(config.ParamConfig, p.ToMap())
-		}
+		config.ParamConfig = p.String()
+		fmt.Printf("WithKey: %s\n", config.ParamConfig)
 	}
 }
 
