@@ -40,27 +40,24 @@ type crypto struct {
 
 var globalCodec = codec.NewCodec()
 
-// NewCrypto creates a new cryptographic instance.
-// It uses the default global factory to create schemes.
-func NewCrypto(defaultAlgName string, opts ...Option) (Crypto, error) {
-	spec, err := types.Parse(defaultAlgName)
-	if err != nil {
-		return nil, fmt.Errorf("hash: failed to parse default algorithm name: %w", err)
+// newCrypto is the internal core constructor for creating a Crypto instance.
+// It requires a factory to create schemes.
+func newCrypto(factory *Factory, defaultAlgName string, opts []Option) (Crypto, error) {
+	spec, exists := factory.GetSpec(defaultAlgName)
+	if !exists {
+		return nil, fmt.Errorf("hash: spec for algorithm '%s' not found or not registered", defaultAlgName)
 	}
 
-	// Get the default config with fallback mechanism. This will not return an error.
-	defaultCfg := defaultFactory.GetConfig(spec.Name)
+	defaultCfg := factory.GetConfig(spec.Name)
 	cfg := configure.Apply(defaultCfg, opts)
 
-	// Create the default scheme. If the algorithm is not registered,
-	// Create will return the appropriate error.
-	defaultAlg, err := defaultFactory.Create(spec, cfg)
+	defaultAlg, err := factory.Create(spec, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to create default scheme: %w", err)
 	}
 
 	return &crypto{
-		factory:           defaultFactory,
+		factory:           factory,
 		defaultAlg:        defaultAlg,
 		schemeCache:       make(map[string]scheme.Scheme),
 		verificationCache: cache.New(5*time.Minute, 10*time.Minute),

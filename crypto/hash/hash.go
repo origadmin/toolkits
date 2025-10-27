@@ -6,11 +6,11 @@
 package hash
 
 import (
-	"log/slog"
-	"os"
+	"fmt"
 	"sync"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -45,23 +45,25 @@ func (u *uninitializedCrypto) Verify(hashed, password string) error {
 	return errors.ErrHashModuleNotInitialized
 }
 
-func init() {
-	algStr := os.Getenv(types.ENV)
-	if algStr == "" {
-		algStr = types.DefaultSpec
-	}
+// --- Package-Level Convenience Functions ---
 
-	// Try to Create an encryption instance with the defined algorithm type
-	crypto, err := NewCrypto(algStr)
-	globalCryptoMutex.Lock()
-	defer globalCryptoMutex.Unlock()
-	if err != nil {
-		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
-		// If the hash module fails to initialize, use a no-op implementation
-		globalCrypto = &uninitializedCrypto{}
-	} else {
-		globalCrypto = crypto
-	}
+// Register is a convenience function that registers a factory to the default global factory.
+func Register(factory scheme.Factory, canonicalSpec types.Spec, aliases ...string) {
+	defaultFactory.Register(factory, canonicalSpec, aliases...)
+}
+
+// NewCrypto is the primary convenience function for creating a Crypto instance.
+// It uses the default global factory.
+func NewCrypto(defaultAlgName string, opts ...Option) (Crypto, error) {
+	// It calls the internal core constructor, injecting the defaultFactory.
+	return newCrypto(defaultFactory, defaultAlgName, opts)
+}
+
+// NewCryptoWithFactory creates a Crypto instance using a specific, provided factory.
+// This is useful for testing or creating isolated instances with different configurations.
+func NewCryptoWithFactory(factory *Factory, defaultAlgName string, opts ...Option) (Crypto, error) {
+	// It calls the internal core constructor with the provided factory.
+	return newCrypto(factory, defaultAlgName, opts)
 }
 
 // UseCrypto updates the active cryptographic instance
@@ -69,9 +71,9 @@ func UseCrypto(algName string, opts ...Option) error {
 	if algName == "" {
 		return errors.ErrInvalidAlgorithm
 	}
-	algSpec, err := types.Parse(algName)
-	if err != nil {
-		return err
+	algSpec, exists := defaultFactory.GetSpec(algName)
+	if !exists {
+		return fmt.Errorf("hash: spec for algorithm '%s' not found", algName)
 	}
 
 	globalCryptoMutex.RLock()
@@ -92,28 +94,28 @@ func UseCrypto(algName string, opts ...Option) error {
 	return nil
 }
 
-// Verify verifies a password using the active cryptographic instance.
+// Verify is a convenience function that uses the active global crypto instance.
 func Verify(hashed, password string) error {
 	globalCryptoMutex.RLock()
 	defer globalCryptoMutex.RUnlock()
 	return globalCrypto.Verify(hashed, password)
 }
 
-// Generate generates a hash for the given password using the active cryptographic instance.
+// Generate is a convenience function that uses the active global crypto instance.
 func Generate(password string) (string, error) {
 	globalCryptoMutex.RLock()
 	defer globalCryptoMutex.RUnlock()
 	return globalCrypto.Hash(password)
 }
 
-// GenerateWithSalt generates a hash for the given password with the specified salt using the active cryptographic instance.
+// GenerateWithSalt is a convenience function that uses the active global crypto instance.
 func GenerateWithSalt(password string, salt []byte) (string, error) {
 	globalCryptoMutex.RLock()
 	defer globalCryptoMutex.RUnlock()
 	return globalCrypto.HashWithSalt(password, salt)
 }
 
-// AvailableAlgorithms returns a list of all registered hash algorithms.
+// AvailableAlgorithms returns a list of all registered hash algorithm aliases from the default factory.
 func AvailableAlgorithms() []string {
 	return defaultFactory.AvailableAlgorithms()
 }

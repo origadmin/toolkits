@@ -332,7 +332,7 @@ func TestNewCryptoWithOptions(t *testing.T) {
 
 			// 测试带选项的哈希和验证功能
 			password := "testpassword"
-			hashed, err := crypto.Hash(password)
+				hashed, err := crypto.Hash(password)
 			assert.NoError(t, err, "Hash failed with options for %s", tc.algName)
 			assert.NotEmpty(t, hashed, "Hashed string is empty with options for %s", tc.algName)
 
@@ -365,21 +365,29 @@ func TestNewCryptoInvalidAlgorithm(t *testing.T) {
 }
 
 func TestAlgorithmMap(t *testing.T) {
-	// 测试 AlgorithmMap 函数返回的算法映射表
-	algMap := AlgorithmMap()
-	assert.NotEmpty(t, algMap, "Spec map is empty")
+	// 测试 AvailableAlgorithms 函数返回的算法列表
+	availableAlgs := AvailableAlgorithms()
+	assert.NotEmpty(t, availableAlgs, "AvailableAlgorithms list is empty")
 
-	// 检查一些关键算法是否存在
+	// 将列表转换为 map 以方便查找
+	availableAlgsMap := make(map[string]bool)
+	for _, alg := range availableAlgs {
+		availableAlgsMap[alg] = true
+	}
+
+	// 检查一些关键算法是否存在 (使用它们的别名)
 	expectedAlgs := []string{
 		types.ARGON2,
 		types.BCRYPT,
 		types.SHA256,
 		types.HMAC,
 		types.PBKDF2,
+		// 确保别名也能被找到
+		"sha-256",
+		"hmac-sha256", // 假设这是HMAC的一个别名
 	}
 
 	for _, algName := range expectedAlgs {
-		_, exists := algMap[algName]
-		assert.True(t, exists, "Expected algorithm not found in map: %s", algName)
+		assert.True(t, availableAlgsMap[algName], "Expected algorithm alias not found: %s", algName)
 	}
 }

@@ -6,6 +6,9 @@
 package hash
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
@@ -20,14 +23,35 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-type algorithm struct {
-	algSpec       types.Spec // Added to store the algorithm type
+// legacyFactoryAdapter is an adapter that wraps the old creator and config functions
+// to implement the new scheme.Factory interface.
+type legacyFactoryAdapter struct {
 	creator       scheme.AlgorithmCreator
 	defaultConfig scheme.AlgorithmConfig
-	resolver      scheme.SpecResolver // New field: Resolver for this algorithm type
 }
 
-// defaultSpecResolver is a pass-through resolver for algorithms that don't need special resolution.
+// Create implements the scheme.Factory interface by calling the wrapped creator.
+func (a *legacyFactoryAdapter) Create(spec types.Spec, cfg *types.Config) (scheme.Scheme, error) {
+	return a.creator(spec, cfg)
+}
+
+// Config implements the scheme.Factory interface by calling the wrapped defaultConfig function.
+func (a *legacyFactoryAdapter) Config() *types.Config {
+	return a.defaultConfig()
+}
+
+// --- Legacy Algorithm Registration ---
+
+// This section remains untouched to support the adapter pattern.
+// It will be removed once all algorithms are migrated to the new provider model.
+
+type algorithm struct {
+	algSpec       types.Spec
+	creator       scheme.AlgorithmCreator
+	defaultConfig scheme.AlgorithmConfig
+	resolver      scheme.SpecResolver
+}
+
 var defaultSpecResolver scheme.SpecResolver = scheme.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
 	algSpec.Name = algSpec.String()
 	algSpec.Underlying = ""
@@ -41,13 +65,12 @@ func wrapCreator(oldCreator func(*types.Config) (scheme.Scheme, error)) scheme.A
 }
 
 var (
-	// algorithmMap stores all supported hash algorithmMap, keyed by their main name (string)
 	algorithmMap = map[string]algorithm{
 		types.ARGON2: {
 			algSpec:       types.New(types.ARGON2),
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(argon2.ResolveSpec), // 使用argon2自定义解析器
+			resolver:      scheme.AlgorithmResolver(argon2.ResolveSpec),
 		},
 		types.ARGON2i: {
 			algSpec:       types.New(types.ARGON2i),
@@ -167,31 +190,66 @@ var (
 			algSpec:       types.New(types.HMAC),
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(hmac.ResolveSpec), // 使用hmac自定义解析器
+			resolver:      scheme.AlgorithmResolver(hmac.ResolveSpec),
 		},
 		types.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
 			algSpec:       types.New(types.PBKDF2),
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(pbkdf2.ResolveSpec), // 使用pbkdf2自定义解析器
+			resolver:      scheme.AlgorithmResolver(pbkdf2.ResolveSpec),
 		},
 		types.RIPEMD: {
 			algSpec:       types.New(types.RIPEMD),
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(ripemd160.ResolveSpec), // 使用ripemd160自定义解析器
+			resolver:      scheme.AlgorithmResolver(ripemd160.ResolveSpec),
 		},
 		types.CRC32: {
 			algSpec:       types.New(types.CRC32),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
+			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec),
 		},
 		types.CRC64: {
 			algSpec:       types.New(types.CRC64),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
+			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec),
 		},
 	}
 )
+
+func init() {
+	// --- Global Crypto Instance Initialization (Moved from hash.go) ---
+	algStr := os.Getenv(types.ENV)
+	if algStr == "" {
+		algStr = types.DefaultSpec
+	}
+
+	// Try to Create an encryption instance with the defined algorithm type
+	crypto, err := NewCrypto(algStr)
+	globalCryptoMutex.Lock()
+	defer globalCryptoMutex.Unlock()
+	if err != nil {
+		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
+		globalCrypto = &uninitializedCrypto{}
+	} else {
+		globalCrypto = crypto
+	}
+
+	// --- Legacy Algorithm Registration (Moved from init.go) ---
+	// Iterate over the old algorithmMap and register each one using the new factory system.
+	for _, alg := range algorithmMap {
+		// Create an adapter for each old algorithm entry.
+		adapter := &legacyFactoryAdapter{
+			creator:       alg.creator,
+			defaultConfig: alg.defaultConfig,
+		}
+
+		// Use the new Register function.
+		// We use the algSpec from the map as the canonical spec.
+		// For now, no aliases are explicitly passed here, as the old system didn't define them this way.
+		// Aliases will be added when individual algorithm packages are migrated.
+		Register(adapter, alg.algSpec)
+	}
+}
