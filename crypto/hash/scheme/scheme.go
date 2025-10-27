@@ -2,14 +2,14 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package interfaces
+package scheme
 
 import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// Cryptographic defines the interface for cryptographic operations
-type Cryptographic interface {
+// Scheme defines the interface for cryptographic operations
+type Scheme interface {
 	Spec() types.Spec
 	// Hash generates a hash for the given password
 	Hash(password string) (*types.HashParts, error)
@@ -22,6 +22,6 @@ type Cryptographic interface {
 // AlgorithmConfig defines a function type that returns a default configuration for an algorithm.
 type AlgorithmConfig func() *types.Config
 
-// AlgorithmCreator defines a function type that creates a new Cryptographic instance.
+// AlgorithmCreator defines a function type that creates a new Scheme instance.
 // It accepts the resolved algorithm Spec and a configuration.
-type AlgorithmCreator func(algSpec types.Spec, cfg *types.Config) (Cryptographic, error)
+type AlgorithmCreator func(algSpec types.Spec, cfg *types.Config) (Scheme, error)

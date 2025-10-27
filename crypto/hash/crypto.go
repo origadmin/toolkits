@@ -12,7 +12,7 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -26,7 +26,7 @@ type Crypto interface {
 type crypto struct {
 	codec codec.Codec
 	// algImpl is the cryptographic implementation used for hashing, wrapped with cachedVerifier
-	algImpl interfaces.Cryptographic
+	algImpl scheme.Scheme
 }
 
 func (c *crypto) Spec() types.Spec {
@@ -128,7 +128,7 @@ func NewCrypto(algName string, opts ...Option) (Crypto, error) {
 }
 
 // RegisterAlgorithm register a new hash algorithm that uses defaultSpecResolver by default
-func RegisterAlgorithm(algSpec types.Spec, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig) {
+func RegisterAlgorithm(algSpec types.Spec, creator scheme.AlgorithmCreator, defaultConfig scheme.AlgorithmConfig) {
 	algorithmMap[algSpec.Name] = algorithm{
 		algSpec:       algSpec,
 		creator:       creator,
@@ -138,7 +138,7 @@ func RegisterAlgorithm(algSpec types.Spec, creator interfaces.AlgorithmCreator, 
 }
 
 // RegisterAlgorithmWithResolver register a new hash algorithm and specify a custom SpecResolver
-func RegisterAlgorithmWithResolver(algSpec types.Spec, creator interfaces.AlgorithmCreator, defaultConfig interfaces.AlgorithmConfig, resolver interfaces.SpecResolver) {
+func RegisterAlgorithmWithResolver(algSpec types.Spec, creator scheme.AlgorithmCreator, defaultConfig scheme.AlgorithmConfig, resolver scheme.SpecResolver) {
 	if resolver == nil {
 		resolver = defaultSpecResolver
 	}

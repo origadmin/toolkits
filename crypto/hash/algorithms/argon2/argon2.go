@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/argon2"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
@@ -107,12 +107,12 @@ func ParseKeyFunc(algSpec types.Spec) KeyFunc {
 	}
 }
 
-func NewDefaultArgon2(config *types.Config) (interfaces.Cryptographic, error) {
+func NewDefaultArgon2(config *types.Config) (scheme.Scheme, error) {
 	return NewArgon2(argon2Spec, config)
 }
 
 // NewArgon2 creates a new Argon2 crypto instance
-func NewArgon2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewArgon2(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()
@@ -137,10 +137,10 @@ func NewArgon2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 	}, nil
 }
 
-func NewArgon2i(cfg *types.Config) (interfaces.Cryptographic, error) {
+func NewArgon2i(cfg *types.Config) (scheme.Scheme, error) {
 	return NewArgon2(argon2i, cfg)
 }
 
-func NewArgon2id(cfg *types.Config) (interfaces.Cryptographic, error) {
+func NewArgon2id(cfg *types.Config) (scheme.Scheme, error) {
 	return NewArgon2(argon2id, cfg)
 }

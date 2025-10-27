@@ -11,17 +11,17 @@ import (
 
 	"github.com/goexts/generic/configure"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 type internalFactory interface {
 	// create now accepts types.Spec directly
-	create(algSpec types.Spec, opts ...Option) (interfaces.Cryptographic, error)
+	create(algSpec types.Spec, opts ...Option) (scheme.Scheme, error)
 }
 
 type algorithmFactory struct {
-	cryptos map[string]interfaces.Cryptographic
+	cryptos map[string]scheme.Scheme
 	mux     sync.RWMutex
 }
 
@@ -33,13 +33,13 @@ var (
 func getFactory() internalFactory {
 	once.Do(func() {
 		defaultFactory = &algorithmFactory{
-			cryptos: make(map[string]interfaces.Cryptographic),
+			cryptos: make(map[string]scheme.Scheme),
 		}
 	})
 	return defaultFactory
 }
 
-func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (interfaces.Cryptographic, error) {
+func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (scheme.Scheme, error) {
 	// First, find the algorithm entry based on the initial algSpec.Name
 	// This is needed to get the specific resolver for this algorithm.
 	algEntry, exists := algorithmMap[algSpec.Name]

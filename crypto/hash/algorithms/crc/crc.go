@@ -8,8 +8,8 @@ import (
 	"crypto/subtle"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
@@ -69,7 +69,7 @@ func (c *CRC) Spec() types.Spec {
 }
 
 // NewCRC creates a new CRC crypto instance
-func NewCRC(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewCRC(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}

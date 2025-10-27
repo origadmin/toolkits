@@ -11,9 +11,9 @@ import (
 	"golang.org/x/crypto/scrypt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
-	"github.com/origadmin/toolkits/crypto/hash/validator"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -32,7 +32,7 @@ func (c *Scrypt) Spec() types.Spec {
 }
 
 // NewScrypt creates a new Scrypt crypto instance
-func NewScrypt(config *types.Config) (interfaces.Cryptographic, error) {
+func NewScrypt(config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()

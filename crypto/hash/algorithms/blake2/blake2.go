@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/blake2s"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
@@ -98,7 +98,7 @@ func (c *Blake2) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func NewBlake2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()
@@ -127,27 +127,27 @@ func NewBlake2(algSpec types.Spec, config *types.Config) (interfaces.Cryptograph
 }
 
 // NewBlake2b256 creates a new BLAKE2b crypto instance
-func NewBlake2b256(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2b256(config *types.Config) (scheme.Scheme, error) {
 	return NewBlake2(blake2b256Spec, config)
 }
 
 // NewBlake2b384 creates a new BLAKE2b crypto instance
-func NewBlake2b384(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2b384(config *types.Config) (scheme.Scheme, error) {
 	return NewBlake2(blake2b384Spec, config)
 }
 
 // NewBlake2b512 creates a new BLAKE2b crypto instance
-func NewBlake2b512(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2b512(config *types.Config) (scheme.Scheme, error) {
 	return NewBlake2(blake2b512Spec, config)
 }
 
 // NewBlake2s128 creates a new BLAKE2s crypto instance
-func NewBlake2s128(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2s128(config *types.Config) (scheme.Scheme, error) {
 	return NewBlake2(blake2s128Spec, config)
 }
 
 // NewBlake2s256 creates a new BLAKE2s crypto instance
-func NewBlake2s256(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBlake2s256(config *types.Config) (scheme.Scheme, error) {
 	return NewBlake2(blake2s256Spec, config)
 }
 

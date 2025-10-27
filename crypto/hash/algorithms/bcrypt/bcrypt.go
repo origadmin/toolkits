@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
@@ -76,7 +76,7 @@ func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
 	return nil
 }
 
-func NewBcrypt(config *types.Config) (interfaces.Cryptographic, error) {
+func NewBcrypt(config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()

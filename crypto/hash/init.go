@@ -16,26 +16,26 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/ripemd160"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/scrypt"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/sha"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 type algorithm struct {
 	algSpec       types.Spec // Added to store the algorithm type
-	creator       interfaces.AlgorithmCreator
-	defaultConfig interfaces.AlgorithmConfig
-	resolver      interfaces.SpecResolver // New field: Resolver for this algorithm type
+	creator       scheme.AlgorithmCreator
+	defaultConfig scheme.AlgorithmConfig
+	resolver      scheme.SpecResolver // New field: Resolver for this algorithm type
 }
 
 // defaultSpecResolver is a pass-through resolver for algorithms that don't need special resolution.
-var defaultSpecResolver interfaces.SpecResolver = interfaces.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
+var defaultSpecResolver scheme.SpecResolver = scheme.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
 	algSpec.Name = algSpec.String()
 	algSpec.Underlying = ""
 	return algSpec, nil
 })
 
-func wrapCreator(oldCreator func(*types.Config) (interfaces.Cryptographic, error)) interfaces.AlgorithmCreator {
-	return func(_ types.Spec, cfg *types.Config) (interfaces.Cryptographic, error) {
+func wrapCreator(oldCreator func(*types.Config) (scheme.Scheme, error)) scheme.AlgorithmCreator {
+	return func(_ types.Spec, cfg *types.Config) (scheme.Scheme, error) {
 		return oldCreator(cfg)
 	}
 }
@@ -47,7 +47,7 @@ var (
 			algSpec:       types.New(types.ARGON2),
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(argon2.ResolveSpec), // 使用argon2自定义解析器
+			resolver:      scheme.AlgorithmResolver(argon2.ResolveSpec), // 使用argon2自定义解析器
 		},
 		types.ARGON2i: {
 			algSpec:       types.New(types.ARGON2i),
@@ -71,13 +71,13 @@ var (
 			algSpec:       types.New(types.BLAKE2b),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(blake2.ResolveSpec),
+			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
 		},
 		types.BLAKE2s: {
 			algSpec:       types.New(types.BLAKE2s),
 			creator:       blake2.NewBlake2,
 			defaultConfig: blake2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(blake2.ResolveSpec),
+			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
 		},
 		types.MD5: {
 			algSpec:       types.New(types.MD5),
@@ -119,7 +119,7 @@ var (
 			algSpec:       types.New(types.SHA3),
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(sha.ResolveSpec),
+			resolver:      scheme.AlgorithmResolver(sha.ResolveSpec),
 		},
 		types.SHA3_224: {
 			algSpec:       types.New(types.SHA3_224),
@@ -167,31 +167,31 @@ var (
 			algSpec:       types.New(types.HMAC),
 			creator:       hmac.NewHMAC,
 			defaultConfig: hmac.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(hmac.ResolveSpec), // 使用hmac自定义解析器
+			resolver:      scheme.AlgorithmResolver(hmac.ResolveSpec), // 使用hmac自定义解析器
 		},
 		types.PBKDF2: { // PBKDF2 creator will now handle the Underlying type
 			algSpec:       types.New(types.PBKDF2),
 			creator:       pbkdf2.NewPBKDF2,
 			defaultConfig: pbkdf2.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(pbkdf2.ResolveSpec), // 使用pbkdf2自定义解析器
+			resolver:      scheme.AlgorithmResolver(pbkdf2.ResolveSpec), // 使用pbkdf2自定义解析器
 		},
 		types.RIPEMD: {
 			algSpec:       types.New(types.RIPEMD),
 			creator:       wrapCreator(ripemd160.NewRIPEMD160),
 			defaultConfig: ripemd160.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(ripemd160.ResolveSpec), // 使用ripemd160自定义解析器
+			resolver:      scheme.AlgorithmResolver(ripemd160.ResolveSpec), // 使用ripemd160自定义解析器
 		},
 		types.CRC32: {
 			algSpec:       types.New(types.CRC32),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
+			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
 		},
 		types.CRC64: {
 			algSpec:       types.New(types.CRC64),
 			creator:       crc.NewCRC,
 			defaultConfig: crc.DefaultConfig,
-			resolver:      interfaces.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
+			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec), // 使用crc自定义解析器
 		},
 	}
 )

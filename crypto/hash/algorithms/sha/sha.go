@@ -9,10 +9,10 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/validator"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -80,7 +80,7 @@ func (c *SHA) Verify(parts *types.HashParts, password string) error {
 }
 
 // NewSHA creates a new SHA crypto instance
-func NewSHA(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewSHA(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()
@@ -103,46 +103,46 @@ func NewSHA(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic,
 	}, nil
 }
 
-func NewSha1(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha1(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha1AlgSpec, config)
 }
 
-func NewSha224(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha224(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha224AlgSpec, config)
 }
 
-func NewSha256(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha256(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha256AlgSpec, config)
 }
 
-func NewSha512(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha512(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha512AlgSpec, config)
 }
 
-func NewSha3224(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3224(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha3_224AlgSpec, config)
 }
 
-func NewSha3256(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3256(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha3_256AlgSpec, config)
 }
 
-func NewSha3384(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3384(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha3_384AlgSpec, config)
 }
 
-func NewSha384(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha384(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha384AlgSpec, config)
 }
 
-func NewSha3512(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3512(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha3_512AlgSpec, config)
 }
-func NewSha3512224(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3512224(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha512_224AlgSpec, config)
 }
 
-func NewSha3512256(config *types.Config) (interfaces.Cryptographic, error) {
+func NewSha3512256(config *types.Config) (scheme.Scheme, error) {
 	return NewSHA(sha512_256AlgSpec, config)
 }
 

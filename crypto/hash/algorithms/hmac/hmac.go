@@ -10,10 +10,10 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/validator"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -42,7 +42,7 @@ func (v ConfigValidator) Validate(config *types.Config) error {
 }
 
 // NewHMAC creates a new HMAC crypto instance
-func NewHMAC(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewHMAC(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()

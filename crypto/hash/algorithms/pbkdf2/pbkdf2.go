@@ -14,10 +14,10 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
-	"github.com/origadmin/toolkits/crypto/hash/validator"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
@@ -97,7 +97,7 @@ func getPRF(algSpec types.Spec) (func() hash.Hash, error) {
 }
 
 // NewPBKDF2 creates a new PBKDF2 crypto instance
-func NewPBKDF2(algSpec types.Spec, config *types.Config) (interfaces.Cryptographic, error) {
+func NewPBKDF2(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// Ensure algorithm-specific default config is applied when caller passes nil.
 	if config == nil {
 		config = DefaultConfig()

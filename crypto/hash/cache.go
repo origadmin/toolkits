@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -21,9 +21,9 @@ var verificationResultCache sync.Map
 
 const cacheDuration = 5 * time.Minute // Cache entries expire after 5 minutes
 
-// cachedVerifier wraps a Cryptographic implementation to add result caching for Verify operations.
+// cachedVerifier wraps a Scheme implementation to add result caching for Verify operations.
 type cachedVerifier struct {
-	wrapped interfaces.Cryptographic
+	wrapped scheme.Scheme
 }
 
 func (c *cachedVerifier) Spec() types.Spec {
@@ -64,7 +64,7 @@ func (c *cachedVerifier) Verify(parts *types.HashParts, password string) error {
 	return err
 }
 
-// NewCachedVerifier creates a new cachedVerifier that wraps the given Cryptographic implementation.
-func NewCachedVerifier(wrapped interfaces.Cryptographic) interfaces.Cryptographic {
+// NewCachedVerifier creates a new cachedVerifier that wraps the given Scheme implementation.
+func NewCachedVerifier(wrapped scheme.Scheme) scheme.Scheme {
 	return &cachedVerifier{wrapped: wrapped}
 }

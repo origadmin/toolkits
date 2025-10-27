@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -23,7 +23,7 @@ func (n *noop) Spec() types.Spec {
 }
 
 // New creates a new noop crypto instance
-func New(config *types.Config) (interfaces.Cryptographic, error) {
+func New(config *types.Config) (scheme.Scheme, error) {
 	return nil, errors.New("algorithm not implemented")
 }
 
@@ -46,6 +46,6 @@ func DefaultConfig() *types.Config {
 	return &types.Config{}
 }
 
-func Noop() (interfaces.Cryptographic, error) {
+func Noop() (scheme.Scheme, error) {
 	return &noop{}, nil
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -58,7 +58,7 @@ func TestAllSHASpecs(t *testing.T) {
 func TestNewShaFunctions(t *testing.T) {
 	testCases := []struct {
 		name     string
-		newFunc  func(config *types.Config) (interfaces.Cryptographic, error)
+		newFunc  func(config *types.Config) (scheme.Scheme, error)
 		expected types.Spec
 	}{
 		{"NewSha1", NewSha1, sha1AlgSpec},

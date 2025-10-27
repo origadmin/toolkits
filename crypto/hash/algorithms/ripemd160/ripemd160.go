@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
@@ -63,7 +63,7 @@ func (r *RIPEMD160) Spec() types.Spec {
 }
 
 // NewRIPEMD160 creates a new RIPEMD-160 crypto instance
-func NewRIPEMD160(config *types.Config) (interfaces.Cryptographic, error) {
+func NewRIPEMD160(config *types.Config) (scheme.Scheme, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}

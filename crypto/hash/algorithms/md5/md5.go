@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
-	"github.com/origadmin/toolkits/crypto/hash/interfaces"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
+	"github.com/origadmin/toolkits/crypto/hash/scheme"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 	"github.com/origadmin/toolkits/crypto/rand"
@@ -51,7 +51,7 @@ func (c *MD5) Spec() types.Spec {
 }
 
 // NewMD5 creates a new MD5 crypto instance
-func NewMD5(config *types.Config) (interfaces.Cryptographic, error) {
+func NewMD5(config *types.Config) (scheme.Scheme, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}

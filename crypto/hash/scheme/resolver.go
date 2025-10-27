@@ -3,7 +3,7 @@
  */
 
 // Package interfaces implements the functions, types, and interfaces for the module.
-package interfaces
+package scheme
 
 import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
