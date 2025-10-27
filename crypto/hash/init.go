@@ -11,7 +11,6 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
-	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/crc"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
@@ -28,6 +27,7 @@ import (
 type legacyFactoryAdapter struct {
 	creator       scheme.AlgorithmCreator
 	defaultConfig scheme.AlgorithmConfig
+	resolver      scheme.AlgorithmResolver
 }
 
 // Create implements the scheme.Factory interface by calling the wrapped creator.
@@ -40,6 +40,10 @@ func (a *legacyFactoryAdapter) Config() *types.Config {
 	return a.defaultConfig()
 }
 
+func (a *legacyFactoryAdapter) ResolveSpec(spec types.Spec) (types.Spec, error) {
+	return a.resolver(spec)
+}
+
 // --- Legacy Algorithm Registration ---
 
 // This section remains untouched to support the adapter pattern.
@@ -49,10 +53,11 @@ type algorithm struct {
 	algSpec       types.Spec
 	creator       scheme.AlgorithmCreator
 	defaultConfig scheme.AlgorithmConfig
-	resolver      scheme.SpecResolver
+	resolver      scheme.AlgorithmResolver
+	alias         []string
 }
 
-var defaultSpecResolver scheme.SpecResolver = scheme.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
+var defaultSpecResolver = scheme.AlgorithmResolver(func(algSpec types.Spec) (types.Spec, error) {
 	algSpec.Name = algSpec.String()
 	algSpec.Underlying = ""
 	return algSpec, nil
@@ -71,6 +76,7 @@ var (
 			creator:       argon2.NewArgon2,
 			defaultConfig: argon2.DefaultConfig,
 			resolver:      scheme.AlgorithmResolver(argon2.ResolveSpec),
+			alias:         []string{types.ARGON2},
 		},
 		types.ARGON2i: {
 			algSpec:       types.New(types.ARGON2i),
@@ -89,18 +95,6 @@ var (
 			creator:       wrapCreator(bcrypt.NewBcrypt),
 			defaultConfig: bcrypt.DefaultConfig,
 			resolver:      defaultSpecResolver,
-		},
-		types.BLAKE2b: {
-			algSpec:       types.New(types.BLAKE2b),
-			creator:       blake2.NewBlake2,
-			defaultConfig: blake2.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
-		},
-		types.BLAKE2s: {
-			algSpec:       types.New(types.BLAKE2s),
-			creator:       blake2.NewBlake2,
-			defaultConfig: blake2.DefaultConfig,
-			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
 		},
 		types.MD5: {
 			algSpec:       types.New(types.MD5),
@@ -143,30 +137,6 @@ var (
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
 			resolver:      scheme.AlgorithmResolver(sha.ResolveSpec),
-		},
-		types.SHA3_224: {
-			algSpec:       types.New(types.SHA3_224),
-			creator:       wrapCreator(sha.NewSha3224),
-			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultSpecResolver,
-		},
-		types.SHA3_256: {
-			algSpec:       types.New(types.SHA3_256),
-			creator:       wrapCreator(sha.NewSha3256),
-			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultSpecResolver,
-		},
-		types.SHA3_384: {
-			algSpec:       types.New(types.SHA3_384),
-			creator:       wrapCreator(sha.NewSha3384),
-			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultSpecResolver,
-		},
-		types.SHA3_512: {
-			algSpec:       types.New(types.SHA3_512),
-			creator:       wrapCreator(sha.NewSha3512),
-			defaultConfig: sha.DefaultConfig,
-			resolver:      defaultSpecResolver,
 		},
 		types.SHA384: {
 			algSpec:       types.New(types.SHA384),
@@ -244,12 +214,13 @@ func init() {
 		adapter := &legacyFactoryAdapter{
 			creator:       alg.creator,
 			defaultConfig: alg.defaultConfig,
+			resolver:      alg.resolver,
 		}
 
 		// Use the new Register function.
 		// We use the algSpec from the map as the canonical spec.
 		// For now, no aliases are explicitly passed here, as the old system didn't define them this way.
 		// Aliases will be added when individual algorithm packages are migrated.
-		Register(adapter, alg.algSpec)
+		Register(adapter, alg.algSpec, alg.alias...)
 	}
 }

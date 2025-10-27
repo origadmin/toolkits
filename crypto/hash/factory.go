@@ -13,7 +13,7 @@ type Factory struct {
 	mu        sync.RWMutex
 	factories map[string]scheme.Factory // name -> factory
 	specs     map[string]types.Spec     // canonical_string -> spec_object
-	aliases   map[string]string         // alias_string -> canonical_string
+	aliases   map[string]string         // alias -> canonical_string
 }
 
 // NewFactory creates a new, empty factory.
@@ -49,18 +49,31 @@ func (f *Factory) Register(factory scheme.Factory, canonicalSpec types.Spec, ali
 	}
 }
 
+func (f *Factory) GetFactory(name string) (scheme.Factory, bool) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
+	factory, exists := f.factories[name]
+	return factory, exists
+}
+
 // GetSpec resolves a spec string to a types.Spec object using the internal alias map.
 func (f *Factory) GetSpec(specStr string) (types.Spec, bool) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
-	canonicalName, exists := f.aliases[specStr]
-	if !exists {
+	parsed, err := types.Parse(specStr)
+	if err != nil {
 		return types.Spec{}, false
 	}
-
-	spec, exists := f.specs[canonicalName]
-	return spec, exists
+	return parsed, true
+	//canonicalName, exists := f.aliases[specStr]
+	//if !exists {
+	//	return types.Spec{}, false
+	//}
+	//
+	//spec, exists := f.specs[canonicalName]
+	//return spec, exists
 }
 
 // GetConfig returns the default configuration for a given algorithm module.

@@ -48,10 +48,22 @@ func newCrypto(factory *Factory, defaultAlgName string, opts []Option) (Crypto, 
 		return nil, fmt.Errorf("hash: spec for algorithm '%s' not found or not registered", defaultAlgName)
 	}
 
-	defaultCfg := factory.GetConfig(spec.Name)
-	cfg := configure.Apply(defaultCfg, opts)
+	// Get the factory for the algorithm once
+	schemeFactory, exists := factory.GetFactory(spec.Name)
+	if !exists {
+		return nil, fmt.Errorf("hash: factory for algorithm '%s' not found", spec.Name)
+	}
 
-	defaultAlg, err := factory.Create(spec, cfg)
+	// Use the same factory instance to get config and create the scheme
+	defaultCfg := schemeFactory.Config()
+	cfg := configure.Apply(defaultCfg, opts)
+	var err error
+	nspec, err := schemeFactory.ResolveSpec(spec)
+	if err != nil {
+		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", spec.Name, err)
+	}
+
+	defaultAlg, err := schemeFactory.Create(nspec, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to create default scheme: %w", err)
 	}
@@ -139,7 +151,15 @@ func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) {
 	// The Config for verification MUST be built from the parts.
 	cfg := ConfigFromHashParts(parts)
 
-	newScheme, err := c.factory.Create(parts.Spec, cfg)
+	schemeFactory, exists := c.factory.GetFactory(parts.Spec.Name)
+	if !exists {
+		return nil, fmt.Errorf("hash: factory for algorithm '%s' not found", parts.Spec.Name)
+	}
+	nspec, err := schemeFactory.ResolveSpec(parts.Spec)
+	if err != nil {
+		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", parts.Spec.Name, err)
+	}
+	newScheme, err := schemeFactory.Create(nspec, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to create verification scheme for %s: %w", parts.Spec.String(), err)
 	}

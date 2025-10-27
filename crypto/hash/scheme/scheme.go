@@ -30,9 +30,12 @@ type Scheme interface {
 // Factory defines the contract for creating Scheme instances.
 // This is the sole entry point for creating any Scheme, used by both NewCrypto and Verify.
 type Factory interface {
+	// Config returns the default configuration for this factory.
 	Config() *types.Config
 	// Create uses a unified Config object to create a Scheme instance.
 	Create(spec types.Spec, cfg *types.Config) (Scheme, error)
+	// ResolveSpec resolves a spec string to a types.Spec object using the internal alias map.
+	ResolveSpec(types.Spec) (types.Spec, error)
 }
 
 // AlgorithmCreator is a function that creates an instance of Scheme given its type and configuration.
