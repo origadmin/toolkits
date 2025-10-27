@@ -3,14 +3,14 @@ module github.com/origadmin/toolkits
 go 1.24.0
 
 require (
-	github.com/bits-and-blooms/bloom/v3 v3.7.0
+	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/goexts/generic v0.8.0
 	github.com/origadmin/toolkits/errors v1.0.0
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
-	github.com/bits-and-blooms/bitset v1.24.1 // indirect
+	github.com/bits-and-blooms/bitset v1.24.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
