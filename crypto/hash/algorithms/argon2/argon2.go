@@ -28,9 +28,9 @@ type Argon2 struct {
 }
 
 var (
-	argon2Spec = types.Spec{Name: types.ARGON2}
-	argon2i    = types.Spec{Name: types.ARGON2i}
-	argon2id   = types.Spec{Name: types.ARGON2id}
+	specArgon2   = types.Spec{Name: types.ARGON2}
+	specArgon2i  = types.Spec{Name: types.ARGON2i}
+	specArgon2id = types.Spec{Name: types.ARGON2id}
 )
 
 func (c *Argon2) Spec() types.Spec {
@@ -68,11 +68,11 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Argon2) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm for comparison and passing to ParseKeyFunc.
-	keyFunc := ParseKeyFunc(parts.Algorithm)
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec for comparison and passing to ParseKeyFunc.
+	keyFunc := ParseKeyFunc(parts.Spec)
 	if keyFunc == nil {
-		return fmt.Errorf("unsupported argon2 type: %s", parts.Algorithm.String())
+		return fmt.Errorf("unsupported argon2 type: %s", parts.Spec.String())
 	}
 
 	// Parse parameters
@@ -108,7 +108,7 @@ func ParseKeyFunc(algSpec types.Spec) KeyFunc {
 }
 
 func NewDefaultArgon2(config *types.Config) (scheme.Scheme, error) {
-	return NewArgon2(argon2Spec, config)
+	return NewArgon2(specArgon2, config)
 }
 
 // NewArgon2 creates a new Argon2 crypto instance
@@ -138,9 +138,9 @@ func NewArgon2(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) 
 }
 
 func NewArgon2i(cfg *types.Config) (scheme.Scheme, error) {
-	return NewArgon2(argon2i, cfg)
+	return NewArgon2(specArgon2i, cfg)
 }
 
 func NewArgon2id(cfg *types.Config) (scheme.Scheme, error) {
-	return NewArgon2(argon2id, cfg)
+	return NewArgon2(specArgon2id, cfg)
 }

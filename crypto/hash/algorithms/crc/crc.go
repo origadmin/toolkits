@@ -21,6 +21,9 @@ type CRC struct {
 	hashHash stdhash.Hash
 }
 
+var specCRC32 = types.Spec{Name: types.CRC32_ISO}
+var specCRC64 = types.Spec{Name: types.CRC64_ISO}
+
 // Hash implements the hash method
 func (c *CRC) Hash(password string) (*types.HashParts, error) {
 	var salt []byte
@@ -46,8 +49,8 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *CRC) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec. Use its Name field to get the hash.
-	hashHash, err := types.Hash(parts.Algorithm.Name)
+	// parts.Spec is already of type types.Spec. Use its Name field to get the hash.
+	hashHash, err := types.Hash(parts.Spec.Name)
 	if err != nil {
 		return err
 	}

@@ -16,29 +16,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
-var md5AlgSpec = types.New(types.MD5)
-
-type ConfigValidator struct {
-}
-
-func (v ConfigValidator) String() string {
-	return ""
-}
-
-func (v ConfigValidator) ToMap() map[string]string {
-	return map[string]string{}
-}
-
-func (v ConfigValidator) FromMap(params map[string]string) error {
-	return nil
-}
-
-func (v ConfigValidator) Validate(config *types.Config) error {
-	if config.SaltLength < 8 {
-		return fmt.Errorf("salt length must be at least 8 bytes")
-	}
-	return nil
-}
+var specMD5 = types.Spec{Name: types.MD5}
 
 // MD5 implements the MD5 hashing algorithm
 type MD5 struct {
@@ -47,7 +25,7 @@ type MD5 struct {
 }
 
 func (c *MD5) Spec() types.Spec {
-	return md5AlgSpec
+	return specMD5
 }
 
 // NewMD5 creates a new MD5 crypto instance
@@ -60,7 +38,7 @@ func NewMD5(config *types.Config) (scheme.Scheme, error) {
 		return nil, fmt.Errorf("invalid md5 config: %v", err)
 	}
 
-	hashHash, err := types.Hash(md5AlgSpec.Name)
+	hashHash, err := types.Hash(specMD5.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +47,6 @@ func NewMD5(config *types.Config) (scheme.Scheme, error) {
 		config:   cfg,
 		hashHash: hashHash,
 	}, nil
-}
-
-func DefaultConfig() *types.Config {
-	return &types.Config{
-		SaltLength: types.DefaultSaltLength,
-	}
 }
 
 // Hash implements the hash method
@@ -99,9 +71,9 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *MD5) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm.Name for comparison.
-	if parts.Algorithm.Name != types.MD5 {
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec.Name for comparison.
+	if parts.Spec.Name != types.MD5 {
 		return errors.ErrAlgorithmMismatch
 	}
 
@@ -115,4 +87,10 @@ func (c *MD5) Verify(parts *types.HashParts, password string) error {
 		return errors.ErrPasswordNotMatch
 	}
 	return nil
+}
+
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		SaltLength: types.DefaultSaltLength,
+	}
 }

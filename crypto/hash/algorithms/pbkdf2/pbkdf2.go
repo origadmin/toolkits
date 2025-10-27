@@ -21,6 +21,11 @@ import (
 	"github.com/origadmin/toolkits/crypto/rand"
 )
 
+var specPBKDF2_SHA256 = types.Spec{
+	Name:       types.PBKDF2,
+	Underlying: types.SHA256, // Default underlying hash for PBKDF2 is SHA-256
+}
+
 // PBKDF2 implements the PBKDF2 hashing algorithm
 type PBKDF2 struct {
 	algSpec types.Spec
@@ -46,9 +51,9 @@ func (c *PBKDF2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm for comparison.
-	if parts.Algorithm.Name != types.PBKDF2 {
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec for comparison.
+	if parts.Spec.Name != types.PBKDF2 {
 		return errors.ErrInvalidAlgorithm
 	}
 
@@ -58,7 +63,7 @@ func (c *PBKDF2) Verify(parts *types.HashParts, password string) error {
 		return err
 	}
 
-	prf, err := getPRF(parts.Algorithm) // Pass parts.Algorithm directly
+	prf, err := getPRF(parts.Spec) // Pass parts.Spec directly
 	if err != nil {
 		return err
 	}

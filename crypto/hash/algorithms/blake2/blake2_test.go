@@ -94,13 +94,13 @@ func TestCrypto_Hash(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Hash",
-			algSpec:  blake2b256Spec,
+			algSpec:  specBlake2b256,
 			password: "testpassword",
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Hash",
-			algSpec:  blake2s256Spec,
+			algSpec:  specBlake2s256,
 			password: "testpassword",
 			wantErr:  false,
 		},
@@ -116,7 +116,7 @@ func TestCrypto_Hash(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Hash() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash.Algorithm.Name == "" {
+			if !tt.wantErr && hash.Spec.Name == "" {
 				t.Error("Hash() returned empty string")
 			}
 			if err := crypto.Verify(hash, tt.password); err != nil {
@@ -136,14 +136,14 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b HashWithSalt",
-			algSpec:  blake2b256Spec,
+			algSpec:  specBlake2b256,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s HashWithSalt",
-			algSpec:  blake2s256Spec,
+			algSpec:  specBlake2s256,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
@@ -160,7 +160,7 @@ func TestCrypto_HashWithSalt(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HashWithSalt() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr && hash.Algorithm.Name == "" {
+			if !tt.wantErr && hash.Spec.Name == "" {
 				t.Error("HashWithSalt() returned empty string")
 			}
 		})
@@ -177,21 +177,21 @@ func TestCrypto_Verify(t *testing.T) {
 	}{
 		{
 			name:     "BLAKE2b Verify Correct",
-			algSpec:  blake2b256Spec,
+			algSpec:  specBlake2b256,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2s Verify Correct",
-			algSpec:  blake2s256Spec,
+			algSpec:  specBlake2s256,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  false,
 		},
 		{
 			name:     "BLAKE2b Verify Wrong Password",
-			algSpec:  blake2b256Spec,
+			algSpec:  specBlake2b256,
 			password: "testpassword",
 			salt:     []byte("somesalt"),
 			wantErr:  true,

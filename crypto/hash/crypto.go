@@ -68,7 +68,7 @@ func (c *crypto) Verify(hashed, password string) error {
 
 	// Get algorithm instance from global factory based on the decoded algorithm
 	factory := getFactory()
-	cryptographic, err := factory.create(parts.Algorithm, WithEncodedParams(parts.Params,
+	cryptographic, err := factory.create(parts.Spec, WithEncodedParams(parts.Params,
 		codec.EncodeParams)) // Pass types.Spec directly
 	if err != nil {
 		return err
@@ -77,11 +77,11 @@ func (c *crypto) Verify(hashed, password string) error {
 	// Wrap the created algorithm with a cached verifier for performance
 	cachedAlg := NewCachedVerifier(cryptographic)
 
-	algEntry, exists := algorithmMap[parts.Algorithm.Name]
+	algEntry, exists := algorithmMap[parts.Spec.Name]
 	if !exists {
-		return fmt.Errorf("unsupported algorithm: %s", parts.Algorithm.String())
+		return fmt.Errorf("unsupported algorithm: %s", parts.Spec.String())
 	}
-	parts.Algorithm, err = algEntry.resolver.ResolveSpec(parts.Algorithm) // Ensure the resolver is called
+	parts.Spec, err = algEntry.resolver.ResolveSpec(parts.Spec) // Ensure the resolver is called
 	if err != nil {
 		return err
 	}

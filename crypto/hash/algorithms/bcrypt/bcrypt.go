@@ -20,10 +20,10 @@ type Bcrypt struct {
 	config *types.Config
 }
 
-var bcryptSpec = types.Spec{Name: types.BCRYPT}
+var specBcrypt = types.Spec{Name: types.BCRYPT}
 
 func (c *Bcrypt) Spec() types.Spec {
-	return bcryptSpec
+	return specBcrypt
 }
 
 // Hash implements the hash method
@@ -57,9 +57,9 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 // WARNING: Manually concatenating salt for Bcrypt is INSECURE as Bcrypt handles salt internally.
 // This implementation is for framework consistency, but should be used with caution.
 func (c *Bcrypt) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm.Name for comparison.
-	if types.BCRYPT != parts.Algorithm.Name {
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec.Name for comparison.
+	if types.BCRYPT != parts.Spec.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 

@@ -22,7 +22,7 @@ type RIPEMD160 struct {
 	hashHash stdhash.Hash
 }
 
-var ripemd160Spec = types.Spec{Name: types.RIPEMD160}
+var specRipemd160 = types.Spec{Name: types.RIPEMD160}
 
 // Hash implements the hash method
 func (r *RIPEMD160) Hash(password string) (*types.HashParts, error) {
@@ -59,7 +59,7 @@ func (r *RIPEMD160) Verify(parts *types.HashParts, password string) error {
 }
 
 func (r *RIPEMD160) Spec() types.Spec {
-	return ripemd160Spec
+	return specRipemd160
 }
 
 // NewRIPEMD160 creates a new RIPEMD-160 crypto instance
@@ -78,7 +78,7 @@ func NewRIPEMD160(config *types.Config) (scheme.Scheme, error) {
 		return nil, fmt.Errorf("invalid ripemd160 config: %v", err)
 	}
 
-	hashHash, err := stdhash.ParseHash(ripemd160Spec.Name)
+	hashHash, err := stdhash.ParseHash(specRipemd160.Name)
 	if err != nil {
 		return nil, err
 	}

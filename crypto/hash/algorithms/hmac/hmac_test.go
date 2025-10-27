@@ -114,7 +114,7 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			hashedParts, err := hmac.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.algSpec.String(), hashedParts.Algorithm)
+			assert.Equal(t, tt.algSpec.String(), hashedParts.Spec)
 			assert.Equal(t, salt, hashedParts.Salt)
 
 			// Test Verify with correct password and salt
@@ -138,7 +138,7 @@ func TestHMAC_HashAndVerify(t *testing.T) {
 			// assert.NoError(t, err)
 			// assert.NotNil(t, hashedPartsNoSalt)
 			// assert.NotEmpty(t, hashedPartsNoSalt.Salt) // Salt should still be generated
-			// t.Logf("hashedPartsNoSalt.Algorithm: %s", hashedPartsNoSalt.Algorithm)
+			// t.Logf("hashedPartsNoSalt.Spec: %s", hashedPartsNoSalt.Spec)
 			// // Test Verify without salt
 			// err = hmacNoSalt.Verify(hashedPartsNoSalt, password)
 			// assert.NoError(t, err)

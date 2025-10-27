@@ -367,7 +367,7 @@ func TestNewCryptoInvalidAlgorithm(t *testing.T) {
 func TestAlgorithmMap(t *testing.T) {
 	// 测试 AlgorithmMap 函数返回的算法映射表
 	algMap := AlgorithmMap()
-	assert.NotEmpty(t, algMap, "Algorithm map is empty")
+	assert.NotEmpty(t, algMap, "Spec map is empty")
 
 	// 检查一些关键算法是否存在
 	expectedAlgs := []string{

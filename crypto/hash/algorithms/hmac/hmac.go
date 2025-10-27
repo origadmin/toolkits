@@ -24,7 +24,7 @@ type HMAC struct {
 	hashHash stdhash.Hash
 }
 
-var hmacSpec = types.Spec{Name: types.HMAC, Underlying: types.SHA256}
+var specHMAC = types.Spec{Name: types.HMAC, Underlying: types.SHA256}
 
 func (c *HMAC) Spec() types.Spec {
 	return c.algSpec
@@ -90,9 +90,9 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm.
-	resolvedAlgSpec, err := ResolveSpec(parts.Algorithm)
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec.
+	resolvedAlgSpec, err := ResolveSpec(parts.Spec)
 	if err != nil {
 		return err
 	}

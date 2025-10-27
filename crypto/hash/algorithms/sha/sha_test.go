@@ -18,17 +18,17 @@ func TestAllSHASpecs(t *testing.T) {
 		name    string
 		algSpec types.Spec
 	}{
-		{name: "SHA1", algSpec: sha1AlgSpec},
-		{name: "SHA224", algSpec: sha224AlgSpec},
-		{name: "SHA256", algSpec: sha256AlgSpec},
-		{name: "SHA384", algSpec: sha384AlgSpec},
-		{name: "SHA512", algSpec: sha512AlgSpec},
-		{name: "SHA512_224", algSpec: sha512_224AlgSpec},
-		{name: "SHA512_256", algSpec: sha512_256AlgSpec},
-		{name: "SHA3_224", algSpec: sha3_224AlgSpec},
-		{name: "SHA3_256", algSpec: sha3_256AlgSpec},
+		{name: "SHA1", algSpec: specSHA1},
+		{name: "SHA224", algSpec: specSHA224},
+		{name: "SHA256", algSpec: specSHA256},
+		{name: "SHA384", algSpec: specSHA384},
+		{name: "SHA512", algSpec: specSHA512},
+		{name: "SHA512_224", algSpec: specSHA512_224},
+		{name: "SHA512_256", algSpec: specSHA512_256},
+		{name: "SHA3_224", algSpec: specSHA3_224},
+		{name: "SHA3_256", algSpec: specSHA3_256},
 		{name: "SHA3_384", algSpec: sha3_384AlgSpec},
-		{name: "SHA3_512", algSpec: sha3_512AlgSpec},
+		{name: "SHA3_512", algSpec: specSHA3_512},
 	}
 
 	for _, tc := range testCases {
@@ -61,17 +61,17 @@ func TestNewShaFunctions(t *testing.T) {
 		newFunc  func(config *types.Config) (scheme.Scheme, error)
 		expected types.Spec
 	}{
-		{"NewSha1", NewSha1, sha1AlgSpec},
-		{"NewSha224", NewSha224, sha224AlgSpec},
-		{"NewSha256", NewSha256, sha256AlgSpec},
-		{"NewSha384", NewSha384, sha384AlgSpec},
-		{"NewSha512", NewSha512, sha512AlgSpec},
-		{"NewSha3224", NewSha3224, sha3_224AlgSpec},
-		{"NewSha3256", NewSha3256, sha3_256AlgSpec},
+		{"NewSha1", NewSha1, specSHA1},
+		{"NewSha224", NewSha224, specSHA224},
+		{"NewSha256", NewSha256, specSHA256},
+		{"NewSha384", NewSha384, specSHA384},
+		{"NewSha512", NewSha512, specSHA512},
+		{"NewSha3224", NewSha3224, specSHA3_224},
+		{"NewSha3256", NewSha3256, specSHA3_256},
 		{"NewSha3384", NewSha3384, sha3_384AlgSpec},
-		{"NewSha3512", NewSha3512, sha3_512AlgSpec},
-		{"NewSha3512224", NewSha3512224, sha512_224AlgSpec},
-		{"NewSha3512256", NewSha3512256, sha512_256AlgSpec},
+		{"NewSha3512", NewSha3512, specSHA3_512},
+		{"NewSha3512224", NewSha3512224, specSHA512_224},
+		{"NewSha3512256", NewSha3512256, specSHA512_256},
 	}
 
 	for _, tc := range testCases {

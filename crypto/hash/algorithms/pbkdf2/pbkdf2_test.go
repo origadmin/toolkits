@@ -102,8 +102,8 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			hashedParts, err := pbkdf2Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.expectedResolvedAlgSpec.String(), hashedParts.Algorithm)
-			parsedAlgSpec := hashedParts.Algorithm
+			assert.Equal(t, tt.expectedResolvedAlgSpec.String(), hashedParts.Spec)
+			parsedAlgSpec := hashedParts.Spec
 			assert.Equal(t, tt.expectedResolvedAlgSpec.Name, parsedAlgSpec.Name)
 			assert.Equal(t, tt.expectedResolvedAlgSpec.Underlying, parsedAlgSpec.Underlying)
 			assert.Equal(t, salt, hashedParts.Salt)

@@ -22,11 +22,11 @@ import (
 type hashFunc func(key []byte) (hash.Hash, error)
 
 var (
-	blake2b512Spec = types.Spec{Name: types.BLAKE2b_512}
-	blake2b384Spec = types.Spec{Name: types.BLAKE2b_384}
-	blake2b256Spec = types.Spec{Name: types.BLAKE2b_256}
-	blake2s256Spec = types.Spec{Name: types.BLAKE2s_256}
-	blake2s128Spec = types.Spec{Name: types.BLAKE2s_128}
+	specBlake2b512 = types.Spec{Name: types.BLAKE2b_512}
+	specBlake2b384 = types.Spec{Name: types.BLAKE2b_384}
+	specBlake2b256 = types.Spec{Name: types.BLAKE2b_256}
+	specBlake2s256 = types.Spec{Name: types.BLAKE2s_256}
+	specBlake2s128 = types.Spec{Name: types.BLAKE2s_128}
 )
 
 var hashFuncs = map[string]hashFunc{
@@ -39,11 +39,10 @@ var hashFuncs = map[string]hashFunc{
 
 // Blake2 implements the BLAKE2 hashing algorithm
 type Blake2 struct {
-	algSpec    types.Spec
-	params     *Params
-	config     *types.Config
-	hashFunc   func(key []byte) (hash.Hash, error)
-	outputSize int
+	algSpec  types.Spec
+	params   *Params
+	config   *types.Config
+	hashFunc func(key []byte) (hash.Hash, error)
 }
 
 func (c *Blake2) Spec() types.Spec {
@@ -75,10 +74,10 @@ func (c *Blake2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Blake2) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec. Use its Name field as the map key.
-	hashFunc, ok := hashFuncs[parts.Algorithm.Name]
+	// parts.Spec is already of type types.Spec. Use its Name field as the map key.
+	hashFunc, ok := hashFuncs[parts.Spec.Name]
 	if !ok {
-		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Algorithm.String())
+		return fmt.Errorf("unsupported blake2 type for keyed hash: %s", parts.Spec.String())
 	}
 	// Recreate the hash function based on the stored parameters
 	h, err := hashFunc(c.params.Key)
@@ -128,27 +127,27 @@ func NewBlake2(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) 
 
 // NewBlake2b256 creates a new BLAKE2b crypto instance
 func NewBlake2b256(config *types.Config) (scheme.Scheme, error) {
-	return NewBlake2(blake2b256Spec, config)
+	return NewBlake2(specBlake2b256, config)
 }
 
 // NewBlake2b384 creates a new BLAKE2b crypto instance
 func NewBlake2b384(config *types.Config) (scheme.Scheme, error) {
-	return NewBlake2(blake2b384Spec, config)
+	return NewBlake2(specBlake2b384, config)
 }
 
 // NewBlake2b512 creates a new BLAKE2b crypto instance
 func NewBlake2b512(config *types.Config) (scheme.Scheme, error) {
-	return NewBlake2(blake2b512Spec, config)
+	return NewBlake2(specBlake2b512, config)
 }
 
 // NewBlake2s128 creates a new BLAKE2s crypto instance
 func NewBlake2s128(config *types.Config) (scheme.Scheme, error) {
-	return NewBlake2(blake2s128Spec, config)
+	return NewBlake2(specBlake2s128, config)
 }
 
 // NewBlake2s256 creates a new BLAKE2s crypto instance
 func NewBlake2s256(config *types.Config) (scheme.Scheme, error) {
-	return NewBlake2(blake2s256Spec, config)
+	return NewBlake2(specBlake2s256, config)
 }
 
 func DefaultConfig() *types.Config {

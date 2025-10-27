@@ -23,12 +23,12 @@ type Scrypt struct {
 	config *types.Config
 }
 
-var scryptSpec = types.Spec{
+var specScrypt = types.Spec{
 	Name: types.SCRYPT,
 }
 
 func (c *Scrypt) Spec() types.Spec {
-	return scryptSpec
+	return specScrypt
 }
 
 // NewScrypt creates a new Scrypt crypto instance
@@ -76,9 +76,9 @@ func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 
 // Verify implements the verify method
 func (c *Scrypt) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Algorithm.Name for comparison.
-	if parts.Algorithm.Name != types.SCRYPT {
+	// parts.Spec is already of type types.Spec, so no need to parse it again.
+	// We can directly use parts.Spec.Name for comparison.
+	if parts.Spec.Name != types.SCRYPT {
 		return errors.ErrAlgorithmMismatch
 	}
 	// Parse parameters

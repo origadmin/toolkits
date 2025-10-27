@@ -24,17 +24,17 @@ type SHA struct {
 }
 
 var (
-	sha1AlgSpec       = types.New(types.SHA1)
-	sha256AlgSpec     = types.New(types.SHA256)
-	sha224AlgSpec     = types.New(types.SHA224)
-	sha384AlgSpec     = types.New(types.SHA384)
-	sha512AlgSpec     = types.New(types.SHA512)
-	sha512_224AlgSpec = types.New(types.SHA512_224)
-	sha512_256AlgSpec = types.New(types.SHA512_256)
-	sha3_224AlgSpec   = types.New(types.SHA3_224)
-	sha3_256AlgSpec   = types.New(types.SHA3_256)
-	sha3_384AlgSpec   = types.New(types.SHA3_384)
-	sha3_512AlgSpec   = types.New(types.SHA3_512)
+	specSHA1       = types.New(types.SHA1)
+	specSHA256     = types.New(types.SHA256)
+	specSHA224     = types.New(types.SHA224)
+	specSHA384     = types.New(types.SHA384)
+	specSHA512     = types.New(types.SHA512)
+	specSHA512_224 = types.New(types.SHA512_224)
+	specSHA512_256 = types.New(types.SHA512_256)
+	specSHA3_224   = types.New(types.SHA3_224)
+	specSHA3_256   = types.New(types.SHA3_256)
+	specSHA3_384   = types.New(types.SHA3_384)
+	specSHA3_512   = types.New(types.SHA3_512)
 )
 
 func (c *SHA) Spec() types.Spec {
@@ -63,8 +63,8 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	// parts.Algorithm is already of type types.Spec. Use its Name field for stdhash.ParseHash.
-	hashHash, err := stdhash.ParseHash(parts.Algorithm.Name)
+	// parts.Spec is already of type types.Spec. Use its Name field for stdhash.ParseHash.
+	hashHash, err := stdhash.ParseHash(parts.Spec.Name)
 	if err != nil {
 		return err
 	}
@@ -104,46 +104,46 @@ func NewSHA(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 }
 
 func NewSha1(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha1AlgSpec, config)
+	return NewSHA(specSHA1, config)
 }
 
 func NewSha224(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha224AlgSpec, config)
+	return NewSHA(specSHA224, config)
 }
 
 func NewSha256(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha256AlgSpec, config)
+	return NewSHA(specSHA256, config)
 }
 
 func NewSha512(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha512AlgSpec, config)
+	return NewSHA(specSHA512, config)
 }
 
 func NewSha3224(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha3_224AlgSpec, config)
+	return NewSHA(specSHA3_224, config)
 }
 
 func NewSha3256(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha3_256AlgSpec, config)
+	return NewSHA(specSHA3_256, config)
 }
 
 func NewSha3384(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha3_384AlgSpec, config)
+	return NewSHA(specSHA3_384, config)
 }
 
 func NewSha384(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha384AlgSpec, config)
+	return NewSHA(specSHA384, config)
 }
 
 func NewSha3512(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha3_512AlgSpec, config)
+	return NewSHA(specSHA3_512, config)
 }
 func NewSha3512224(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha512_224AlgSpec, config)
+	return NewSHA(specSHA512_224, config)
 }
 
 func NewSha3512256(config *types.Config) (scheme.Scheme, error) {
-	return NewSHA(sha512_256AlgSpec, config)
+	return NewSHA(specSHA512_256, config)
 }
 
 func DefaultConfig() *types.Config {

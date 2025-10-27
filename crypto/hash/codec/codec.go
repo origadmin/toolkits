@@ -57,7 +57,7 @@ func (c *codec) Encode(parts *types.HashParts) (string, error) {
 	}
 	return fmt.Sprintf(
 		"$%s$%s$%s$%s$%s",
-		parts.Algorithm,
+		parts.Spec,
 		parts.Version,
 		EncodeParams(parts.Params),
 		hex.EncodeToString(parts.Hash),
@@ -96,11 +96,11 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 		return nil, fmt.Errorf("invalid salt: %v", err)
 	}
 	return &types.HashParts{
-		Algorithm: algorithm,
-		Version:   version,
-		Params:    decodedParams,
-		Hash:      hash,
-		Salt:      salt,
+		Spec:    algorithm,
+		Version: version,
+		Params:  decodedParams,
+		Hash:    hash,
+		Salt:    salt,
 	}, nil
 }
 
