@@ -2,8 +2,7 @@
 package hash
 
 import (
-	"fmt"
-
+	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -17,31 +16,34 @@ func WithSaltLength(length int) Option {
 	}
 }
 
-// WithParams sets the parameters for the hash algorithm using a type that implements fmt.Stringer.
-func WithParams(stringer fmt.Stringer) Option {
+// WithParamString sets the parameters for the hash algorithm using a type that implements fmt.Stringer.
+func WithParamString(params string) Option {
 	return func(cfg *types.Config) {
-		if stringer == nil {
-			return
+		decoded, err := codec.DecodeParams(params)
+		if err == nil {
+			cfg.Params = decoded
 		}
-		cfg.ParamConfig = stringer.String()
 	}
 }
 
 // WithEncodedParams sets the parameters for the hash algorithm by encoding a map[string]string
 // using the provided ParamEncoderFunc. This is used when the parameters are in map format
 // and need to be converted to a string by an external encoder (e.g., from the codec package).
-func WithEncodedParams(params map[string]string, encoder types.ParamEncoderFunc) Option {
+func WithEncodedParams(params map[string]string) Option {
 	return func(cfg *types.Config) {
-		if params == nil || encoder == nil {
+		if len(params) == 0 {
 			return
 		}
-		cfg.ParamConfig = encoder(params)
+		cfg.Params = params
 	}
 }
 
-// WithParamConfig allows direct manipulation of the ParamConfig string.
-func WithParamConfig(fn func(string) string) Option {
+func WithHashParts(parts *types.HashParts) Option {
 	return func(cfg *types.Config) {
-		cfg.ParamConfig = fn(cfg.ParamConfig)
+		if parts == nil {
+			return
+		}
+		cfg.SaltLength = len(parts.Salt)
+		cfg.Params = parts.Params
 	}
 }

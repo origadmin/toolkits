@@ -23,8 +23,9 @@ type Crypto interface {
 	Verify(hashed, password string) error
 }
 
+var globalCodec = codec.NewCodec()
+
 type crypto struct {
-	codec codec.Codec
 	// algImpl is the cryptographic implementation used for hashing, wrapped with cachedVerifier
 	algImpl scheme.Scheme
 }
@@ -38,7 +39,7 @@ func (c *crypto) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.codec.Encode(hashParts)
+	return globalCodec.Encode(hashParts)
 }
 
 func (c *crypto) HashWithSalt(password string, salt []byte) (string, error) {
@@ -46,7 +47,7 @@ func (c *crypto) HashWithSalt(password string, salt []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.codec.Encode(hashParts)
+	return globalCodec.Encode(hashParts)
 }
 
 func (c *crypto) Verify(hashed, password string) error {
@@ -56,7 +57,7 @@ func (c *crypto) Verify(hashed, password string) error {
 	}
 
 	// Decode the hash value to get algorithm type and parts
-	parts, err := c.codec.Decode(hashed)
+	parts, err := globalCodec.Decode(hashed)
 	if err != nil {
 		return err
 	}
@@ -68,8 +69,7 @@ func (c *crypto) Verify(hashed, password string) error {
 
 	// Get algorithm instance from global factory based on the decoded algorithm
 	factory := getFactory()
-	cryptographic, err := factory.create(parts.Spec, WithEncodedParams(parts.Params,
-		codec.EncodeParams)) // Pass types.Spec directly
+	cryptographic, err := factory.Create(parts.Spec, WithHashParts(parts)) // Pass types.Spec directly
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func NewCrypto(algName string, opts ...Option) (Crypto, error) {
 		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algSpec.String(), err)
 	}
 
-	// 4. Apply options to default config and create the cryptographic instance
+	// 4. Apply options to default config and Create the cryptographic instance
 	cfg := configure.Apply(algEntry.defaultConfig(), opts)
 	cryptographic, err := algEntry.creator(resolvedAlgSpec, cfg) // Pass the resolved type
 	if err != nil {

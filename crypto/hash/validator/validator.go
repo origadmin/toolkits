@@ -8,7 +8,6 @@ package validator
 import (
 	"fmt"
 
-	"github.com/origadmin/toolkits/crypto/hash/codec"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
@@ -93,13 +92,8 @@ func ValidateParams[T Parameters](cfg *types.Config, p T) (*Validated[T], error)
 	}
 
 	// If a parameter string is present in the config, decode and apply it to p.
-	if cfg.ParamConfig != "" {
-		paramsMap, err := codec.DecodeParams(cfg.ParamConfig)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := p.FromMap(paramsMap); err != nil {
+	if len(cfg.Params) > 0 {
+		if err := p.FromMap(cfg.Params); err != nil {
 			return nil, err
 		}
 	}

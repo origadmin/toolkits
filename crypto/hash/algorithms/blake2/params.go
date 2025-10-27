@@ -22,13 +22,10 @@ func (p *Params) IsNil() bool {
 	return p == nil
 }
 
+// Validate checks the parameters for correctness. It now only validates the key length.
 func (p *Params) Validate(config *types.Config) error {
-
-	//if config.SaltLength < 8 {
-	//	return fmt.Errorf("salt length must be at least 8 bytes")
-	//}
-	if len(p.Key) < MinKeyLength || len(p.Key) > MaxKeyLength {
-		return fmt.Errorf("invalid key length: %d", len(p.Key))
+	if len(p.Key) > 0 && (len(p.Key) < MinKeyLength || len(p.Key) > MaxKeyLength) {
+		return fmt.Errorf("invalid key length: %d, must be between %d and %d", len(p.Key), MinKeyLength, MaxKeyLength)
 	}
 	return nil
 }
@@ -37,7 +34,7 @@ func (p *Params) FromMap(params map[string]string) error {
 	if v, ok := params["k"]; ok {
 		key, err := base64.RawURLEncoding.DecodeString(v)
 		if err != nil {
-			return fmt.Errorf("invalid key: %w", err)
+			return fmt.Errorf("invalid base64 key: %w", err)
 		}
 		p.Key = key
 	}
@@ -53,29 +50,14 @@ func (p *Params) ToMap() map[string]string {
 	return m
 }
 
-func (p *Params) String() string {
-	return hashcodec.EncodeParams(p.ToMap())
-}
-
-func FromMap(m map[string]string) (params *Params, err error) {
-	params = &Params{}
-	if v, ok := m["k"]; ok {
-		key, err := base64.RawURLEncoding.DecodeString(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid key: %w", err)
-		}
-		params.Key = key
-	}
-	return params, nil
-}
-
+// WithKey is an option to set the key for blake2 hashing.
+// It operates on the new Config model by directly modifying the Params map.
 func WithKey(key []byte) func(config *types.Config) {
-	p := &Params{
-		Key: key,
-	}
 	return func(config *types.Config) {
-		config.ParamConfig = p.String()
-		fmt.Printf("WithKey: %s\n", config.ParamConfig)
+		if config.Params == nil {
+			config.Params = make(map[string]string)
+		}
+		config.Params["k"] = base64.RawURLEncoding.EncodeToString(key)
 	}
 }
 
@@ -83,4 +65,5 @@ func DefaultParams() *Params {
 	return &Params{}
 }
 
+// Ensure Params implements the validator.Parameters interface for now.
 var _ validator.Parameters = (*Params)(nil)

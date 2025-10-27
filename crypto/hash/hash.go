@@ -46,7 +46,7 @@ func init() {
 		algStr = types.DefaultSpec
 	}
 
-	// Try to create an encryption instance with the defined algorithm type
+	// Try to Create an encryption instance with the defined algorithm type
 	crypto, err := NewCrypto(algStr)
 	activeCryptoMu.Lock()
 	defer activeCryptoMu.Unlock()

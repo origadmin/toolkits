@@ -246,7 +246,7 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 		t.Run(tc.algName, func(t *testing.T) {
 			// 测试创建算法实例
 			crypto, err := NewCrypto(tc.algName, tc.options...)
-			require.NoError(t, err, "Failed to create crypto for algorithm: %s", tc.algName)
+			require.NoError(t, err, "Failed to Create crypto for algorithm: %s", tc.algName)
 			require.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
 
 			// 测试算法类型是否正确
@@ -327,7 +327,7 @@ func TestNewCryptoWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.algName+"_with_options", func(t *testing.T) {
 			crypto, err := NewCrypto(tc.algName, tc.options...)
-			require.NoError(t, err, "Failed to create crypto with options for algorithm: %s", tc.algName)
+			require.NoError(t, err, "Failed to Create crypto with options for algorithm: %s", tc.algName)
 			require.NotNil(t, crypto, "Crypto instance is nil with options for algorithm: %s", tc.algName)
 
 			// 测试带选项的哈希和验证功能

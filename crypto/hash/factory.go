@@ -15,40 +15,22 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-type internalFactory interface {
-	// create now accepts types.Spec directly
-	create(algSpec types.Spec, opts ...Option) (scheme.Scheme, error)
-}
-
 type algorithmFactory struct {
-	cryptos map[string]scheme.Scheme
-	mux     sync.RWMutex
+	factories map[string]scheme.Factory
+	schemes   map[string]scheme.Scheme
+	mux       sync.RWMutex
 }
 
-var (
-	defaultFactory internalFactory
-	once           sync.Once
-)
-
-func getFactory() internalFactory {
-	once.Do(func() {
-		defaultFactory = &algorithmFactory{
-			cryptos: make(map[string]scheme.Scheme),
-		}
-	})
-	return defaultFactory
-}
-
-func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (scheme.Scheme, error) {
+func (f *algorithmFactory) Create(algSpec types.Spec, opts ...Option) (scheme.Scheme, error) {
 	// First, find the algorithm entry based on the initial algSpec.Name
 	// This is needed to get the specific resolver for this algorithm.
-	algEntry, exists := algorithmMap[algSpec.Name]
+	algFactory, exists := f.factories[algSpec.Name]
 	if !exists {
 		return nil, fmt.Errorf("unsupported algorithm: %s", algSpec.String())
 	}
 
 	// 1. Resolve the algorithm Spec to its canonical form using the algorithm's specific resolver
-	resolvedAlgSpec, err := algEntry.resolver.ResolveSpec(algSpec) // Use algEntry.resolver
+	resolvedAlgSpec, err := algFactory.resolver.ResolveSpec(algSpec) // Use algFactory.resolver
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve algorithm type %s: %w", algSpec.String(), err)
 	}
@@ -57,7 +39,7 @@ func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (scheme.Sc
 	algNameKey := resolvedAlgSpec.String()
 
 	f.mux.RLock()
-	if cachedAlg, exists := f.cryptos[algNameKey]; exists {
+	if cachedAlg, exists := f.schemes[algNameKey]; exists {
 		f.mux.RUnlock()
 		return cachedAlg, nil
 	}
@@ -67,26 +49,44 @@ func (f *algorithmFactory) create(algSpec types.Spec, opts ...Option) (scheme.Sc
 	defer f.mux.Unlock()
 
 	// Double-check after acquiring lock
-	if cachedAlg, exists := f.cryptos[algNameKey]; exists {
+	if cachedAlg, exists := f.schemes[algNameKey]; exists {
 		return cachedAlg, nil
 	}
 
-	// Re-check algEntry after resolution, in case the resolved type's Name is different
+	// Re-check algFactory after resolution, in case the resolved type's Name is different
 	// and points to a different algorithm entry. This is important if resolvers can change the main Name.
-	// For now, we assume algEntry is based on the initial algSpec.Name
+	// For now, we assume algFactory is based on the initial algSpec.Name
 	// and the resolver just canonicalizes the type itself.
 	// If resolvedAlgSpec.Name could be different, we'd need to re-lookup here.
-	// For simplicity and current design, we'll stick with the initial algEntry.
+	// For simplicity and current design, we'll stick with the initial algFactory.
 
-	// Always create with default config for verification
-	cfg := f.createConfig(algEntry, opts...)
-	newAlg, err := algEntry.creator(resolvedAlgSpec, cfg) // Pass resolvedAlgSpec
+	// Always Create with default config for verification
+	cfg := algFactory.Config()
+	if cfg == nil {
+		cfg = types.DefaultConfig()
+	}
+	cfg = configure.Apply(cfg, opts)
+	newAlg, err := algFactory.Create(resolvedAlgSpec, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create algorithm %s: %w", resolvedAlgSpec.String(), err)
+		return nil, fmt.Errorf("failed to Create algorithm %s: %w", resolvedAlgSpec.String(), err)
 	}
 
-	f.cryptos[algNameKey] = newAlg
+	f.schemes[algNameKey] = newAlg
 	return newAlg, nil
+}
+
+var (
+	defaultFactory *algorithmFactory
+	once           sync.Once
+)
+
+func getFactory() *algorithmFactory {
+	once.Do(func() {
+		defaultFactory = &algorithmFactory{
+			schemes: make(map[string]scheme.Scheme),
+		}
+	})
+	return defaultFactory
 }
 
 func (f *algorithmFactory) createConfig(algEntry algorithm, opts ...Option) *types.Config {

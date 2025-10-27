@@ -5,26 +5,28 @@
 package types
 
 import (
-	"fmt" // Needed for fmt.Stringer
+	"encoding/json"
+	"fmt"
 )
 
 // Config represents the configuration for hash algorithms
 type Config struct {
-	SaltLength  int    `env:"HASH_SALTLENGTH"`
-	ParamConfig string `env:"HASH_PARAM_CONFIG"`
+	SaltLength int               `env:"HASH_SALTLENGTH"`
+	Params     map[string]string `env:"HASH_PARAMS"`
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("SaltLength: %d, ParamConfig: %s", c.SaltLength, c.ParamConfig)
+	b, err := json.Marshal(c.Params)
+	if err != nil {
+		return fmt.Sprintf("SaltLength: %d, Params: (unmarshallable: %v)", c.SaltLength, err)
+	}
+	return fmt.Sprintf("SaltLength: %d, Params: %s", c.SaltLength, string(b))
 }
-
-// ParamEncoderFunc defines a function type for encoding parameters (map[string]string) into a string.
-// This is used for dependency injection to avoid circular dependencies.
-type ParamEncoderFunc func(params map[string]string) string
 
 // DefaultConfig return to the default configuration
 func DefaultConfig() *Config {
 	return &Config{
 		SaltLength: DefaultSaltLength, // Default salt length
+		Params:     make(map[string]string),
 	}
 }
