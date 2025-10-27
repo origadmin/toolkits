@@ -11,6 +11,7 @@ import (
 
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/crc"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/hmac"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/md5"
@@ -90,6 +91,18 @@ var (
 			defaultConfig: argon2.DefaultConfig,
 			resolver:      defaultSpecResolver,
 		},
+		types.BLAKE2b: {
+			algSpec:       types.New(types.BLAKE2b),
+			creator:       blake2.NewBlake2,
+			defaultConfig: blake2.DefaultConfig,
+			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
+		},
+		types.BLAKE2s: {
+			algSpec:       types.New(types.BLAKE2s),
+			creator:       blake2.NewBlake2,
+			defaultConfig: blake2.DefaultConfig,
+			resolver:      scheme.AlgorithmResolver(blake2.ResolveSpec),
+		},
 		types.BCRYPT: {
 			algSpec:       types.New(types.BCRYPT),
 			creator:       wrapCreator(bcrypt.NewBcrypt),
@@ -137,6 +150,30 @@ var (
 			creator:       sha.NewSHA,
 			defaultConfig: sha.DefaultConfig,
 			resolver:      scheme.AlgorithmResolver(sha.ResolveSpec),
+		},
+		types.SHA3_224: {
+			algSpec:       types.New(types.SHA3_224),
+			creator:       wrapCreator(sha.NewSha3224),
+			defaultConfig: sha.DefaultConfig,
+			resolver:      defaultSpecResolver,
+		},
+		types.SHA3_256: {
+			algSpec:       types.New(types.SHA3_256),
+			creator:       wrapCreator(sha.NewSha3256),
+			defaultConfig: sha.DefaultConfig,
+			resolver:      defaultSpecResolver,
+		},
+		types.SHA3_384: {
+			algSpec:       types.New(types.SHA3_384),
+			creator:       wrapCreator(sha.NewSha3384),
+			defaultConfig: sha.DefaultConfig,
+			resolver:      defaultSpecResolver,
+		},
+		types.SHA3_512: {
+			algSpec:       types.New(types.SHA3_512),
+			creator:       wrapCreator(sha.NewSha3512),
+			defaultConfig: sha.DefaultConfig,
+			resolver:      defaultSpecResolver,
 		},
 		types.SHA384: {
 			algSpec:       types.New(types.SHA384),
@@ -190,6 +227,23 @@ var (
 )
 
 func init() {
+	// --- Legacy Algorithm Registration (Moved from init.go) ---
+	// Iterate over the old algorithmMap and register each one using the new factory system.
+	for _, alg := range algorithmMap {
+		// Create an adapter for each old algorithm entry.
+		adapter := &legacyFactoryAdapter{
+			creator:       alg.creator,
+			defaultConfig: alg.defaultConfig,
+			resolver:      alg.resolver,
+		}
+
+		// Use the new Register function.
+		// We use the algSpec from the map as the canonical spec.
+		// For now, no aliases are explicitly passed here, as the old system didn't define them this way.
+		// Aliases will be added when individual algorithm packages are migrated.
+		Register(adapter, alg.algSpec, alg.alias...)
+	}
+
 	// --- Global Crypto Instance Initialization (Moved from hash.go) ---
 	algStr := os.Getenv(types.ENV)
 	if algStr == "" {
@@ -207,20 +261,4 @@ func init() {
 		globalCrypto = crypto
 	}
 
-	// --- Legacy Algorithm Registration (Moved from init.go) ---
-	// Iterate over the old algorithmMap and register each one using the new factory system.
-	for _, alg := range algorithmMap {
-		// Create an adapter for each old algorithm entry.
-		adapter := &legacyFactoryAdapter{
-			creator:       alg.creator,
-			defaultConfig: alg.defaultConfig,
-			resolver:      alg.resolver,
-		}
-
-		// Use the new Register function.
-		// We use the algSpec from the map as the canonical spec.
-		// For now, no aliases are explicitly passed here, as the old system didn't define them this way.
-		// Aliases will be added when individual algorithm packages are migrated.
-		Register(adapter, alg.algSpec, alg.alias...)
-	}
 }

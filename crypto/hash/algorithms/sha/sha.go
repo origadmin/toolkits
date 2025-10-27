@@ -7,6 +7,7 @@ package sha
 import (
 	"crypto/subtle"
 	"fmt"
+	"log/slog"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/internal/stdhash"
@@ -63,6 +64,7 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
+	slog.Info("Verifying SHA hash", "Name", parts.Spec.Name)
 	// parts.Spec is already of type types.Spec. Use its Name field for stdhash.ParseHash.
 	hashHash, err := stdhash.ParseHash(parts.Spec.Name)
 	if err != nil {
@@ -91,6 +93,7 @@ func NewSHA(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 		return nil, fmt.Errorf("invalid sha config: %v", err)
 	}
 
+	slog.Debug("Creating SHA scheme", "Name", algSpec.Name, "Underlying", algSpec.Underlying)
 	hashHash, err := stdhash.ParseHash(algSpec.Name)
 	if err != nil {
 		return nil, err

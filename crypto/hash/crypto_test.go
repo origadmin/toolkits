@@ -245,25 +245,25 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 	for _, tc := range allAlgorithms {
 		t.Run(tc.algName, func(t *testing.T) {
 			// 测试创建算法实例
-			crypto, err := NewCrypto(tc.algName, tc.options...)
-			require.NoError(t, err, "Failed to Create crypto for algorithm: %s", tc.algName)
-			require.NotNil(t, crypto, "Crypto instance is nil for algorithm: %s", tc.algName)
+			c, err := NewCrypto(tc.algName, tc.options...)
+			require.NoError(t, err, "Failed to Create c for algorithm: %s", tc.algName)
+			require.NotNil(t, c, "Crypto instance is nil for algorithm: %s", tc.algName)
 
 			// 测试算法类型是否正确
-			assert.Equal(t, tc.expectedAlgName, crypto.Spec().String(), "Unexpected algorithm name for %s", tc.algName)
+			assert.Equal(t, tc.expectedAlgName, c.Spec().String(), "Unexpected algorithm name for %s", tc.algName)
 
 			// 测试 Hash 方法
 			password := "testpassword"
-			hashed, err := crypto.Hash(password)
+			hashed, err := c.Hash(password)
 			if err == nil {
 				assert.NotEmpty(t, hashed, "Hashed string is empty for %s (Hash method)", tc.algName)
 
 				// 测试 Verify 方法 - 正确的密码
-				verifyErr := crypto.Verify(hashed, password)
+				verifyErr := c.Verify(hashed, password)
 				assert.NoError(t, verifyErr, "Verification failed for %s with correct password (Hash method)", tc.algName)
 
 				// 测试 Verify 方法 - 错误的密码
-				verifyErr = crypto.Verify(hashed, "wrongpassword")
+				verifyErr = c.Verify(hashed, "wrongpassword")
 				assert.Error(t, verifyErr, "Verification should fail for %s with wrong password (Hash method)", tc.algName)
 			} else {
 				t.Logf("Skipping Hash method test for %s due to error: %v", tc.algName, err)
@@ -271,16 +271,16 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 
 			// 测试 HashWithSalt 方法
 			salt := []byte("testsalt12345678") // 示例盐值
-			hashedWithSalt, err := crypto.HashWithSalt(password, salt)
+			hashedWithSalt, err := c.HashWithSalt(password, salt)
 			if err == nil {
 				assert.NotEmpty(t, hashedWithSalt, "Hashed string is empty for %s (HashWithSalt method)", tc.algName)
 
 				// 测试 Verify 方法 - 正确的密码
-				verifyErr := crypto.Verify(hashedWithSalt, password)
+				verifyErr := c.Verify(hashedWithSalt, password)
 				assert.NoError(t, verifyErr, "Verification failed for %s with correct password (HashWithSalt method)", tc.algName)
 
 				// 测试 Verify 方法 - 错误的密码
-				verifyErr = crypto.Verify(hashedWithSalt, "wrongpassword")
+				verifyErr = c.Verify(hashedWithSalt, "wrongpassword")
 				assert.Error(t, verifyErr, "Verification should fail for %s with wrong password (HashWithSalt method)", tc.algName)
 			} else {
 				t.Logf("Skipping HashWithSalt method test for %s due to error: %v", tc.algName, err)
@@ -332,7 +332,7 @@ func TestNewCryptoWithOptions(t *testing.T) {
 
 			// 测试带选项的哈希和验证功能
 			password := "testpassword"
-				hashed, err := crypto.Hash(password)
+			hashed, err := crypto.Hash(password)
 			assert.NoError(t, err, "Hash failed with options for %s", tc.algName)
 			assert.NotEmpty(t, hashed, "Hashed string is empty with options for %s", tc.algName)
 

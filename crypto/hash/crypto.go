@@ -7,6 +7,7 @@ package hash
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -48,6 +49,7 @@ func newCrypto(factory *Factory, defaultAlgName string, opts []Option) (Crypto, 
 		return nil, fmt.Errorf("hash: spec for algorithm '%s' not found or not registered", defaultAlgName)
 	}
 
+	slog.Info("Creating default scheme", "Name", spec.Name, "Underlying", spec.Underlying)
 	// Get the factory for the algorithm once
 	schemeFactory, exists := factory.GetFactory(spec.Name)
 	if !exists {
@@ -62,7 +64,7 @@ func newCrypto(factory *Factory, defaultAlgName string, opts []Option) (Crypto, 
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", spec.Name, err)
 	}
-
+	slog.Info("Creating scheme", "Name", nspec.Name, "Underlying", nspec.Underlying)
 	defaultAlg, err := schemeFactory.Create(nspec, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to create default scheme: %w", err)
@@ -119,12 +121,13 @@ func (c *crypto) Verify(hashed, password string) error {
 	if parts == nil || parts.Hash == nil || parts.Salt == nil {
 		return errors.ErrInvalidHashParts
 	}
-
+	slog.Info("Verifying hash", "Salt", parts.Salt)
 	// 3. Get the scheme (from cache or create new)
 	schemeInstance, err := c.getScheme(parts)
 	if err != nil {
 		return err
 	}
+	slog.Info("Verifying schemeInstance hash", "Name", parts.Spec.Name, "Underlying", parts.Spec.Underlying)
 
 	// 4. Perform the actual verification
 	verificationErr := schemeInstance.Verify(parts, password)
@@ -136,38 +139,59 @@ func (c *crypto) Verify(hashed, password string) error {
 }
 
 // getScheme retrieves a scheme from the cache or creates it if not present.
+// It returns the scheme and the resolved spec.
 func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) {
-	specString := parts.Spec.String()
+	// First, resolve the spec to get the correct algorithm name
+	schemeFactory, exists := c.factory.GetFactory(parts.Spec.Name)
+	if !exists {
+		return nil, fmt.Errorf("hash: factory for algorithm '%s' not found", parts.Spec.Name)
+	}
 
+	// Resolve the spec to handle any aliases or default values
+	resolvedSpec, err := schemeFactory.ResolveSpec(parts.Spec)
+	if err != nil {
+		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", parts.Spec.Name, err)
+	}
+
+	// Use the resolved spec for cache key
+	specString := resolvedSpec.String()
+
+	// Check cache with resolved spec
 	c.mu.RLock()
 	cachedScheme, exists := c.schemeCache[specString]
 	c.mu.RUnlock()
 
 	if exists {
+		// Update the original parts with the resolved spec
+		parts.Spec = resolvedSpec
 		return cachedScheme, nil
 	}
 
-	// Not in cache, create it.
-	// The Config for verification MUST be built from the parts.
+	// Not in cache, create new scheme
 	cfg := ConfigFromHashParts(parts)
 
-	schemeFactory, exists := c.factory.GetFactory(parts.Spec.Name)
-	if !exists {
-		return nil, fmt.Errorf("hash: factory for algorithm '%s' not found", parts.Spec.Name)
-	}
-	nspec, err := schemeFactory.ResolveSpec(parts.Spec)
+	slog.Info("Creating verification scheme",
+		"OriginalSpec", parts.Spec.String(),
+		"ResolvedSpec", resolvedSpec.String())
+
+	// Create the scheme with the resolved spec
+	newScheme, err := schemeFactory.Create(resolvedSpec, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", parts.Spec.Name, err)
-	}
-	newScheme, err := schemeFactory.Create(nspec, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("hash: failed to create verification scheme for %s: %w", parts.Spec.String(), err)
+		return nil, fmt.Errorf("hash: failed to create verification scheme for %s: %w", 
+			resolvedSpec.String(), err)
 	}
 
-	// Cache the newly created scheme.
+	// Cache the newly created scheme
 	c.mu.Lock()
 	c.schemeCache[specString] = newScheme
 	c.mu.Unlock()
+
+	// Update the original parts with the resolved spec
+	parts.Spec = resolvedSpec
+
+	slog.Info("Created and cached verification scheme",
+		"Name", resolvedSpec.Name,
+		"Underlying", resolvedSpec.Underlying)
 
 	return newScheme, nil
 }
