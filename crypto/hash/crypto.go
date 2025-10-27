@@ -41,22 +41,19 @@ type crypto struct {
 var globalCodec = codec.NewCodec()
 
 // NewCrypto creates a new cryptographic instance.
-// It requires a factory to create schemes and a default algorithm name for hashing.
+// It uses the default global factory to create schemes.
 func NewCrypto(defaultAlgName string, opts ...Option) (Crypto, error) {
 	spec, err := types.Parse(defaultAlgName)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to parse default algorithm name: %w", err)
 	}
 
-	// Create the default scheme for hashing.
-	// We need to get the default config from the specific scheme factory.
-	f, exists := defaultFactory.factories[spec.Name]
-	if !exists {
-		return nil, fmt.Errorf("hash: default algorithm '%s' not registered", spec.Name)
-	}
-	defaultCfg := f.Config()
+	// Get the default config with fallback mechanism. This will not return an error.
+	defaultCfg := defaultFactory.GetConfig(spec.Name)
 	cfg := configure.Apply(defaultCfg, opts)
 
+	// Create the default scheme. If the algorithm is not registered,
+	// Create will return the appropriate error.
 	defaultAlg, err := defaultFactory.Create(spec, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("hash: failed to create default scheme: %w", err)
@@ -130,7 +127,7 @@ func (c *crypto) Verify(hashed, password string) error {
 }
 
 // getScheme retrieves a scheme from the cache or creates it if not present.
-func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) { // **CORRECTED**: Signature now takes *types.HashParts
+func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) {
 	specString := parts.Spec.String()
 
 	c.mu.RLock()
@@ -142,7 +139,7 @@ func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) { // *
 	}
 
 	// Not in cache, create it.
-	// **CORRECTED**: The Config for verification MUST be built from the parts, not from a factory default.
+	// The Config for verification MUST be built from the parts.
 	cfg := ConfigFromHashParts(parts)
 
 	newScheme, err := c.factory.Create(parts.Spec, cfg)

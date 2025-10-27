@@ -14,7 +14,10 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// --- Global Default Crypto Instance ---
+// --- Global Default Instances ---
+
+// defaultFactory is the global, default instance of the factory.
+var defaultFactory = NewFactory()
 
 var (
 	// globalCrypto is the global, default instance of Crypto.
@@ -111,10 +114,6 @@ func GenerateWithSalt(password string, salt []byte) (string, error) {
 }
 
 // AvailableAlgorithms returns a list of all registered hash algorithms.
-func AvailableAlgorithms() []types.Spec {
-	var algorithms []types.Spec
-	for _, algEntry := range algorithmMap {
-		algorithms = append(algorithms, algEntry.algSpec)
-	}
-	return algorithms
+func AvailableAlgorithms() []string {
+	return defaultFactory.AvailableAlgorithms()
 }

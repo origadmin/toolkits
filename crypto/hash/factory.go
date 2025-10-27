@@ -8,11 +8,6 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// --- Global Default Factory ---
-
-// defaultFactory is the global, default instance of the factory.
-var defaultFactory = NewFactory()
-
 // Factory holds the registration of all scheme factories. It is a stateless creator.
 type Factory struct {
 	mu        sync.RWMutex
@@ -37,6 +32,21 @@ func (f *Factory) Register(name string, factory scheme.Factory) {
 	f.factories[name] = factory
 }
 
+// GetConfig returns the default configuration for a given algorithm.
+// If the specific algorithm's factory is not found, it gracefully falls back
+// to the global default configuration from the types package.
+func (f *Factory) GetConfig(name string) *types.Config {
+	f.mu.RLock()
+	schemeFactory, exists := f.factories[name]
+	f.mu.RUnlock()
+
+	if !exists {
+		// Fallback to global default if specific factory is not registered.
+		return types.DefaultConfig()
+	}
+	return schemeFactory.Config()
+}
+
 // Create uses the registered factories to create a new Scheme instance.
 // This is the primary creation method of the factory.
 func (f *Factory) Create(spec types.Spec, cfg *types.Config) (scheme.Scheme, error) {
@@ -50,8 +60,13 @@ func (f *Factory) Create(spec types.Spec, cfg *types.Config) (scheme.Scheme, err
 	return schemeFactory.Create(spec, cfg)
 }
 
-// Register registers a scheme factory to the default global factory.
-// This is intended to be called from init() functions of algorithm packages.
-func Register(name string, factory scheme.Factory) {
-	defaultFactory.Register(name, factory)
+// AvailableAlgorithms returns a list of all registered hash algorithms.
+func (f *Factory) AvailableAlgorithms() []string {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	algorithms := make([]string, 0, len(f.factories))
+	for name := range f.factories {
+		algorithms = append(algorithms, name)
+	}
+	return algorithms
 }
