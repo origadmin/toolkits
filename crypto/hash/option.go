@@ -47,3 +47,11 @@ func WithHashParts(parts *types.HashParts) Option {
 		cfg.Params = parts.Params
 	}
 }
+
+// ConfigFromHashParts creates a Config from a HashParts object.
+func ConfigFromHashParts(parts *types.HashParts) *types.Config {
+	return &types.Config{
+		SaltLength: len(parts.Salt),
+		Params:     parts.Params,
+	}
+}

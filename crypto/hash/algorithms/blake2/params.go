@@ -18,6 +18,11 @@ type Params struct {
 	Key []byte
 }
 
+// String returns the string representation of parameters
+func (p *Params) String() string {
+	return hashcodec.EncodeParams(p.ToMap())
+}
+
 func (p *Params) IsNil() bool {
 	return p == nil
 }

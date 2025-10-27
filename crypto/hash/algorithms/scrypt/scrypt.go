@@ -51,8 +51,8 @@ func NewScrypt(config *types.Config) (scheme.Scheme, error) {
 
 func DefaultConfig() *types.Config {
 	return &types.Config{
-		SaltLength:  16,
-		ParamConfig: DefaultParams().String(),
+		SaltLength: 16,
+		Params:     DefaultParams().ToMap(),
 	}
 }
 

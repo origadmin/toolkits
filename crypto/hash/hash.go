@@ -14,11 +14,13 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
+// --- Global Default Crypto Instance ---
+
 var (
-	// activeCrypto is the currently active cryptographic instance
-	activeCrypto Crypto
-	// activeCryptoMu protects activeCrypto from concurrent access
-	activeCryptoMu sync.RWMutex
+	// globalCrypto is the global, default instance of Crypto.
+	globalCrypto Crypto
+	// globalCryptoMutex protects globalCrypto from concurrent access
+	globalCryptoMutex sync.RWMutex
 )
 
 // uninitializedCrypto is a no-op Crypto implementation used when the module fails to initialize.
@@ -48,14 +50,14 @@ func init() {
 
 	// Try to Create an encryption instance with the defined algorithm type
 	crypto, err := NewCrypto(algStr)
-	activeCryptoMu.Lock()
-	defer activeCryptoMu.Unlock()
+	globalCryptoMutex.Lock()
+	defer globalCryptoMutex.Unlock()
 	if err != nil {
 		slog.Error("hash: failed to initialize active crypto", "type", algStr, "error", err)
 		// If the hash module fails to initialize, use a no-op implementation
-		activeCrypto = &uninitializedCrypto{}
+		globalCrypto = &uninitializedCrypto{}
 	} else {
-		activeCrypto = crypto
+		globalCrypto = crypto
 	}
 }
 
@@ -69,9 +71,9 @@ func UseCrypto(algName string, opts ...Option) error {
 		return err
 	}
 
-	activeCryptoMu.RLock()
-	currentCrypto := activeCrypto
-	activeCryptoMu.RUnlock()
+	globalCryptoMutex.RLock()
+	currentCrypto := globalCrypto
+	globalCryptoMutex.RUnlock()
 
 	if currentCrypto != nil && currentCrypto.Spec().Is(algSpec) {
 		return nil
@@ -81,31 +83,31 @@ func UseCrypto(algName string, opts ...Option) error {
 	if err != nil {
 		return err
 	}
-	activeCryptoMu.Lock()
-	activeCrypto = newCrypto
-	activeCryptoMu.Unlock()
+	globalCryptoMutex.Lock()
+	globalCrypto = newCrypto
+	globalCryptoMutex.Unlock()
 	return nil
 }
 
 // Verify verifies a password using the active cryptographic instance.
 func Verify(hashed, password string) error {
-	activeCryptoMu.RLock()
-	defer activeCryptoMu.RUnlock()
-	return activeCrypto.Verify(hashed, password)
+	globalCryptoMutex.RLock()
+	defer globalCryptoMutex.RUnlock()
+	return globalCrypto.Verify(hashed, password)
 }
 
 // Generate generates a hash for the given password using the active cryptographic instance.
 func Generate(password string) (string, error) {
-	activeCryptoMu.RLock()
-	defer activeCryptoMu.RUnlock()
-	return activeCrypto.Hash(password)
+	globalCryptoMutex.RLock()
+	defer globalCryptoMutex.RUnlock()
+	return globalCrypto.Hash(password)
 }
 
 // GenerateWithSalt generates a hash for the given password with the specified salt using the active cryptographic instance.
 func GenerateWithSalt(password string, salt []byte) (string, error) {
-	activeCryptoMu.RLock()
-	defer activeCryptoMu.RUnlock()
-	return activeCrypto.HashWithSalt(password, salt)
+	globalCryptoMutex.RLock()
+	defer globalCryptoMutex.RUnlock()
+	return globalCrypto.HashWithSalt(password, salt)
 }
 
 // AvailableAlgorithms returns a list of all registered hash algorithms.
