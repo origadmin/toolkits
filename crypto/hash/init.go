@@ -126,24 +126,28 @@ var (
 			creator:       wrapCreator(sha.NewSha1),
 			defaultConfig: sha.DefaultConfig,
 			resolver:      defaultSpecResolver,
+			alias:         []string{"sha-1"},
 		},
 		types.SHA224: {
 			algSpec:       types.New(types.SHA224),
 			creator:       wrapCreator(sha.NewSha224),
 			defaultConfig: sha.DefaultConfig,
 			resolver:      defaultSpecResolver,
+			alias:         []string{"sha-224"},
 		},
 		types.SHA256: {
 			algSpec:       types.New(types.SHA256),
 			creator:       wrapCreator(sha.NewSha256),
 			defaultConfig: sha.DefaultConfig,
 			resolver:      defaultSpecResolver,
+			alias:         []string{"sha-256"},
 		},
 		types.SHA512: {
 			algSpec:       types.New(types.SHA512),
 			creator:       wrapCreator(sha.NewSha512),
 			defaultConfig: sha.DefaultConfig,
 			resolver:      defaultSpecResolver,
+			alias:         []string{"sha-512"},
 		},
 		types.SHA3: {
 			algSpec:       types.New(types.SHA3),
@@ -180,6 +184,7 @@ var (
 			creator:       wrapCreator(sha.NewSha384),
 			defaultConfig: sha.DefaultConfig,
 			resolver:      defaultSpecResolver,
+			alias:         []string{"sha-384"},
 		},
 		types.SHA512_224: {
 			algSpec:       types.New(types.SHA512_224),

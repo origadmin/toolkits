@@ -42,7 +42,6 @@ func (f *Factory) Register(factory scheme.Factory, canonicalSpec types.Spec, ali
 	canonicalString := canonicalSpec.String()
 	f.specs[canonicalString] = canonicalSpec
 	f.aliases[canonicalString] = canonicalString // The canonical name is an alias for itself
-
 	// Register all other string aliases
 	for _, alias := range aliases {
 		f.aliases[alias] = canonicalString
@@ -61,16 +60,16 @@ func (f *Factory) GetFactory(name string) (scheme.Factory, bool) {
 func (f *Factory) GetSpec(specStr string) (types.Spec, bool) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
-
-	parsed, err := types.Parse(specStr)
+	canonicalName, exists := f.aliases[specStr]
+	if !exists {
+		canonicalName = specStr
+	}
+	parsed, err := types.Parse(canonicalName)
 	if err != nil {
 		return types.Spec{}, false
 	}
 	return parsed, true
-	//canonicalName, exists := f.aliases[specStr]
-	//if !exists {
-	//	return types.Spec{}, false
-	//}
+
 	//
 	//spec, exists := f.specs[canonicalName]
 	//return spec, exists

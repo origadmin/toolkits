@@ -64,7 +64,6 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
-	slog.Info("Verifying SHA hash", "Name", parts.Spec.Name)
 	// parts.Spec is already of type types.Spec. Use its Name field for stdhash.ParseHash.
 	hashHash, err := stdhash.ParseHash(parts.Spec.Name)
 	if err != nil {

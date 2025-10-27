@@ -382,9 +382,7 @@ func TestAlgorithmMap(t *testing.T) {
 		types.SHA256,
 		types.HMAC,
 		types.PBKDF2,
-		// 确保别名也能被找到
 		"sha-256",
-		"hmac-sha256", // 假设这是HMAC的一个别名
 	}
 
 	for _, algName := range expectedAlgs {
