@@ -23,24 +23,24 @@ func TestNewScrypt(t *testing.T) {
 			name: "Custom config",
 			config: &types.Config{
 				SaltLength: 16,
-				ParamConfig: (&Params{
+				Params: (&Params{
 					N:      16384,
 					R:      8,
 					P:      1,
 					KeyLen: 32,
-				}).String(),
+				}).ToMap(),
 			},
 			wantErr: false,
 		},
 		{
 			name: "Invalid config - invalid N",
 			config: &types.Config{
-				ParamConfig: (&Params{
+				Params: (&Params{
 					N:      1,
 					R:      8,
 					P:      1,
 					KeyLen: 32,
-				}).String(),
+				}).ToMap(),
 				SaltLength: 16,
 			},
 			wantErr: true,

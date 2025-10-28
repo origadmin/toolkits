@@ -23,18 +23,18 @@ func TestNewBcryptCrypto(t *testing.T) {
 			name: "Custom config",
 			config: &types.Config{
 				SaltLength: 16,
-				ParamConfig: (&Params{
+				Params: (&Params{
 					Cost: types.DefaultCost,
-				}).String(),
+				}).ToMap(),
 			},
 			wantErr: false,
 		},
 		{
 			name: "Invalid config - zero cost",
 			config: &types.Config{
-				ParamConfig: (&Params{
+				Params: (&Params{
 					Cost: 0,
-				}).String(),
+				}).ToMap(),
 				SaltLength: 16,
 			},
 			wantErr: true,

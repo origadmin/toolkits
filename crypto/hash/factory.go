@@ -70,7 +70,6 @@ func (f *Factory) GetSpec(specStr string) (types.Spec, bool) {
 	}
 	return parsed, true
 
-	//
 	//spec, exists := f.specs[canonicalName]
 	//return spec, exists
 }

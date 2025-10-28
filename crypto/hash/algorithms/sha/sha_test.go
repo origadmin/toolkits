@@ -27,7 +27,7 @@ func TestAllSHASpecs(t *testing.T) {
 		{name: "SHA512_256", algSpec: specSHA512_256},
 		{name: "SHA3_224", algSpec: specSHA3_224},
 		{name: "SHA3_256", algSpec: specSHA3_256},
-		{name: "SHA3_384", algSpec: sha3_384AlgSpec},
+		{name: "SHA3_384", algSpec: specSHA3_384},
 		{name: "SHA3_512", algSpec: specSHA3_512},
 	}
 
@@ -68,7 +68,7 @@ func TestNewShaFunctions(t *testing.T) {
 		{"NewSha512", NewSha512, specSHA512},
 		{"NewSha3224", NewSha3224, specSHA3_224},
 		{"NewSha3256", NewSha3256, specSHA3_256},
-		{"NewSha3384", NewSha3384, sha3_384AlgSpec},
+		{"NewSha3384", NewSha3384, specSHA3_384},
 		{"NewSha3512", NewSha3512, specSHA3_512},
 		{"NewSha3512224", NewSha3512224, specSHA512_224},
 		{"NewSha3512256", NewSha3512256, specSHA512_256},
