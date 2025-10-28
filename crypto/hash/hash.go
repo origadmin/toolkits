@@ -2,7 +2,47 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package hash provides the hash functions
+/*
+Package hash provides a unified and extensible framework for password hashing and verification.
+
+It offers a consistent interface to work with a variety of hashing algorithms,
+from standard ones like SHA-256 and bcrypt to custom, user-defined implementations.
+
+Key Features:
+
+  - Unified Interface: The `Crypto` interface provides a simple `Hash` and `Verify`
+    method, abstracting away the complexities of each underlying algorithm.
+
+  - Extensible by Design: New algorithms can be easily integrated by implementing the
+    `scheme.Scheme` and `scheme.Factory` interfaces and registering them using the
+    `Register` function.
+
+  - Automatic Algorithm Detection: The library automatically identifies the algorithm
+    from the encoded hash string during verification, allowing for seamless algorithm
+    upgrades.
+
+  - Tunable Parameters: Algorithm-specific parameters, such as bcrypt's cost or
+    Argon2's memory usage, can be configured at creation time using option functions.
+
+Basic Usage:
+
+	// Create a new instance for a specific algorithm (e.g., bcrypt).
+	crypto, err := hash.NewCrypto(types.BCRYPT, bcrypt.WithCost(12))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Hash a password.
+	hashed, err := crypto.Hash("my-secret-password")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Verify the password against the hash.
+	if err := crypto.Verify(hashed, "my-secret-password"); err != nil {
+		fmt.Println("Password verification failed!")
+	}
+*/
 package hash
 
 import (
