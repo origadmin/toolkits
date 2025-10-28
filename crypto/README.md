@@ -97,3 +97,123 @@ func demonstrateUpgrade() {
 The framework is fully extensible. You can add your own hashing algorithm by implementing the `scheme.Scheme` and `scheme.Factory` interfaces.
 
 See `examples/example_test.go` for a complete, working example of how to define and register a custom algorithm.
+
+## Random Data Generation (`rand` package)
+
+The `rand` package provides cryptographically secure, high-performance random string and byte generation. It is designed for scenarios requiring strong randomness, such as generating passwords, tokens, or cryptographic keys.
+
+### Key Features
+
+- **Cryptographically Secure**: Utilizes `crypto/rand.Reader` for all random byte generation, ensuring high-quality, unpredictable randomness suitable for security-sensitive applications.
+- **Modulo Bias Elimination**: Employs rejection sampling to guarantee a statistically uniform distribution of characters from the chosen character set, even when the character set size is not a power of two.
+- **High Performance**: Optimized for speed by using an internal buffer to minimize expensive system calls to `crypto/rand.Reader`.
+- **Lazy Initialization for Global Functions**: Package-level convenience functions (`RandomString`, `RandomBytes`, etc.) use `sync.Once` to lazily initialize and reuse `Generator` instances, reducing startup overhead and resource consumption.
+- **Flexible Character Sets**: Supports predefined character sets (digits, lowercase, uppercase, symbols, alphanumeric, all with symbols) and custom character sets.
+- **Efficient `io.Reader` Implementation**: The `Read` method provides the most performant way to fill pre-allocated byte slices, avoiding internal allocations and making it ideal for high-throughput scenarios.
+
+### Basic Usage
+
+#### Generating Alphanumeric Random Strings
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/origadmin/toolkits/crypto/rand"
+)
+
+func main() {
+	// Generate a 16-character alphanumeric random string
+	randomStr, err := rand.RandomString(16)
+	if err != nil {
+		log.Fatalf("Failed to generate random string: %v", err)
+	}
+	fmt.Printf("Alphanumeric Random String: %s\n", randomStr)
+
+	// Generate 32 alphanumeric random bytes
+	randomBytes, err := rand.RandomBytes(32)
+	if err != nil {
+		log.Fatalf("Failed to generate random bytes: %v", err)
+	}
+	fmt.Printf("Alphanumeric Random Bytes: %x\n", randomBytes)
+}
+```
+
+#### Generating Random Strings with Symbols
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/origadmin/toolkits/crypto/rand"
+)
+
+func main() {
+	// Generate a 20-character random string including symbols
+	randomStrWithSymbols, err := rand.RandomStringWithSymbols(20)
+	if err != nil {
+		log.Fatalf("Failed to generate random string with symbols: %v", err)
+	}
+	fmt.Printf("Random String with Symbols: %s\n", randomStrWithSymbols)
+}
+```
+
+#### Using a Custom Character Set
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/origadmin/toolkits/crypto/rand"
+)
+
+func main() {
+	// Create a generator with a custom character set (e.g., only hex characters)
+	hexCharset := "0123456789abcdef"
+	hexGenerator := rand.NewGeneratorWithCharset(hexCharset)
+
+	// Generate a 64-character hex string
+	hexString, err := hexGenerator.RandString(64)
+	if err != nil {
+		log.Fatalf("Failed to generate hex string: %v", err)
+	}
+	fmt.Printf("Custom Hex String: %s\n", hexString)
+}
+```
+
+#### High-Performance Byte Generation with `Read`
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/origadmin/toolkits/crypto/rand"
+)
+
+func main() {
+	// Create a generator for alphanumeric characters
+	gen := rand.NewGenerator(rand.KindAlphanumeric)
+
+	// Pre-allocate a byte slice
+	buffer := make([]byte, 128)
+
+	// Fill the buffer with random bytes using the Read method
+	n, err := gen.Read(buffer)
+	if err != nil {
+		log.Fatalf("Failed to read random bytes: %v", err)
+	}
+	fmt.Printf("Read %d random bytes: %s\n", n, string(buffer))
+}
+```
