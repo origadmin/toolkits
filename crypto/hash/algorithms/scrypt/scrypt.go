@@ -67,11 +67,11 @@ func (c *Scrypt) Hash(password string) (*types.HashParts, error) {
 
 // HashWithSalt implements the hash with salt method
 func (c *Scrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
-	hash, err := scrypt.Key([]byte(password), salt, c.params.N, c.params.R, c.params.P, c.params.KeyLen)
+	hashBytes, err := scrypt.Key([]byte(password), salt, c.params.N, c.params.R, c.params.P, c.params.KeyLen)
 	if err != nil {
 		return nil, err
 	}
-	return types.NewHashParts(c.Spec()).WithHashSalt(hash, salt).WithParams(c.params.ToMap()), nil
+	return types.NewHashParts(c.Spec(), hashBytes, salt, c.params), nil
 }
 
 // Verify implements the verify method

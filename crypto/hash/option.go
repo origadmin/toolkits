@@ -56,3 +56,11 @@ func ConfigFromHashParts(parts *types.HashParts) *types.Config {
 		Params:     parts.Params,
 	}
 }
+
+// DefaultConfig return to the default configuration
+func DefaultConfig() *types.Config {
+	return &types.Config{
+		SaltLength: types.DefaultSaltLength, // Default salt length
+		Params:     make(map[string]string),
+	}
+}

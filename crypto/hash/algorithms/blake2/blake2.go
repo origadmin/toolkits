@@ -69,7 +69,7 @@ func (c *Blake2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 		h.Write(salt)
 	}
 	hashBytes := h.Sum(nil)
-	return types.NewHashParts(c.algSpec).WithHashSalt(hashBytes, salt).WithParams(c.params.ToMap()), nil
+	return types.NewHashParts(c.Spec(), hashBytes, salt, c.params), nil
 }
 
 // Verify implements the verify method

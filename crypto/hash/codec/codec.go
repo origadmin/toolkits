@@ -34,7 +34,7 @@ type Version interface {
 	Version() string
 }
 
-// codec defines the interface for hash encoding and decoding operations
+// Codec defines the interface for hash encoding and decoding operations
 type Codec interface {
 	Encoder
 	Decoder
@@ -106,10 +106,9 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 
 // NewCodec creates a new codec
 func NewCodec(opts ...Option) Codec {
-	return configure.Apply(
-		&codec{
-			version: types.DefaultVersion,
-		}, opts)
+	return configure.Apply(&codec{
+		version: types.DefaultVersion,
+	}, opts)
 }
 
 // Option defines configuration options for the codec

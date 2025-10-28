@@ -68,4 +68,14 @@ func DefaultParams() *Params {
 	}
 }
 
+// WithCost sets the cost parameter for the bcrypt algorithm.
+func WithCost(cost int) func(cfg *types.Config) {
+	return func(cfg *types.Config) {
+		if cfg.Params == nil {
+			cfg.Params = make(map[string]string)
+		}
+		cfg.Params["c"] = fmt.Sprintf("%d", cost)
+	}
+}
+
 var _ validator.Parameters = (*Params)(nil)

@@ -64,7 +64,7 @@ func (c *PBKDF2) Hash(password string) (*types.HashParts, error) {
 // HashWithSalt implements the hash with salt method
 func (c *PBKDF2) HashWithSalt(password string, salt []byte) (*types.HashParts, error) {
 	hashBytes := pbkdf2.Key([]byte(password), salt, c.params.Iterations, int(c.params.KeyLength), c.prf)
-	return types.NewHashParts(c.Spec()).WithHashSalt(hashBytes, salt).WithParams(c.params.ToMap()), nil
+	return types.NewHashParts(c.Spec(), hashBytes, salt, c.params), nil
 }
 
 // Verify implements the verify method

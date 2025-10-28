@@ -23,6 +23,14 @@ func (c *Config) String() string {
 	return fmt.Sprintf("SaltLength: %d, Params: %s", c.SaltLength, string(b))
 }
 
+// ConfigFromHashParts creates a Config from a HashParts object.
+func ConfigFromHashParts(parts *HashParts) *Config {
+	return &Config{
+		SaltLength: len(parts.Salt),
+		Params:     parts.Params,
+	}
+}
+
 // DefaultConfig return to the default configuration
 func DefaultConfig() *Config {
 	return &Config{

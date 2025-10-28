@@ -8,6 +8,14 @@ import (
 	"encoding/json"
 )
 
+// ParamContainer defines the interface for any object that can be converted into a parameter map.
+// This avoids a circular dependency on the validator package, as any type that implements
+// these methods will implicitly satisfy the interface.
+type ParamContainer interface {
+	ToMap() map[string]string
+	IsNil() bool
+}
+
 // HashParts represents the parts of a hash, designed to be a portable data container
 // that stores parsed algorithm information.
 // It is suitable for serialization (e.g., to JSON) for debugging or transfer.
@@ -30,7 +38,17 @@ type HashParts struct {
 }
 
 // WithParams sets the parameters for the hash parts and returns the modified HashParts instance.
-func (h *HashParts) WithParams(params map[string]string) *HashParts {
+func (h *HashParts) WithParams(params ParamContainer) *HashParts {
+	if params != nil && !params.IsNil() {
+		h.Params = params.ToMap()
+	}
+	return h
+}
+
+func (h *HashParts) WithMapParams(params map[string]string) *HashParts {
+	if params == nil {
+		return h
+	}
 	h.Params = params
 	return h
 }
@@ -126,11 +144,27 @@ func FromJSON(jsonStr string) (*HashParts, error) {
 	return &parts, nil
 }
 
-// NewHashParts creates a new HashParts instance using the provided algorithm Spec.
-// It initializes Params to an empty map to prevent nil map panics.
-func NewHashParts(spec Spec) *HashParts {
+// NewHashParts is the primary constructor for creating a fully-formed HashParts object.
+// It accepts a ParamContainer interface and handles the conversion to a map internally.
+func NewHashParts(spec Spec, hash, salt []byte, params ParamContainer) *HashParts {
+	var paramsMap map[string]string
+	if params != nil && !params.IsNil() {
+		paramsMap = params.ToMap()
+	} else {
+		paramsMap = make(map[string]string)
+	}
+
 	return &HashParts{
 		Spec:   spec,
-		Params: make(map[string]string), // Ensure Params is initialized
+		Hash:   hash,
+		Salt:   salt,
+		Params: paramsMap,
+	}
+}
+
+func NewHashPartsWithSpec(spec Spec) *HashParts {
+	return &HashParts{
+		Spec:   spec,
+		Params: make(map[string]string),
 	}
 }

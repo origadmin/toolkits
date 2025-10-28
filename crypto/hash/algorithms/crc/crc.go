@@ -44,7 +44,8 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 	if len(salt) > 0 {
 		_, _ = h.Write(salt) // Error is always nil for standard hash.Hash.Write
 	}
-	return types.NewHashParts(c.Spec()).WithHashSalt(h.Sum(nil), salt), nil
+	hashBytes := h.Sum(nil)
+	return types.NewHashParts(c.Spec(), hashBytes, salt, nil), nil
 }
 
 // Verify implements the verify method

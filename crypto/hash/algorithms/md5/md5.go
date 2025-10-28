@@ -66,7 +66,7 @@ func (c *MD5) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 		h.Write(salt)
 	}
 	hashBytes := h.Sum(nil)
-	return types.NewHashParts(c.Spec()).WithHashSalt(hashBytes[:], salt), nil
+	return types.NewHashParts(c.Spec(), hashBytes, salt, nil), nil
 }
 
 // Verify implements the verify method
