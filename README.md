@@ -4,7 +4,7 @@ This repository contains a collection of Go-specific packages designed to provid
 
 ## Introduction
 
-The Toolkit is a collection of Go-specific packages providing idiomatic solutions for common tasks encountered in Go-based software development. It aims to streamline your workflow, enhance code quality, and promote consistency across Go projects. This README focuses on the Toolkit, detailing its contents, usage, and contribution guidelines.
+The `toolkits` module is a collection of Go packages providing idiomatic solutions for common tasks encountered in Go-based software development. It aims to streamline your workflow, enhance code quality, and promote consistency across Go projects.
 
 ### Key Features
 
@@ -16,91 +16,51 @@ The Toolkit is a collection of Go-specific packages providing idiomatic solution
 
 ## Available Packages
 
-The Toolkit main package is `toolkit` and is the interface package.:
+The `toolkits` module currently offers the following packages:
 
-1. [**registry**](registry): The registry package is register implementation for the main package definition.
-
-The Toolkit currently offers the following packages:
-
-1. [**codec**](codec): A set of utilities for serializing and deserializing data in a variety of formats.
-2. [**errors**](errors): Enhanced error handling utilities, such as error wrapping, context propagation, and error inspection.
-3. [**idgen**](idgen): A package for generating unique identifiers.
-4. [**crypto**](crypto): A powerful library designed to provide cryptographic functionalities, including hashing, encryption, and decryption. This toolkit is built with performance and security in mind, making it an essential component for any application that requires secure data handling.
+1.  [**codec**](./codec): Utilities for encoding and decoding data in various formats.
+2.  [**crypto**](./crypto): A unified and extensible framework for cryptographic operations, primarily password hashing and verification.
+3.  [**decode**](./decode): Generic utilities for decoding various data structures.
+4.  [**errors**](./errors): Enhanced error handling utilities, such as error wrapping, context propagation, and error inspection.
+5.  [**helpers**](./helpers): A collection of small, reusable utility functions.
+6.  [**identifier**](./identifier): Tools for generating and managing unique identifiers.
+7.  [**io**](./io): Extended I/O utilities.
+8.  [**mail**](./mail): Utilities for sending and managing emails.
+9.  [**metrics**](./metrics): Tools and interfaces for collecting and exposing application metrics.
+10. [**net**](./net): Network-related utilities.
+11. [**slogx**](./slogx): Extensions and helpers for structured logging.
+12. [**version**](./version): Utilities for managing and exposing application version information.
 
 ## Getting Started
 
-### To incorporate the Toolkit into your project, follow these steps:
+### To incorporate packages from `toolkits` into your project, follow these steps:
 
 1. **Add the dependency**:
 
-- Add the Toolkit as a dependency in your `go.mod` file, specifying the latest version:
+- Add the `toolkits` module as a dependency in your `go.mod` file, specifying the latest version:
 
 ```bash
-go get github.com/origadmin/toolkit@vX.Y.Z
+go get github.com/origadmin/toolkits@vX.Y.Z
 ```
 
 - Replace `vX.Y.Z` with the desired version or `latest` to fetch the most recent release.
 
 2. **Import required packages**:
 
-- In your Go source files, import the necessary packages from the Toolkit:
+- In your Go source files, import the necessary packages from `toolkits`:
 
 ```go
 import (
-"github.com/origadmin/toolkits/errors"
-"github.com/origadmin/runtime"
-//    "github.com/origadmin/runtime/xxx"
-"github.com/origadmin/runtime/config"
-"github.com/origadmin/contrib"
-//    "github.com/origadmin/contrib/xxx"
-"github.com/origadmin/contrib/config"
+    "github.com/origadmin/toolkits/crypto/hash"
+    "github.com/origadmin/toolkits/errors"
+    // ... and other packages as needed
 )
 ```
 
 3. **Use the toolkit components**:
 
-- Refer to the package documentation and examples to learn how to utilize the toolkit components in your code.
+- Refer to the package-specific documentation (e.g., `toolkits/crypto/README.md`) and examples to learn how to utilize the components in your code.
 - You can access the documentation by running `godoc` locally or visiting the package documentation hosted on godoc.org.
-
-## Call relationships intro
-
-In `OrigAdmin`, the call relationship between packages is as follows:
-
-- [Contrib](https://github.com/origadmin/contrib) : in view of the toolkits interface, the realization of the runtime and kratos.
-    - [contrib/consul/config ](https://github.com/origadmin/contrib/consul/config) : the runtime config to encapsulate an implementation, encapsulates the consul of the client
-    - [contrib/consul/registry](https://github.com/origadmin/contrib/consul/registry) : An implementation of kratos config's encapsulation that encapsulates consul's client
-    - [contrib/config](https://github.com/origadmin/contrib/config) : kratos config encapsulation of implementation
-
-- [Runtime](https://github.com/origadmin/runtime) : encapsulates the kratos runtime required interfaces, including basic functions, initialize the application, as well as the service registry, service discovery, etc.
-    - [runtime/registry](https://github.com/origadmin/runtime/registry) : provide basic service registry found the function definition.
-    - [runtime/config ](https://github.com/origadmin/runtime/config) : provide configuration file is read and parse the definition of the configuration of the analytic function.
-- [Toolkit](https://github.com/origadmin/toolkits) : toolkits provide some of the basic function of the general interface definition or implementation, such as the serialization and deserialization, error handling, a unique identifier generated, etc.
-    -  [toolkits/codec](https://github.com/origadmin/toolkits/codec) : provide a variety of formats data serialization and deserialization.
-    -  [toolkit/errors](https://github.com/origadmin/toolkits/errors) : provide enhanced error handling utility, such as wrong packaging, context propagation and error checking.
-
-```shell
-your_project --> contrib --> contrib/config --> runtime --> toolkits
-             --> contrib/config
-             --> runtime --> rumtime/registry
-             --> rumtime/registry
-             --> toolkits
-             --> toolkits/codec
-             --> toolkits/errors
-             --> other_package
-```
-
-```mermaid
-graph LR
-A(your_project)
-A --> B(contrib)
-A --> C(runtime)
-A --> D(toolkits)
-B --> E(contrib/config)
-C --> F(runtime/config)
-C --> G(runtime/registry)
-D --> H(toolkits/codec)
-D --> I(toolkits/errors)
-```
 
 ## Contributing
 

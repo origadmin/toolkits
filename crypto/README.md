@@ -2,95 +2,98 @@
 
 ## Overview
 
-The Crypto Toolkit is a powerful library designed to provide cryptographic functionalities, including hashing, encryption, and decryption. This toolkit is built with performance and security in mind, making it an essential component for any application that requires secure data handling.
+The Crypto Toolkit provides a unified and extensible framework for cryptographic operations, with a primary focus on password hashing and verification.
 
-## Hashing
+## Hashing (`hash` package)
 
-One of the standout features of the Crypto Toolkit is its robust hashing capabilities. Hashing is a fundamental aspect of cryptography, used to ensure data integrity and authenticity. The toolkit supports various hashing algorithms, allowing developers to choose the most suitable one for their needs.
+The `hash` package offers a consistent interface to work with a variety of hashing algorithms, from standard ones like SHA-256 and bcrypt to custom, user-defined implementations.
 
-### Key Features of Hashing:
+### Key Features
 
-- **Speed and Efficiency**: The hashing functions are optimized for performance, ensuring that even large datasets can be processed quickly without compromising security.
-- **Multiple Algorithms**: The toolkit supports a variety of hashing algorithms, including SHA-256, SHA-512, Argon2, Bcrypt, Scrypt, and others, providing flexibility for different use cases. This allows for easy upgrades to stronger algorithms without modifying the password verification logic.
-- **Algorithm Compatibility**: When users need to enhance security or switch algorithms, the toolkit ensures compatibility with existing hashed passwords. This means you can seamlessly transition to a new hashing algorithm without needing to rehash all stored passwords.
-- **Built-in Salt Management**: The toolkit includes built-in salt management, eliminating the need for users to manage salts manually. This enhances security by ensuring that each hash is unique, even for identical inputs.
-- **Collision Resistance**: The hashing algorithms are designed to minimize the risk of collisions, ensuring that each unique input produces a unique hash output.
-- **Secure Data Integrity**: By using cryptographic hashes, you can verify the integrity of your data, ensuring that it has not been altered or tampered with during transmission or storage.
-- **Customizable Parameters**: Each hashing algorithm allows for customizable parameters such as salt length, iteration count, and memory cost, enabling developers to fine-tune the security and performance of their hashing operations.
-- **Caching Mechanism**: The toolkit includes a caching mechanism to optimize the verification process, reducing the computational overhead for frequently verified hashes.
+- **Unified Interface**: The `Crypto` interface provides simple `Hash` and `Verify` methods, abstracting away the complexities of each underlying algorithm.
+- **Extensible by Design**: New algorithms can be easily integrated by implementing the `scheme.Scheme` and `scheme.Factory` interfaces and registering them.
+- **Automatic Algorithm Detection**: The library automatically identifies the algorithm from the encoded hash string during verification, allowing for seamless algorithm upgrades. You can hash a password with SHA-256, and later verify it with a `Crypto` instance configured to use Argon2.
+- **Tunable Parameters**: Algorithm-specific parameters, such as bcrypt's cost or Argon2's memory usage, can be configured at creation time using option functions (e.g., `bcrypt.WithCost`).
+- **Built-in Salt Management**: Secure salt generation is handled automatically, but the library also supports hashing with a user-provided salt for specific use cases.
+- **Verification Caching**: Repeated verification attempts for the same hash and password are automatically cached to reduce computational overhead.
 
-### Supported Algorithms
+### Basic Usage
 
-The Crypto Toolkit supports a wide range of hashing algorithms, including but not limited to:
-
-- **Argon2**: A modern, memory-hard hashing algorithm designed to resist GPU and ASIC attacks.
-- **Bcrypt**: A widely-used hashing algorithm that is resistant to brute-force attacks.
-- **Scrypt**: A memory-intensive hashing algorithm that is designed to be computationally expensive.
-- **SHA-256/SHA-512**: Secure Hash Algorithms that are widely used for data integrity checks.
-- **PBKDF2**: A key derivation function that is commonly used for password hashing.
-- **HMAC**: A keyed-hash message authentication code that provides both data integrity and authenticity.
-
-### Compatibility and Salt Management
-
-The Crypto Toolkit is designed to be highly compatible with existing hashed passwords. When upgrading to a stronger hashing algorithm, the toolkit can still verify passwords that were hashed with the older algorithm. This ensures a smooth transition without requiring users to reset their passwords.
-Additionally, the toolkit provides built-in salt management, which automatically generates and manages salts for each hash. This eliminates the need for developers to manually handle salts, reducing the risk of security vulnerabilities. However, the toolkit also supports custom salt generation, allowing developers to use their own salt values if needed.
-
-### Example of Compatibility and Salt Management
+This example demonstrates how to create a hash with a standard algorithm and verify it.
 
 ```go
 package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/origadmin/toolkits/crypto/hash"
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/bcrypt"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 func main() {
-	// The hash is generated using the SHA-256 algorithm
-	sha256Crypto, err := hash.NewCrypto(types.TypeSha256)
+	password := "my-secret-password"
+
+	// 1. Create a crypto instance with a specific algorithm and options.
+	// Here, we use bcrypt with a custom cost.
+	c, err := hash.NewCrypto(types.BCRYPT, bcrypt.WithCost(10))
 	if err != nil {
-		fmt.Println("Failed to create SHA-256 crypto:", err)
-		return
+		log.Fatalf("Failed to create crypto: %v", err)
 	}
 
-	sha256Hash, err := sha256Crypto.Hash("myPassword123")
+	// 2. Hash the password. The result is a single, encoded string that contains
+	//    the algorithm name, parameters, salt, and the hash itself.
+	hashed, err := c.Hash(password)
 	if err != nil {
-		fmt.Println("Failed to hash with SHA-256:", err)
-		return
+		log.Fatalf("Hashing failed: %v", err)
 	}
-	fmt.Println("SHA-256 Hash:", sha256Hash)
+	fmt.Println("Bcrypt Hash:", hashed)
 
-	// Upgrade to the Argon2 algorithm
-	argon2Crypto, err := hash.NewCrypto(types.TypeArgon2)
-	if err != nil {
-		fmt.Println("Failed to create Argon2 crypto:", err)
-		return
-	}
-
-	// Verify the old SHA-256 hash
-	err = argon2Crypto.Verify(sha256Hash, "myPassword123")
-	if err != nil {
-		fmt.Println("SHA-256 verification failed:", err)
+	// 3. Verify the password. The `Verify` method automatically detects the algorithm
+	//    from the hashed string and uses the correct logic to compare.
+	if err := c.Verify(hashed, password); err != nil {
+		fmt.Println("Verification failed!")
 	} else {
-		fmt.Println("SHA-256 verification succeeded")
-	}
-
-	// Use Argon2 to generate a new hash
-	argon2Hash, err := argon2Crypto.Hash("myPassword123")
-	if err != nil {
-		fmt.Println("Failed to hash with Argon2:", err)
-		return
-	}
-	fmt.Println("Argon2 Hash:", argon2Hash)
-
-	// Verify the Argon2 hash
-	err = argon2Crypto.Verify(argon2Hash, "myPassword123")
-	if err != nil {
-		fmt.Println("Argon2 verification failed:", err)
-	} else {
-		fmt.Println("Argon2 verification succeeded")
+		fmt.Println("Verification successful!")
 	}
 }
 ```
+
+### Advanced Usage
+
+#### Algorithm Upgrade
+
+The `hash` package makes it easy to upgrade your hashing algorithms without forcing users to reset their passwords. The `Verify` method can check passwords against hashes created by any registered algorithm, regardless of the `Crypto` instance's default algorithm.
+
+```go
+func demonstrateUpgrade() {
+	password := "password-to-migrate"
+
+	// 1. Assume you have an old hash created with SHA-256.
+	sha256Crypto, _ := hash.NewCrypto(types.SHA256)
+	oldHash, _ := sha256Crypto.Hash(password)
+	fmt.Println("Old SHA-256 Hash:", oldHash)
+
+	// 2. Your application is now configured to use the more secure Argon2 algorithm.
+	argon2Crypto, _ := hash.NewCrypto(types.ARGON2)
+
+	// 3. A user logs in. You can still verify their password against the old SHA-256 hash.
+	if err := argon2Crypto.Verify(oldHash, password); err == nil {
+		fmt.Println("Verification of old hash successful!")
+
+		// 4. (Recommended) Since verification was successful, create a new hash with the
+		//    upgraded algorithm and store it in your database for future logins.
+		newHash, _ := argon2Crypto.Hash(password)
+		fmt.Println("New Argon2 Hash:", newHash)
+		// database.UpdateUserPasswordHash(userID, newHash)
+	}
+}
+```
+
+#### Custom Algorithm
+
+The framework is fully extensible. You can add your own hashing algorithm by implementing the `scheme.Scheme` and `scheme.Factory` interfaces.
+
+See `examples/example_test.go` for a complete, working example of how to define and register a custom algorithm.
