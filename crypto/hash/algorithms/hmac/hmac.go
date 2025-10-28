@@ -58,6 +58,16 @@ func NewHMAC(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 		return nil, err
 	}
 
+	// Explicitly check for unsuitable hash types for HMAC
+	// MAPHASH, ADLER32, CRC32, FNV are not cryptographically secure and should not be used with HMAC
+	switch hashHash {
+	case stdhash.MAPHASH, stdhash.ADLER32, stdhash.CRC32, stdhash.CRC32_ISO, stdhash.CRC32_CAST, stdhash.CRC32_KOOP,
+		stdhash.CRC64_ISO, stdhash.CRC64_ECMA, stdhash.FNV32, stdhash.FNV32A, stdhash.FNV64, stdhash.FNV64A,
+		stdhash.FNV128, stdhash.FNV128A:
+		return nil, errors.ErrUnsupportedHashForHMAC
+	default:
+	}
+
 	return &HMAC{
 		algSpec:  algSpec,
 		config:   v.Config,
@@ -85,22 +95,16 @@ func (c *HMAC) HashWithSalt(password string, salt []byte) (*types.HashParts, err
 	h := hmac.New(c.hashHash.New, salt)
 	h.Write([]byte(password))
 	hash := h.Sum(nil)
-	return types.NewHashPartsWithHashSalt(c.Spec(), hash, salt), nil
+	return types.NewHashParts(c.Spec()).WithHashSalt(hash, salt), nil
 }
 
 // Verify implements the verify method
 func (c *HMAC) Verify(parts *types.HashParts, password string) error {
-	// parts.Spec is already of type types.Spec, so no need to parse it again.
-	// We can directly use parts.Spec.
-	resolvedAlgSpec, err := ResolveSpec(parts.Spec)
-	if err != nil {
-		return err
-	}
-	if types.HMAC != resolvedAlgSpec.Name {
+	if types.HMAC != parts.Spec.Name {
 		return errors.ErrAlgorithmMismatch
 	}
 
-	hashHash, err := types.Hash(resolvedAlgSpec.Underlying)
+	hashHash, err := types.Hash(parts.Spec.Underlying)
 	if err != nil {
 		return err
 	}

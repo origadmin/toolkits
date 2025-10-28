@@ -44,7 +44,7 @@ func (c *CRC) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 	if len(salt) > 0 {
 		_, _ = h.Write(salt) // Error is always nil for standard hash.Hash.Write
 	}
-	return types.NewHashPartsFull(c.Spec(), h.Sum(nil), salt, nil), nil
+	return types.NewHashParts(c.Spec()).WithHashSalt(h.Sum(nil), salt), nil
 }
 
 // Verify implements the verify method
@@ -81,7 +81,7 @@ func NewCRC(algSpec types.Spec, config *types.Config) (scheme.Scheme, error) {
 	// which is handled by the main hash package's config validation.
 
 	// Removed: algSpec = must.Do(ResolveSpec(algSpec))
-	hashHash, err := stdhash.ParseHash(algSpec.Name)
+	hashHash, err := types.Hash(algSpec.Name)
 	if err != nil {
 		return nil, err
 	}

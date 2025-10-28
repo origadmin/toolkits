@@ -26,10 +26,10 @@ func (p *Params) Validate(config *types.Config) error {
 		return fmt.Errorf("invalid salt length: %d, must be at least 8", config.SaltLength)
 	}
 
-	if p.TimeCost < 1 {
+	if p.TimeCost < 3 {
 		return fmt.Errorf("invalid time cost: %d", p.TimeCost)
 	}
-	if p.MemoryCost < 1 {
+	if p.MemoryCost < 64*1024 {
 		return fmt.Errorf("invalid memory cost: %d", p.MemoryCost)
 	}
 	if p.Threads < 1 {
@@ -45,7 +45,7 @@ func (p *Params) FromMap(params map[string]string) error {
 	if params == nil {
 		return fmt.Errorf("params is nil")
 	}
-	// Parse time cost
+	p.TimeCost = 0
 	if v, ok := params["t"]; ok {
 		timeCost, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
@@ -54,7 +54,7 @@ func (p *Params) FromMap(params map[string]string) error {
 		p.TimeCost = uint32(timeCost)
 	}
 
-	// Parse memory cost
+	p.MemoryCost = 0
 	if v, ok := params["m"]; ok {
 		memoryCost, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
@@ -63,7 +63,7 @@ func (p *Params) FromMap(params map[string]string) error {
 		p.MemoryCost = uint32(memoryCost)
 	}
 
-	// Parse threads
+	p.Threads = 0
 	if v, ok := params["p"]; ok {
 		threads, err := strconv.ParseUint(v, 10, 8)
 		if err != nil {
@@ -72,7 +72,7 @@ func (p *Params) FromMap(params map[string]string) error {
 		p.Threads = uint8(threads)
 	}
 
-	// Parse key length
+	p.KeyLength = 0
 	if v, ok := params["k"]; ok {
 		keyLength, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
@@ -114,6 +114,36 @@ func FromMap(m map[string]string) (params *Params, err error) {
 		return nil, err
 	}
 	return params, nil
+}
+
+func WithTimeCost(timeCost uint32) func(*types.Config) {
+	return func(c *types.Config) {
+		c.Params["t"] = fmt.Sprintf("%d", timeCost)
+	}
+}
+
+func WithMemoryCost(memoryCost uint32) func(*types.Config) {
+	return func(c *types.Config) {
+		c.Params["m"] = fmt.Sprintf("%d", memoryCost)
+	}
+}
+
+func WithThreads(threads uint8) func(*types.Config) {
+	return func(c *types.Config) {
+		c.Params["p"] = fmt.Sprintf("%d", threads)
+	}
+}
+
+func WithKeyLength(keyLength uint32) func(*types.Config) {
+	return func(c *types.Config) {
+		c.Params["k"] = fmt.Sprintf("%d", keyLength)
+	}
+}
+
+func WithParams(params *Params) func(*types.Config) {
+	return func(c *types.Config) {
+		c.Params = params.ToMap()
+	}
 }
 
 func DefaultParams() *Params {

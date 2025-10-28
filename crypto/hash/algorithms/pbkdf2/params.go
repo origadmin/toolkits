@@ -81,6 +81,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	params = &Params{}
 
 	// Parse iterations
+	params.Iterations = 0
 	if v, ok := m["i"]; ok {
 		iterations, err := strconv.Atoi(v)
 		if err != nil {
@@ -90,6 +91,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 	}
 
 	// Parse key length
+	params.KeyLength = 0
 	if v, ok := m["k"]; ok {
 		keyLength, err := strconv.Atoi(v)
 		if err != nil {

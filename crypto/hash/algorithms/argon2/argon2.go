@@ -63,7 +63,7 @@ func (c *Argon2) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 		c.params.Threads,
 		c.params.KeyLength,
 	)
-	return types.NewHashPartsFull(c.algSpec, hashBytes, salt, c.params.ToMap()), nil
+	return types.NewHashParts(c.algSpec).WithHashSalt(hashBytes, salt).WithParams(c.params.ToMap()), nil
 }
 
 // Verify implements the verify method

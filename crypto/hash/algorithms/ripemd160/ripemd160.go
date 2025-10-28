@@ -40,7 +40,7 @@ func (r *RIPEMD160) HashWithSalt(password string, salt []byte) (*types.HashParts
 	if len(salt) > 0 {
 		h.Write(salt)
 	}
-	return types.NewHashPartsFull(r.Spec(), h.Sum(nil), salt, nil), nil
+	return types.NewHashParts(r.Spec()).WithHashSalt(h.Sum(nil), salt), nil
 }
 
 // Verify implements the verify method

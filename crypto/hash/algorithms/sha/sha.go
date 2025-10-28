@@ -59,13 +59,13 @@ func (c *SHA) HashWithSalt(password string, salt []byte) (*types.HashParts, erro
 		newHash.Write(salt)
 	}
 	hashBytes := newHash.Sum(nil)
-	return types.NewHashPartsWithHashSalt(c.algSpec, hashBytes, salt), nil
+	return types.NewHashParts(c.algSpec).WithHashSalt(hashBytes, salt), nil
 }
 
 // Verify implements the verify method
 func (c *SHA) Verify(parts *types.HashParts, password string) error {
 	// parts.Spec is already of type types.Spec. Use its Name field for stdhash.ParseHash.
-	hashHash, err := stdhash.ParseHash(parts.Spec.Name)
+	hashHash, err := types.Hash(parts.Spec.Name)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,6 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // HashParts represents the parts of a hash, designed to be a portable data container
@@ -67,14 +66,64 @@ func (h *HashParts) WithHashSalt(hash []byte, salt []byte) *HashParts {
 	return h
 }
 
-// String returns the JSON string representation of HashParts.
-// If marshaling fails, it returns an error message indicating the failure.
-func (h *HashParts) String() string {
-	b, err := json.Marshal(h)
-	if err != nil {
-		return fmt.Sprintf("Error marshaling HashParts to JSON: %v", err)
+// AddParam adds a single parameter to the hash parts and returns the modified HashParts instance.
+func (h *HashParts) AddParam(key, value string) *HashParts {
+	if h.Params == nil {
+		h.Params = make(map[string]string)
 	}
-	return string(b)
+	h.Params[key] = value
+	return h
+}
+
+// DeleteParam removes a parameter from the hash parts and returns the modified HashParts instance.
+func (h *HashParts) DeleteParam(key string) *HashParts {
+	if h.Params != nil {
+		delete(h.Params, key)
+	}
+	return h
+}
+
+func (h *HashParts) IsEmpty() bool {
+	return h.Spec.Name == "" && len(h.Hash) == 0 && len(h.Salt) == 0
+}
+
+func (h *HashParts) Clone() *HashParts {
+	clone := &HashParts{
+		Spec:    New(h.Spec.Name, h.Spec.Underlying),
+		Version: h.Version,
+		Hash:    make([]byte, len(h.Hash)),
+		Salt:    make([]byte, len(h.Salt)),
+	}
+	copy(clone.Hash, h.Hash)
+	copy(clone.Salt, h.Salt)
+
+	if h.Params != nil {
+		clone.Params = make(map[string]string, len(h.Params))
+		for k, v := range h.Params {
+			clone.Params[k] = v
+		}
+	}
+
+	return clone
+}
+
+// ToJSON returns the JSON string representation of HashParts.
+// If marshaling fails, it returns an error message indicating the failure.
+func (h *HashParts) ToJSON() (string, error) {
+	data, err := json.MarshalIndent(h, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// FromJSON creates a HashParts instance from a JSON string.
+func FromJSON(jsonStr string) (*HashParts, error) {
+	var parts HashParts
+	if err := json.Unmarshal([]byte(jsonStr), &parts); err != nil {
+		return nil, err
+	}
+	return &parts, nil
 }
 
 // NewHashParts creates a new HashParts instance using the provided algorithm Spec.
@@ -83,30 +132,5 @@ func NewHashParts(spec Spec) *HashParts {
 	return &HashParts{
 		Spec:   spec,
 		Params: make(map[string]string), // Ensure Params is initialized
-	}
-}
-
-// NewHashPartsWithHashSalt creates a new HashParts instance with the given algorithm Spec, hash, and salt.
-// It initializes Params to an empty map to prevent nil map panics.
-func NewHashPartsWithHashSalt(spec Spec, hash []byte, salt []byte) *HashParts {
-	return &HashParts{
-		Spec:   spec,
-		Hash:   hash,
-		Salt:   salt,
-		Params: make(map[string]string), // Ensure Params is initialized
-	}
-}
-
-// NewHashPartsFull creates a new HashParts instance with all fields provided.
-// If the provided params map is nil, it initializes it to an empty map.
-func NewHashPartsFull(spec Spec, hash []byte, salt []byte, params map[string]string) *HashParts {
-	if params == nil {
-		params = make(map[string]string) // Ensure Params is initialized if nil
-	}
-	return &HashParts{
-		Spec:   spec,
-		Hash:   hash,
-		Salt:   salt,
-		Params: params,
 	}
 }

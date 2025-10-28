@@ -59,8 +59,8 @@ func TestNewBlake2(t *testing.T) {
 			name:            "BLAKE2b Invalid SaltLength",
 			algSpec:         types.New(types.BLAKE2b_256),
 			config:          &types.Config{SaltLength: 4},
-			expectedAlgName: "",
-			wantErr:         false, // Changed to false, as blake2.go does not validate SaltLength for BLAKE2
+			expectedAlgName: types.BLAKE2b_256,
+			wantErr:         false,
 		},
 		{
 			name:            "Unsupported Spec",

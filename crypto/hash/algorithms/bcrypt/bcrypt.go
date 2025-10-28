@@ -50,7 +50,7 @@ func (c *Bcrypt) HashWithSalt(password string, salt []byte) (*types.HashParts, e
 	if err != nil {
 		return nil, err
 	}
-	return types.NewHashPartsFull(c.Spec(), hashBytes, salt, c.params.ToMap()), nil
+	return types.NewHashParts(c.Spec()).WithHashSalt(hashBytes, salt), nil
 }
 
 // Verify implements the verify method

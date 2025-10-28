@@ -5,6 +5,7 @@
 package pbkdf2
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -125,6 +126,27 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			pbkdf2NoSalt, err := NewPBKDF2(tt.algSpec, cfg)
 			assert.Error(t, err)
 			assert.Nil(t, pbkdf2NoSalt)
+		})
+	}
+}
+func TestNewPBKDF2_UnsupportedHashes(t *testing.T) {
+	unsupportedHashes := []string{
+		"crc32", "crc32_iso", "crc32_cast", "crc32_koop",
+		"crc64_iso", "crc64_ecma",
+		"fnv32", "fnv32a", "fnv64", "fnv64a", "fnv128", "fnv128a",
+		"adler32", "maphash",
+	}
+
+	for _, hashName := range unsupportedHashes {
+		t.Run(fmt.Sprintf("PBKDF2_with_unsupported_%s", hashName), func(t *testing.T) {
+			_, err := NewPBKDF2(types.Spec{
+				Name:       types.PBKDF2,
+				Underlying: hashName,
+			}, DefaultConfig())
+
+			if err == nil {
+				t.Errorf("Expected error for unsupported hash algorithm: %s", hashName)
+			}
 		})
 	}
 }

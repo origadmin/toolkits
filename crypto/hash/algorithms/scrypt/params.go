@@ -43,6 +43,7 @@ func (p *Params) Validate(config *types.Config) error {
 
 func (p *Params) FromMap(params map[string]string) error {
 	// Parse N
+	p.N = 0
 	if v, ok := params["N"]; ok {
 		n, err := strconv.Atoi(v)
 		if err != nil {
@@ -51,7 +52,7 @@ func (p *Params) FromMap(params map[string]string) error {
 		p.N = n
 	}
 
-	// Parse R
+	p.R = 0
 	if v, ok := params["r"]; ok {
 		r, err := strconv.Atoi(v)
 		if err != nil {
@@ -60,7 +61,7 @@ func (p *Params) FromMap(params map[string]string) error {
 		p.R = r
 	}
 
-	// Parse P
+	p.P = 0
 	if v, ok := params["p"]; ok {
 		pp, err := strconv.Atoi(v)
 		if err != nil {
@@ -70,6 +71,7 @@ func (p *Params) FromMap(params map[string]string) error {
 	}
 
 	// Parse KeyLen
+	p.KeyLen = 0
 	if v, ok := params["k"]; ok {
 		keyLen, err := strconv.Atoi(v)
 		if err != nil {

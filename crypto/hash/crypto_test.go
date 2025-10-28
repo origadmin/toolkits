@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/origadmin/toolkits/crypto/hash/algorithms/argon2"
 	"github.com/origadmin/toolkits/crypto/hash/algorithms/blake2"
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -104,15 +105,15 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 	}, {
 		algName:         types.ARGON2,
 		expectedAlgName: types.ARGON2i,
-		options:         nil,
+		options:         []Option{argon2.WithParams(argon2.DefaultParams())},
 	}, {
 		algName:         types.ARGON2i,
 		expectedAlgName: types.ARGON2i,
-		options:         nil,
+		options:         []Option{argon2.WithParams(argon2.DefaultParams())},
 	}, {
 		algName:         types.ARGON2id,
 		expectedAlgName: types.ARGON2id,
-		options:         nil,
+		options:         []Option{argon2.WithParams(argon2.DefaultParams())},
 	}, {
 		algName:         types.BCRYPT,
 		expectedAlgName: types.BCRYPT,
@@ -257,7 +258,7 @@ func TestNewCryptoAllAlgorithms(t *testing.T) {
 			hashed, err := c.Hash(password)
 			if err == nil {
 				assert.NotEmpty(t, hashed, "Hashed string is empty for %s (Hash method)", tc.algName)
-
+				t.Logf("Hashed string for %s (Hash method): %s", tc.algName, hashed)
 				// 测试 Verify 方法 - 正确的密码
 				verifyErr := c.Verify(hashed, password)
 				assert.NoError(t, verifyErr, "Verification failed for %s with correct password (Hash method)", tc.algName)
