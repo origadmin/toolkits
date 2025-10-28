@@ -23,32 +23,7 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/types"
 )
 
-// legacyFactoryAdapter is an adapter that wraps the old creator and config functions
-// to implement the new scheme.Factory interface.
-type legacyFactoryAdapter struct {
-	creator       scheme.AlgorithmCreator
-	defaultConfig scheme.AlgorithmConfig
-	resolver      scheme.AlgorithmResolver
-}
-
-// Create implements the scheme.Factory interface by calling the wrapped creator.
-func (a *legacyFactoryAdapter) Create(spec types.Spec, cfg *types.Config) (scheme.Scheme, error) {
-	return a.creator(spec, cfg)
-}
-
-// Config implements the scheme.Factory interface by calling the wrapped defaultConfig function.
-func (a *legacyFactoryAdapter) Config() *types.Config {
-	return a.defaultConfig()
-}
-
-func (a *legacyFactoryAdapter) ResolveSpec(spec types.Spec) (types.Spec, error) {
-	return a.resolver(spec)
-}
-
 // --- Legacy Algorithm Registration ---
-
-// This section remains untouched to support the adapter pattern.
-// It will be removed once all algorithms are migrated to the new provider model.
 
 type algorithm struct {
 	algSpec       types.Spec
@@ -70,8 +45,8 @@ func wrapCreator(oldCreator func(*types.Config) (scheme.Scheme, error)) scheme.A
 	}
 }
 
-var (
-	algorithmMap = map[string]algorithm{
+func init() {
+	algorithmMap := map[string]algorithm{
 		types.ARGON2: {
 			algSpec:       types.New(types.ARGON2),
 			creator:       argon2.NewArgon2,
@@ -229,9 +204,7 @@ var (
 			resolver:      scheme.AlgorithmResolver(crc.ResolveSpec),
 		},
 	}
-)
 
-func init() {
 	// --- Legacy Algorithm Registration (Moved from init.go) ---
 	// Iterate over the old algorithmMap and register each one using the new factory system.
 	for _, alg := range algorithmMap {

@@ -8,9 +8,7 @@ package hash
 import (
 	"fmt"
 	"sync"
-	"time"
 
-	"github.com/goexts/generic/configure"
 	"github.com/patrickmn/go-cache"
 
 	"github.com/origadmin/toolkits/crypto/hash/codec"
@@ -39,43 +37,6 @@ type crypto struct {
 }
 
 var globalCodec = codec.NewCodec()
-
-// newCrypto is the internal core constructor for creating a Crypto instance.
-// It requires a factory to create schemes.
-func newCrypto(factory *Factory, defaultAlgName string, opts []Option) (Crypto, error) {
-	spec, exists := factory.GetSpec(defaultAlgName)
-	if !exists {
-		return nil, fmt.Errorf("hash: spec for algorithm '%s' not found or not registered", defaultAlgName)
-	}
-
-	//slog.Info("Creating default scheme", "Name", spec.Name, "Underlying", spec.Underlying)
-	// Get the factory for the algorithm once
-	schemeFactory, exists := factory.GetFactory(spec.Name)
-	if !exists {
-		return nil, fmt.Errorf("hash: factory for algorithm '%s' not found", spec.Name)
-	}
-
-	// Use the same factory instance to get config and create the scheme
-	defaultCfg := schemeFactory.Config()
-	cfg := configure.Apply(defaultCfg, opts)
-	var err error
-	nspec, err := schemeFactory.ResolveSpec(spec)
-	if err != nil {
-		return nil, fmt.Errorf("hash: failed to resolve spec for algorithm '%s': %w", spec.Name, err)
-	}
-	//slog.Info("Creating scheme", "Name", nspec.Name, "Underlying", nspec.Underlying)
-	defaultAlg, err := schemeFactory.Create(nspec, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("hash: failed to create default scheme: %w", err)
-	}
-
-	return &crypto{
-		factory:           factory,
-		defaultAlg:        defaultAlg,
-		schemeCache:       make(map[string]scheme.Scheme),
-		verificationCache: cache.New(5*time.Minute, 10*time.Minute),
-	}, nil
-}
 
 func (c *crypto) Spec() types.Spec {
 	return c.defaultAlg.Spec()
@@ -120,13 +81,12 @@ func (c *crypto) Verify(hashed, password string) error {
 	if parts == nil || parts.Hash == nil || parts.Salt == nil {
 		return errors.ErrInvalidHashParts
 	}
-	//slog.Info("Verifying hash", "Salt", parts.Salt)
+
 	// 3. Get the scheme (from cache or create new)
 	schemeInstance, err := c.getScheme(parts)
 	if err != nil {
 		return err
 	}
-	//slog.Info("Verifying schemeInstance hash", "Name", parts.Spec.Name, "Underlying", parts.Spec.Underlying)
 
 	// 4. Perform the actual verification
 	verificationErr := schemeInstance.Verify(parts, password)
@@ -169,10 +129,6 @@ func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) {
 	// Not in cache, create new scheme
 	cfg := ConfigFromHashParts(parts)
 
-	//slog.Info("Creating verification scheme",
-	//	"OriginalSpec", parts.Spec.String(),
-	//	"ResolvedSpec", resolvedSpec.String())
-
 	// Create the scheme with the resolved spec
 	newScheme, err := schemeFactory.Create(resolvedSpec, cfg)
 	if err != nil {
@@ -187,10 +143,6 @@ func (c *crypto) getScheme(parts *types.HashParts) (scheme.Scheme, error) {
 
 	// Update the original parts with the resolved spec
 	parts.Spec = resolvedSpec
-
-	//slog.Info("Created and cached verification scheme",
-	//	"Name", resolvedSpec.Name,
-	//	"Underlying", resolvedSpec.Underlying)
 
 	return newScheme, nil
 }

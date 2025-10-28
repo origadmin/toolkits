@@ -21,12 +21,12 @@ func TestNewCRC(t *testing.T) {
 		expectedStdHash stdhash.Hash
 		expectedErr     bool
 	}{
-		{name: "CRC32", algSpec: types.New("crc32"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
-		{name: "CRC32-ISO", algSpec: types.New("crc32-iso"), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
+		{name: "CRC32", algSpec: types.New(types.CRC32_ISO), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
+		{name: "CRC32-ISO", algSpec: types.New(types.CRC32_ISO), expectedAlgName: "crc32-iso", expectedStdHash: stdhash.CRC32_ISO, expectedErr: false},
 		{name: "CRC32-CAST", algSpec: types.New("crc32-cast"), expectedAlgName: "crc32-cast", expectedStdHash: stdhash.CRC32_CAST, expectedErr: false},
 		{name: "CRC32-KOOP", algSpec: types.New("crc32-koop"), expectedAlgName: "crc32-koop", expectedStdHash: stdhash.CRC32_KOOP, expectedErr: false},
-		{name: "CRC64", algSpec: types.New("crc64"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false}, // Default to ISO
-		{name: "CRC64-ISO", algSpec: types.New("crc64-iso"), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false},
+		{name: "CRC64", algSpec: types.New(types.CRC64_ISO), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false}, // Default to ISO
+		{name: "CRC64-ISO", algSpec: types.New(types.CRC64_ISO), expectedAlgName: "crc64-iso", expectedStdHash: stdhash.CRC64_ISO, expectedErr: false},
 		{name: "CRC64-ECMA", algSpec: types.New("crc64-ecma"), expectedAlgName: "crc64-ecma", expectedStdHash: stdhash.CRC64_ECMA, expectedErr: false},
 		{name: "Unsupported", algSpec: types.New("unsupported"), expectedAlgName: "", expectedStdHash: 0, expectedErr: true},
 	}
@@ -56,8 +56,8 @@ func TestCRCHashAndVerify(t *testing.T) {
 		algSpec           types.Spec
 		expectedAlgorithm string
 	}{
-		{name: "CRC32", algSpec: types.New("crc32"), expectedAlgorithm: "crc32-iso"},
-		{name: "CRC64", algSpec: types.New("crc64"), expectedAlgorithm: "crc64-iso"},
+		{name: "CRC32", algSpec: types.New(types.CRC32_ISO), expectedAlgorithm: "crc32-iso"},
+		{name: "CRC64", algSpec: types.New(types.CRC64_ISO), expectedAlgorithm: "crc64-iso"},
 	}
 
 	for _, tt := range tests {
@@ -108,7 +108,7 @@ func TestCRCHashAndVerify(t *testing.T) {
 
 func TestCRCHashWithSaltEmpty(t *testing.T) {
 	password := "testpassword"
-	algSpec := types.New("crc32")
+	algSpec := types.New(types.CRC32_ISO)
 
 	crc, err := NewCRC(algSpec, DefaultConfig())
 	assert.NoError(t, err)

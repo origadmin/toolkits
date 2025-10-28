@@ -22,7 +22,7 @@ func TestNewPBKDF2(t *testing.T) {
 	}{
 		{
 			name:               "PBKDF2 Default (SHA256)",
-			algSpec:            types.New(types.PBKDF2),
+			algSpec:            types.New(types.PBKDF2, types.SHA256), // Explicitly set SHA256 as underlying
 			config:             DefaultConfig(),
 			expectedUnderlying: types.SHA256,
 			expectedErr:        false,
@@ -57,7 +57,7 @@ func TestNewPBKDF2(t *testing.T) {
 		},
 		{
 			name:               "Invalid SaltLength",
-			algSpec:            types.New(types.PBKDF2),
+			algSpec:            types.New(types.PBKDF2, types.SHA256),
 			config:             &types.Config{SaltLength: 4}, // Less than 8
 			expectedUnderlying: "",
 			expectedErr:        true,
@@ -69,6 +69,7 @@ func TestNewPBKDF2(t *testing.T) {
 			c, err := NewPBKDF2(tt.algSpec, tt.config)
 			if (err != nil) != tt.expectedErr {
 				t.Errorf("NewPBKDF2() error = %v, expectedErr %v", err, tt.expectedErr)
+				return // Add return here to prevent nil pointer dereference
 			}
 			if !tt.expectedErr {
 				assert.NotNil(t, c)
@@ -88,7 +89,8 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 		algSpec                 types.Spec
 		expectedResolvedAlgSpec types.Spec
 	}{
-		{name: "PBKDF2-SHA256", algSpec: types.New(types.PBKDF2_SHA256), expectedResolvedAlgSpec: types.New(types.PBKDF2, types.SHA256)},
+		{name: "PBKDF2-SHA256", algSpec: types.New(types.PBKDF2, types.SHA256), expectedResolvedAlgSpec: types.New(types.PBKDF2,
+			types.SHA256)},
 		{name: "PBKDF2-HMAC-SHA512", algSpec: types.New(types.PBKDF2, types.HMAC_SHA512), expectedResolvedAlgSpec: types.New(types.PBKDF2, types.HMAC_SHA512)},
 	}
 
@@ -102,7 +104,7 @@ func TestPBKDF2_HashAndVerify(t *testing.T) {
 			hashedParts, err := pbkdf2Alg.HashWithSalt(password, salt)
 			assert.NoError(t, err)
 			assert.NotNil(t, hashedParts)
-			assert.Equal(t, tt.expectedResolvedAlgSpec.String(), hashedParts.Spec)
+			assert.Equal(t, tt.expectedResolvedAlgSpec, hashedParts.Spec)
 			parsedAlgSpec := hashedParts.Spec
 			assert.Equal(t, tt.expectedResolvedAlgSpec.Name, parsedAlgSpec.Name)
 			assert.Equal(t, tt.expectedResolvedAlgSpec.Underlying, parsedAlgSpec.Underlying)
