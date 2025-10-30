@@ -1,4 +1,4 @@
-# OrigAdmin Go Toolkits
+# OrigAdmin Toolkits
 
 This repository contains a collection of Go-specific packages designed to provide idiomatic solutions for common tasks in Go-based software development within the [OrigAdmin](https://github.com/origadmin) organization. It aims to streamline your workflow, enhance code quality, and promote consistency across Go projects.
 
