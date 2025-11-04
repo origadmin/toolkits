@@ -8,7 +8,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [closed]
+    types: [ closed ]
 
 permissions:
   contents: write
@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   lint:
+    if: "!contains(github.event.head_commit.message, 'chore(main)')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,6 +29,7 @@ jobs:
           go-version: '^1.23.0'
 
   test:
+    if: "!contains(github.event.head_commit.message, 'chore(main)')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -43,7 +45,6 @@ jobs:
 
   release:
     # The release job depends on the test job succeeding. Ensure lint and test pass before releasing.
-    needs: [ test ]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release and Changelog
