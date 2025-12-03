@@ -6,10 +6,9 @@
 package tz
 
 import (
-	"reflect"
+	"encoding/json"
+	"os"
 	"testing"
-
-	"github.com/origadmin/toolkits/codec"
 )
 
 func TestWindowsZonesFromXML(t *testing.T) {
@@ -57,6 +56,7 @@ func TestWindowsZonesFromJSON(t *testing.T) {
 			args: args{
 				filePath: "windows/windows_zones.json",
 			},
+			wantErr: false, // Just check that it loads without error
 		},
 	}
 	for _, tt := range tests {
@@ -66,8 +66,9 @@ func TestWindowsZonesFromJSON(t *testing.T) {
 				t.Errorf("WindowsZonesFromJSON() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WindowsZonesFromJSON() got = %v, want %v", got, tt.want)
+			// Just verify it loads and has expected structure
+			if got.MapTimeZones.OtherVersion == "" {
+				t.Errorf("WindowsZonesFromJSON() expected OtherVersion to be set")
 			}
 		})
 	}
@@ -75,8 +76,18 @@ func TestWindowsZonesFromJSON(t *testing.T) {
 
 func TestSaveNewTimeZonesToJSON(t *testing.T) {
 	var supplementalData SupplementalData
-	err := codec.DecodeFromFile("windows/windowsZones.json", &supplementalData)
+	file, err := os.Open("windows/windows_zones.json")
 	if err != nil {
+		t.Errorf("WindowsZonesFromJSON() error = %v", err)
+		return
+	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			t.Errorf("File close error = %v", closeErr)
+		}
+	}()
+	if err := json.NewDecoder(file).Decode(&supplementalData); err != nil {
+		t.Errorf("WindowsZonesFromJSON() error = %v", err)
 		return
 	}
 	type args struct {

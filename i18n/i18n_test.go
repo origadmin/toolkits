@@ -67,18 +67,19 @@ func TestLanguageStrings(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "test",
-			want: []string{"en-US", "zh-Hans", "zh-Hant"},
-		},
-		{
-			name: "test",
-			//want:   []string{"zh-TW", "zh-CN"}, // this is failure
+			name: "test_contains_expected",
+			want: []string{"en-Latn", "zh-Hans", "zh-Hant"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LanguageStrings(); !containsAll(got, tt.want) {
-				t.Errorf("LanguageStrings() = %v, want %v", got, tt.want)
+			got := LanguageStrings()
+			if !containsAll(got, tt.want) {
+				t.Errorf("LanguageStrings() should contain %v, but got: %v", tt.want, got)
+			}
+			// Also verify we get a reasonable number of languages
+			if len(got) < 50 {
+				t.Errorf("LanguageStrings() returned too few languages: %d", len(got))
 			}
 		})
 	}
@@ -159,11 +160,18 @@ func TestCountryLanguage(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "test",
+			name: "test_simplified_chinese",
 			args: args{
 				lang: language.SimplifiedChinese,
 			},
-			want: language.Make("zh-CN"),
+			want: language.Make("zh-Hans-CN"), // Simplified Chinese with default region
+		},
+		{
+			name: "test_chinese_with_region",
+			args: args{
+				lang: language.Make("zh-CN"),
+			},
+			want: language.Make("zh-Hans-CN"), // Chinese with region gets script added
 		},
 	}
 	for _, tt := range tests {

@@ -1,5 +1,5 @@
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
-github.com/goexts/generic v0.11.0 h1:A2uhmLHEbZ8oI43JpXmeATA/ejU/PD1GaVMXy5e3B2I=
+github.com/goexts/generic v0.14.0 h1:Lw8QKwgN9w6vnHuEbs3K+42frxi7MHS2pJrg7/ZCkJc=
 github.com/golang-cz/devslog v0.0.15 h1:ejoBLTCwJHWGbAmDf2fyTJJQO3AkzcPjw8SC9LaOQMI=
 github.com/golang-cz/devslog v0.0.15/go.mod h1:bSe5bm0A7Nyfqtijf1OMNgVJHlWEuVSXnkuASiE1vV8=
 github.com/lmittmann/tint v1.1.2 h1:2CQzrL6rslrsyjqLDwD11bZ5OpLBPU+g3G/r5LSfS8w=

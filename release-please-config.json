@@ -101,6 +101,13 @@
       "tag-separator": "/",
       "skip-changelog": true,
       "major-version-bump-on-breaking-change": false
+    },
+    "i18n": {
+      "package-name": "github.com/origadmin/toolkits/i18n",
+      "component": "i18n",
+      "tag-separator": "/",
+      "skip-changelog": true,
+      "major-version-bump-on-breaking-change": false
     }
   },
   "plugins": [
@@ -113,6 +120,7 @@
         "crypto",
         "errors",
         "slogx",
+        "i18n",
         "identifier/cuid2",
         "identifier/ksuid",
         "identifier/nanoid",

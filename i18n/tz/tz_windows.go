@@ -1,3 +1,5 @@
+//go:build windows
+
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
@@ -8,11 +10,9 @@ package tz
 import (
 	_ "embed"
 	"encoding/json"
+	"encoding/xml"
 	"os"
-	"os/exec"
 	"strings"
-
-	"github.com/origadmin/toolkits/codec"
 )
 
 //go:embed map_zones.json
@@ -201,7 +201,17 @@ type SupplementalData struct {
 
 func WindowsZonesFromJSON(filePath string) (WindowsZones, error) {
 	var supplementalData SupplementalData
-	err := codec.DecodeFromFile(filePath, &supplementalData)
+	file, err := os.Open(filePath)
+	if err != nil {
+		return WindowsZones{}, err
+	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			// Log the close error, but don't override the main error
+			_ = closeErr
+		}
+	}()
+	err = json.NewDecoder(file).Decode(&supplementalData)
 	if err != nil {
 		return WindowsZones{}, err
 	}
@@ -210,12 +220,31 @@ func WindowsZonesFromJSON(filePath string) (WindowsZones, error) {
 
 func WindowsZonesFromXMLToJSON(filePath string) error {
 	var supplementalData SupplementalData
-	err := codec.DecodeFromFile(filePath, &supplementalData)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			// Log the close error, but don't override the main error
+			_ = closeErr
+		}
+	}()
+	if err := xml.NewDecoder(file).Decode(&supplementalData); err != nil {
+		return err
+	}
 	supplementalData.WindowsZones.MapTimeZones.MapZone = splitWindowsZoneType(supplementalData.WindowsZones.MapTimeZones.MapZone)
-	if err := codec.EncodeToFile("windows/windows_zones.json", supplementalData); err != nil {
+	wzfile, err := os.Create("windows/windows_zones.json")
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := wzfile.Close(); closeErr != nil {
+			// Log the close error, but don't override the main error
+			_ = closeErr
+		}
+	}()
+	if err := json.NewEncoder(wzfile).Encode(supplementalData); err != nil {
 		return err
 	}
 
@@ -223,37 +252,38 @@ func WindowsZonesFromXMLToJSON(filePath string) error {
 }
 
 func splitWindowsZoneType(mz []MapZone) []MapZone {
-	var tz []MapZone
 	for i := range mz {
 		mz[i].Types = strings.Split(mz[i].Type, " ")
 	}
-	return tz
+	return mz
 }
 
 func FixTimeZoneFromWindowsZones(windowsZones WindowsZones) []TimeZone {
 	var timeZones []TimeZone
 	mapZones := windowsZones.MapTimeZones.MapZone
-	for i := range TimeZones {
-		timeZones = append(timeZones, fixWindowsZoneType(mapZones, TimeZones[i]))
+	allTimeZones := GetTimeZones()
+	for i := range allTimeZones {
+		timeZones = append(timeZones, fixWindowsZoneType(mapZones, *allTimeZones[i]))
 	}
 	return timeZones
 }
 
 func TimeZoneToTimeZoneMap(mapfile string) {
 	m := make(map[string]TimeZoneMap)
-	for i := range TimeZones {
-		if TimeZones[i].ZoneID == "" {
+	allTimeZones := GetTimeZones()
+	for i := range allTimeZones {
+		if allTimeZones[i].ZoneID == "" {
 			continue
 		}
-		if zone, ok := m[TimeZones[i].ZoneID]; ok {
-			if !contains(zone.TimeZones, TimeZones[i].ZoneName) {
-				zone.TimeZones = append(zone.TimeZones, TimeZones[i].ZoneName)
-				m[TimeZones[i].ZoneID] = zone
+		if zone, ok := m[allTimeZones[i].ZoneID]; ok {
+			if !contains(zone.TimeZones, allTimeZones[i].ZoneName) {
+				zone.TimeZones = append(zone.TimeZones, allTimeZones[i].ZoneName)
+				m[allTimeZones[i].ZoneID] = zone
 			}
 		} else {
-			m[TimeZones[i].ZoneID] = TimeZoneMap{
-				ZoneID:    TimeZones[i].ZoneID,
-				TimeZones: []string{TimeZones[i].ZoneName},
+			m[allTimeZones[i].ZoneID] = TimeZoneMap{
+				ZoneID:    allTimeZones[i].ZoneID,
+				TimeZones: []string{allTimeZones[i].ZoneName},
 			}
 		}
 	}
@@ -286,30 +316,39 @@ func fixWindowsZoneType(mz []MapZone, tz TimeZone) TimeZone {
 }
 
 func location() string {
-	locations := Locations()
-	szLocations := len(locations)
-	if szLocations > 0 {
-		return locations[szLocations-1]
+	// Use enhanced detector with fallback
+	if timezone, err := GetSystemTimezone(); err == nil {
+		locations := locationsForTimezone(timezone)
+		if len(locations) > 0 {
+			return locations[len(locations)-1]
+		}
+		return timezone
 	}
+	
+	// Fallback to default
 	return defaultTimeZone
 }
 
 // Locations A time zone may have multiple time zones,
 // so a way to get all the time zones under the current time zone is needed
 func Locations() []string {
-	path, err := exec.LookPath("tzutil")
-	if err != nil {
-		return nil
+	if timezone, err := GetSystemTimezone(); err == nil {
+		return locationsForTimezone(timezone)
 	}
-	cmd := exec.Command(path, "/g")
-	out, err := cmd.Output()
-	if err != nil {
-		return nil
+	return nil
+}
+
+// locationsForTimezone gets all IANA zones for a given Windows timezone
+func locationsForTimezone(windowsTimezone string) []string {
+	// Try enhanced mapper first
+	if ianaZones, exists := ConvertWindowsToIANA(windowsTimezone); exists {
+		return ianaZones
 	}
-	zone := strings.Trim(string(out), "\r\n")
+
+	// Fallback to legacy mapZones
 	for i := range mapZones {
 		szTimeZone := len(mapZones[i].TimeZones)
-		if mapZones[i].ZoneID == zone && szTimeZone > 0 {
+		if mapZones[i].ZoneID == windowsTimezone && szTimeZone > 0 {
 			return mapZones[i].TimeZones
 		}
 	}

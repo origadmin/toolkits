@@ -9,6 +9,8 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -33,6 +35,25 @@ func GenerateJSON() error {
 	}
 	_ = os.WriteFile("time_zone.json", timeZonesJSON, 0644)
 	return nil
+}
+
+func main() {
+	var generateJSON = flag.Bool("generate-json", false, "Generate JSON files from CSV data")
+	flag.Parse()
+
+	if *generateJSON {
+		fmt.Println("Starting JSON file generation...")
+		if err := GenerateJSON(); err != nil {
+			fmt.Printf("JSON file generation failed: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("JSON files generated successfully!")
+	} else {
+		fmt.Println("Usage:")
+		fmt.Println("  go run make.go -generate-json")
+		fmt.Println("  or:")
+		fmt.Println("  go build -o make && ./make -generate-json")
+	}
 }
 
 func TimeZonesFromCSV(filePath string) ([]TimeZone, error) {

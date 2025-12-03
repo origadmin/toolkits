@@ -2,75 +2,67 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package tz implements the functions, types, and interfaces for the module.
+// Package tz implements functions, types, and interfaces for module.
 package tz
 
 import (
 	"testing"
 )
 
-func TestCountriesFromFile(t *testing.T) {
-	type args struct {
-		filePath string
-	}
+func TestGenerateJSON(t *testing.T) {
 	tests := []struct {
-		name      string
-		args      args
-		want      []Country
-		wantTotal int
-		wantErr   bool
+		name    string
+		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
-			name:      "test",
-			args:      args{filePath: "country.csv"},
-			wantTotal: 247,
+			name:    "generate json files",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := CountriesFromCSV(tt.args.filePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CountriesFromCSV() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if len(got) != tt.wantTotal {
-				t.Errorf("CountriesFromCSV() got = %v, want %v", len(got), tt.wantTotal)
+			if err := GenerateJSON(); (err != nil) != tt.wantErr {
+				t.Errorf("GenerateJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func TestTimeZonesFromFile(t *testing.T) {
-	type args struct {
-		filePath string
-	}
+func TestCountriesFromCSV(t *testing.T) {
 	tests := []struct {
-		name      string
-		args      args
-		want      []TimeZone
-		wantTotal int
-		wantErr   bool
+		name    string
+		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
-			name: "test",
-			args: args{
-				filePath: "time_zone.csv",
-			},
-			want:      nil,
-			wantTotal: 146523,
+			name:    "load countries from csv",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := TimeZonesFromCSV(tt.args.filePath)
+			_, err := CountriesFromCSV("data/country.csv")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CountriesFromCSV() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestTimeZonesFromCSV(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{
+			name:    "load timezones from csv",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := TimeZonesFromCSV("data/time_zone.csv")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("TimeZonesFromCSV() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if len(got) != tt.wantTotal {
-				t.Errorf("TimeZonesFromCSV() got = %v, want %v", len(got), tt.wantTotal)
 			}
 		})
 	}

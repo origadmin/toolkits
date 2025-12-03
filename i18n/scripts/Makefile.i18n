@@ -1,0 +1,78 @@
+# I18n Data Build Makefile
+# Automates all steps from README.md
+
+.PHONY: all clean help download-iana download-timezonedb download-cldr download-windows generate-json
+
+# Default target
+all: download-iana download-timezonedb download-cldr download-windows generate-json
+
+# Help information
+help:
+	@echo "I18n Data Build Makefile"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all              - Execute complete build process"
+	@echo "  download-iana    - Download IANA tzdata"
+	@echo "  download-timezonedb - Download TimeZoneDB data"
+	@echo "  download-cldr    - Download CLDR DTD"
+	@echo "  download-windows - Download Windows timezone data"
+	@echo "  generate-json    - Generate JSON files from CSV"
+	@echo "  clean            - Clean all generated files"
+	@echo "  help             - Show this help information"
+
+# Create necessary directories
+setup:
+	@mkdir -p tzdb data windows temp
+
+# Download IANA tzdata
+download-iana: setup
+	@echo "Downloading IANA tzdata..."
+	@cd tzdb && \
+	wget -O tzcode-latest.tar.gz https://www.iana.org/time-zones/repository/tzcode-latest.tar.gz && \
+	wget -O tzdata-latest.tar.gz https://www.iana.org/time-zones/repository/tzdata-latest.tar.gz && \
+	gzip -dc tzcode-latest.tar.gz | tar -xf - && \
+	gzip -dc tzdata-latest.tar.gz | tar -xf - && \
+	echo "IANA tzdata download completed"
+
+# Download TimeZoneDB data
+download-timezonedb: setup
+	@echo "Downloading TimeZoneDB data..."
+	@cd temp && \
+	wget -O TimeZoneDB.csv.zip https://timezonedb.com/files/TimeZoneDB.csv.zip && \
+	unzip -o TimeZoneDB.csv.zip && \
+	mv time_zone.csv ../data/ && \
+	echo "TimeZoneDB data download completed"
+
+# Download CLDR DTD
+download-cldr: setup
+	@echo "Downloading CLDR DTD..."
+	@wget -O windows/ldmlSupplemental.dtd https://raw.githubusercontent.com/unicode-org/cldr/main/common/dtd/ldmlSupplemental.dtd
+	@echo "CLDR DTD download completed"
+
+# Download Windows timezone data
+download-windows: setup
+	@echo "Downloading Windows timezone data..."
+	@wget -O windows/windowsZones.xml https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/windowsZones.xml
+	@echo "Windows timezone data download completed"
+
+# Generate JSON files
+generate-json:
+	@echo "Generating JSON files..."
+	@cd tz && go run make.go -generate-json
+	@echo "JSON file generation completed"
+
+# Clean all generated files
+clean:
+	@echo "Cleaning generated files..."
+	@rm -rf tzdb data/*.csv windows/*.dtd windows/*.xml windows/*.json temp
+	@echo "Cleanup completed"
+
+# Check dependencies
+check-deps:
+	@echo "Checking required dependencies..."
+	@command -v wget >/dev/null 2>&1 || { echo "Error: wget is required"; exit 1; }
+	@command -v tar >/dev/null 2>&1 || { echo "Error: tar is required"; exit 1; }
+	@command -v gzip >/dev/null 2>&1 || { echo "Error: gzip is required"; exit 1; }
+	@command -v unzip >/dev/null 2>&1 || { echo "Error: unzip is required"; exit 1; }
+	@command -v go >/dev/null 2>&1 || { echo "Error: Go is required"; exit 1; }
+	@echo "All dependencies check passed"

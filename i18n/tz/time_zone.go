@@ -31,3 +31,13 @@ type TimeZone struct {
 
 //go:embed time_zone.json
 var jsonTimeZones []byte
+
+// RawTimeZone represents the raw timezone data from JSON
+type RawTimeZone struct {
+	ZoneName     string `json:"zone_name"`
+	CountryCode  string `json:"country_code"`
+	Abbreviation string `json:"abbreviation"`
+	TimeStart    int64  `json:"time_start"`
+	GmtOffset    int64  `json:"gmt_offset"`
+	Dst          int64  `json:"dst"`
+}
