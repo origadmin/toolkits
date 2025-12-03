@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/origadmin/toolkits/compare/v1.1.0...v1.2.0) (2025-12-03)
+
+
+### Features
+
+* **i18n:** add country and timezone data files for internationalization support ([0f8b3f4](https://github.com/origadmin/toolkits/commit/0f8b3f4441844431f05ec04c887e885b20f54b23))
+
 ## [1.1.0](https://github.com/origadmin/toolkits/compare/v1.0.1...v1.1.0) (2025-10-27)
 
 
