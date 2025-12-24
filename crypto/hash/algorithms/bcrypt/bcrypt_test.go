@@ -24,7 +24,7 @@ func TestNewBcryptCrypto(t *testing.T) {
 			config: &types.Config{
 				SaltLength: 16,
 				Params: (&Params{
-					Cost: types.DefaultCost,
+					Cost: DefaultCost,
 				}).ToMap(),
 			},
 			wantErr: false,

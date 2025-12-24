@@ -185,9 +185,9 @@ func TestNewArgon2(t *testing.T) {
 			config: &types.Config{
 				SaltLength: types.DefaultSaltLength,
 				Params: (&Params{
-					TimeCost:   types.DefaultTimeCost,
-					MemoryCost: types.DefaultMemoryCost,
-					Threads:    types.DefaultThreads,
+					TimeCost:   DefaultTimeCost,
+					MemoryCost: DefaultMemoryCost,
+					Threads:    DefaultThreads,
 					KeyLength:  32,
 				}).ToMap(),
 			},
@@ -201,8 +201,8 @@ func TestNewArgon2(t *testing.T) {
 				SaltLength: types.DefaultSaltLength,
 				Params: (&Params{
 					TimeCost:   0,
-					MemoryCost: types.DefaultMemoryCost,
-					Threads:    types.DefaultThreads,
+					MemoryCost: DefaultMemoryCost,
+					Threads:    DefaultThreads,
 					KeyLength:  32,
 				}).ToMap(),
 			},

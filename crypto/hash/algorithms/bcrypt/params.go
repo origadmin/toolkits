@@ -9,6 +9,11 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 )
 
+const (
+	// DefaultCost is the default cost for bcrypt.
+	DefaultCost = 10
+)
+
 type Params struct {
 	Cost int
 }
@@ -64,7 +69,7 @@ func FromMap(m map[string]string) (params *Params, err error) {
 
 func DefaultParams() *Params {
 	return &Params{
-		Cost: types.DefaultCost,
+		Cost: DefaultCost,
 	}
 }
 

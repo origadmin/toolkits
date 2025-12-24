@@ -9,6 +9,17 @@ import (
 	"github.com/origadmin/toolkits/crypto/hash/validator"
 )
 
+const (
+	// DefaultTimeCost is the default time cost for Argon2.
+	DefaultTimeCost = 3
+	// DefaultMemoryCost is the default memory cost for Argon2.
+	DefaultMemoryCost = 64 * 1024 // 64MB
+	// DefaultThreads is the default number of threads for Argon2.
+	DefaultThreads = 4
+	// DefaultKeyLength is the default key length for Argon2.
+	DefaultKeyLength = 32
+)
+
 // Params represents parameters for Argon2 algorithm
 type Params struct {
 	TimeCost   uint32
@@ -148,10 +159,10 @@ func WithParams(params *Params) func(*types.Config) {
 
 func DefaultParams() *Params {
 	return &Params{
-		TimeCost:   types.DefaultTimeCost,
-		MemoryCost: types.DefaultMemoryCost,
-		Threads:    types.DefaultThreads,
-		KeyLength:  32,
+		TimeCost:   DefaultTimeCost,
+		MemoryCost: DefaultMemoryCost,
+		Threads:    DefaultThreads,
+		KeyLength:  DefaultKeyLength,
 	}
 }
 

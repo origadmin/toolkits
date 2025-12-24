@@ -25,14 +25,6 @@ const (
 	DefaultVersion = "v1"
 	// DefaultSaltLength is the default salt length.
 	DefaultSaltLength = 16
-	// DefaultTimeCost is the default time cost for Argon2.
-	DefaultTimeCost = 3
-	// DefaultMemoryCost is the default memory cost for Argon2.
-	DefaultMemoryCost = 64 * 1024 // 64MB
-	// DefaultThreads is the default number of threads for Argon2.
-	DefaultThreads = 4
-	// DefaultCost is the default cost for bcrypt.
-	DefaultCost = 10
 
 	// ParamSeparator is the separator for parameters in a hash string.
 	ParamSeparator = ","
