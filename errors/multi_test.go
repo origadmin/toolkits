@@ -23,14 +23,13 @@ func TestThreadSafeMultiError(t *testing.T) {
 	if !tsme.HasErrors() {
 		t.Error("Expected errors, but got none")
 	}
-
 	// Check if a specific error exists
-	if err := tsme.Has(errors.New("error 2")); err == nil {
+	if exist := tsme.Contains(errors.New("error 2")); exist {
 		t.Error("Expected error 2, but got nil")
 	}
 
 	// Get the MultiError collection
-	me := tsme.Unsafe()
+	me := tsme.Snapshot()
 
 	// Check if the MultiError collection has the expected number of errors
 	if len(me.Errors) != 3 {
