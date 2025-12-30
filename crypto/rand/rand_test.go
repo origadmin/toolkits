@@ -25,12 +25,12 @@ func TestNewGenerator(t *testing.T) {
 		{"KindAlphanumeric", KindDigit | KindLowerCase | KindUpperCase, Digits + Lowercase + Uppercase},
 		{"KindAllWithSymbols", KindDigit | KindLowerCase | KindUpperCase | KindSymbol, Digits + Lowercase + Uppercase + Symbols},
 		{"Digit and Symbol", KindDigit | KindSymbol, Digits + Symbols}, // Test a non-pre-calculated combination
-		{"UnknownKind", Kind(999), Digits + Lowercase + Uppercase}, // Fallback to KindAlphanumeric
+		{"UnknownKind", Kind(999), Digits + Lowercase + Uppercase},     // Fallback to KindAlphanumeric
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gen := NewGenerator(tc.kind).(*randGenerator) // Type assertion for internal access
+			gen := New(tc.kind).(*randImpl) // Type assertion for internal access
 			if gen.charset != tc.charset {
 				t.Errorf("NewGenerator(%v) charset mismatch:\n got %q,\nwant %q", tc.kind, gen.charset, tc.charset)
 			}
@@ -47,22 +47,22 @@ func TestNewGenerator(t *testing.T) {
 
 func TestNewGeneratorWithCharset(t *testing.T) {
 	customCharset := "abcDE123!@#"
-	gen := NewGeneratorWithCharset(customCharset).(*randGenerator)
+	gen := NewWithCharset(customCharset).(*randImpl)
 	if gen.charset != customCharset {
-		t.Errorf("NewGeneratorWithCharset charset mismatch: got %q, want %q", gen.charset, customCharset)
+		t.Errorf("NewWithCharset charset mismatch: got %q, want %q", gen.charset, customCharset)
 	}
 	expectedMaxByte := byte(256 - (256 % len(customCharset)))
 	if gen.maxByte != expectedMaxByte {
-			t.Errorf("NewGeneratorWithCharset maxByte mismatch: got %d, want %d", gen.maxByte, expectedMaxByte)
+		t.Errorf("NewWithCharset maxByte mismatch: got %d, want %d", gen.maxByte, expectedMaxByte)
 	}
 
 	emptyCharset := ""
-	gen = NewGeneratorWithCharset(emptyCharset).(*randGenerator)
+	gen = NewWithCharset(emptyCharset).(*randImpl)
 	if gen.charset != emptyCharset {
-		t.Errorf("NewGeneratorWithCharset empty charset mismatch: got %q, want %q", gen.charset, emptyCharset)
+		t.Errorf("NewWithCharset empty charset mismatch: got %q, want %q", gen.charset, emptyCharset)
 	}
 	if gen.maxByte != 0 {
-		t.Errorf("NewGeneratorWithCharset empty maxByte mismatch: got %d, want %d", gen.maxByte, 0)
+		t.Errorf("NewWithCharset empty maxByte mismatch: got %d, want %d", gen.maxByte, 0)
 	}
 }
 
@@ -85,16 +85,16 @@ func TestRandBytes(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gen := NewGenerator(tc.kind)
-			b, err := gen.RandBytes(tc.size)
+			b, err := gen.Bytes(tc.size)
 			if err != nil {
-				t.Fatalf("RandBytes returned an error: %v", err)
+				t.Fatalf("Bytes returned an error: %v", err)
 			}
 			if len(b) != tc.size {
-				t.Errorf("RandBytes length mismatch: got %d, want %d", len(b), tc.size)
+				t.Errorf("Bytes length mismatch: got %d, want %d", len(b), tc.size)
 			}
 			for _, char := range b {
 				if tc.size > 0 && !bytes.ContainsRune([]byte(tc.charset), rune(char)) {
-					t.Errorf("RandBytes generated character not in charset: %q (charset: %q)", char, tc.charset)
+					t.Errorf("Bytes generated character not in charset: %q (charset: %q)", char, tc.charset)
 				}
 			}
 		})
@@ -102,8 +102,8 @@ func TestRandBytes(t *testing.T) {
 
 	t.Run("CustomCharsetBytes", func(t *testing.T) {
 		customCharset := "XYZ789"
-		gen := NewGeneratorWithCharset(customCharset)
-		b, err := gen.RandBytes(10)
+		gen := NewWithCharset(customCharset)
+		b, err := gen.Bytes(10)
 		if err != nil {
 			t.Fatalf("CustomRandBytes returned an error: %v", err)
 		}
@@ -118,8 +118,8 @@ func TestRandBytes(t *testing.T) {
 	})
 
 	t.Run("EmptyCharsetBytes", func(t *testing.T) {
-		gen := NewGeneratorWithCharset("")
-		b, err := gen.RandBytes(10)
+		gen := NewWithCharset("")
+		b, err := gen.Bytes(10)
 		if err != nil {
 			t.Fatalf("EmptyCharsetBytes returned an error: %v", err)
 		}
@@ -148,16 +148,16 @@ func TestRandString(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gen := NewGenerator(tc.kind)
-			s, err := gen.RandString(tc.size)
+			s, err := gen.String(tc.size)
 			if err != nil {
-				t.Fatalf("RandString returned an error: %v", err)
+				t.Fatalf("String returned an error: %v", err)
 			}
 			if len(s) != tc.size {
-				t.Errorf("RandString length mismatch: got %d, want %d", len(s), tc.size)
+				t.Errorf("String length mismatch: got %d, want %d", len(s), tc.size)
 			}
 			for _, char := range s {
 				if tc.size > 0 && !bytes.ContainsRune([]byte(tc.charset), char) {
-					t.Errorf("RandString generated character not in charset: %q (charset: %q)", char, tc.charset)
+					t.Errorf("String generated character not in charset: %q (charset: %q)", char, tc.charset)
 				}
 			}
 		})
@@ -165,8 +165,8 @@ func TestRandString(t *testing.T) {
 
 	t.Run("CustomCharsetString", func(t *testing.T) {
 		customCharset := "XYZ789"
-		gen := NewGeneratorWithCharset(customCharset)
-		s, err := gen.RandString(10)
+		gen := NewWithCharset(customCharset)
+		s, err := gen.String(10)
 		if err != nil {
 			t.Fatalf("CustomRandString returned an error: %v", err)
 		}
@@ -181,8 +181,8 @@ func TestRandString(t *testing.T) {
 	})
 
 	t.Run("EmptyCharsetString", func(t *testing.T) {
-		gen := NewGeneratorWithCharset("")
-		s, err := gen.RandString(10)
+		gen := NewWithCharset("")
+		s, err := gen.String(10)
 		if err != nil {
 			t.Fatalf("EmptyCharsetString returned an error: %v", err)
 		}
@@ -229,7 +229,7 @@ func TestRead(t *testing.T) {
 
 	t.Run("CustomCharsetRead", func(t *testing.T) {
 		customCharset := "XYZ789"
-		gen := NewGeneratorWithCharset(customCharset)
+		gen := NewWithCharset(customCharset)
 		p := make([]byte, 10)
 		n, err := gen.Read(p)
 		if err != nil {
@@ -246,7 +246,7 @@ func TestRead(t *testing.T) {
 	})
 
 	t.Run("EmptyCharsetRead", func(t *testing.T) {
-		gen := NewGeneratorWithCharset("")
+		gen := NewWithCharset("")
 		p := make([]byte, 10)
 		n, err := gen.Read(p)
 		if err != nil {
@@ -359,19 +359,19 @@ func TestConcurrentGeneration(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			s, err := gen.RandString(length)
+			s, err := gen.String(length)
 			if err != nil {
 				errors <- err
 				return
 			}
 			if len(s) != length {
-				errors <- fmt.Errorf("concurrent RandString length mismatch: got %d, want %d", len(s), length)
+				errors <- fmt.Errorf("concurrent String length mismatch: got %d, want %d", len(s), length)
 				return
 			}
 			alphanumericCharset := Digits + Lowercase + Uppercase
 			for _, char := range s {
 				if !bytes.ContainsRune([]byte(alphanumericCharset), char) {
-					errors <- fmt.Errorf("concurrent RandString generated character not in alphanumeric charset: %q", char)
+					errors <- fmt.Errorf("concurrent String generated character not in alphanumeric charset: %q", char)
 					return
 				}
 			}
@@ -419,12 +419,12 @@ func TestCharsetsInitialization(t *testing.T) {
 // This is a statistical test and might occasionally fail due to pure chance, but should generally pass.
 func TestRandDistribution(t *testing.T) {
 	charset := Digits + Lowercase + Uppercase + Symbols
-	gen := NewGeneratorWithCharset(charset)
+	gen := NewWithCharset(charset)
 
 	sampleSize := 100000 // Generate a large number of characters
-	generated, err := gen.RandString(sampleSize)
+	generated, err := gen.String(sampleSize)
 	if err != nil {
-		t.Fatalf("RandString failed: %v", err)
+		t.Fatalf("String failed: %v", err)
 	}
 
 	counts := make(map[rune]int)
@@ -445,36 +445,36 @@ func TestRandDistribution(t *testing.T) {
 	}
 }
 
-// TestGeneratorProducesDifferentValues verifies that successive calls to RandString on the same Generator instance produce different outputs.
+// TestGeneratorProducesDifferentValues verifies that successive calls to String on the same Rand instance produce different outputs.
 func TestGeneratorProducesDifferentValues(t *testing.T) {
 	gen := NewGenerator(KindAlphanumeric)
 	length := 32 // Sufficiently long to make collisions highly improbable
 
-	val1, err := gen.RandString(length)
+	val1, err := gen.String(length)
 	if err != nil {
-		t.Fatalf("First RandString call failed: %v", err)
+		t.Fatalf("First String call failed: %v", err)
 	}
 
-	val2, err := gen.RandString(length)
+	val2, err := gen.String(length)
 	if err != nil {
-		t.Fatalf("Second RandString call failed: %v", err)
+		t.Fatalf("Second String call failed: %v", err)
 	}
 
 	if val1 == val2 {
-		t.Errorf("Generator produced identical values on successive calls: %q", val1)
+		t.Errorf("Rand produced identical values on successive calls: %q", val1)
 	}
 
-	// Also test with RandBytes
-	bytes1, err := gen.RandBytes(length)
+	// Also test with Bytes
+	bytes1, err := gen.Bytes(length)
 	if err != nil {
-		t.Fatalf("First RandBytes call failed: %v", err)
+		t.Fatalf("First Bytes call failed: %v", err)
 	}
-	bytes2, err := gen.RandBytes(length)
+	bytes2, err := gen.Bytes(length)
 	if err != nil {
-		t.Fatalf("Second RandBytes call failed: %v", err)
+		t.Fatalf("Second Bytes call failed: %v", err)
 	}
 
 	if bytes.Equal(bytes1, bytes2) {
-		t.Errorf("Generator produced identical byte slices on successive calls: %v", bytes1)
+		t.Errorf("Rand produced identical byte slices on successive calls: %v", bytes1)
 	}
 }

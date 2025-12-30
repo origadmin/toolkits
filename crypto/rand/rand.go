@@ -59,19 +59,19 @@ func init() {
 	charsets[KindDigit|KindLowerCase|KindUpperCase|KindSymbol] = Digits + Lowercase + Uppercase + Symbols
 }
 
-// Generator defines the interface for generating cryptographically secure random data.
+// Rand defines the interface for generating cryptographically secure random data.
 // Implementations of this interface are designed for high performance and statistical randomness.
-type Generator interface {
-	// RandBytes generates a new random byte slice of the specified size.
+type Rand interface {
+	// Bytes generates a new random byte slice of the specified size.
 	// This method allocates a new slice for each call. For maximum performance when
 	// repeatedly generating random bytes into a pre-existing buffer, prefer the Read method.
-	RandBytes(size int) ([]byte, error)
-	// RandString generates a new random string of the specified size.
+	Bytes(size int) ([]byte, error)
+	// String generates a new random string of the specified size.
 	// This method involves internal byte slice allocation and conversion to string.
 	// For scenarios requiring extreme performance and byte-level control, consider
 	// using RandBytes or Read and managing string conversion manually if profiling
 	// indicates this is a bottleneck.
-	RandString(size int) (string, error)
+	String(size int) (string, error)
 	// Read populates the given byte slice with random bytes from the generator's character set.
 	// It implements the io.Reader interface. This is the most performant method for
 	// filling pre-allocated buffers, as it avoids internal allocations of the output slice.
@@ -83,8 +83,8 @@ const (
 	randBufferSize = 512
 )
 
-// randGenerator is the concrete implementation of Generator.
-type randGenerator struct {
+// rand is the concrete implementation of Rand.
+type randImpl struct {
 	charset string
 	maxByte byte // maxByte is the maximum byte value that can be used without introducing modulo bias.
 
@@ -92,12 +92,20 @@ type randGenerator struct {
 	buffer    [randBufferSize]byte
 	bufferIdx int
 	bufferN   int
-	mu        sync.Mutex // Protects buffer access for concurrent Read/RandBytes calls
+	mu        sync.Mutex // Protects buffer access for concurrent Read/Bytes calls
+}
+
+// New creates a new random data generator for the given kind of character set.
+// It uses a high-performance array lookup instead of a map.
+func New(kind Kind) Rand {
+	return NewGenerator(kind)
 }
 
 // NewGenerator creates a new random data generator for the given kind of character set.
 // It uses a high-performance array lookup instead of a map.
-func NewGenerator(kind Kind) Generator {
+//
+// Decrypted: use New instead.
+func NewGenerator(kind Kind) Rand {
 	var charset string
 	// Check bounds and if the specific combination is pre-calculated.
 	if kind < maxKind && charsets[kind] != "" {
@@ -123,25 +131,25 @@ func NewGenerator(kind Kind) Generator {
 		charset = charsets[KindDigit|KindLowerCase|KindUpperCase]
 	}
 
-	return NewGeneratorWithCharset(charset)
+	return NewWithCharset(charset)
 }
 
-// NewGeneratorWithCharset creates a new random data generator with a custom character set.
-func NewGeneratorWithCharset(charset string) Generator {
+// NewWithCharset creates a new random data generator with a custom character set.
+func NewWithCharset(charset string) Rand {
 	length := len(charset)
 	if length == 0 {
-		return &randGenerator{charset: "", maxByte: 0}
+		return &randImpl{charset: "", maxByte: 0}
 	}
 	// Calculate maxByte to eliminate modulo bias using rejection sampling.
 	maxByte := byte(256 - (256 % length))
-	return &randGenerator{
+	return &randImpl{
 		charset: charset,
 		maxByte: maxByte,
 	}
 }
 
 // refillBuffer reads a new chunk of random bytes from crypto/rand.Reader into the internal buffer.
-func (r *randGenerator) refillBuffer() error {
+func (r *randImpl) refillBuffer() error {
 	n, err := io.ReadFull(rand.Reader, r.buffer[:])
 	if err != nil {
 		return err
@@ -151,9 +159,9 @@ func (r *randGenerator) refillBuffer() error {
 	return nil
 }
 
-// RandBytes generates a random byte slice of a given size using the generator's character set.
+// Bytes generates a random byte slice of a given size using the generator's character set.
 // It is highly optimized for performance and security (no modulo bias).
-func (r *randGenerator) RandBytes(size int) ([]byte, error) {
+func (r *randImpl) Bytes(size int) ([]byte, error) {
 	charsetLen := len(r.charset)
 	if charsetLen == 0 {
 		return nil, nil
@@ -183,9 +191,9 @@ func (r *randGenerator) RandBytes(size int) ([]byte, error) {
 	return ret, nil
 }
 
-// RandString generates a random string of a given size using the generator's character set.
-func (r *randGenerator) RandString(size int) (string, error) {
-	b, err := r.RandBytes(size)
+// String generates a random string of a given size using the generator's character set.
+func (r *randImpl) String(size int) (string, error) {
+	b, err := r.Bytes(size)
 	if err != nil {
 		return "", err
 	}
@@ -194,7 +202,7 @@ func (r *randGenerator) RandString(size int) (string, error) {
 
 // Read populates the given byte slice with random bytes from the generator's character set.
 // It implements the io.Reader interface and is highly optimized.
-func (r *randGenerator) Read(p []byte) (n int, err error) {
+func (r *randImpl) Read(p []byte) (n int, err error) {
 	charsetLen := len(r.charset)
 	if charsetLen == 0 {
 		return 0, nil
@@ -228,25 +236,25 @@ func (r *randGenerator) Read(p []byte) (n int, err error) {
 }
 
 // RandomBytes generates n cryptographically secure random bytes using the default alphanumeric character set.
-// This function reuses a single, lazily initialized Generator instance for performance.
+// This function reuses a single, lazily initialized Rand instance for performance.
 func RandomBytes(n int) ([]byte, error) {
-	return NewGenerator(KindAlphanumeric).RandBytes(n)
+	return NewWithCharset(charsets[KindAlphanumeric]).Bytes(n)
 }
 
 // RandomString generates a cryptographically secure random string of length n using the default alphanumeric character set.
-// This function reuses a single, lazily initialized Generator instance for performance.
+// This function reuses a single, lazily initialized Rand instance for performance.
 func RandomString(n int) (string, error) {
-	return NewGenerator(KindAlphanumeric).RandString(n)
+	return NewWithCharset(charsets[KindAlphanumeric]).String(n)
 }
 
 // RandomBytesWithSymbols generates n cryptographically secure random bytes using the alphanumeric and symbol character set.
-// This function reuses a single, lazily initialized Generator instance for performance.
+// This function reuses a single, lazily initialized Rand instance for performance.
 func RandomBytesWithSymbols(n int) ([]byte, error) {
-	return NewGenerator(KindAllWithSymbols).RandBytes(n)
+	return NewWithCharset(charsets[KindAllWithSymbols]).Bytes(n)
 }
 
 // RandomStringWithSymbols generates a cryptographically secure random string of length n using the alphanumeric and symbol character set.
-// This function reuses a single, lazily initialized Generator instance for performance.
+// This function reuses a single, lazily initialized Rand instance for performance.
 func RandomStringWithSymbols(n int) (string, error) {
-	return NewGenerator(KindAllWithSymbols).RandString(n)
+	return NewWithCharset(charsets[KindAllWithSymbols]).String(n)
 }
