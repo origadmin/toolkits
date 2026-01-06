@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/origadmin/toolkits/compare/v1.2.0...v1.3.0) (2026-01-06)
+
+
+### Features
+
+* **crypto:** add versioned encoding support with base64 for v2+ and maintain hex for v1.x.x ([608b8fe](https://github.com/origadmin/toolkits/commit/608b8fe2586e4b90e7b47435ca748680f3fca542))
+
 ## [1.2.0](https://github.com/origadmin/toolkits/compare/v1.1.0...v1.2.0) (2025-12-03)
 
 
