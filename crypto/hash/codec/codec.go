@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/goexts/generic/configure"
+	"golang.org/x/mod/semver"
 
 	"github.com/origadmin/toolkits/crypto/hash/errors"
 	"github.com/origadmin/toolkits/crypto/hash/types"
@@ -59,7 +60,7 @@ func (c *codec) Encode(parts *types.HashParts) (string, error) {
 
 	// Use base64 for v2+, hex for v1.x.x
 	encodeFunc := hex.EncodeToString
-	if c.version >= "v2.0.0" {
+	if semver.Compare(parts.Version, "v2.0.0") >= 0 {
 		encodeFunc = base64.RawURLEncoding.EncodeToString
 	}
 
@@ -89,33 +90,22 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 	}
 	version := parts[2]
 
-	// v1.x.x uses hex encoding
-	if strings.HasPrefix(version, "v1") {
-		hash, err = hex.DecodeString(parts[4])
-		if err != nil {
-			return nil, fmt.Errorf("invalid hex hash (v1): %v", err)
-		}
-		salt, err = hex.DecodeString(parts[5])
-		if err != nil {
-			return nil, fmt.Errorf("invalid hex salt (v1): %v", err)
-		}
-	} else if strings.HasPrefix(version, "v2") {
-		// v2.x.x uses URL-safe base64 encoding (without padding)
-		hash, err = base64.RawURLEncoding.DecodeString(parts[4])
-		if err != nil {
-			return nil, fmt.Errorf("invalid base64 hash (v2): %v", err)
-		}
-		salt, err = base64.RawURLEncoding.DecodeString(parts[5])
-		if err != nil {
-			return nil, fmt.Errorf("invalid base64 salt (v2): %v", err)
-		}
-	} else {
-		return nil, fmt.Errorf("unsupported version format: %s", version)
+	// Use base64 for v2+, hex for v1.x.x
+	decodeFunc := hex.DecodeString
+	if semver.Compare(version, "v2.0.0") >= 0 {
+		decodeFunc = base64.RawURLEncoding.DecodeString
 	}
-	// Add version checks
-	if version != c.version {
-		return nil, fmt.Errorf("unsupported codec version: %s, expected %s", version, c.version)
+
+	// v2.0.0+ uses URL-safe base64 encoding (without padding)
+	hash, err = decodeFunc(parts[4])
+	if err != nil {
+		return nil, fmt.Errorf("invalid base64 hash (%s): %v", c.version, err)
 	}
+	salt, err = decodeFunc(parts[5])
+	if err != nil {
+		return nil, fmt.Errorf("invalid base64 salt (%s): %v", c.version, err)
+	}
+
 	paramsStr := parts[3]
 	decodedParams, err := DecodeParams(paramsStr)
 	if err != nil {
