@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/origadmin/toolkits/compare/v1.3.0...v1.3.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* **crypto:** refactor hash codec version handling using semver package ([fb0339f](https://github.com/origadmin/toolkits/commit/fb0339f01e908cbdf1172d56bb300817cc06717f))
+
 ## [1.3.0](https://github.com/origadmin/toolkits/compare/v1.2.0...v1.3.0) (2026-01-06)
 
 
