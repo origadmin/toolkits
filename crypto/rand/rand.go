@@ -95,17 +95,7 @@ type randImpl struct {
 	mu        sync.Mutex // Protects buffer access for concurrent Read/Bytes calls
 }
 
-// New creates a new random data generator for the given kind of character set.
-// It uses a high-performance array lookup instead of a map.
-func New(kind Kind) Rand {
-	return NewGenerator(kind)
-}
-
-// NewGenerator creates a new random data generator for the given kind of character set.
-// It uses a high-performance array lookup instead of a map.
-//
-// Decrypted: use New instead.
-func NewGenerator(kind Kind) Rand {
+func newRand(kind Kind) Rand {
 	var charset string
 	// Check bounds and if the specific combination is pre-calculated.
 	if kind < maxKind && charsets[kind] != "" {
@@ -132,6 +122,20 @@ func NewGenerator(kind Kind) Rand {
 	}
 
 	return NewWithCharset(charset)
+}
+
+// New creates a new random data generator for the given kind of character set.
+// It uses a high-performance array lookup instead of a map.
+func New(kind Kind) Rand {
+	return newRand(kind)
+}
+
+// NewGenerator creates a new random data generator for the given kind of character set.
+// It uses a high-performance array lookup instead of a map.
+//
+// Decrypted: use New instead.
+func NewGenerator(kind Kind) Rand {
+	return newRand(kind)
 }
 
 // NewWithCharset creates a new random data generator with a custom character set.
