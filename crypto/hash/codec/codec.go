@@ -5,6 +5,7 @@
 package codec
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"sort"
@@ -55,13 +56,20 @@ func (c *codec) Encode(parts *types.HashParts) (string, error) {
 	if parts.Version == "" {
 		parts.Version = c.version
 	}
+
+	// Use base64 for v2+, hex for v1.x.x
+	encodeFunc := hex.EncodeToString
+	if c.version >= "v2.0.0" {
+		encodeFunc = base64.RawURLEncoding.EncodeToString
+	}
+
 	return fmt.Sprintf(
 		"$%s$%s$%s$%s$%s",
 		parts.Spec,
 		parts.Version,
 		EncodeParams(parts.Params),
-		hex.EncodeToString(parts.Hash),
-		hex.EncodeToString(parts.Salt),
+		encodeFunc(parts.Hash),
+		encodeFunc(parts.Salt),
 	), nil
 }
 
@@ -71,6 +79,9 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 	if len(parts) != 6 {
 		return nil, errors.ErrInvalidHashFormat
 	}
+	// Handle different versions
+	var hash, salt []byte
+	var err error
 
 	algorithm, err := types.Parse(parts[1])
 	if err != nil {
@@ -78,6 +89,29 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 	}
 	version := parts[2]
 
+	// v1.x.x uses hex encoding
+	if strings.HasPrefix(version, "v1") {
+		hash, err = hex.DecodeString(parts[4])
+		if err != nil {
+			return nil, fmt.Errorf("invalid hex hash (v1): %v", err)
+		}
+		salt, err = hex.DecodeString(parts[5])
+		if err != nil {
+			return nil, fmt.Errorf("invalid hex salt (v1): %v", err)
+		}
+	} else if strings.HasPrefix(version, "v2") {
+		// v2.x.x uses URL-safe base64 encoding (without padding)
+		hash, err = base64.RawURLEncoding.DecodeString(parts[4])
+		if err != nil {
+			return nil, fmt.Errorf("invalid base64 hash (v2): %v", err)
+		}
+		salt, err = base64.RawURLEncoding.DecodeString(parts[5])
+		if err != nil {
+			return nil, fmt.Errorf("invalid base64 salt (v2): %v", err)
+		}
+	} else {
+		return nil, fmt.Errorf("unsupported version format: %s", version)
+	}
 	// Add version checks
 	if version != c.version {
 		return nil, fmt.Errorf("unsupported codec version: %s, expected %s", version, c.version)
@@ -87,14 +121,7 @@ func (c *codec) Decode(encoded string) (*types.HashParts, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid params format: %v", err)
 	}
-	hash, err := hex.DecodeString(parts[4])
-	if err != nil {
-		return nil, fmt.Errorf("invalid hash: %v", err)
-	}
-	salt, err := hex.DecodeString(parts[5])
-	if err != nil {
-		return nil, fmt.Errorf("invalid salt: %v", err)
-	}
+
 	return &types.HashParts{
 		Spec:    algorithm,
 		Version: version,
@@ -114,7 +141,16 @@ func NewCodec(opts ...Option) Codec {
 // Option defines configuration options for the codec
 type Option func(*codec)
 
+// Version constants
+const (
+	Version1 = "v1.0.0" // Original version using hex encoding
+	Version2 = "v2.0.0" // New version using base64 encoding (not backward compatible with v1)
+)
+
 // WithVersion sets the version number
+// Use Version1 (v1.0.0) for hex encoding (legacy)
+// Use Version2 (v2.0.0) for base64 encoding (recommended for new hashes)
+// Follows semantic versioning (semver.org)
 func WithVersion(version string) Option {
 	return func(c *codec) {
 		c.version = version

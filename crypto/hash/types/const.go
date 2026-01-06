@@ -22,7 +22,7 @@ const (
 	// DefaultSpec is the default hash type.
 	DefaultSpec = "argon2"
 	// DefaultVersion is the default hash version.
-	DefaultVersion = "v1"
+	DefaultVersion = "v2.0.0"
 	// DefaultSaltLength is the default salt length.
 	DefaultSaltLength = 16
 
