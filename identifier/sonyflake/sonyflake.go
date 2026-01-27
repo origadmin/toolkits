@@ -2,107 +2,76 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package sonyflake provides a unique ID generation based on Sony's snowflake variant.
+// Package sonyflake provides a unique ID generator based on Sony's snowflake variant.
 package sonyflake
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/sony/sonyflake"
 
 	"github.com/origadmin/toolkits/identifier"
 )
 
-// Config is an alias for sonyflake.Settings, allowing for detailed configuration
-// such as setting a custom MachineID or StartTime.
-// See https://pkg.go.dev/github.com/sony/sonyflake#Settings for all options.
-type Config = sonyflake.Settings
-
-// Ensure the provider and generator implement the required interfaces at compile time.
-var (
-	_ identifier.Provider     = (*provider)(nil)
-	_ identifier.Generator[int64] = (*numberGenerator)(nil)
-)
-
-// provider implements identifier.Provider for Sonyflake.
-// It holds a configured, stateful sonyflake instance.
-type provider struct {
+// generator implements the identifier.Generator interface for Sonyflake.
+type generator struct {
 	sf *sonyflake.Sonyflake
 }
 
-// Name returns the name of the identifier.
-func (p *provider) Name() string {
-	return "sonyflake"
-}
-
-// Size returns the size of the identifier in bits.
-// A Sonyflake ID is 63 bits.
-func (p *provider) Size() int {
-	return 63
-}
-
-// AsString returns nil as Sonyflake does not have a standard string representation.
-func (p *provider) AsString() identifier.Generator[string] {
-	return nil
-}
-
-// AsNumber returns a number-based generator for Sonyflake.
-func (p *provider) AsNumber() identifier.Generator[int64] {
-	return &numberGenerator{sf: p.sf}
-}
-
-// numberGenerator implements identifier.Generator[int64] for Sonyflake.
-type numberGenerator struct {
-	sf *sonyflake.Sonyflake
-}
-
-// Name returns the name of the identifier.
-func (g *numberGenerator) Name() string {
-	return "sonyflake"
-}
-
-// Size returns the size of the identifier in bits.
-func (g *numberGenerator) Size() int {
-	return 63
-}
-
-// Generate creates a new Sonyflake ID and returns it as an int64.
-func (g *numberGenerator) Generate() int64 {
-	id, err := g.sf.NextID()
-	if err != nil {
-		// This can happen if the system clock goes backwards.
-		return 0
-	}
-	return int64(id)
-}
-
-// Validate checks if the provided int64 is a plausible Sonyflake ID.
-func (g *numberGenerator) Validate(id int64) bool {
-	return id > 0
-}
-
-// --- Advanced Usage ---
-
-// New creates a new, local, configured Sonyflake provider.
-// This instance is NOT managed by the global identifier registry.
-func New(cfg Config) (identifier.Provider, error) {
-	sf := sonyflake.NewSonyflake(sonyflake.Settings(cfg))
-	if sf == nil {
-		// This can happen if the machine ID function fails.
-		return nil, fmt.Errorf("sonyflake: failed to initialize with the given settings")
-	}
-	return &provider{sf: sf}, nil
-}
-
-// --- Default Global Instance ---
-
-// init registers the default Sonyflake provider with the global identifier registry.
-// This provider uses a default configuration (e.g., private IP for machine ID).
-func init() {
+// New creates a new Sonyflake generator with default settings.
+// It panics if the generator cannot be initialized.
+func New() identifier.Generator {
 	sf := sonyflake.NewSonyflake(sonyflake.Settings{})
 	if sf == nil {
-		panic("identifier: failed to initialize default sonyflake node")
+		panic("sonyflake: failed to initialize generator")
 	}
+	return &generator{sf: sf}
+}
 
-	identifier.Register(&provider{sf: sf})
+// Name returns the name of the generator.
+func (g *generator) Name() string {
+	return "sonyflake"
+}
+
+// GenerateString generates a new Sonyflake ID and returns it as a string.
+func (g *generator) GenerateString() (string, error) {
+	id, err := g.sf.NextID()
+	if err != nil {
+		return "", err
+	}
+	return strconv.FormatUint(id, 10), nil
+}
+
+// GenerateNumber generates a new Sonyflake ID as an int64.
+func (g *generator) GenerateNumber() (int64, error) {
+	id, err := g.sf.NextID()
+	if err != nil {
+		return 0, err
+	}
+	return int64(id), nil
+}
+
+// Validate checks if the provided id is a valid Sonyflake ID.
+// A valid ID must be a positive number.
+func (g *generator) Validate(id any) bool {
+	switch v := id.(type) {
+	case int64:
+		return v > 0
+	case uint64:
+		return v > 0
+	case string:
+		parsed, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return false
+		}
+		// A valid ID must be greater than 0.
+		return parsed > 0
+	default:
+		return false
+	}
+}
+
+// init registers the Sonyflake generator.
+func init() {
+	identifier.Register(New())
 }

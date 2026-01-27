@@ -10,72 +10,46 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/cuid2"
-	// Blank import to trigger the cuid2 provider registration
+	// Blank import to trigger the cuid2 generator registration
 	_ "github.com/origadmin/toolkits/identifier/cuid2"
 )
 
-// TestGeneratorCreation ensures the generator can be retrieved correctly,
-// both from the central registry and the package's convenience function.
-func TestGeneratorCreation(t *testing.T) {
-	// Test getting from the global registry
-	registryGenerator := identifier.Get[string]("cuid2")
-	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'cuid2'")
-
-	id1 := registryGenerator.Generate()
-	assert.NotEmpty(t, id1)
-	assert.True(t, registryGenerator.Validate(id1))
-
-	// Test getting via the convenience function
-	convenienceGenerator := cuid2.New()
-	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from cuid2.New()")
-
-	id2 := convenienceGenerator.Generate()
-	assert.NotEmpty(t, id2)
-	assert.True(t, convenienceGenerator.Validate(id2))
-}
-
-// TestCustomGenerator tests the creation of a generator with custom settings.
-func TestCustomGenerator(t *testing.T) {
-	t.Run("WithCustomConfig", func(t *testing.T) {
-		// Test that providing a custom config returns an error, as it's not supported.
-		cfg := cuid2.Config{
-			Length:      32,
-			Fingerprint: "my-app-worker-1",
-		}
-		generator, err := cuid2.NewGenerator(cfg)
-		assert.Error(t, err)
-		assert.Nil(t, generator)
-	})
-
-	t.Run("WithDefaultConfig", func(t *testing.T) {
-		// Test that a default (empty) config works correctly.
-		generator, err := cuid2.NewGenerator(cuid2.Config{})
-		assert.NoError(t, err)
-		assert.NotNil(t, generator)
-
-		id := generator.Generate()
-		assert.NotEmpty(t, id)
-		assert.True(t, generator.Validate(id))
-	})
-}
-
-// TestGeneratorProperties checks the metadata of the cuid2 generator.
-func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.Get[string]("cuid2")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
+func TestCUID2Generator(t *testing.T) {
+	// Get the generator from the registry
+	gen := identifier.Get("cuid2")
+	if !assert.NotNil(t, gen, "Generator 'cuid2' should be registered") {
 		t.FailNow()
 	}
 
-	assert.Equal(t, "cuid2", generator.Name(), "Generator name should be 'cuid2'")
-	assert.Equal(t, 0, generator.Size(), "Generator size should be 0 for variable-length IDs")
-}
+	t.Run("Properties", func(t *testing.T) {
+		assert.Equal(t, "cuid2", gen.Name(), "Name() should be 'cuid2'")
+	})
 
-// TestValidationFailure checks that validation correctly identifies an invalid CUID2.
-func TestValidationFailure(t *testing.T) {
-	generator := identifier.Get[string]("cuid2")
-	if !assert.NotNil(t, generator) {
-		t.FailNow()
-	}
-	assert.False(t, generator.Validate("this-is-not-a-cuid2"))
+	t.Run("GenerateString", func(t *testing.T) {
+		id, err := gen.GenerateString()
+		assert.NoError(t, err, "GenerateString() should not return an error")
+		assert.NotEmpty(t, id, "Generated string ID should not be empty")
+	})
+
+	t.Run("GenerateNumber", func(t *testing.T) {
+		// CUID2 does not support number generation
+		_, err := gen.GenerateNumber()
+		assert.Error(t, err, "GenerateNumber() should return an error for cuid2")
+	})
+
+	t.Run("Validate", func(t *testing.T) {
+		id, _ := gen.GenerateString()
+
+		// Test with a valid string ID
+		assert.True(t, gen.Validate(id), "Validate() should return true for a valid string ID")
+
+		// Test with an invalid string ID
+		assert.False(t, gen.Validate("invalid-cuid2"), "Validate() should return false for an invalid string")
+
+		// Test with an incorrect type (int64)
+		assert.False(t, gen.Validate(int64(12345)), "Validate() should return false for an int64")
+
+		// Test with nil
+		assert.False(t, gen.Validate(nil), "Validate() should return false for nil")
+	})
 }

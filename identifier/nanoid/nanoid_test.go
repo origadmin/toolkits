@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package nanoid_test // Use black-box testing
+package nanoid_test
 
 import (
 	"testing"
@@ -10,55 +10,47 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/nanoid"
-	// Blank import to trigger the nanoid provider registration
+	// Blank import to trigger the nanoid generator registration
 	_ "github.com/origadmin/toolkits/identifier/nanoid"
 )
 
-// TestGeneratorCreation ensures the generator can be retrieved correctly.
-func TestGeneratorCreation(t *testing.T) {
-	// Test getting from the global registry
-	registryGenerator := identifier.Get[string]("nanoid")
-	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'nanoid'")
-
-	// Test getting via the convenience function
-	convenienceGenerator := nanoid.New()
-	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from nanoid.New()")
-
-	// Number generator should NOT be available.
-	numGenerator := identifier.Get[int64]("nanoid")
-	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'nanoid' as it is not supported")
-}
-
-// TestGenerateAndValidate tests the generation and validation of a NanoID.
-func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.Get[string]("nanoid")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
+func TestNanoIDGenerator(t *testing.T) {
+	// Get the generator from the registry
+	gen := identifier.Get("nanoid")
+	if !assert.NotNil(t, gen, "Generator 'nanoid' should be registered") {
 		t.FailNow()
 	}
 
-	// 1. Generate a new ID
-	id := generator.Generate()
-	assert.NotEmpty(t, id, "Generated ID should not be empty")
-	assert.Len(t, id, 21, "A standard NanoID should have a length of 21 characters")
+	t.Run("Properties", func(t *testing.T) {
+		assert.Equal(t, "nanoid", gen.Name(), "Name() should be 'nanoid'")
+	})
 
-	// 2. Validate the new ID
-	isValid := generator.Validate(id)
-	assert.True(t, isValid, "A freshly generated ID should be valid")
+	t.Run("GenerateString", func(t *testing.T) {
+		id, err := gen.GenerateString()
+		assert.NoError(t, err, "GenerateString() should not return an error")
+		assert.NotEmpty(t, id, "Generated string ID should not be empty")
+		assert.Len(t, id, 21, "A standard NanoID should have a length of 21 characters")
+	})
 
-	// 3. Validate a known invalid ID (wrong length and contains invalid char '%')
-	isInvalid := generator.Validate("invalid-nanoid-%")
-	assert.False(t, isInvalid, "An invalid string should not be considered a valid NanoID")
-}
+	t.Run("GenerateNumber", func(t *testing.T) {
+		// NanoID does not support number generation
+		_, err := gen.GenerateNumber()
+		assert.Error(t, err, "GenerateNumber() should return an error for nanoid")
+	})
 
-// TestGeneratorProperties checks the metadata of the nanoid generator.
-func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.Get[string]("nanoid")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
-		t.FailNow()
-	}
+	t.Run("Validate", func(t *testing.T) {
+		id, _ := gen.GenerateString()
 
-	assert.Equal(t, "nanoid", generator.Name(), "Generator name should be 'nanoid'")
-	// Size is variable for nanoid, so we expect 0.
-	assert.Equal(t, 0, generator.Size(), "Generator size should be 0 for variable-length IDs")
+		// Test with a valid string ID
+		assert.True(t, gen.Validate(id), "Validate() should return true for a valid string ID")
+
+		// Test with an invalid string ID (wrong length and invalid characters)
+		assert.False(t, gen.Validate("invalid-nanoid-%"), "Validate() should return false for an invalid string")
+
+		// Test with an incorrect type (int64)
+		assert.False(t, gen.Validate(int64(12345)), "Validate() should return false for an int64")
+
+		// Test with nil
+		assert.False(t, gen.Validate(nil), "Validate() should return false for nil")
+	})
 }

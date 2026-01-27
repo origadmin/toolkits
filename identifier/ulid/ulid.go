@@ -2,82 +2,71 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package ulid provides a ULID (Universally Unique Lexicographically Sortable Identifier) implementation.
+// Package ulid provides a Universally Unique Lexicographically Sortable Identifier (ULID) generator.
 package ulid
 
 import (
+	"crypto/rand"
+	"time"
+
 	"github.com/oklog/ulid/v2"
 
 	"github.com/origadmin/toolkits/identifier"
 )
 
-// Ensure the provider and generator implement the required interfaces at compile time.
-var (
-	_ identifier.Provider      = (*provider)(nil)
-	_ identifier.Generator[string] = (*stringGenerator)(nil)
-)
+// generator implements the identifier.Generator interface for ULID.
+type generator struct {
+	entropy *ulid.MonotonicEntropy
+}
 
-// provider implements identifier.Provider for ULID.
-// It's a stateless singleton that vends the actual generator.
-type provider struct{}
+// New creates a new ULID generator.
+func New() identifier.Generator {
+	// Create a new monotonic entropy source seeded with a cryptographically secure random reader.
+	entropy := ulid.Monotonic(rand.Reader, 0)
+	return &generator{entropy: entropy}
+}
 
-// Name returns the name of the identifier.
-func (p *provider) Name() string {
+// Name returns the name of the generator.
+func (g *generator) Name() string {
 	return "ulid"
 }
 
-// Size returns the size of the identifier in bits.
-func (p *provider) Size() int {
-	// A ULID is always 128 bits.
-	return 128
+// GenerateString generates a new ULID identifier as a string.
+func (g *generator) GenerateString() (string, error) {
+	id, err := ulid.New(ulid.Timestamp(time.Now()), g.entropy)
+	if err != nil {
+		return "", err
+	}
+	return id.String(), nil
 }
 
-// AsString returns a string-based generator for ULID.
-func (p *provider) AsString() identifier.Generator[string] {
-	return &stringGenerator{}
+// GenerateNumber returns the Unix timestamp part of a new ULID in milliseconds.
+// This is not a unique number but provides the time component.
+func (g *generator) GenerateNumber() (int64, error) {
+	id, err := ulid.New(ulid.Timestamp(time.Now()), g.entropy)
+	if err != nil {
+		return 0, err
+	}
+	return int64(id.Time()), nil
 }
 
-// AsNumber returns nil as ULID does not have a standard integer representation.
-func (p *provider) AsNumber() identifier.Generator[int64] {
-	return nil
-}
-
-// stringGenerator implements identifier.Generator[string] for ULID.
-// This is the actual workhorse for generating and validating IDs.
-type stringGenerator struct{}
-
-// Name returns the name of the identifier.
-func (g *stringGenerator) Name() string {
-	return "ulid"
-}
-
-// Size returns the size of the identifier in bits.
-func (g *stringGenerator) Size() int {
-	return 128
-}
-
-// Generate creates a new ULID and returns it as a string.
-func (g *stringGenerator) Generate() string {
-	return ulid.Make().String()
-}
-
-// Validate checks if the provided string is a valid ULID.
-func (g *stringGenerator) Validate(id string) bool {
-	_, err := ulid.ParseStrict(id)
+// Validate checks if the provided id is a valid ULID string.
+func (g *generator) Validate(id any) bool {
+	idStr, ok := id.(string)
+	if !ok {
+		return false
+	}
+	_, err := ulid.ParseStrict(idStr)
 	return err == nil
 }
 
-// --- Convenience Constructor ---
-
-// New creates a new, default ULID generator.
-// This is a convenience function for direct use of the ulid package,
-// and it returns the globally registered default generator.
-func New() identifier.Generator[string] {
-	return identifier.Get[string]("ulid")
-}
-
-// init registers the ULID provider with the global identifier registry.
+// init registers the ULID generator.
 func init() {
-	// Register a singleton instance of our provider.
-	identifier.Register(&provider{})
+	// This can panic if the entropy source fails, which is a critical failure.
+	defer func() {
+		if r := recover(); r != nil {
+			panic("ulid: failed to initialize generator, entropy source might be unavailable")
+		}
+	}()
+	identifier.Register(New())
 }

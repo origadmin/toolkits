@@ -2,83 +2,67 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package ksuid provides a KSUID (K-Sortable Unique Identifier) implementation.
+// Package ksuid provides a K-Sortable Unique Identifier (KSUID) generator.
 package ksuid
 
 import (
+	"errors"
+
 	"github.com/segmentio/ksuid"
 
 	"github.com/origadmin/toolkits/identifier"
 )
 
-// Ensure the provider and generator implement the required interfaces at compile time.
-var (
-	_ identifier.Provider      = (*provider)(nil)
-	_ identifier.Generator[string] = (*stringGenerator)(nil)
-)
+// generator implements the identifier.Generator interface for KSUID.
+type generator struct{}
 
-// provider implements identifier.Provider for KSUID.
-// It's a stateless singleton that vends the actual generator.
-type provider struct{}
+// New creates a new KSUID generator.
+func New() identifier.Generator {
+	return &generator{}
+}
 
-// Name returns the name of the identifier.
-func (p *provider) Name() string {
+// Name returns the name of the generator.
+func (g *generator) Name() string {
 	return "ksuid"
 }
 
-// Size returns the size of the identifier in bits.
-func (p *provider) Size() int {
-	// A KSUID is 160 bits (20 bytes).
-	return 160
+// GenerateString generates a new KSUID identifier as a string.
+// It can panic if the system's entropy source is unavailable.
+func (g *generator) GenerateString() (string, error) {
+	return ksuid.New().String(), nil
 }
 
-// AsString returns a string-based generator for KSUID.
-func (p *provider) AsString() identifier.Generator[string] {
-	return &stringGenerator{}
+// GenerateNumber returns the Unix timestamp part of a new KSUID.
+// This is not a unique number but provides the time component.
+func (g *generator) GenerateNumber() (int64, error) {
+	// ksuid.New() can panic, so we need to recover from it to return an error.
+	var id ksuid.KSUID
+	var err error
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				err = errors.New("ksuid: failed to generate id, entropy source might be unavailable")
+			}
+		}()
+		id = ksuid.New()
+	}()
+	if err != nil {
+		return 0, err
+	}
+	return id.Time().Unix(), nil
 }
 
-// AsNumber returns nil as KSUID does not have a standard integer representation.
-func (p *provider) AsNumber() identifier.Generator[int64] {
-	return nil
-}
-
-// stringGenerator implements identifier.Generator[string] for KSUID.
-// This is the actual workhorse for generating and validating IDs.
-type stringGenerator struct{}
-
-// Name returns the name of the identifier.
-func (g *stringGenerator) Name() string {
-	return "ksuid"
-}
-
-// Size returns the size of the identifier in bits.
-func (g *stringGenerator) Size() int {
-	return 160
-}
-
-// Generate creates a new KSUID and returns it as a string.
-func (g *stringGenerator) Generate() string {
-	// ksuid.New() panics if it fails to read from the system's entropy source.
-	return ksuid.New().String()
-}
-
-// Validate checks if the provided string is a valid KSUID.
-func (g *stringGenerator) Validate(id string) bool {
-	_, err := ksuid.Parse(id)
+// Validate checks if the provided id is a valid KSUID string.
+func (g *generator) Validate(id any) bool {
+	idStr, ok := id.(string)
+	if !ok {
+		return false
+	}
+	_, err := ksuid.Parse(idStr)
 	return err == nil
 }
 
-// --- Convenience Constructor ---
-
-// New creates a new, default KSUID generator.
-// This is a convenience function for direct use of the ksuid package,
-// and it returns the globally registered default generator.
-func New() identifier.Generator[string] {
-	return identifier.Get[string]("ksuid")
-}
-
-// init registers the KSUID provider with the global identifier registry.
+// init registers the KSUID generator.
 func init() {
-	// Register a singleton instance of our provider.
-	identifier.Register(&provider{})
+	identifier.Register(New())
 }

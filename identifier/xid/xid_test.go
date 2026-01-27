@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package xid_test // Use black-box testing
+package xid_test
 
 import (
 	"testing"
@@ -10,54 +10,49 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/xid"
-	// Blank import to trigger the xid provider registration
+	// Blank import to trigger the xid generator registration
 	_ "github.com/origadmin/toolkits/identifier/xid"
 )
 
-// TestGeneratorCreation ensures the xid provider is registered correctly.
-func TestGeneratorCreation(t *testing.T) {
-	// Test getting from the global registry
-	registryGenerator := identifier.Get[string]("xid")
-	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'xid'")
-
-	// Test getting via the convenience function
-	convenienceGenerator := xid.New()
-	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from xid.New()")
-
-	// Number generator should NOT be available.
-	numGenerator := identifier.Get[int64]("xid")
-	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'xid' as it is not supported")
-}
-
-// TestGenerateAndValidate tests the generation and validation of an XID.
-func TestGenerateAndValidate(t *testing.T) {
-	generator := xid.New()
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
+func TestXIDGenerator(t *testing.T) {
+	// Get the generator from the registry.
+	// Note: The default generator is 'snowflake', but 'xid' should still be registered
+	// by its own package's init() function.
+	gen := identifier.Get("xid")
+	if !assert.NotNil(t, gen, "Generator 'xid' should be registered") {
 		t.FailNow()
 	}
 
-	// 1. Generate a new ID
-	id := generator.Generate()
-	assert.NotEmpty(t, id, "Generated ID should not be empty")
-	assert.Len(t, id, 20, "A standard XID should have a length of 20 characters")
+	t.Run("Properties", func(t *testing.T) {
+		assert.Equal(t, "xid", gen.Name(), "Name() should be 'xid'")
+	})
 
-	// 2. Validate the new ID
-	isValid := generator.Validate(id)
-	assert.True(t, isValid, "A freshly generated ID should be valid")
+	t.Run("GenerateString", func(t *testing.T) {
+		id, err := gen.GenerateString()
+		assert.NoError(t, err, "GenerateString() should not return an error")
+		assert.NotEmpty(t, id, "Generated string ID should not be empty")
+	})
 
-	// 3. Validate a known invalid ID
-	isInvalid := generator.Validate("not-a-valid-xid")
-	assert.False(t, isInvalid, "An invalid string should not be considered a valid XID")
-}
+	t.Run("GenerateNumber", func(t *testing.T) {
+		// XID's GenerateNumber returns the timestamp part.
+		num, err := gen.GenerateNumber()
+		assert.NoError(t, err, "GenerateNumber() should not return an error")
+		assert.NotZero(t, num, "Generated number (timestamp) should not be zero")
+	})
 
-// TestGeneratorProperties checks the metadata of the xid generator.
-func TestGeneratorProperties(t *testing.T) {
-	generator := xid.New()
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
-		t.FailNow()
-	}
+	t.Run("Validate", func(t *testing.T) {
+		id, _ := gen.GenerateString()
 
-	assert.Equal(t, "xid", generator.Name(), "Generator name should be 'xid'")
-	assert.Equal(t, 96, generator.Size(), "Generator size should be 96 bits")
+		// Test with a valid string ID
+		assert.True(t, gen.Validate(id), "Validate() should return true for a valid string ID")
+
+		// Test with an invalid string ID
+		assert.False(t, gen.Validate("invalid-xid"), "Validate() should return false for an invalid string")
+
+		// Test with an incorrect type (int64) - xid validation is string-based
+		assert.False(t, gen.Validate(int64(12345)), "Validate() should return false for an int64")
+
+		// Test with nil
+		assert.False(t, gen.Validate(nil), "Validate() should return false for nil")
+	})
 }

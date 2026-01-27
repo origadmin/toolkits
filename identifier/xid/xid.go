@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package xid provides a unique identifier generator based on xid.
+// Package xid provides a globally unique identifier generator.
 package xid
 
 import (
@@ -11,73 +11,60 @@ import (
 	"github.com/origadmin/toolkits/identifier"
 )
 
-// Ensure the provider and generator implement the required interfaces at compile time.
-var (
-	_ identifier.Provider      = (*provider)(nil)
-	_ identifier.Generator[string] = (*stringGenerator)(nil)
-)
+// generator implements the identifier.Generator interface for XID.
+type generator struct{}
 
-// provider implements identifier.Provider for XID.
-// It's a stateless singleton that vends the actual generator.
-type provider struct{}
+// New creates a new XID generator.
+// Note: This generator is distinct from the default generator in the parent 'identifier' package,
+// but it uses the same underlying algorithm.
+func New() identifier.Generator {
+	return &generator{}
+}
 
-// Name returns the name of the identifier.
-func (p *provider) Name() string {
+// Name returns the name of the generator.
+func (g *generator) Name() string {
+	// This name must match the one used by the internal default generator
+	// to avoid registration conflicts if a user explicitly registers this one.
+	// The registration logic prevents duplicates.
 	return "xid"
 }
 
-// Size returns the size of the identifier in bits.
-// An XID is 12 bytes, so 96 bits.
-func (p *provider) Size() int {
-	return 96
+// GenerateString generates a new XID identifier as a string.
+func (g *generator) GenerateString() (string, error) {
+	return xid.New().String(), nil
 }
 
-// AsString returns a string-based generator for XID.
-func (p *provider) AsString() identifier.Generator[string] {
-	return &stringGenerator{}
+// GenerateNumber returns the Unix timestamp part of a new XID.
+// This is not a unique number but can be useful for time-based sorting.
+func (g *generator) GenerateNumber() (int64, error) {
+	return xid.New().Time().Unix(), nil
 }
 
-// AsNumber returns nil as XID does not have a standard integer representation.
-func (p *provider) AsNumber() identifier.Generator[int64] {
-	return nil
-}
-
-// stringGenerator implements identifier.Generator[string] for XID.
-// This is the actual workhorse for generating and validating IDs.
-type stringGenerator struct{}
-
-// Name returns the name of the identifier.
-func (g *stringGenerator) Name() string {
-	return "xid"
-}
-
-// Size returns the size of the identifier in bits.
-func (g *stringGenerator) Size() int {
-	return 96
-}
-
-// Generate creates a new XID and returns it as a string.
-func (g *stringGenerator) Generate() string {
-	return xid.New().String()
-}
-
-// Validate checks if the provided string is a valid XID.
-func (g *stringGenerator) Validate(id string) bool {
-	_, err := xid.FromString(id)
+// Validate checks if the provided id is a valid XID string.
+func (g *generator) Validate(id any) bool {
+	idStr, ok := id.(string)
+	if !ok {
+		return false
+	}
+	_, err := xid.FromString(idStr)
 	return err == nil
 }
 
-// --- Convenience Constructor ---
-
-// New creates a new, default XID generator.
-// This is a convenience function for direct use of the xid package,
-// and it returns the globally registered default generator.
-func New() identifier.Generator[string] {
-	return identifier.Get[string]("xid")
+// init registers this XID generator with the identifier registry.
+// The registration in the parent 'identifier' package for the default generator
+// runs first, so this registration will effectively be a no-op due to the duplicate name check.
+// This ensures that if the parent package's logic changes, this package remains self-registering.
+func init() {
+	// This registration will likely be skipped because the default 'xid' is already registered.
+	// We use a separate function to handle the panic gracefully for clarity.
+	tryRegister()
 }
 
-// init registers the XID provider with the global identifier registry.
-func init() {
-	// Register a singleton instance of our provider.
-	identifier.Register(&provider{})
+func tryRegister() {
+	// The registry panics on duplicate registration. We can recover from it
+	// as it's an expected condition in this specific setup.
+	defer func() {
+		_ = recover()
+	}()
+	identifier.Register(New())
 }

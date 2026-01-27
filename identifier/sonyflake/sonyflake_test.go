@@ -2,99 +2,62 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package sonyflake_test // Corrected package declaration for black-box testing
+package sonyflake_test
 
 import (
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/sonyflake"
-	// This blank import is necessary to ensure the sonyflake's init() function is called,
-	// which registers the provider.
+	// Blank import to trigger the sonyflake generator registration
 	_ "github.com/origadmin/toolkits/identifier/sonyflake"
 )
 
-// TestDefaultGenerator ensures the sonyflake provider is registered and can be retrieved.
-func TestDefaultGenerator(t *testing.T) {
-	// Attempt to get the number generator, which should succeed.
-	numGenerator := identifier.Get[int64]("sonyflake")
-	assert.NotNil(t, numGenerator, "Expected to get a non-nil number generator for 'sonyflake'")
-
-	// Ensure the string generator is not supported and returns nil.
-	strGenerator := identifier.Get[string]("sonyflake")
-	assert.Nil(t, strGenerator, "Expected to get a nil string generator for 'sonyflake' as it is not supported")
-}
-
-// TestGenerateAndValidate tests the full lifecycle of generating and validating an ID.
-func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.Get[int64]("sonyflake")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
+func TestSonyflakeGenerator(t *testing.T) {
+	// Get the generator from the registry
+	gen := identifier.Get("sonyflake")
+	if !assert.NotNil(t, gen, "Generator 'sonyflake' should be registered") {
 		t.FailNow()
 	}
 
-	// 1. Generate a new ID
-	id := generator.Generate()
-	assert.NotEqual(t, int64(0), id, "Generated ID should not be zero")
-
-	// 2. Validate the newly generated ID
-	isValid := generator.Validate(id)
-	assert.True(t, isValid, "A freshly generated ID should be considered valid")
-
-	// 3. Validate a known invalid ID
-	isInvalid := generator.Validate(0)
-	assert.False(t, isInvalid, "ID '0' should be considered invalid")
-}
-
-// TestGeneratorProperties checks the metadata of the sonyflake generator.
-func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.Get[int64]("sonyflake")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
-		t.FailNow()
-	}
-
-	assert.Equal(t, "sonyflake", generator.Name(), "Generator name should be 'sonyflake'")
-	assert.Equal(t, 63, generator.Size(), "Generator size should be 63 bits")
-}
-
-// TestCustomGenerator tests creating a sonyflake generator with custom settings.
-func TestCustomGenerator(t *testing.T) {
-	t.Run("SuccessfulCreation", func(t *testing.T) {
-		// Create a custom configuration
-		cfg := sonyflake.Config{
-			StartTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			MachineID: func() (uint16, error) {
-				return 123, nil
-			},
-		}
-
-		// Create a new provider with the custom config
-		provider, err := sonyflake.New(cfg)
-		assert.NoError(t, err)
-		assert.NotNil(t, provider)
-
-		// Get a number generator and generate an ID
-		generator := provider.AsNumber()
-		assert.NotNil(t, generator)
-		id := generator.Generate()
-		assert.NotZero(t, id)
-		assert.True(t, generator.Validate(id))
+	t.Run("Properties", func(t *testing.T) {
+		assert.Equal(t, "sonyflake", gen.Name(), "Name() should be 'sonyflake'")
 	})
 
-	t.Run("FailedCreation", func(t *testing.T) {
-		// Create a config with a MachineID function that always fails
-		cfg := sonyflake.Config{
-			MachineID: func() (uint16, error) {
-				return 0, fmt.Errorf("simulated machine ID failure")
-			},
-		}
+	t.Run("GenerateString", func(t *testing.T) {
+		id, err := gen.GenerateString()
+		assert.NoError(t, err, "GenerateString() should not return an error")
+		assert.NotEmpty(t, id, "Generated string ID should not be empty")
+	})
 
-		// Attempt to create a new provider, which should fail
-		provider, err := sonyflake.New(cfg)
-		assert.Error(t, err)
-		assert.Nil(t, provider)
+	t.Run("GenerateNumber", func(t *testing.T) {
+		id, err := gen.GenerateNumber()
+		assert.NoError(t, err, "GenerateNumber() should not return an error")
+		assert.NotZero(t, id, "Generated number ID should not be zero")
+	})
+
+	t.Run("Validate", func(t *testing.T) {
+		strID, _ := gen.GenerateString()
+		numID, _ := gen.GenerateNumber()
+
+		// Test with a valid string ID
+		assert.True(t, gen.Validate(strID), "Validate() should return true for a valid string ID")
+
+		// Test with a valid int64 ID
+		assert.True(t, gen.Validate(numID), "Validate() should return true for a valid int64 ID")
+
+		// Test with an invalid string ID
+		assert.False(t, gen.Validate("invalid-sonyflake"), "Validate() should return false for an invalid string")
+
+		// Test with an invalid int64 ID (e.g., 0 or negative)
+		assert.False(t, gen.Validate(int64(0)), "Validate() should return false for 0")
+		assert.False(t, gen.Validate(int64(-1)), "Validate() should return false for a negative int64")
+
+		// Test with an incorrect type
+		assert.False(t, gen.Validate(123.45), "Validate() should return false for a float")
+
+		// Test with nil
+		assert.False(t, gen.Validate(nil), "Validate() should return false for nil")
 	})
 }

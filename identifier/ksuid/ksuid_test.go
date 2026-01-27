@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package ksuid_test // Use black-box testing
+package ksuid_test
 
 import (
 	"testing"
@@ -10,54 +10,48 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/identifier"
-	"github.com/origadmin/toolkits/identifier/ksuid"
-	// Blank import to trigger the ksuid provider registration
+	// Blank import to trigger the ksuid generator registration
 	_ "github.com/origadmin/toolkits/identifier/ksuid"
 )
 
-// TestGeneratorCreation ensures the ksuid provider is registered correctly.
-func TestGeneratorCreation(t *testing.T) {
-	// Test getting from the global registry
-	registryGenerator := identifier.Get[string]("ksuid")
-	assert.NotNil(t, registryGenerator, "Expected to get a non-nil string generator for 'ksuid'")
-
-	// Test getting via the convenience function
-	convenienceGenerator := ksuid.New()
-	assert.NotNil(t, convenienceGenerator, "Expected to get a non-nil generator from ksuid.New()")
-
-	// Number generator should NOT be available.
-	numGenerator := identifier.Get[int64]("ksuid")
-	assert.Nil(t, numGenerator, "Expected to get a nil number generator for 'ksuid' as it is not supported")
-}
-
-// TestGenerateAndValidate tests the generation and validation of a KSUID.
-func TestGenerateAndValidate(t *testing.T) {
-	generator := identifier.Get[string]("ksuid")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
+func TestKSUIDGenerator(t *testing.T) {
+	// Get the generator from the registry
+	gen := identifier.Get("ksuid")
+	if !assert.NotNil(t, gen, "Generator 'ksuid' should be registered") {
 		t.FailNow()
 	}
 
-	// 1. Generate a new ID
-	id := generator.Generate()
-	assert.NotEmpty(t, id, "Generated ID should not be empty")
-	assert.Len(t, id, 27, "A standard KSUID should have a length of 27 characters")
+	t.Run("Properties", func(t *testing.T) {
+		assert.Equal(t, "ksuid", gen.Name(), "Name() should be 'ksuid'")
+	})
 
-	// 2. Validate the new ID
-	isValid := generator.Validate(id)
-	assert.True(t, isValid, "A freshly generated ID should be valid")
+	t.Run("GenerateString", func(t *testing.T) {
+		id, err := gen.GenerateString()
+		assert.NoError(t, err, "GenerateString() should not return an error")
+		assert.NotEmpty(t, id, "Generated string ID should not be empty")
+		assert.Len(t, id, 27, "A standard KSUID should have a length of 27 characters")
+	})
 
-	// 3. Validate a known invalid ID
-	isInvalid := generator.Validate("not_a_valid_ksuid")
-	assert.False(t, isInvalid, "An invalid string should not be considered a valid KSUID")
-}
+	t.Run("GenerateNumber", func(t *testing.T) {
+		// KSUID's GenerateNumber returns the timestamp part, which is a valid use case.
+		num, err := gen.GenerateNumber()
+		assert.NoError(t, err, "GenerateNumber() should not return an error")
+		assert.NotZero(t, num, "Generated number (timestamp) should not be zero")
+	})
 
-// TestGeneratorProperties checks the metadata of the ksuid generator.
-func TestGeneratorProperties(t *testing.T) {
-	generator := identifier.Get[string]("ksuid")
-	if !assert.NotNil(t, generator, "Generator should not be nil") {
-		t.FailNow()
-	}
+	t.Run("Validate", func(t *testing.T) {
+		id, _ := gen.GenerateString()
 
-	assert.Equal(t, "ksuid", generator.Name(), "Generator name should be 'ksuid'")
-	assert.Equal(t, 160, generator.Size(), "Generator size should be 160 bits")
+		// Test with a valid string ID
+		assert.True(t, gen.Validate(id), "Validate() should return true for a valid string ID")
+
+		// Test with an invalid string ID
+		assert.False(t, gen.Validate("invalid-ksuid"), "Validate() should return false for an invalid string")
+
+		// Test with an incorrect type (int64) - ksuid validation is string-based
+		assert.False(t, gen.Validate(int64(12345)), "Validate() should return false for an int64")
+
+		// Test with nil
+		assert.False(t, gen.Validate(nil), "Validate() should return false for nil")
+	})
 }
