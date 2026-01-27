@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/origadmin/toolkits/compare/v1.3.1...v1.4.0) (2026-01-27)
+
+
+### Features
+
+* **identifier:** add generic message broker interface and refactor identifier packages ([9fd1d3e](https://github.com/origadmin/toolkits/commit/9fd1d3e6e34293a8cd037f51b922068379cc3abc))
+* **identifier:** add generic message broker interface and refactor identifier packages ([e16cb40](https://github.com/origadmin/toolkits/commit/e16cb401fc7d4022748aa44030536ed49e3fa6cd))
+
 ## [1.3.1](https://github.com/origadmin/toolkits/compare/v1.3.0...v1.3.1) (2026-01-06)
 
 
